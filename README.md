@@ -17,3 +17,14 @@ Some rules:
 * Each C++ code should use pragmas to represent non-module dependencies (flags,
   resources, system libraries, etc
 
+## Building LECO
+
+Roughly:
+
+```sh
+clang++ -std=c+20 -o build.exe build.cppm
+build.exe
+```
+
+`build.exe` only requires a clang++ installed to be built, but it requires
+LLVM/Clang include/libs to build LECO itself.
