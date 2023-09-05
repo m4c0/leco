@@ -1,4 +1,3 @@
-module;
 #include "llvm/Support/CrashRecoveryContext.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/ManagedStatic.h"
@@ -6,7 +5,7 @@ module;
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
 
-export module leco;
+void compile(llvm::StringRef path);
 
 void try_main() {
   std::error_code ec;
@@ -24,11 +23,11 @@ void try_main() {
 
     auto ext = llvm::sys::path::extension(it->path());
     if (ext == ".cppm") {
-      llvm::errs() << it->path() << "\n";
+      compile(it->path());
     } else if (ext == ".cpp") {
-      llvm::errs() << it->path() << "\n";
+      compile(it->path());
     } else if (ext == ".m") {
-      llvm::errs() << it->path() << "\n";
+      compile(it->path());
     }
   }
 }

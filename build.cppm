@@ -6,7 +6,7 @@ module;
 export module build;
 
 constexpr const char *cmd =
-    "clang++ -std=c++20 -o leco.exe leco.cppm -I%s/include -L%s/lib "
+    "clang++ -std=c++20 -o leco.exe -I%s/include -L%s/lib "
 #if _WIN32
     "-fms-runtime-lib=dll -nostdlib -nostdlib++ -lVersion "
     "-lclangAnalysis -lclangAnalysisFlowSensitive "
@@ -49,7 +49,8 @@ constexpr const char *cmd =
 #else
     "-lclang -lclang-cpp -lLLVM"
 #endif
-    ;
+    " leco.cpp"
+    " compile.cpp";
 
 #if _WIN32
 const char *clang_dir() {
