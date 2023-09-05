@@ -2,18 +2,34 @@ module;
 #include "llvm/Support/CrashRecoveryContext.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/ManagedStatic.h"
+#include "llvm/Support/Path.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
 
 export module leco;
 
 void try_main() {
-  using dirent = llvm::sys::fs::directory_iterator;
   std::error_code ec;
-  dirent it{".", ec};
-  while (it != dirent{}) {
-    llvm::errs() << it->path() << "\n";
-    it.increment(ec);
+  for (llvm::sys::fs::directory_iterator it{".", ec}, e; it != e;
+       it.increment(ec)) {
+    auto status = it->status();
+    if (!status) {
+      llvm::errs() << it->path() << ": " << status.getError().message() << "\n";
+      continue;
+    }
+
+    if (status->type() != llvm::sys::fs::file_type::regular_file) {
+      continue;
+    }
+
+    auto ext = llvm::sys::path::extension(it->path());
+    if (ext == ".cppm") {
+      llvm::errs() << it->path() << "\n";
+    } else if (ext == ".cpp") {
+      llvm::errs() << it->path() << "\n";
+    } else if (ext == ".m") {
+      llvm::errs() << it->path() << "\n";
+    }
   }
 }
 
