@@ -5,9 +5,22 @@
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
 
-void compile(llvm::StringRef path);
+bool compile(llvm::StringRef path);
 
-void try_main() {
+bool compile_by_ext(llvm::StringRef path) {
+  auto ext = llvm::sys::path::extension(path);
+  if (ext == ".cppm") {
+    return compile(path);
+  } else if (ext == ".cpp") {
+    return compile(path);
+  } else if (ext == ".m") {
+    return compile(path);
+  } else {
+    return true;
+  }
+}
+
+bool try_main() {
   std::error_code ec;
   for (llvm::sys::fs::directory_iterator it{".", ec}, e; it != e;
        it.increment(ec)) {
@@ -21,15 +34,11 @@ void try_main() {
       continue;
     }
 
-    auto ext = llvm::sys::path::extension(it->path());
-    if (ext == ".cppm") {
-      compile(it->path());
-    } else if (ext == ".cpp") {
-      compile(it->path());
-    } else if (ext == ".m") {
-      compile(it->path());
+    if (!compile_by_ext(it->path())) {
+      return false;
     }
   }
+  return true;
 }
 
 extern "C" int main(int argc, char **argv) {
@@ -42,8 +51,7 @@ extern "C" int main(int argc, char **argv) {
   llvm::CrashRecoveryContext::Enable();
 
   try {
-    try_main();
-    return 0;
+    return try_main() ? 0 : 1;
   } catch (...) {
     llvm::errs() << "unexpected exception\n";
     return 1;
