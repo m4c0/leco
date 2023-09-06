@@ -22,13 +22,6 @@ class find_deps_pp_callbacks : public PPCallbacks {
     m_diags->Report(loc, did);
   }
 
-  StringRef check_module(Twine t, SmallVectorImpl<char> &s) {
-    if (!sys::fs::is_regular_file(t))
-      return {};
-
-    return t.toNullTerminatedStringRef(s);
-  }
-
 public:
   find_deps_pp_callbacks(DiagnosticsEngine *diags, StringRef file)
       : m_diags{diags}, m_cur_file{file} {}
@@ -56,18 +49,21 @@ public:
       auto me = mod_name.substr(0, p);
       auto part = mod_name.substr(p + 1);
 
-      if (compile((dir + "/" + me + "-" + part + ".cppm")
-                      .toNullTerminatedStringRef(dep)))
+      sys::path::append(dep, dir, me + "-" + part + ".cppm");
+      if (compile(dep))
         return;
 
     } else {
-      auto t = check_module(dir + "/" + mod_name + ".cppm", dep);
-      if (t.empty())
-        t = check_module("../" + mod_name + "/" + mod_name + ".cppm", dep);
-      if (!sys::fs::is_regular_file(t))
+      auto t = mod_name + ".cppm";
+      sys::path::append(dep, dir, t);
+      if (!sys::fs::is_regular_file(dep)) {
+        dep.clear();
+        sys::path::append(dep, "..", mod_name, t);
+      }
+      if (!sys::fs::is_regular_file(dep))
         return report_missing_module(loc);
 
-      if (compile(t))
+      if (compile(dep))
         return;
     }
 
