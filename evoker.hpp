@@ -18,7 +18,7 @@ public:
   evoker &set_inout(llvm::StringRef in, llvm::StringRef ext);
   [[nodiscard]] bool run(clang::FrontendAction *a);
 
-  [[nodiscard]] llvm::StringRef output() const { return m_obj; }
+  [[nodiscard]] llvm::StringRef output() { return m_obj.c_str(); }
 
   template <typename Tp> std::unique_ptr<Tp> run() {
     auto action = std::make_unique<Tp>();

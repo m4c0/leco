@@ -34,7 +34,7 @@ public:
       auto part = mod_name.substr(p + 1);
 
       SmallString<128> dep{};
-      if (compile((me + "-" + part + ".cppm").toStringRef(dep)))
+      if (compile((me + "-" + part + ".cppm").toNullTerminatedStringRef(dep)))
         return;
     } else {
       if (compile(mod_name))
