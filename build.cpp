@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 constexpr const char *cmd =
     "clang++ -g -std=c++20 -o leco.exe -I%s/include -L%s/lib "
@@ -47,13 +48,31 @@ constexpr const char *cmd =
 #else
     "-lclang -lclang-cpp -lLLVM"
 #endif
-    " leco.cpp"
-    " compile.cpp"
-    " evoker.cpp";
+    " leco.o"
+    " compile.o"
+    " evoker.o";
+
+#if _WIN32
+#define stat _stat
+#endif
+
+bool compile(const char *stem) {
+  auto cdir = clang_dir();
+  char buf[1024];
+  snprintf(buf, sizeof(buf),
+           "clang++ -g -std=c++20 -I%s/include -c %s.cpp -o %s.o", cdir, stem,
+           stem);
+  return 0 == system(buf);
+}
+bool link() {
+  auto cdir = clang_dir();
+  char buf[1024];
+  snprintf(buf, sizeof(buf), cmd, cdir, cdir);
+  return 0 == system(buf);
+}
 
 int main(int argc, char **argv) {
-  auto cdir = clang_dir();
-  char buf[10240];
-  snprintf(buf, sizeof(buf), cmd, cdir, cdir);
-  return system(buf);
+  return compile("leco") && compile("compile") && compile("evoker") && link()
+             ? 0
+             : 1;
 }
