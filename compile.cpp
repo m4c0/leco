@@ -10,6 +10,7 @@
 #include "clang/Driver/Compilation.h"
 #include "clang/Driver/Driver.h"
 #include "clang/Frontend/CompilerInstance.h"
+#include "clang/Frontend/FrontendActions.h"
 #include "clang/Frontend/TextDiagnosticPrinter.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
@@ -38,13 +39,15 @@ const char *clang_exe() {
   return exe.data();
 }
 
-auto cc1(SmallVectorImpl<const char *> args) {
+int cc1(SmallVectorImpl<const char *> &args) {
+  auto argv = llvm::ArrayRef(args).slice(1);
+
   auto cinst = std::make_unique<CompilerInstance>();
-  CompilerInvocation::CreateFromArgs(cinst->getInvocation(), args,
+  CompilerInvocation::CreateFromArgs(cinst->getInvocation(), argv,
                                      diag_engine(), clang_exe());
   cinst->createDiagnostics();
 
-  EmitObjAction a{};
+  GenerateModuleInterfaceAction a{};
   return !cinst->ExecuteAction(a);
 }
 
@@ -53,6 +56,7 @@ bool compile(StringRef file) {
 
   auto def_triple = sys::getDefaultTargetTriple();
   Driver drv{clang_exe(), def_triple, diag_engine()};
+  drv.CC1Main = cc1;
 
   auto path = sys::path::parent_path(file);
   auto name = sys::path::stem(file);
