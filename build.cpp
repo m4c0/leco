@@ -48,7 +48,8 @@ constexpr const char *cmd =
     "-lclang -lclang-cpp -lLLVM"
 #endif
     " leco.cpp"
-    " compile.cpp";
+    " compile.cpp"
+    " evoker.cpp";
 
 int main(int argc, char **argv) {
   auto cdir = clang_dir();
