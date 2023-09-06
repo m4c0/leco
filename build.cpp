@@ -50,7 +50,8 @@ constexpr const char *cmd =
 #endif
     " leco.o"
     " compile.o"
-    " evoker.o";
+    " evoker.o"
+    " find_deps_action.o";
 
 uint64_t mtime(const char *stem, const char *ext) {
   char buf[128];
@@ -88,7 +89,8 @@ bool link() {
 }
 
 int main(int argc, char **argv) {
-  return compile("leco") && compile("compile") && compile("evoker") && link()
+  return compile("leco") && compile("compile") && compile("evoker") &&
+                 compile("find_deps_action") && link()
              ? 0
              : 1;
 }
