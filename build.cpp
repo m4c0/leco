@@ -1,10 +1,7 @@
-module;
 #include "clang_dir.hpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-export module build;
 
 constexpr const char *cmd =
     "clang++ -std=c++20 -o leco.exe -I%s/include -L%s/lib "
@@ -53,7 +50,7 @@ constexpr const char *cmd =
     " leco.cpp"
     " compile.cpp";
 
-extern "C" int main(int argc, char **argv) {
+int main(int argc, char **argv) {
   auto cdir = clang_dir();
   char buf[10240];
   snprintf(buf, sizeof(buf), cmd, cdir, cdir);
