@@ -47,12 +47,12 @@ std::unique_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
   auto def_triple = sys::getDefaultTargetTriple();
   Driver drv{clang_exe(), def_triple, diag_engine()};
   std::unique_ptr<Compilation> c{drv.BuildCompilation(args)};
-  if (!c || c->containsError())
+  if (!c || c->containsError() || c->getJobs().size() == 0)
     // We did a mistake in clang args. Bail out and let the diagnostics
     // client do its job informing the user
     return {};
 
-  auto cc1args = c->getJobs().getJobs()[0]->getArguments();
+  auto cc1args = c->getJobs().begin()->getArguments();
   if (!CompilerInvocation::CreateFromArgs(clang->getInvocation(), cc1args,
                                           diag_engine()))
     return {};
