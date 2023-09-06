@@ -52,11 +52,27 @@ constexpr const char *cmd =
     " compile.o"
     " evoker.o";
 
+uint64_t mtime(const char *stem, const char *ext) {
+  char buf[128];
+  snprintf(buf, sizeof(buf), "%s.%s", stem, ext);
+
 #if _WIN32
-#define stat _stat
+  struct __stat64 s {};
+  _stat64(buf, &s);
+  return s.st_mtime;
+#else
+  struct stat s {};
+  stat(buf, &s);
+  auto mtime = s.st_mtimespec;
+  return static_cast<uint64_t>(mtime.tv_sec) * 1000000000ul +
+         static_cast<uint64_t>(mtime.tv_nsec);
 #endif
+}
 
 bool compile(const char *stem) {
+  if (mtime(stem, "cpp") < mtime(stem, "o"))
+    return true;
+
   auto cdir = clang_dir();
   char buf[1024];
   snprintf(buf, sizeof(buf),
