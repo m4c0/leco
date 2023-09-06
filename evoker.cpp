@@ -81,8 +81,6 @@ evoker &evoker::set_inout(StringRef in, StringRef ext) {
   return *this;
 }
 [[nodiscard]] bool evoker::run(clang::FrontendAction *a) {
-  errs() << "compiling " << m_obj << "\n";
-
   auto clang = createCI(m_args);
   return clang && clang->ExecuteAction(*a);
 }
