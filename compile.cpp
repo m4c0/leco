@@ -64,10 +64,18 @@ bool compile(StringRef file) {
   auto ext = sys::path::extension(file);
   SmallString<128> obj{};
   sys::path::append(obj, path, "out", name);
-  sys::path::replace_extension(obj, ext + ".o");
+
+  const char *mode;
+  if (ext == ".cppm") {
+    mode = "--precompile";
+    sys::path::replace_extension(obj, ".pcm");
+  } else {
+    mode = "-c";
+    sys::path::replace_extension(obj, ext + ".o");
+  }
 
   SmallVector<const char *> args{
-      {"-std=c++20", "-c", file.data(), "-o", obj.data()}};
+      {clang_exe(), "-std=c++20", mode, file.data(), "-o", obj.data()}};
   std::unique_ptr<Compilation> c{dvr().BuildCompilation(args)};
   if (!c || c->containsError())
     // We did a mistake in clang args. Bail out and let the diagnostics
