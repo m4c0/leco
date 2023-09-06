@@ -4,7 +4,7 @@
 #include <string.h>
 
 constexpr const char *cmd =
-    "clang++ -std=c++20 -o leco.exe -I%s/include -L%s/lib "
+    "clang++ -g -std=c++20 -o leco.exe -I%s/include -L%s/lib "
 #if _WIN32
     "-fms-runtime-lib=dll -nostdlib -nostdlib++ -lVersion "
     "-lclangAnalysis -lclangAnalysisFlowSensitive "
