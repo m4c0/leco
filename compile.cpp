@@ -21,6 +21,9 @@ bool compile(StringRef file) {
       return false;
 
     return compile(pcm.output());
+  } else if (ext == ".cpp") {
+    // TODO: detect module impls
+    return !!evoker{}.push_arg("-c").set_inout(file, ".o").run<EmitObjAction>();
   } else if (ext == ".c" || ext == ".pcm" || ext == ".m") {
     return !!evoker{}.push_arg("-c").set_inout(file, ".o").run<EmitObjAction>();
   } else {
