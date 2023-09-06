@@ -38,14 +38,6 @@ const char *clang_exe() {
   return exe.data();
 }
 
-Driver &dvr() {
-  static auto drv = [] {
-    auto def_triple = sys::getDefaultTargetTriple();
-    return Driver{clang_exe(), def_triple, diag_engine()};
-  }();
-  return drv;
-}
-
 auto cc1(SmallVectorImpl<const char *> args) {
   auto cinst = std::make_unique<CompilerInstance>();
   CompilerInvocation::CreateFromArgs(cinst->getInvocation(), args,
@@ -58,6 +50,9 @@ auto cc1(SmallVectorImpl<const char *> args) {
 
 bool compile(StringRef file) {
   errs() << "compiling " << file << "\n";
+
+  auto def_triple = sys::getDefaultTargetTriple();
+  Driver drv{clang_exe(), def_triple, diag_engine()};
 
   auto path = sys::path::parent_path(file);
   auto name = sys::path::stem(file);
@@ -74,16 +69,22 @@ bool compile(StringRef file) {
     sys::path::replace_extension(obj, ext + ".o");
   }
 
-  SmallVector<const char *> args{
-      {clang_exe(), "-std=c++20", mode, file.data(), "-o", obj.data()}};
-  std::unique_ptr<Compilation> c{dvr().BuildCompilation(args)};
+  std::vector<const char *> args{};
+  args.push_back(clang_exe());
+  args.push_back("-std=c++20");
+  args.push_back(mode);
+  args.push_back(file.data());
+  args.push_back("-o");
+  args.push_back(obj.data());
+
+  std::unique_ptr<Compilation> c{drv.BuildCompilation(args)};
   if (!c || c->containsError())
     // We did a mistake in clang args. Bail out and let the diagnostics
     // client do its job informing the user
     return false;
 
   SmallVector<std::pair<int, const ::clang::driver::Command *>, 4> failures;
-  int res = dvr().ExecuteCompilation(*c, failures);
+  int res = drv.ExecuteCompilation(*c, failures);
   for (const auto &p : failures) {
     if (p.first)
       return false;
