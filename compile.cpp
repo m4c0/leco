@@ -14,11 +14,8 @@ bool compile(StringRef file) {
     if (!pcm.run<GenerateModuleInterfaceAction>())
       return false;
 
-    return !!evoker{}
-                 .push_arg("-c")
-                 .set_inout(pcm.output(), ".o")
-                 .run<EmitObjAction>();
-  } else {
+    return compile(pcm.output());
+  } else if (ext == ".c" || ext == ".pcm" || ext == ".m") {
     return !!evoker{}.push_arg("-c").set_inout(file, ".o").run<EmitObjAction>();
   }
 }
