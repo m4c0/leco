@@ -66,7 +66,6 @@ std::unique_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
 
 class evoker {
   std::vector<const char *> m_args{};
-  std::unique_ptr<FrontendAction> m_action{};
   SmallString<128> m_obj{};
 
 public:
@@ -74,50 +73,50 @@ public:
     m_args.push_back(clang_exe());
     m_args.push_back("-std=c++20");
   }
-  evoker &set_action(FrontendAction *a) {
-    m_action.reset(a);
-    return *this;
-  }
   evoker &set_inout(StringRef in, StringRef ext) {
     auto path = sys::path::parent_path(in);
-    auto name = sys::path::stem(in);
-    sys::path::append(m_obj, path, "out", name);
+    if (sys::path::stem(path) != "out") {
+      auto name = sys::path::stem(in);
+      sys::path::append(m_obj, path, "out", name);
+    } else {
+      m_obj.append(in);
+    }
     sys::path::replace_extension(m_obj, ext);
+
     m_args.push_back(in.data());
     m_args.push_back("-o");
-    m_args.push_back(m_obj.data());
+    m_args.push_back(m_obj.c_str());
     return *this;
   }
   evoker &push_arg(StringRef mode) {
     m_args.push_back(mode.data());
     return *this;
   }
-  bool run() {
+  template <typename Tp> std::unique_ptr<Tp> run() {
     errs() << "compiling " << m_obj << "\n";
 
+    auto action = std::make_unique<Tp>();
     auto clang = createCI(m_args);
-    return clang && clang->ExecuteAction(*m_action);
+    if (!clang || !clang->ExecuteAction(*action))
+      return {};
+    return std::move(action);
   }
+
+  [[nodiscard]] StringRef output() const { return m_obj; }
 };
 
 bool compile(StringRef file) {
   auto ext = sys::path::extension(file);
   if (ext == ".cppm") {
-    return evoker{}
-               .set_action(new GenerateModuleInterfaceAction)
-               .push_arg("--precompile")
-               .set_inout(file, ".pcm")
-               .run() &&
-           evoker{}
-               .set_action(new EmitObjAction)
-               .push_arg("-c")
-               .set_inout(file, ".o")
-               .run();
+    auto pcm = evoker{}.push_arg("--precompile").set_inout(file, ".pcm");
+    if (!pcm.run<GenerateModuleInterfaceAction>())
+      return false;
+
+    return !!evoker{}
+                 .push_arg("-c")
+                 .set_inout(pcm.output(), ".o")
+                 .run<EmitObjAction>();
   } else {
-    return evoker{}
-        .set_action(new EmitObjAction)
-        .push_arg("-c")
-        .set_inout(file, ".o")
-        .run();
+    return !!evoker{}.push_arg("-c").set_inout(file, ".o").run<EmitObjAction>();
   }
 }
