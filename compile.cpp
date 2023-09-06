@@ -87,11 +87,15 @@ bool compile(StringRef file) {
     // client do its job informing the user
     return false;
 
-  SmallVector<std::pair<int, const ::clang::driver::Command *>, 4> failures;
+  SmallVector<std::pair<int, const Command *>, 4> failures;
   int res = drv.ExecuteCompilation(*c, failures);
   for (const auto &p : failures) {
     if (p.first)
-      return false;
+      res = p.first;
+  }
+  if (res != 0) {
+    errs() << "Job failed:\n";
+    c->getJobs().Print(errs(), "\n", false);
   }
   return res == 0;
 }
