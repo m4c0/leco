@@ -40,11 +40,32 @@ const char *clang_exe() {
   return exe.data();
 }
 
-bool compile(StringRef file) {
-  errs() << "compiling " << file << "\n";
+std::unique_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
+  auto clang = std::make_unique<CompilerInstance>();
+
+  auto pch = clang->getPCHContainerOperations();
+  pch->registerWriter(std::make_unique<ObjectFilePCHContainerWriter>());
+  pch->registerReader(std::make_unique<ObjectFilePCHContainerReader>());
 
   auto def_triple = sys::getDefaultTargetTriple();
   Driver drv{clang_exe(), def_triple, diag_engine()};
+  std::unique_ptr<Compilation> c{drv.BuildCompilation(args)};
+  if (!c || c->containsError())
+    // We did a mistake in clang args. Bail out and let the diagnostics
+    // client do its job informing the user
+    return {};
+
+  auto cc1args = c->getJobs().getJobs()[0]->getArguments();
+  if (!CompilerInvocation::CreateFromArgs(clang->getInvocation(), cc1args,
+                                          diag_engine()))
+    return {};
+
+  clang->createDiagnostics();
+  return clang;
+}
+
+bool compile(StringRef file) {
+  errs() << "compiling " << file << "\n";
 
   auto path = sys::path::parent_path(file);
   auto name = sys::path::stem(file);
@@ -52,13 +73,16 @@ bool compile(StringRef file) {
   SmallString<128> obj{};
   sys::path::append(obj, path, "out", name);
 
+  std::unique_ptr<FrontendAction> action{};
   const char *mode;
   if (ext == ".cppm") {
     mode = "--precompile";
     sys::path::replace_extension(obj, ".pcm");
+    action = std::make_unique<GenerateModuleInterfaceAction>();
   } else {
     mode = "-c";
     sys::path::replace_extension(obj, ext + ".o");
+    action = std::make_unique<EmitObjAction>();
   }
 
   std::vector<const char *> args{};
@@ -69,31 +93,6 @@ bool compile(StringRef file) {
   args.push_back("-o");
   args.push_back(obj.data());
 
-  std::unique_ptr<Compilation> c{drv.BuildCompilation(args)};
-  if (!c || c->containsError())
-    // We did a mistake in clang args. Bail out and let the diagnostics
-    // client do its job informing the user
-    return false;
-
-  auto cc1args = c->getJobs().getJobs()[0]->getArguments();
-
-  auto clang = std::make_unique<CompilerInstance>();
-
-  auto pch = clang->getPCHContainerOperations();
-  pch->registerWriter(std::make_unique<ObjectFilePCHContainerWriter>());
-  pch->registerReader(std::make_unique<ObjectFilePCHContainerReader>());
-
-  if (!CompilerInvocation::CreateFromArgs(clang->getInvocation(), cc1args,
-                                          diag_engine()))
-    return false;
-
-  clang->createDiagnostics();
-
-  std::unique_ptr<FrontendAction> action{};
-  if (ext == ".cppm") {
-    action = std::make_unique<GenerateModuleInterfaceAction>();
-  } else {
-    action = std::make_unique<EmitObjAction>();
-  }
-  return clang->ExecuteAction(*action);
+  auto clang = createCI(args);
+  return clang && clang->ExecuteAction(*action);
 }
