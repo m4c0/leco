@@ -29,15 +29,15 @@ public:
     auto &[id, _] = path[0];
     auto mod_name = id->getName();
     auto p = mod_name.find(":");
+    SmallString<128> dep{};
     if (p != StringRef::npos) {
       auto me = mod_name.substr(0, p);
       auto part = mod_name.substr(p + 1);
 
-      SmallString<128> dep{};
       if (compile((me + "-" + part + ".cppm").toNullTerminatedStringRef(dep)))
         return;
     } else {
-      if (compile(mod_name))
+      if (compile((mod_name + ".cppm").toNullTerminatedStringRef(dep)))
         return;
     }
 
