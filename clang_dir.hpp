@@ -10,7 +10,6 @@ const char *clang_dir() {
   if (fgets(buf, 1024, f) == nullptr)
     throw 0;
 
-  buf[strlen(buf)] = 0;
   *strrchr(buf, '\\') = 0;
   *strrchr(buf, '\\') = 0;
   return buf;
@@ -22,7 +21,7 @@ const char *clang_dir() {
   if (fgets(buf, 1024, f) == nullptr)
     throw 0;
 
-  buf[strlen(buf)] = 0;
+  buf[strlen(buf) - 1] = 0;
   return buf;
 }
 #endif
