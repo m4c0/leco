@@ -64,35 +64,60 @@ std::unique_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
   return clang;
 }
 
-bool compile(StringRef file) {
-  errs() << "compiling " << file << "\n";
+class evoker {
+  std::vector<const char *> m_args{};
+  std::unique_ptr<FrontendAction> m_action{};
+  SmallString<128> m_obj{};
 
-  auto path = sys::path::parent_path(file);
-  auto name = sys::path::stem(file);
-  auto ext = sys::path::extension(file);
-  SmallString<128> obj{};
-  sys::path::append(obj, path, "out", name);
-
-  std::unique_ptr<FrontendAction> action{};
-  const char *mode;
-  if (ext == ".cppm") {
-    mode = "--precompile";
-    sys::path::replace_extension(obj, ".pcm");
-    action = std::make_unique<GenerateModuleInterfaceAction>();
-  } else {
-    mode = "-c";
-    sys::path::replace_extension(obj, ext + ".o");
-    action = std::make_unique<EmitObjAction>();
+public:
+  evoker() {
+    m_args.push_back(clang_exe());
+    m_args.push_back("-std=c++20");
   }
+  evoker &set_action(FrontendAction *a) {
+    m_action.reset(a);
+    return *this;
+  }
+  evoker &set_inout(StringRef in, StringRef ext) {
+    auto path = sys::path::parent_path(in);
+    auto name = sys::path::stem(in);
+    sys::path::append(m_obj, path, "out", name);
+    sys::path::replace_extension(m_obj, ext);
+    m_args.push_back(in.data());
+    m_args.push_back("-o");
+    m_args.push_back(m_obj.data());
+    return *this;
+  }
+  evoker &push_arg(StringRef mode) {
+    m_args.push_back(mode.data());
+    return *this;
+  }
+  bool run() {
+    errs() << "compiling " << m_obj << "\n";
 
-  std::vector<const char *> args{};
-  args.push_back(clang_exe());
-  args.push_back("-std=c++20");
-  args.push_back(mode);
-  args.push_back(file.data());
-  args.push_back("-o");
-  args.push_back(obj.data());
+    auto clang = createCI(m_args);
+    return clang && clang->ExecuteAction(*m_action);
+  }
+};
 
-  auto clang = createCI(args);
-  return clang && clang->ExecuteAction(*action);
+bool compile(StringRef file) {
+  auto ext = sys::path::extension(file);
+  if (ext == ".cppm") {
+    return evoker{}
+               .set_action(new GenerateModuleInterfaceAction)
+               .push_arg("--precompile")
+               .set_inout(file, ".pcm")
+               .run() &&
+           evoker{}
+               .set_action(new EmitObjAction)
+               .push_arg("-c")
+               .set_inout(file, ".o")
+               .run();
+  } else {
+    return evoker{}
+        .set_action(new EmitObjAction)
+        .push_arg("-c")
+        .set_inout(file, ".o")
+        .run();
+  }
 }
