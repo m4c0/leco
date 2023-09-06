@@ -7,6 +7,7 @@
 
 #include "clang_dir.hpp"
 #include "clang/CodeGen/CodeGenAction.h"
+#include "clang/CodeGen/ObjectFilePCHContainerOperations.h"
 #include "clang/Driver/Compilation.h"
 #include "clang/Driver/Driver.h"
 #include "clang/Frontend/CompilerInstance.h"
@@ -39,24 +40,11 @@ const char *clang_exe() {
   return exe.data();
 }
 
-int cc1(SmallVectorImpl<const char *> &args) {
-  auto argv = llvm::ArrayRef(args).slice(1);
-
-  auto cinst = std::make_unique<CompilerInstance>();
-  CompilerInvocation::CreateFromArgs(cinst->getInvocation(), argv,
-                                     diag_engine(), clang_exe());
-  cinst->createDiagnostics();
-
-  GenerateModuleInterfaceAction a{};
-  return !cinst->ExecuteAction(a);
-}
-
 bool compile(StringRef file) {
   errs() << "compiling " << file << "\n";
 
   auto def_triple = sys::getDefaultTargetTriple();
   Driver drv{clang_exe(), def_triple, diag_engine()};
-  drv.CC1Main = cc1;
 
   auto path = sys::path::parent_path(file);
   auto name = sys::path::stem(file);
@@ -87,15 +75,25 @@ bool compile(StringRef file) {
     // client do its job informing the user
     return false;
 
-  SmallVector<std::pair<int, const Command *>, 4> failures;
-  int res = drv.ExecuteCompilation(*c, failures);
-  for (const auto &p : failures) {
-    if (p.first)
-      res = p.first;
+  auto cc1args = c->getJobs().getJobs()[0]->getArguments();
+
+  auto clang = std::make_unique<CompilerInstance>();
+
+  auto pch = clang->getPCHContainerOperations();
+  pch->registerWriter(std::make_unique<ObjectFilePCHContainerWriter>());
+  pch->registerReader(std::make_unique<ObjectFilePCHContainerReader>());
+
+  if (!CompilerInvocation::CreateFromArgs(clang->getInvocation(), cc1args,
+                                          diag_engine()))
+    return false;
+
+  clang->createDiagnostics();
+
+  std::unique_ptr<FrontendAction> action{};
+  if (ext == ".cppm") {
+    action = std::make_unique<GenerateModuleInterfaceAction>();
+  } else {
+    action = std::make_unique<EmitObjAction>();
   }
-  if (res != 0) {
-    errs() << "Job failed:\n";
-    c->getJobs().Print(errs(), "\n", false);
-  }
-  return res == 0;
+  return clang->ExecuteAction(*action);
 }
