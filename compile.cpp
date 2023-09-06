@@ -1,5 +1,8 @@
 #ifdef _WIN32
 #define _CRT_SECURE_NO_WARNINGS
+#define EXE_EXT ".exe"
+#else
+#define EXE_EXT ""
 #endif
 
 #include "clang_dir.hpp"
@@ -29,7 +32,7 @@ DiagnosticsEngine &diag_engine() {
 const char *clang_exe() {
   static const auto exe = [] {
     SmallString<1024> buf{};
-    sys::path::append(buf, clang_dir(), "bin", "clang++.exe");
+    sys::path::append(buf, clang_dir(), "bin", "clang++" EXE_EXT);
     return buf;
   }();
   return exe.data();
