@@ -11,10 +11,15 @@ using namespace llvm;
 bool compile(StringRef file) {
   auto ext = sys::path::extension(file);
   if (ext == ".cppm") {
-    auto pcm = evoker{}
-                   .push_arg("-fprebuilt-module-path=out")
-                   .push_arg("--precompile")
-                   .set_inout(file, ".pcm");
+    SmallString<64> out{};
+    auto parent = sys::path::parent_path(file);
+    sys::path::append(out, parent, "out");
+
+    SmallString<128> pmp{};
+    ("-fprebuilt-module-path=" + out).toNullTerminatedStringRef(pmp);
+
+    auto pcm =
+        evoker{}.push_arg(pmp).push_arg("--precompile").set_inout(file, ".pcm");
     if (!pcm.run<find_deps_action>())
       return false;
     if (!pcm.run<GenerateModuleInterfaceAction>())
