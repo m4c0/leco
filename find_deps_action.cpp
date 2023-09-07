@@ -50,7 +50,7 @@ public:
       auto part = mod_name.substr(p + 1);
 
       sys::path::append(dep, dir, me + "-" + part + ".cppm");
-      if (compile(dep))
+      if (compile(dep.c_str()))
         return;
 
     } else {
@@ -60,10 +60,10 @@ public:
         dep.clear();
         sys::path::append(dep, "..", mod_name, t);
       }
-      if (!sys::fs::is_regular_file(dep))
+      if (!sys::fs::is_regular_file(dep.c_str()))
         return report_missing_module(loc);
 
-      if (compile(dep))
+      if (compile(dep.c_str()))
         return;
     }
 
