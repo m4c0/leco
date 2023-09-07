@@ -1,5 +1,6 @@
 #include "evoker.hpp"
 #include "find_deps_action.hpp"
+#include "instance.hpp"
 #include "clang/CodeGen/CodeGenAction.h"
 #include "clang/Frontend/FrontendActions.h"
 #include "llvm/ADT/StringRef.h"
