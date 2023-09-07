@@ -54,11 +54,7 @@ bool try_compile(StringRef file) {
   }
 }
 
-bool compile(StringRef file, bool clear_cache) {
-  if (clear_cache) {
-    already_built().clear();
-  }
-
+bool compile(StringRef file) {
   if (already_built().contains(file))
     return true;
   if (!try_compile(file))
@@ -67,3 +63,5 @@ bool compile(StringRef file, bool clear_cache) {
   already_built().insert(file);
   return true;
 }
+
+void clear_compile_cache() { already_built().clear(); }

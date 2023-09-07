@@ -20,6 +20,8 @@ bool compile_by_ext(llvm::StringRef path) {
 }
 
 bool try_main() {
+  clear_compile_cache();
+
   std::error_code ec;
   for (llvm::sys::fs::directory_iterator it{".", ec}, e; it != e;
        it.increment(ec)) {
