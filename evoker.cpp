@@ -80,7 +80,15 @@ evoker &evoker::set_inout(StringRef in, StringRef ext) {
   m_args.push_back(m_obj.c_str());
   return *this;
 }
-[[nodiscard]] bool evoker::run(clang::FrontendAction *a) {
-  auto clang = createCI(m_args);
-  return clang && clang->ExecuteAction(*a);
+instance evoker::build() {
+  return instance{createCI(m_args), m_obj.str().str()};
 }
+
+instance::instance(std::unique_ptr<CompilerInstance> ci, std::string out)
+    : m_ci{std::move(ci)}, m_output{out} {}
+instance::~instance() = default;
+bool instance::run(FrontendAction *a) {
+  return m_ci && m_ci->ExecuteAction(*a);
+}
+
+StringRef instance::output() { return m_output; }

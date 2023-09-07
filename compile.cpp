@@ -18,8 +18,11 @@ bool compile(StringRef file) {
     SmallString<128> pmp{};
     ("-fprebuilt-module-path=" + out).toNullTerminatedStringRef(pmp);
 
-    auto pcm =
-        evoker{}.push_arg(pmp).push_arg("--precompile").set_inout(file, ".pcm");
+    auto pcm = evoker{}
+                   .push_arg(pmp)
+                   .push_arg("--precompile")
+                   .set_inout(file, ".pcm")
+                   .build();
     if (!pcm.run<find_deps_action>())
       return false;
     if (!pcm.run<GenerateModuleInterfaceAction>())
@@ -28,9 +31,17 @@ bool compile(StringRef file) {
     return compile(pcm.output());
   } else if (ext == ".cpp") {
     // TODO: detect module impls
-    return !!evoker{}.push_arg("-c").set_inout(file, ".o").run<EmitObjAction>();
+    return !!evoker{}
+                 .push_arg("-c")
+                 .set_inout(file, ".o")
+                 .build()
+                 .run<EmitObjAction>();
   } else if (ext == ".c" || ext == ".pcm" || ext == ".m") {
-    return !!evoker{}.push_arg("-c").set_inout(file, ".o").run<EmitObjAction>();
+    return !!evoker{}
+                 .push_arg("-c")
+                 .set_inout(file, ".o")
+                 .build()
+                 .run<EmitObjAction>();
   } else {
     errs() << "don't know how to build " << file << "\n";
     return false;
