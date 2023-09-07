@@ -8,20 +8,31 @@
 using namespace clang;
 using namespace llvm;
 
+StringSet<> &module_paths() {
+  static StringSet<> i{};
+  return i;
+}
+
 bool compile(StringRef file) {
   auto ext = sys::path::extension(file);
   if (ext == ".cppm") {
     SmallString<64> out{};
     auto parent = sys::path::parent_path(file);
     sys::path::append(out, parent, "out");
+    module_paths().insert(out);
 
-    auto pcm = evoker{}
-                   .push_arg("--precompile")
-                   .set_inout(file, ".pcm")
-                   .build()
-                   .add_module_path(out);
+    auto pcm =
+        evoker{}.push_arg("--precompile").set_inout(file, ".pcm").build();
+
+    for (auto &p : module_paths()) {
+      pcm.add_module_path(p.first());
+    }
     if (!pcm.run<find_deps_action>())
       return false;
+
+    for (auto &p : module_paths()) {
+      pcm.add_module_path(p.first());
+    }
     if (!pcm.run<GenerateModuleInterfaceAction>())
       return false;
 
