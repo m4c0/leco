@@ -7,14 +7,17 @@ class FrontendAction;
 } // namespace clang
 
 class instance {
-  std::unique_ptr<clang::CompilerInstance> m_ci;
+  std::shared_ptr<clang::CompilerInstance> m_ci;
   std::string m_output;
 
 public:
-  explicit instance(std::unique_ptr<clang::CompilerInstance> ci, std::string o);
+  explicit instance(std::shared_ptr<clang::CompilerInstance> ci,
+                    llvm::StringRef out);
   ~instance();
 
   [[nodiscard]] llvm::StringRef output();
+
+  instance &add_module_path(llvm::StringRef path);
 
   [[nodiscard]] bool run(clang::FrontendAction *a);
 

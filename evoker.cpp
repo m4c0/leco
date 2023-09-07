@@ -37,8 +37,8 @@ const char *clang_exe() {
   return exe.data();
 }
 
-std::unique_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
-  auto clang = std::make_unique<CompilerInstance>();
+std::shared_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
+  auto clang = std::make_shared<CompilerInstance>();
 
   auto pch = clang->getPCHContainerOperations();
   pch->registerWriter(std::make_unique<ObjectFilePCHContainerWriter>());
@@ -80,13 +80,17 @@ evoker &evoker::set_inout(StringRef in, StringRef ext) {
   m_args.push_back(m_obj.c_str());
   return *this;
 }
-instance evoker::build() {
-  return instance{createCI(m_args), m_obj.str().str()};
+instance evoker::build() { return instance{createCI(m_args), m_obj.str()}; }
+
+instance::instance(std::shared_ptr<CompilerInstance> ci, StringRef out)
+    : m_ci{std::move(ci)}, m_output{out.str()} {}
+instance::~instance() = default;
+
+instance &instance::add_module_path(StringRef path) {
+  m_ci->getHeaderSearchOpts().AddPrebuiltModulePath(path);
+  return *this;
 }
 
-instance::instance(std::unique_ptr<CompilerInstance> ci, std::string out)
-    : m_ci{std::move(ci)}, m_output{out} {}
-instance::~instance() = default;
 bool instance::run(FrontendAction *a) {
   return m_ci && m_ci->ExecuteAction(*a);
 }

@@ -15,14 +15,11 @@ bool compile(StringRef file) {
     auto parent = sys::path::parent_path(file);
     sys::path::append(out, parent, "out");
 
-    SmallString<128> pmp{};
-    ("-fprebuilt-module-path=" + out).toNullTerminatedStringRef(pmp);
-
     auto pcm = evoker{}
-                   .push_arg(pmp)
                    .push_arg("--precompile")
                    .set_inout(file, ".pcm")
-                   .build();
+                   .build()
+                   .add_module_path(out);
     if (!pcm.run<find_deps_action>())
       return false;
     if (!pcm.run<GenerateModuleInterfaceAction>())
