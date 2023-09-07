@@ -1,16 +1,10 @@
+#include "compile.hpp"
 #include "find_deps_action.hpp"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Lex/Preprocessor.h"
 
 using namespace clang;
 using namespace llvm;
-
-bool compile(StringRef path);
-
-StringSet<> &already_built() {
-  static StringSet<> i{};
-  return i;
-}
 
 class find_deps_pp_callbacks : public PPCallbacks {
   DiagnosticsEngine *m_diags;
@@ -25,16 +19,6 @@ class find_deps_pp_callbacks : public PPCallbacks {
     auto lvl = DiagnosticsEngine::Error;
     auto did = m_diags->getCustomDiagID(lvl, "module not found");
     m_diags->Report(loc, did);
-  }
-
-  bool try_compile(StringRef name) {
-    if (already_built().contains(name))
-      return true;
-    if (!compile(name))
-      return false;
-
-    already_built().insert(name);
-    return true;
   }
 
 public:
@@ -65,7 +49,7 @@ public:
       auto part = mod_name.substr(p + 1);
 
       sys::path::append(dep, dir, me + "-" + part + ".cppm");
-      if (try_compile(dep.c_str()))
+      if (compile(dep.c_str()))
         return;
 
     } else {
@@ -78,7 +62,7 @@ public:
       if (!sys::fs::is_regular_file(dep.c_str()))
         return report_missing_module(loc);
 
-      if (try_compile(dep.c_str()))
+      if (compile(dep.c_str()))
         return;
     }
 

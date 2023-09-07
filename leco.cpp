@@ -1,11 +1,10 @@
+#include "compile.hpp"
 #include "llvm/Support/CrashRecoveryContext.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/ManagedStatic.h"
 #include "llvm/Support/Path.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
-
-bool compile(llvm::StringRef path);
 
 bool compile_by_ext(llvm::StringRef path) {
   auto ext = llvm::sys::path::extension(path);

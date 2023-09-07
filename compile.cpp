@@ -1,3 +1,4 @@
+#include "compile.hpp"
 #include "evoker.hpp"
 #include "find_deps_action.hpp"
 #include "instance.hpp"
@@ -9,7 +10,12 @@
 using namespace clang;
 using namespace llvm;
 
-bool compile(StringRef file) {
+StringSet<> &already_built() {
+  static StringSet<> i{};
+  return i;
+}
+
+bool try_compile(StringRef file) {
   SmallString<64> out{};
   auto parent = sys::path::parent_path(file);
   sys::path::append(out, parent, "out");
@@ -46,4 +52,18 @@ bool compile(StringRef file) {
     errs() << "don't know how to build " << file << "\n";
     return false;
   }
+}
+
+bool compile(StringRef file, bool clear_cache) {
+  if (clear_cache) {
+    already_built().clear();
+  }
+
+  if (already_built().contains(file))
+    return true;
+  if (!try_compile(file))
+    return false;
+
+  already_built().insert(file);
+  return true;
 }
