@@ -10,12 +10,12 @@ using namespace clang;
 using namespace llvm;
 
 bool compile(StringRef file) {
+  SmallString<64> out{};
+  auto parent = sys::path::parent_path(file);
+  sys::path::append(out, parent, "out");
+
   auto ext = sys::path::extension(file);
   if (ext == ".cppm") {
-    SmallString<64> out{};
-    auto parent = sys::path::parent_path(file);
-    sys::path::append(out, parent, "out");
-
     auto pcm = evoker{}
                    .push_arg("--precompile")
                    .set_inout(file, ".pcm")
@@ -29,12 +29,13 @@ bool compile(StringRef file) {
 
     return compile(pcm.output());
   } else if (ext == ".cpp") {
-    // TODO: detect module impls
-    return !!evoker{}
-                 .push_arg("-c")
-                 .set_inout(file, ".o")
-                 .build()
-                 .run<EmitObjAction>();
+    auto bld = evoker{}
+                   .push_arg("-c")
+                   .set_inout(file, ".o")
+                   .build()
+                   .add_module_path(out);
+
+    return bld.run<find_deps_action>() && bld.run<EmitObjAction>();
   } else if (ext == ".c" || ext == ".pcm" || ext == ".m") {
     return !!evoker{}
                  .push_arg("-c")
