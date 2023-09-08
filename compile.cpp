@@ -18,8 +18,10 @@ StringSet<> &already_built() {
 bool try_compile(StringRef file) {
   SmallString<64> out{};
   auto parent = sys::path::parent_path(file);
-  sys::path::append(out, parent, "out");
-  sys::fs::create_directories(out);
+  if (sys::path::stem(parent) != "out") {
+    sys::path::append(out, parent, "out");
+    sys::fs::create_directories(out);
+  }
 
   auto ext = sys::path::extension(file);
   if (ext == ".cppm") {
