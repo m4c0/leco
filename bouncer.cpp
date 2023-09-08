@@ -1,16 +1,31 @@
 #include "bouncer.hpp"
 #include "evoker.hpp"
 #include "instance.hpp"
+#include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendActions.h"
+#include "clang/Lex/Preprocessor.h"
 
 using namespace clang;
 using namespace llvm;
 
 class bouncer : public PreprocessorFrontendAction {
-public:
-  void ExecuteAction() override {}
+  bool m_valid{};
 
-  [[nodiscard]] bool is_valid() { return false; }
+public:
+  void ExecuteAction() override {
+    auto *diags = &getCompilerInstance().getDiagnostics();
+    auto &pp = getCompilerInstance().getPreprocessor();
+    pp.EnterMainSourceFile();
+
+    Token Tok;
+    do {
+      pp.Lex(Tok);
+    } while (!Tok.is(tok::eof));
+
+    m_valid = !pp.isInNamedModule();
+  }
+
+  [[nodiscard]] bool is_valid() { return m_valid; }
 };
 
 bool is_valid_root_compilation(StringRef path) {
