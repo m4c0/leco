@@ -1,4 +1,5 @@
 #include "bouncer.hpp"
+#include "compile.hpp"
 #include "evoker.hpp"
 #include "instance.hpp"
 #include "clang/Frontend/CompilerInstance.h"
@@ -40,4 +41,11 @@ bool is_valid_root_compilation(StringRef path) {
 
   auto b = evoker{}.push_arg("-c").set_inout(path, ".o").build().run<bouncer>();
   return b && b->is_valid();
+}
+
+bool bounce(StringRef path) {
+  if (is_valid_root_compilation(path)) {
+    compile(path);
+  }
+  return true;
 }

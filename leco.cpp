@@ -23,11 +23,7 @@ bool try_main() {
       continue;
     }
 
-    if (!is_valid_root_compilation(it->path())) {
-      continue;
-    }
-
-    if (!compile(it->path())) {
+    if (!bounce(it->path())) {
       return false;
     }
   }
