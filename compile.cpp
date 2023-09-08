@@ -1,6 +1,5 @@
 #include "compile.hpp"
 #include "evoker.hpp"
-#include "find_deps_action.hpp"
 #include "instance.hpp"
 #include "clang/CodeGen/CodeGenAction.h"
 #include "clang/Frontend/FrontendActions.h"
@@ -21,8 +20,6 @@ bool try_compile(StringRef file) {
     auto pcm =
         evoker{}.push_arg("--precompile").set_inout(file, ".pcm").build();
 
-    if (!pcm.run<find_deps_action>())
-      return false;
     if (!pcm.run<GenerateModuleInterfaceAction>())
       return false;
 
@@ -30,7 +27,7 @@ bool try_compile(StringRef file) {
   } else if (ext == ".cpp" || ext == ".c" || ext == ".pcm" || ext == ".m") {
     auto bld = evoker{}.push_arg("-c").set_inout(file, ".o").build();
 
-    return bld.run<find_deps_action>() && bld.run<EmitObjAction>();
+    return !!bld.run<EmitObjAction>();
   } else {
     errs() << "don't know how to build " << file << "\n";
     return false;

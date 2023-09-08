@@ -1,3 +1,4 @@
+#include "find_deps_action.hpp"
 #include "instance.hpp"
 #include "clang/Frontend/CompilerInstance.h"
 
@@ -17,6 +18,13 @@ instance::~instance() = default;
 
 bool instance::run(FrontendAction *a) {
   if (!m_ci)
+    return false;
+
+  for (auto &p : module_paths())
+    m_ci->getHeaderSearchOpts().AddPrebuiltModulePath(p.first());
+
+  find_deps_action fd{};
+  if (!m_ci->ExecuteAction(fd))
     return false;
 
   for (auto &p : module_paths())
