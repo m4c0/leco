@@ -41,10 +41,6 @@ const char *clang_exe() {
 std::shared_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
   auto clang = std::make_shared<CompilerInstance>();
 
-  auto pch = clang->getPCHContainerOperations();
-  pch->registerWriter(std::make_unique<ObjectFilePCHContainerWriter>());
-  pch->registerReader(std::make_unique<ObjectFilePCHContainerReader>());
-
   auto def_triple = sys::getDefaultTargetTriple();
   Driver drv{clang_exe(), def_triple, diag_engine()};
   std::unique_ptr<Compilation> c{drv.BuildCompilation(args)};
