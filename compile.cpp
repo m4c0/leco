@@ -27,16 +27,10 @@ bool try_compile(StringRef file) {
       return false;
 
     return compile(pcm.output());
-  } else if (ext == ".cpp") {
+  } else if (ext == ".cpp" || ext == ".c" || ext == ".pcm" || ext == ".m") {
     auto bld = evoker{}.push_arg("-c").set_inout(file, ".o").build();
 
     return bld.run<find_deps_action>() && bld.run<EmitObjAction>();
-  } else if (ext == ".c" || ext == ".pcm" || ext == ".m") {
-    return !!evoker{}
-                 .push_arg("-c")
-                 .set_inout(file, ".o")
-                 .build()
-                 .run<EmitObjAction>();
   } else {
     errs() << "don't know how to build " << file << "\n";
     return false;
