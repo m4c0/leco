@@ -17,7 +17,13 @@ public:
 
   [[nodiscard]] llvm::StringRef output();
 
-  [[nodiscard]] bool run(std::unique_ptr<clang::FrontendAction> a);
+  [[nodiscard]] bool run(std::unique_ptr<clang::FrontendAction> a,
+                         bool wrapped);
 
-  template <typename Tp> bool run() { return run(std::make_unique<Tp>()); }
+  template <typename Tp> bool run() {
+    return run(std::make_unique<Tp>(), true);
+  }
+  template <typename Tp> bool run_raw() {
+    return run(std::make_unique<Tp>(), false);
+  }
 };

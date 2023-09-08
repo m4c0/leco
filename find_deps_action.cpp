@@ -53,15 +53,11 @@ void find_deps_pp_callbacks::moduleImport(SourceLocation loc, ModuleIdPath path,
   return;
 }
 
-void find_deps_action::ExecuteAction() {
-  auto *diags = &getCompilerInstance().getDiagnostics();
-  auto &pp = getCompilerInstance().getPreprocessor();
-  pp.EnterMainSourceFile();
+bool find_deps_action::BeginSourceFileAction(CompilerInstance &ci) {
+  auto *diags = &ci.getDiagnostics();
+  auto &pp = ci.getPreprocessor();
   pp.addPPCallbacks(
       std::make_unique<find_deps_pp_callbacks>(diags, getCurrentFile()));
 
-  Token Tok;
-  do {
-    pp.Lex(Tok);
-  } while (!Tok.is(tok::eof));
+  return WrapperFrontendAction::BeginSourceFileAction(ci);
 }

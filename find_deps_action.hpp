@@ -17,7 +17,8 @@ public:
                     const clang::Module *imported) override;
 };
 
-class find_deps_action : public clang::PreprocessorFrontendAction {
+class find_deps_action : public clang::WrapperFrontendAction {
 public:
-  void ExecuteAction() override;
+  using WrapperFrontendAction::WrapperFrontendAction;
+  bool BeginSourceFileAction(clang::CompilerInstance &ci) override;
 };

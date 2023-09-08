@@ -42,18 +42,16 @@ instance::~instance() {
     std::erase(in_flights(), m_ci);
 }
 
-bool instance::run(std::unique_ptr<FrontendAction> a) {
+bool instance::run(std::unique_ptr<FrontendAction> a, bool wrapped) {
   if (!m_ci)
     return false;
 
-  find_deps_action fd{};
-  if (!m_ci->ExecuteAction(fd))
-    return false;
-
-  if (m_ci->ExecuteAction(*a))
-    return true;
-
-  return false;
+  if (wrapped) {
+    find_deps_action fd{std::move(a)};
+    return m_ci->ExecuteAction(fd);
+  } else {
+    return m_ci->ExecuteAction(*a);
+  }
 }
 
 StringRef instance::output() { return m_output; }

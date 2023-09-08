@@ -25,7 +25,11 @@ bool try_compile(StringRef file) {
     if (!pcm.run<GenerateModuleInterfaceAction>())
       return false;
 
-    return compile(pcm.output());
+    return evoker{}
+        .push_arg("-c")
+        .set_inout(pcm.output(), ".o")
+        .build()
+        .run_raw<EmitObjAction>();
   } else if (ext == ".cpp" || ext == ".c" || ext == ".pcm" || ext == ".m") {
     auto bld = evoker{}.push_arg("-c").set_inout(file, ".o").build();
 
