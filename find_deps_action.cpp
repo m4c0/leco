@@ -25,15 +25,6 @@ public:
   find_deps_pp_callbacks(DiagnosticsEngine *diags, StringRef file)
       : m_diags{diags}, m_cur_file{file} {}
 
-  void EnteredSubmodule(Module *m, SourceLocation loc,
-                        bool for_pragma) override {
-    assert(false && "missing support for submodule");
-  }
-
-  void LeftSubmodule(Module *m, SourceLocation loc, bool for_pragma) override {
-    assert(false && "missing support for submodule");
-  }
-
   void moduleImport(SourceLocation loc, ModuleIdPath path,
                     const Module *imported) override {
     assert(path.size() == 1 && "path isn't atomic");
