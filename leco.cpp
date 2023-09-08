@@ -9,14 +9,16 @@
 bool compile_by_ext(llvm::StringRef path) {
   auto ext = llvm::sys::path::extension(path);
   if (ext == ".cppm") {
-    return compile(path);
+    auto stem = llvm::sys::path::stem(path);
+    if (stem.find("-") == llvm::StringRef::npos)
+      return compile(path);
   } else if (ext == ".cpp") {
     return compile(path);
   } else if (ext == ".m") {
     return compile(path);
-  } else {
-    return true;
   }
+
+  return true;
 }
 
 bool try_main() {
