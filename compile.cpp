@@ -16,20 +16,10 @@ StringSet<> &already_built() {
 }
 
 bool try_compile(StringRef file) {
-  SmallString<64> out{};
-  auto parent = sys::path::parent_path(file);
-  if (sys::path::stem(parent) != "out") {
-    sys::path::append(out, parent, "out");
-    sys::fs::create_directories(out);
-  }
-
   auto ext = sys::path::extension(file);
   if (ext == ".cppm") {
-    auto pcm = evoker{}
-                   .push_arg("--precompile")
-                   .set_inout(file, ".pcm")
-                   .build()
-                   .add_module_path(out);
+    auto pcm =
+        evoker{}.push_arg("--precompile").set_inout(file, ".pcm").build();
 
     if (!pcm.run<find_deps_action>())
       return false;
@@ -38,11 +28,7 @@ bool try_compile(StringRef file) {
 
     return compile(pcm.output());
   } else if (ext == ".cpp") {
-    auto bld = evoker{}
-                   .push_arg("-c")
-                   .set_inout(file, ".o")
-                   .build()
-                   .add_module_path(out);
+    auto bld = evoker{}.push_arg("-c").set_inout(file, ".o").build();
 
     return bld.run<find_deps_action>() && bld.run<EmitObjAction>();
   } else if (ext == ".c" || ext == ".pcm" || ext == ".m") {

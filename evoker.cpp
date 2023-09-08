@@ -64,9 +64,12 @@ evoker::evoker() {
 }
 evoker &evoker::set_inout(StringRef in, StringRef ext) {
   auto path = sys::path::parent_path(in);
-  if (sys::path::stem(path) != "out") {
+  auto gpath = sys::path::parent_path(path);
+  if (sys::path::stem(gpath) != "out") {
     auto name = sys::path::stem(in);
-    sys::path::append(m_obj, path, "out", name);
+    auto triple = sys::getDefaultTargetTriple();
+    sys::path::append(m_obj, path, "out", triple, name);
+    sys::fs::create_directories(sys::path::parent_path(m_obj));
   } else {
     m_obj.append(in);
   }

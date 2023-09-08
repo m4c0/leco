@@ -10,13 +10,10 @@ StringSet<> &module_paths() {
 }
 
 instance::instance(std::shared_ptr<CompilerInstance> ci, StringRef out)
-    : m_ci{std::move(ci)}, m_output{out.str()} {}
-instance::~instance() = default;
-
-instance &instance::add_module_path(StringRef path) {
-  module_paths().insert(path);
-  return *this;
+    : m_ci{std::move(ci)}, m_output{out.str()} {
+  module_paths().insert(sys::path::parent_path(out));
 }
+instance::~instance() = default;
 
 bool instance::run(FrontendAction *a) {
   if (!m_ci)

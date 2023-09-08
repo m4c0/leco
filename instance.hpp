@@ -17,8 +17,6 @@ public:
 
   [[nodiscard]] llvm::StringRef output();
 
-  instance &add_module_path(llvm::StringRef path);
-
   [[nodiscard]] bool run(clang::FrontendAction *a);
 
   template <typename Tp> std::unique_ptr<Tp> run() {
