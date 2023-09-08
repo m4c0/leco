@@ -29,23 +29,20 @@ public:
   [[nodiscard]] bool is_valid() { return m_valid; }
 };
 
-bool is_valid_root_compilation(StringRef path) {
+bool bounce(StringRef path) {
   auto stem = sys::path::stem(path);
   auto ext = sys::path::extension(path);
 
-  if (ext == ".cppm")
-    return stem.find("-") == StringRef::npos;
+  if (ext == ".cppm") {
+    return (stem.find("-") == StringRef::npos) ? compile(path) : true;
+  }
 
   if (ext != ".cpp")
-    return false;
+    return true;
 
   auto b = evoker{}.push_arg("-c").set_inout(path, ".o").build().run<bouncer>();
-  return b && b->is_valid();
-}
+  if (b && b->is_valid())
+    return compile(path); // TODO: link as well
 
-bool bounce(StringRef path) {
-  if (is_valid_root_compilation(path)) {
-    compile(path);
-  }
   return true;
 }
