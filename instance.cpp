@@ -5,32 +5,55 @@
 using namespace clang;
 using namespace llvm;
 
-StringSet<> &module_paths() {
-  static StringSet<> i{};
+auto &current_paths() {
+  static std::set<std::string> i{};
+  return i;
+}
+auto &in_flights() {
+  static std::vector<std::shared_ptr<CompilerInstance>> i{};
   return i;
 }
 
 instance::instance(std::shared_ptr<CompilerInstance> ci, StringRef out)
     : m_ci{std::move(ci)}, m_output{out.str()} {
-  module_paths().insert(sys::path::parent_path(out));
+
+  auto &inf = in_flights();
+
+  if (m_ci) {
+    for (auto &p : current_paths()) {
+      m_ci->getHeaderSearchOpts().AddPrebuiltModulePath(p);
+    }
+
+    inf.push_back(m_ci);
+  }
+
+  auto path = sys::path::parent_path(out);
+  auto [_, inserted] = current_paths().insert(path.str());
+
+  if (!inserted)
+    return;
+
+  for (auto &ci : inf) {
+    ci->getHeaderSearchOpts().AddPrebuiltModulePath(path);
+  }
 }
-instance::~instance() = default;
+instance::~instance() {
+  if (m_ci)
+    std::erase(in_flights(), m_ci);
+}
 
 bool instance::run(FrontendAction *a) {
   if (!m_ci)
     return false;
 
-  for (auto &p : module_paths())
-    m_ci->getHeaderSearchOpts().AddPrebuiltModulePath(p.first());
-
   find_deps_action fd{};
   if (!m_ci->ExecuteAction(fd))
     return false;
 
-  for (auto &p : module_paths())
-    m_ci->getHeaderSearchOpts().AddPrebuiltModulePath(p.first());
+  if (m_ci->ExecuteAction(*a))
+    return true;
 
-  return m_ci->ExecuteAction(*a);
+  return false;
 }
 
 StringRef instance::output() { return m_output; }
