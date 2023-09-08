@@ -42,7 +42,7 @@ instance::~instance() {
     std::erase(in_flights(), m_ci);
 }
 
-bool instance::run(FrontendAction *a) {
+bool instance::run(std::unique_ptr<FrontendAction> a) {
   if (!m_ci)
     return false;
 
