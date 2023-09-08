@@ -49,6 +49,7 @@ constexpr const char *cmd =
     "-lclang -lclang-cpp -lLLVM"
 #endif
     " leco.o"
+    " bouncer.o"
     " compile.o"
     " evoker.o"
     " find_deps_action.o"
@@ -90,8 +91,9 @@ bool link() {
 }
 
 int main(int argc, char **argv) {
-  return compile("leco") && compile("compile") && compile("evoker") &&
-                 compile("find_deps_action") && compile("instance") && link()
+  return compile("leco") && compile("bouncer") && compile("compile") &&
+                 compile("evoker") && compile("find_deps_action") &&
+                 compile("instance") && link()
              ? 0
              : 1;
 }

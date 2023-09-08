@@ -1,3 +1,4 @@
+#include "bouncer.hpp"
 #include "compile.hpp"
 #include "llvm/Support/CrashRecoveryContext.h"
 #include "llvm/Support/FileSystem.h"
@@ -5,21 +6,6 @@
 #include "llvm/Support/Path.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
-
-bool compile_by_ext(llvm::StringRef path) {
-  auto ext = llvm::sys::path::extension(path);
-  if (ext == ".cppm") {
-    auto stem = llvm::sys::path::stem(path);
-    if (stem.find("-") == llvm::StringRef::npos)
-      return compile(path);
-  } else if (ext == ".cpp") {
-    return compile(path);
-  } else if (ext == ".m") {
-    return compile(path);
-  }
-
-  return true;
-}
 
 bool try_main() {
   clear_compile_cache();
@@ -37,7 +23,11 @@ bool try_main() {
       continue;
     }
 
-    if (!compile_by_ext(it->path())) {
+    if (!is_valid_root_compilation(it->path())) {
+      continue;
+    }
+
+    if (!compile(it->path())) {
       return false;
     }
   }
