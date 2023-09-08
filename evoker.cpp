@@ -69,6 +69,8 @@ evoker &evoker::set_inout(StringRef in, StringRef ext) {
     auto name = sys::path::stem(in);
     auto triple = sys::getDefaultTargetTriple();
     sys::path::append(m_obj, path, "out", triple, name);
+    // TODO: check errors
+    sys::fs::make_absolute(m_obj);
     sys::fs::create_directories(sys::path::parent_path(m_obj));
   } else {
     m_obj.append(in);

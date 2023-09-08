@@ -4,13 +4,15 @@
 #include "clang/CodeGen/CodeGenAction.h"
 #include "clang/Frontend/FrontendActions.h"
 #include "llvm/ADT/StringRef.h"
+#include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
+#include <set>
 
 using namespace clang;
 using namespace llvm;
 
-StringSet<> &already_built() {
-  static StringSet<> i{};
+auto &already_built() {
+  static std::set<std::string> i{};
   return i;
 }
 
@@ -34,7 +36,15 @@ bool try_compile(StringRef file) {
   }
 }
 
-bool compile(StringRef file) {
+std::string make_abs(StringRef file) {
+  SmallString<1024> buf;
+  // TODO: check errors
+  sys::fs::real_path(file, buf);
+  return buf.str().str();
+}
+bool compile(StringRef rel_file) {
+  auto file = make_abs(rel_file);
+
   if (already_built().contains(file))
     return true;
   if (!try_compile(file))
