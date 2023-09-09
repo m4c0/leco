@@ -7,12 +7,19 @@ using namespace llvm;
 bool link() {
   std::vector<std::string> args{};
   for (auto &p : cur_ctx().object_files) {
-    args.push_back(p);
+    SmallString<128> pp{};
+    in2out(p, pp, "o");
+    args.push_back(pp.str().str());
   }
 
-  auto e = evoker{}.set_inout(cur_ctx().main_source, ".exe");
+  SmallString<128> exe{};
+  in2out(cur_ctx().main_source, exe, "exe");
+
+  evoker e{};
   for (auto &p : args) {
     e.push_arg(p);
   }
+  e.push_arg("-o");
+  e.push_arg(exe);
   return e.execute();
 }

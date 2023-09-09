@@ -1,6 +1,9 @@
 #pragma once
 #include "llvm/ADT/SmallString.h"
 
+void in2out(llvm::StringRef in, llvm::SmallVectorImpl<char> &out,
+            llvm::StringRef ext);
+
 class instance;
 class evoker {
   std::vector<const char *> m_args{};

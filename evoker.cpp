@@ -58,23 +58,30 @@ std::shared_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
   return clang;
 }
 
-evoker::evoker() {
-  m_args.push_back(clang_exe());
-  m_args.push_back("-std=c++20");
-}
-evoker &evoker::set_inout(StringRef in, StringRef ext) {
+void in2out(llvm::StringRef in, llvm::SmallVectorImpl<char> &out,
+            llvm::StringRef ext) {
+  out.clear();
+
   auto path = sys::path::parent_path(in);
   auto gpath = sys::path::parent_path(path);
   if (sys::path::stem(gpath) != "out") {
     auto name = sys::path::stem(in);
     auto triple = sys::getDefaultTargetTriple();
-    sys::path::append(m_obj, path, "out", triple, name);
-    // TODO: check errors
-    sys::fs::make_absolute(m_obj);
+    sys::path::append(out, path, "out", triple, name);
   } else {
-    m_obj.append(in);
+    sys::path::append(out, in);
   }
-  sys::path::replace_extension(m_obj, ext);
+  // TODO: check errors
+  sys::fs::make_absolute(out);
+  sys::path::replace_extension(out, ext);
+}
+
+evoker::evoker() {
+  m_args.push_back(clang_exe());
+  m_args.push_back("-std=c++20");
+}
+evoker &evoker::set_inout(StringRef in, StringRef ext) {
+  in2out(in, m_obj, ext);
 
   m_args.push_back(in.data());
   m_args.push_back("-o");
