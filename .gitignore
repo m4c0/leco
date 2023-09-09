@@ -1,5 +1,6 @@
 *.dSYM
 *.exe
+*.ilk
 *.o
 *.pcm
 *.pdb
