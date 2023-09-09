@@ -1,5 +1,6 @@
-*.exe
-*.pcm
-*.o
 *.dSYM
+*.exe
+*.o
+*.pcm
+*.pdb
 
