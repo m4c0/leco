@@ -87,7 +87,7 @@ bool compile(const char *stem) {
 }
 bool link() {
   auto cdir = clang_dir();
-  char buf[1024];
+  char buf[10240];
   snprintf(buf, sizeof(buf), cmd, cdir, cdir);
   return 0 == system(buf);
 }
