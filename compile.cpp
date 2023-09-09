@@ -2,6 +2,7 @@
 #include "context.hpp"
 #include "evoker.hpp"
 #include "instance.hpp"
+#include "link.hpp"
 #include "clang/CodeGen/CodeGenAction.h"
 #include "clang/Frontend/FrontendActions.h"
 #include "llvm/ADT/StringRef.h"
@@ -60,7 +61,8 @@ bool compile(StringRef rel_file) {
     return false;
 
   if (c.tool) {
-    outs() << "tool: " << file << "\n";
+    if (!link(file, &c))
+      return false;
   }
 
   already_built().insert(file);
