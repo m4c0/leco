@@ -1,4 +1,5 @@
 #include "compile.hpp"
+#include "context.hpp"
 #include "evoker.hpp"
 #include "instance.hpp"
 #include "link.hpp"
@@ -17,20 +18,20 @@ auto &already_built() {
   return i;
 }
 
-bool try_compile(StringRef file, context *c) {
+bool try_compile(StringRef file) {
   auto ext = sys::path::extension(file);
   if (ext == ".cppm") {
     auto pcm =
         evoker{}.push_arg("--precompile").set_inout(file, ".pcm").build();
 
-    if (!pcm.run<GenerateModuleInterfaceAction>(c))
+    if (!pcm.run<GenerateModuleInterfaceAction>())
       return false;
 
     return evoker{}
         .push_arg("-c")
         .set_inout(pcm.output(), ".o")
         .build()
-        .run_wo_ctx<EmitObjAction>();
+        .run<EmitObjAction>(false);
   } else if (ext == ".cpp" || ext == ".c" || ext == ".pcm" || ext == ".m") {
     return evoker{}
         .push_arg("-c")
@@ -55,12 +56,12 @@ bool compile(StringRef rel_file) {
   if (already_built().contains(file))
     return true;
 
-  context c{};
-  if (!try_compile(file, &c))
+  if (!try_compile(file))
     return false;
 
-  if (c.tool) {
-    if (!link(&c))
+  if (cur_ctx().tool) {
+    cur_ctx().main_source = rel_file;
+    if (!link())
       return false;
   }
 

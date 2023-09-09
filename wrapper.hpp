@@ -1,14 +1,11 @@
 #pragma once
 #include "clang/Frontend/FrontendActions.h"
 
-struct context;
-
 class wrapper_action : public clang::WrapperFrontendAction {
-  context *m_ctx;
 
 public:
-  wrapper_action(context *c, std::unique_ptr<FrontendAction> a)
-      : WrapperFrontendAction{std::move(a)}, m_ctx{c} {}
+  wrapper_action(std::unique_ptr<FrontendAction> a)
+      : WrapperFrontendAction{std::move(a)} {}
 
   bool BeginSourceFileAction(clang::CompilerInstance &ci) override;
 };

@@ -4,13 +4,13 @@
 
 using namespace llvm;
 
-bool link(context *c) {
+bool link() {
   std::vector<std::string> args{};
-  for (auto &p : c->object_files) {
+  for (auto &p : cur_ctx().object_files) {
     args.push_back(p);
   }
 
-  auto e = evoker{}.set_inout(c->main_obj, ".exe");
+  auto e = evoker{}.set_inout(cur_ctx().main_source, ".exe");
   for (auto &p : args) {
     e.push_arg(p);
   }
