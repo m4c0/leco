@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 
 constexpr const char *cmd =
-    "clang++ -g -std=c++20 -o leco.exe -I%s/include -L%s/lib "
+    "clang++ -std=c++20 -o leco.exe -I%s/include -L%s/lib "
 #if _WIN32
     "-fms-runtime-lib=dll -nostdlib -nostdlib++ -lVersion "
     "-lclangAnalysis -lclangAnalysisFlowSensitive "
@@ -81,7 +81,7 @@ bool compile(const char *stem) {
   auto cdir = clang_dir();
   char buf[1024];
   snprintf(buf, sizeof(buf),
-           "clang++ -g -std=c++20 "
+           "clang++ -std=c++20 "
 #ifdef _WIN32
            "-D_CRT_SECURE_NO_WARNINGS -fms-runtime-lib=dll "
 #endif
