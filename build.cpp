@@ -80,8 +80,9 @@ bool compile(const char *stem) {
   auto cdir = clang_dir();
   char buf[1024];
   snprintf(buf, sizeof(buf),
-           "clang++ -g -std=c++20 -I%s/include -c %s.cpp -o %s.o", cdir, stem,
-           stem);
+           "clang++ -g -std=c++20 -D_CRT_SECURE_NO_WARNINGS -I%s/include "
+           "-c %s.cpp -o %s.o",
+           cdir, stem, stem);
   return 0 == system(buf);
 }
 bool link() {
