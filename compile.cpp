@@ -1,5 +1,4 @@
 #include "compile.hpp"
-#include "context.hpp"
 #include "evoker.hpp"
 #include "instance.hpp"
 #include "link.hpp"
@@ -31,13 +30,13 @@ bool try_compile(StringRef file, context *c) {
         .push_arg("-c")
         .set_inout(pcm.output(), ".o")
         .build()
-        .run<EmitObjAction>(nullptr);
+        .run_wo_ctx<EmitObjAction>();
   } else if (ext == ".cpp" || ext == ".c" || ext == ".pcm" || ext == ".m") {
     return evoker{}
         .push_arg("-c")
         .set_inout(file, ".o")
         .build()
-        .run<EmitObjAction>(c);
+        .run<EmitObjAction>();
   } else {
     errs() << "don't know how to build " << file << "\n";
     return false;

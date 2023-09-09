@@ -7,14 +7,12 @@ using namespace clang;
 using namespace llvm;
 
 class tool_pragma_handler : public PragmaHandler {
-  context *m_c;
-
 public:
-  explicit tool_pragma_handler(context *c) : m_c{c}, PragmaHandler{"tool"} {}
+  tool_pragma_handler() : PragmaHandler{"tool"} {}
 
   void HandlePragma(Preprocessor &PP, PragmaIntroducer Introducer,
                     Token &PragmaTok) {
-    m_c->tool = true;
+    cur_ctx().tool = true;
   }
 };
 
@@ -25,7 +23,7 @@ bool wrapper_action::BeginSourceFileAction(CompilerInstance &ci) {
   pp.addPPCallbacks(
       std::make_unique<find_deps_pp_callbacks>(diags, getCurrentFile()));
 
-  pp.AddPragmaHandler("leco", new tool_pragma_handler(m_ctx));
+  pp.AddPragmaHandler("leco", new tool_pragma_handler());
 
   return WrapperFrontendAction::BeginSourceFileAction(ci);
 }

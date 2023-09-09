@@ -61,16 +61,15 @@ instance::~instance() {
     std::erase(in_flights(), m_ci);
 }
 
-bool instance::run(std::unique_ptr<FrontendAction> a, context *ctx) {
+bool instance::run_wo_ctx(std::unique_ptr<FrontendAction> a) {
+  return m_ci ? m_ci->ExecuteAction(*a) : false;
+}
+bool instance::run(std::unique_ptr<FrontendAction> a) {
   if (!m_ci)
     return false;
 
-  if (ctx != nullptr) {
-    wrapper_action fd{ctx, std::move(a)};
-    return m_ci->ExecuteAction(fd);
-  } else {
-    return m_ci->ExecuteAction(*a);
-  }
+  wrapper_action fd{std::move(a)};
+  return m_ci->ExecuteAction(fd);
 }
 
 StringRef instance::output() { return m_output; }

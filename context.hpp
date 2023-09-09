@@ -7,3 +7,8 @@ struct context {
   std::string main_obj;
   std::set<std::string> object_files{};
 };
+
+context &cur_ctx() {
+  static context i{};
+  return i;
+}
