@@ -1,4 +1,5 @@
 #include "bouncer.hpp"
+#include "cl.hpp"
 #include "compile.hpp"
 #include "llvm/Support/CrashRecoveryContext.h"
 #include "llvm/Support/FileSystem.h"
@@ -39,6 +40,8 @@ extern "C" int main(int argc, char **argv) {
   InitializeAllAsmPrinters();
   InitializeAllAsmParsers();
   CrashRecoveryContext::Enable();
+
+  parse_args(argc, argv);
 
   try {
     return try_main() ? 0 : 1;
