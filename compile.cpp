@@ -61,7 +61,7 @@ bool compile(StringRef rel_file) {
     return false;
 
   if (c.tool) {
-    if (!link(file, &c))
+    if (!link(&c))
       return false;
   }
 

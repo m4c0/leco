@@ -4,13 +4,13 @@
 
 using namespace llvm;
 
-bool link(StringRef in, context *c) {
+bool link(context *c) {
   std::vector<std::string> args{};
   for (auto &p : *(c->module_paths)) {
     args.push_back("-fprebuilt-module-path=" + p);
   }
 
-  auto e = evoker{}.set_inout(in, ".exe");
+  auto e = evoker{}.set_inout(c->main_obj, ".exe");
   for (auto &p : args) {
     e.push_arg(p);
   }
