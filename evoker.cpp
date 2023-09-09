@@ -82,3 +82,21 @@ evoker &evoker::set_inout(StringRef in, StringRef ext) {
   return *this;
 }
 instance evoker::build() { return instance{createCI(m_args), m_obj.str()}; }
+
+bool evoker::execute() {
+  auto def_triple = sys::getDefaultTargetTriple();
+  Driver drv{clang_exe(), def_triple, diag_engine()};
+  std::unique_ptr<Compilation> c{drv.BuildCompilation(m_args)};
+  if (!c || c->containsError() || c->getJobs().size() == 0)
+    // We did a mistake in clang args. Bail out and let the diagnostics
+    // client do its job informing the user
+    return {};
+
+  SmallVector<std::pair<int, const Command *>, 4> fails;
+  auto res = drv.ExecuteCompilation(*c, fails);
+  for (auto &p : fails) {
+    if (!res)
+      res = p.first;
+  }
+  return res;
+}

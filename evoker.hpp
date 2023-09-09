@@ -15,4 +15,5 @@ public:
   evoker &set_inout(llvm::StringRef in, llvm::StringRef ext);
 
   [[nodiscard]] instance build();
+  [[nodiscard]] bool execute();
 };
