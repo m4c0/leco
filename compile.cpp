@@ -17,14 +17,13 @@ auto &already_built() {
   return i;
 }
 
-bool try_compile(StringRef file) {
+bool try_compile(StringRef file, context *c) {
   auto ext = sys::path::extension(file);
   if (ext == ".cppm") {
     auto pcm =
         evoker{}.push_arg("--precompile").set_inout(file, ".pcm").build();
 
-    context c{};
-    if (!pcm.run<GenerateModuleInterfaceAction>(&c))
+    if (!pcm.run<GenerateModuleInterfaceAction>(c))
       return false;
 
     return evoker{}
@@ -33,12 +32,11 @@ bool try_compile(StringRef file) {
         .build()
         .run<EmitObjAction>(nullptr);
   } else if (ext == ".cpp" || ext == ".c" || ext == ".pcm" || ext == ".m") {
-    context c{};
     return evoker{}
         .push_arg("-c")
         .set_inout(file, ".o")
         .build()
-        .run<EmitObjAction>(&c);
+        .run<EmitObjAction>(c);
   } else {
     errs() << "don't know how to build " << file << "\n";
     return false;
@@ -56,8 +54,14 @@ bool compile(StringRef rel_file) {
 
   if (already_built().contains(file))
     return true;
-  if (!try_compile(file))
+
+  context c{};
+  if (!try_compile(file, &c))
     return false;
+
+  if (c.tool) {
+    outs() << "tool: " << file << "\n";
+  }
 
   already_built().insert(file);
   return true;
