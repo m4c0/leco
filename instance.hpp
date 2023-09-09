@@ -21,7 +21,7 @@ public:
   [[nodiscard]] bool run(std::unique_ptr<clang::FrontendAction> a,
                          context *ctx);
 
-  template <typename Tp> bool run(context *ctx = nullptr) {
+  template <typename Tp> bool run(context *ctx) {
     return run(std::make_unique<Tp>(), ctx);
   }
 };

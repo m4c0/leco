@@ -34,9 +34,12 @@ bool try_compile(StringRef file) {
         .build()
         .run<EmitObjAction>(nullptr);
   } else if (ext == ".cpp" || ext == ".c" || ext == ".pcm" || ext == ".m") {
-    auto bld = evoker{}.push_arg("-c").set_inout(file, ".o").build();
-
-    return !!bld.run<EmitObjAction>();
+    context c{};
+    return evoker{}
+        .push_arg("-c")
+        .set_inout(file, ".o")
+        .build()
+        .run<EmitObjAction>(&c);
   } else {
     errs() << "don't know how to build " << file << "\n";
     return false;
