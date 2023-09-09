@@ -7,19 +7,20 @@
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
 
+using namespace llvm;
+
 bool try_main() {
   clear_compile_cache();
 
   std::error_code ec;
-  for (llvm::sys::fs::directory_iterator it{".", ec}, e; it != e;
-       it.increment(ec)) {
+  for (sys::fs::directory_iterator it{".", ec}, e; it != e; it.increment(ec)) {
     auto status = it->status();
     if (!status) {
-      llvm::errs() << it->path() << ": " << status.getError().message() << "\n";
+      errs() << it->path() << ": " << status.getError().message() << "\n";
       continue;
     }
 
-    if (status->type() != llvm::sys::fs::file_type::regular_file) {
+    if (status->type() != sys::fs::file_type::regular_file) {
       continue;
     }
 
@@ -31,18 +32,18 @@ bool try_main() {
 }
 
 extern "C" int main(int argc, char **argv) {
-  llvm::llvm_shutdown_obj sdo{};
+  llvm_shutdown_obj sdo{};
 
-  llvm::InitializeAllTargets();
-  llvm::InitializeAllTargetMCs();
-  llvm::InitializeAllAsmPrinters();
-  llvm::InitializeAllAsmParsers();
-  llvm::CrashRecoveryContext::Enable();
+  InitializeAllTargets();
+  InitializeAllTargetMCs();
+  InitializeAllAsmPrinters();
+  InitializeAllAsmParsers();
+  CrashRecoveryContext::Enable();
 
   try {
     return try_main() ? 0 : 1;
   } catch (...) {
-    llvm::errs() << "unexpected exception\n";
+    errs() << "unexpected exception\n";
     return 1;
   }
 }
