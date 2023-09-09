@@ -29,6 +29,9 @@ instance::instance(std::shared_ptr<CompilerInstance> ci, StringRef out)
       m_ci->getHeaderSearchOpts().AddPrebuiltModulePath(p);
     }
 
+    if (is_verbose()) {
+      errs() << "compiling " << out << "\n";
+    }
     inf.push_back(m_ci);
   }
 
@@ -40,11 +43,10 @@ instance::instance(std::shared_ptr<CompilerInstance> ci, StringRef out)
 
   auto [__, not_cleaned] = cleaned_up_paths().insert(path.str());
   if (not_cleaned) {
-    if (should_clean_current() && cleaned_up_paths().size() == 1) {
-      errs() << "cleaning up " << path << "\n";
-      sys::fs::remove_directories(path);
-    } else if (should_clean_all()) {
-      errs() << "cleaning up " << path << "\n";
+    if ((should_clean_current() && cleaned_up_paths().size() == 1) ||
+        should_clean_all()) {
+      if (is_verbose())
+        errs() << "cleaning up " << path << "\n";
       sys::fs::remove_directories(path);
     }
   }
