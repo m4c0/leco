@@ -12,6 +12,8 @@ cl::opt<clean_levels> clean_level(
                clEnumValN(cup_cur, "cur", "Cleanup current directory"),
                clEnumValN(cup_all, "all", "Cleanup any traversed directory")),
     cl::cat(leco_cat));
+bool should_clean_current() { return clean_level >= cup_cur; }
+bool should_clean_all() { return clean_level >= cup_all; }
 
 void parse_args(int argc, char **argv) {
   for (auto &[k, v] : cl::getRegisteredOptions()) {
