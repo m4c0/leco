@@ -42,11 +42,11 @@ instance::~instance() {
     std::erase(in_flights(), m_ci);
 }
 
-bool instance::run(std::unique_ptr<FrontendAction> a, bool wrapped) {
+bool instance::run(std::unique_ptr<FrontendAction> a, context *ctx) {
   if (!m_ci)
     return false;
 
-  if (wrapped) {
+  if (ctx != nullptr) {
     find_deps_action fd{std::move(a)};
     return m_ci->ExecuteAction(fd);
   } else {

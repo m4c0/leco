@@ -11,6 +11,8 @@
 using namespace clang;
 using namespace llvm;
 
+class context {};
+
 auto &already_built() {
   static std::set<std::string> i{};
   return i;
@@ -22,14 +24,15 @@ bool try_compile(StringRef file) {
     auto pcm =
         evoker{}.push_arg("--precompile").set_inout(file, ".pcm").build();
 
-    if (!pcm.run<GenerateModuleInterfaceAction>())
+    context c{};
+    if (!pcm.run<GenerateModuleInterfaceAction>(&c))
       return false;
 
     return evoker{}
         .push_arg("-c")
         .set_inout(pcm.output(), ".o")
         .build()
-        .run_raw<EmitObjAction>();
+        .run<EmitObjAction>(nullptr);
   } else if (ext == ".cpp" || ext == ".c" || ext == ".pcm" || ext == ".m") {
     auto bld = evoker{}.push_arg("-c").set_inout(file, ".o").build();
 

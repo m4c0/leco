@@ -6,6 +6,7 @@ class CompilerInstance;
 class FrontendAction;
 } // namespace clang
 
+class context;
 class instance {
   std::shared_ptr<clang::CompilerInstance> m_ci;
   std::string m_output;
@@ -18,12 +19,9 @@ public:
   [[nodiscard]] llvm::StringRef output();
 
   [[nodiscard]] bool run(std::unique_ptr<clang::FrontendAction> a,
-                         bool wrapped);
+                         context *ctx);
 
-  template <typename Tp> bool run() {
-    return run(std::make_unique<Tp>(), true);
-  }
-  template <typename Tp> bool run_raw() {
-    return run(std::make_unique<Tp>(), false);
+  template <typename Tp> bool run(context *ctx = nullptr) {
+    return run(std::make_unique<Tp>(), ctx);
   }
 };
