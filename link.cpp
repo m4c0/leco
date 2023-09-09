@@ -6,8 +6,8 @@ using namespace llvm;
 
 bool link(context *c) {
   std::vector<std::string> args{};
-  for (auto &p : *(c->module_paths)) {
-    args.push_back("-fprebuilt-module-path=" + p);
+  for (auto &p : c->object_files) {
+    args.push_back(p);
   }
 
   auto e = evoker{}.set_inout(c->main_obj, ".exe");

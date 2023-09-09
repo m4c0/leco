@@ -5,5 +5,5 @@
 struct context {
   bool tool;
   std::string main_obj;
-  std::set<std::string> *module_paths;
+  std::set<std::string> object_files{};
 };
