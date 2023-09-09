@@ -1,4 +1,5 @@
 #include "compile.hpp"
+#include "context.hpp"
 #include "evoker.hpp"
 #include "instance.hpp"
 #include "clang/CodeGen/CodeGenAction.h"
@@ -10,8 +11,6 @@
 
 using namespace clang;
 using namespace llvm;
-
-class context {};
 
 auto &already_built() {
   static std::set<std::string> i{};

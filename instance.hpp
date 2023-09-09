@@ -6,7 +6,7 @@ class CompilerInstance;
 class FrontendAction;
 } // namespace clang
 
-class context;
+struct context;
 class instance {
   std::shared_ptr<clang::CompilerInstance> m_ci;
   std::string m_output;

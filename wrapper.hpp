@@ -1,7 +1,7 @@
 #pragma once
 #include "clang/Frontend/FrontendActions.h"
 
-class context;
+struct context;
 
 class wrapper_action : public clang::WrapperFrontendAction {
   context *m_ctx;
