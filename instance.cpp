@@ -1,4 +1,5 @@
 #include "cl.hpp"
+#include "context.hpp"
 #include "instance.hpp"
 #include "wrapper.hpp"
 #include "clang/Frontend/CompilerInstance.h"
@@ -69,6 +70,7 @@ bool instance::run(std::unique_ptr<FrontendAction> a) {
     return false;
 
   wrapper_action fd{std::move(a)};
+  cur_ctx().object_files.insert(m_output);
   return m_ci->ExecuteAction(fd);
 }
 
