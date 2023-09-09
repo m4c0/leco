@@ -55,7 +55,8 @@ constexpr const char *cmd =
     " compile.o"
     " evoker.o"
     " find_deps_action.o"
-    " instance.o";
+    " instance.o"
+    " wrapper.o";
 
 uint64_t mtime(const char *stem, const char *ext) {
   char buf[128];
@@ -99,6 +100,7 @@ bool link() {
 int main(int argc, char **argv) {
   bool res = compile("leco") && compile("bouncer") && compile("cl") &&
              compile("compile") && compile("evoker") &&
-             compile("find_deps_action") && compile("instance") && link();
+             compile("find_deps_action") && compile("instance") &&
+             compile("wrapper") && link();
   return res ? 0 : 1;
 }

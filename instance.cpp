@@ -1,6 +1,6 @@
 #include "cl.hpp"
-#include "find_deps_action.hpp"
 #include "instance.hpp"
+#include "wrapper.hpp"
 #include "clang/Frontend/CompilerInstance.h"
 
 using namespace clang;
@@ -66,7 +66,7 @@ bool instance::run(std::unique_ptr<FrontendAction> a, context *ctx) {
     return false;
 
   if (ctx != nullptr) {
-    find_deps_action fd{std::move(a)};
+    wrapper_action fd{std::move(a)};
     return m_ci->ExecuteAction(fd);
   } else {
     return m_ci->ExecuteAction(*a);

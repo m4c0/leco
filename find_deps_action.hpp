@@ -16,9 +16,3 @@ public:
   void moduleImport(clang::SourceLocation loc, clang::ModuleIdPath path,
                     const clang::Module *imported) override;
 };
-
-class find_deps_action : public clang::WrapperFrontendAction {
-public:
-  using WrapperFrontendAction::WrapperFrontendAction;
-  bool BeginSourceFileAction(clang::CompilerInstance &ci) override;
-};

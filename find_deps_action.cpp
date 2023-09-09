@@ -52,12 +52,3 @@ void find_deps_pp_callbacks::moduleImport(SourceLocation loc, ModuleIdPath path,
   report_missing_module(loc);
   return;
 }
-
-bool find_deps_action::BeginSourceFileAction(CompilerInstance &ci) {
-  auto *diags = &ci.getDiagnostics();
-  auto &pp = ci.getPreprocessor();
-  pp.addPPCallbacks(
-      std::make_unique<find_deps_pp_callbacks>(diags, getCurrentFile()));
-
-  return WrapperFrontendAction::BeginSourceFileAction(ci);
-}
