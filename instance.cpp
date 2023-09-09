@@ -66,7 +66,7 @@ bool instance::run(std::unique_ptr<FrontendAction> a, context *ctx) {
     return false;
 
   if (ctx != nullptr) {
-    wrapper_action fd{std::move(a)};
+    wrapper_action fd{ctx, std::move(a)};
     return m_ci->ExecuteAction(fd);
   } else {
     return m_ci->ExecuteAction(*a);
