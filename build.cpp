@@ -54,6 +54,7 @@ constexpr const char *cmd =
     " cl.o"
     " compile.o"
     " context.o"
+    " diags.o"
     " evoker.o"
     " find_deps_action.o"
     " instance.o"
@@ -101,8 +102,9 @@ bool link() {
 
 int main(int argc, char **argv) {
   bool res = compile("leco") && compile("bouncer") && compile("cl") &&
-             compile("compile") && compile("context") && compile("evoker") &&
-             compile("find_deps_action") && compile("instance") &&
-             compile("link") && compile("wrapper") && link();
+             compile("compile") && compile("context") && compile("diags") &&
+             compile("evoker") && compile("find_deps_action") &&
+             compile("instance") && compile("link") && compile("wrapper") &&
+             link();
   return res ? 0 : 1;
 }

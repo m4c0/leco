@@ -5,29 +5,19 @@
 #endif
 
 #include "clang_dir.hpp"
+#include "diags.hpp"
 #include "evoker.hpp"
 #include "instance.hpp"
 #include "clang/CodeGen/ObjectFilePCHContainerOperations.h"
 #include "clang/Driver/Compilation.h"
 #include "clang/Driver/Driver.h"
 #include "clang/Frontend/CompilerInstance.h"
-#include "clang/Frontend/TextDiagnosticPrinter.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Host.h"
 
 using namespace clang;
 using namespace clang::driver;
 using namespace llvm;
-
-DiagnosticsEngine &diag_engine() {
-  static IntrusiveRefCntPtr<DiagnosticOptions> diag_opts{
-      new DiagnosticOptions()};
-  static IntrusiveRefCntPtr<DiagnosticIDs> diag_ids{new DiagnosticIDs()};
-  static auto diag_cli = new TextDiagnosticPrinter(llvm::errs(), &*diag_opts);
-
-  static DiagnosticsEngine diags{diag_ids, diag_opts, diag_cli};
-  return diags;
-}
 
 const char *clang_exe() {
   static const auto exe = [] {
@@ -42,7 +32,7 @@ std::shared_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
   auto clang = std::make_shared<CompilerInstance>();
 
   auto def_triple = sys::getDefaultTargetTriple();
-  Driver drv{clang_exe(), def_triple, diag_engine()};
+  Driver drv{clang_exe(), def_triple, diags()};
   std::unique_ptr<Compilation> c{drv.BuildCompilation(args)};
   if (!c || c->containsError() || c->getJobs().size() == 0)
     // We did a mistake in clang args. Bail out and let the diagnostics
@@ -51,7 +41,7 @@ std::shared_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
 
   auto cc1args = c->getJobs().begin()->getArguments();
   if (!CompilerInvocation::CreateFromArgs(clang->getInvocation(), cc1args,
-                                          diag_engine()))
+                                          diags()))
     return {};
 
   clang->createDiagnostics();
@@ -92,7 +82,7 @@ instance evoker::build() { return instance{createCI(m_args), m_obj.str()}; }
 
 bool evoker::execute() {
   auto def_triple = sys::getDefaultTargetTriple();
-  Driver drv{clang_exe(), def_triple, diag_engine()};
+  Driver drv{clang_exe(), def_triple, diags()};
   std::unique_ptr<Compilation> c{drv.BuildCompilation(m_args)};
   if (!c || c->containsError() || c->getJobs().size() == 0)
     // We did a mistake in clang args. Bail out and let the diagnostics
