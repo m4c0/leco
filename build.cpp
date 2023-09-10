@@ -5,6 +5,12 @@
 #include <string.h>
 #include <sys/stat.h>
 
+static constexpr const char *files[]{
+    "leco",     "bouncer", "cl",         "compile",
+    "context",  "diags",   "evoker",     "find_deps_action",
+    "instance", "link",    "p_add_impl", "wrapper",
+};
+
 constexpr const char *cmd =
     "clang++ -std=c++20 -o leco.exe -I%s/include -L%s/lib "
 #if _WIN32
@@ -49,11 +55,6 @@ constexpr const char *cmd =
 #else
     "-lclang -lclang-cpp -lLLVM";
 #endif
-
-static constexpr const char *files[]{
-    "leco",   "bouncer",          "cl",       "compile", "context", "diags",
-    "evoker", "find_deps_action", "instance", "link",    "wrapper",
-};
 
 uint64_t mtime(const char *stem, const char *ext) {
   char buf[128];
