@@ -45,21 +45,10 @@ constexpr const char *cmd =
     "-lLLVMTargetParser -lLLVMTextAPI -lLLVMTransformUtils -lLLVMVectorize "
     "-lLLVMWindowsDriver -lLLVMWindowsManifest -lLLVMX86AsmParser "
     "-lLLVMX86CodeGen -lLLVMX86Desc -lLLVMX86Disassembler -lLLVMX86Info "
-    "-lLLVMX86TargetMCA -lLLVMXRay"
+    "-lLLVMX86TargetMCA -lLLVMXRay";
 #else
-    "-lclang -lclang-cpp -lLLVM"
+    "-lclang -lclang-cpp -lLLVM";
 #endif
-    " leco.o"
-    " bouncer.o"
-    " cl.o"
-    " compile.o"
-    " context.o"
-    " diags.o"
-    " evoker.o"
-    " find_deps_action.o"
-    " instance.o"
-    " link.o"
-    " wrapper.o";
 
 static constexpr const char *files[]{
     "leco",   "bouncer",          "cl",       "compile", "context", "diags",
@@ -102,6 +91,11 @@ bool link() {
   auto cdir = clang_dir();
   char buf[10240];
   snprintf(buf, sizeof(buf), cmd, cdir, cdir);
+  for (auto f : files) {
+    strncat_s(buf, " ", sizeof(buf));
+    strncat_s(buf, f, sizeof(buf));
+    strncat_s(buf, ".o", sizeof(buf));
+  }
   return 0 == system(buf);
 }
 
