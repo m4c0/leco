@@ -61,6 +61,11 @@ constexpr const char *cmd =
     " link.o"
     " wrapper.o";
 
+static constexpr const char *files[]{
+    "leco",   "bouncer",          "cl",       "compile", "context", "diags",
+    "evoker", "find_deps_action", "instance", "link",    "wrapper",
+};
+
 uint64_t mtime(const char *stem, const char *ext) {
   char buf[128];
   snprintf(buf, sizeof(buf), "%s.%s", stem, ext);
@@ -101,10 +106,9 @@ bool link() {
 }
 
 int main(int argc, char **argv) {
-  bool res = compile("leco") && compile("bouncer") && compile("cl") &&
-             compile("compile") && compile("context") && compile("diags") &&
-             compile("evoker") && compile("find_deps_action") &&
-             compile("instance") && compile("link") && compile("wrapper") &&
-             link();
-  return res ? 0 : 1;
+  for (auto f : files) {
+    if (!compile(f))
+      return 1;
+  }
+  return link() ? 0 : 1;
 }
