@@ -25,12 +25,8 @@ bool bounce(StringRef path) {
   auto stem = sys::path::stem(path);
   auto ext = sys::path::extension(path);
 
-  if (ext == ".cppm") {
-    return (stem.find("-") == StringRef::npos) ? compile_and_link(path) : true;
-  }
-
-  if (ext != ".cpp")
+  if (ext != ".cppm" && ext != ".cpp")
     return true;
 
-  return compile_and_link(path);
+  return (stem.find("-") == StringRef::npos) ? compile_and_link(path) : true;
 }
