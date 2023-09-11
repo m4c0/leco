@@ -32,7 +32,7 @@ instance::instance(std::shared_ptr<CompilerInstance> ci, StringRef out)
       m_ci->getHeaderSearchOpts().AddPrebuiltModulePath(p);
     }
 
-    if (is_verbose()) {
+    if (out != "" && is_verbose()) {
       errs() << "compiling " << out << "\n";
     }
     inf.push_back(m_ci);
