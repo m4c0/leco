@@ -10,7 +10,7 @@
 
 using namespace llvm;
 
-bool try_main() {
+bool run_target() {
   clear_compile_cache();
 
   std::error_code ec;
@@ -44,7 +44,7 @@ extern "C" int main(int argc, char **argv) {
   parse_args(argc, argv);
 
   try {
-    return try_main() ? 0 : 1;
+    return for_each_target(run_target) ? 0 : 1;
   } catch (...) {
     errs() << "unexpected exception\n";
     return 1;

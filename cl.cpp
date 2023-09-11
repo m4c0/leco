@@ -1,5 +1,6 @@
 #include "cl.hpp"
 #include "llvm/Support/CommandLine.h"
+#include "llvm/TargetParser/Host.h"
 
 using namespace llvm;
 
@@ -18,6 +19,58 @@ bool should_clean_all() { return clean_level >= cup_all; }
 cl::opt<bool> verbose("verbose", cl::desc("Output important actions"),
                       cl::cat(leco_cat));
 bool is_verbose() { return verbose; }
+
+enum targets {
+  host,
+  apple,
+  macosx,
+  iphoneos,
+  iphonesimulator,
+  windows,
+  android
+};
+cl::opt<targets> target(
+    "target", cl::desc("Targets of build"),
+    cl::values(clEnumVal(host, "Same as host"),
+               clEnumVal(apple, "All Apple targets"),
+               clEnumVal(macosx, "MacOSX"), clEnumVal(iphoneos, "iPhone OS"),
+               clEnumVal(iphonesimulator, "iPhone Simulator"),
+               clEnumVal(windows, "Windows 64bits"),
+               clEnumVal(android, "All Android targets")),
+    cl::cat(leco_cat));
+std::string cur_target{};
+const char *current_target() { return cur_target.c_str(); }
+bool for_each_target(bool (*fn)()) {
+  const auto run = [&](std::string tgt) {
+    cur_target = tgt;
+    return fn();
+  };
+  switch (target) {
+  case host:
+    return run(sys::getDefaultTargetTriple());
+
+  case apple:
+    return run("x86_64-apple-macosx11.6.0") && run("arm64-apple-ios13.0") &&
+           run("x86_64-apple-ios13.0-simulator");
+  case macosx:
+    return run("x86_64-apple-macosx11.6.0");
+  case iphoneos:
+    return run("arm64-apple-ios13.0");
+  case iphonesimulator:
+    return run("x86_64-apple-ios13.0-simulator");
+
+  case windows:
+    return run("x86_64-pc-windows-msvc");
+
+  case android:
+    return run("aarch64-none-linux-android26") &&
+           run("armv7-none-linux-androideabi26") &&
+           run("i686-none-linux-android26") &&
+           run("x86_64-none-linux-android26");
+  };
+
+  return false;
+}
 
 void parse_args(int argc, char **argv) {
   for (auto &[k, v] : cl::getRegisteredOptions()) {
