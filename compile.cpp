@@ -61,4 +61,7 @@ bool compile(StringRef rel_file) {
   return true;
 }
 
-void clear_compile_cache() { already_built().clear(); }
+void clear_compile_cache() {
+  already_built().clear();
+  clear_module_path_cache();
+}

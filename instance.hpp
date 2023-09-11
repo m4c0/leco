@@ -26,3 +26,4 @@ public:
                    : run_wo_ctx(std::make_unique<Tp>());
   }
 };
+void clear_module_path_cache();

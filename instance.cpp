@@ -20,6 +20,8 @@ auto &in_flights() {
   return i;
 }
 
+void clear_module_path_cache() { current_paths().clear(); }
+
 instance::instance(std::shared_ptr<CompilerInstance> ci, StringRef out)
     : m_ci{std::move(ci)}, m_output{out.str()} {
 
