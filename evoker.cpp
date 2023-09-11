@@ -4,6 +4,7 @@
 #define EXE_EXT ""
 #endif
 
+#include "cl.hpp"
 #include "clang_dir.hpp"
 #include "diags.hpp"
 #include "evoker.hpp"
@@ -31,8 +32,7 @@ const char *clang_exe() {
 std::shared_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
   auto clang = std::make_shared<CompilerInstance>();
 
-  auto def_triple = sys::getDefaultTargetTriple();
-  Driver drv{clang_exe(), def_triple, diags()};
+  Driver drv{clang_exe(), current_target(), diags()};
   std::unique_ptr<Compilation> c{drv.BuildCompilation(args)};
   if (!c || c->containsError() || c->getJobs().size() == 0)
     // We did a mistake in clang args. Bail out and let the diagnostics
@@ -56,7 +56,7 @@ void in2out(llvm::StringRef in, llvm::SmallVectorImpl<char> &out,
   auto gpath = sys::path::parent_path(path);
   if (sys::path::stem(gpath) != "out") {
     auto name = sys::path::stem(in);
-    auto triple = sys::getDefaultTargetTriple();
+    auto triple = current_target();
     sys::path::append(out, path, "out", triple, name);
   } else {
     sys::path::append(out, in);
@@ -69,6 +69,8 @@ void in2out(llvm::StringRef in, llvm::SmallVectorImpl<char> &out,
 evoker::evoker() {
   m_args.push_back(clang_exe());
   m_args.push_back("-std=c++20");
+  m_args.push_back("-target");
+  m_args.push_back(current_target());
 }
 evoker &evoker::set_inout(StringRef in, StringRef ext) {
   in2out(in, m_obj, ext);
@@ -81,8 +83,7 @@ evoker &evoker::set_inout(StringRef in, StringRef ext) {
 instance evoker::build() { return instance{createCI(m_args), m_obj.str()}; }
 
 bool evoker::execute() {
-  auto def_triple = sys::getDefaultTargetTriple();
-  Driver drv{clang_exe(), def_triple, diags()};
+  Driver drv{clang_exe(), current_target(), diags()};
   std::unique_ptr<Compilation> c{drv.BuildCompilation(m_args)};
   if (!c || c->containsError() || c->getJobs().size() == 0)
     // We did a mistake in clang args. Bail out and let the diagnostics
