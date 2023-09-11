@@ -60,7 +60,7 @@ public:
     if (!tool)
       return;
 
-    link();
+    link(getCurrentFile());
   }
 };
 

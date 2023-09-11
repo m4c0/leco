@@ -4,7 +4,7 @@
 
 using namespace llvm;
 
-bool link() {
+bool link(StringRef main_src) {
   std::vector<std::string> args{};
   for (auto &p : cur_ctx().object_files) {
     SmallString<128> pp{};
@@ -13,7 +13,7 @@ bool link() {
   }
 
   SmallString<128> exe{};
-  in2out(cur_ctx().main_source, exe, "exe");
+  in2out(main_src, exe, "exe");
 
   evoker e{};
   for (auto &p : args) {
