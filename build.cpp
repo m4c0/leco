@@ -88,14 +88,17 @@ bool compile(const char *stem) {
            cdir, stem, stem);
   return 0 == system(buf);
 }
+#ifdef _WIN32
+#define strncat strncat_s
+#endif
 bool link() {
   auto cdir = clang_dir();
   char buf[10240];
   snprintf(buf, sizeof(buf), cmd, cdir, cdir);
   for (auto f : files) {
-    strncat_s(buf, " ", sizeof(buf));
-    strncat_s(buf, f, sizeof(buf));
-    strncat_s(buf, ".o", sizeof(buf));
+    strncat(buf, " ", sizeof(buf) - 1);
+    strncat(buf, f, sizeof(buf) - 1);
+    strncat(buf, ".o", sizeof(buf) - 1);
   }
   return 0 == system(buf);
 }
