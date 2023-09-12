@@ -43,8 +43,11 @@ cl::opt<targets> target(
                clEnumVal(android, "All Android targets")),
     cl::cat(leco_cat));
 bool for_each_target(bool (*fn)()) {
-  const auto run = [&](std::string tgt) {
-    cur_ctx() = {.target = tgt};
+  const auto run = [&](std::string tgt, bool native = false) {
+    cur_ctx() = context{
+        .target = tgt,
+        .native_target = native,
+    };
     return fn();
   };
   const auto run_droid = [&](std::string tgt) {
@@ -64,17 +67,17 @@ bool for_each_target(bool (*fn)()) {
     return run(sys::getDefaultTargetTriple());
 
   case apple:
-    return run("x86_64-apple-macosx11.6.0") && run("arm64-apple-ios13.0") &&
-           run("x86_64-apple-ios13.0-simulator");
+    return run("x86_64-apple-macosx11.6.0", true) &&
+           run("arm64-apple-ios13.0") && run("x86_64-apple-ios13.0-simulator");
   case macosx:
-    return run("x86_64-apple-macosx11.6.0");
+    return run("x86_64-apple-macosx11.6.0", true);
   case iphoneos:
     return run("arm64-apple-ios13.0");
   case iphonesimulator:
     return run("x86_64-apple-ios13.0-simulator");
 
   case windows:
-    return run("x86_64-pc-windows-msvc");
+    return run("x86_64-pc-windows-msvc", true);
 
   case android:
     return run_droid("aarch64-none-linux-android26") &&

@@ -15,6 +15,8 @@ struct context {
   std::string target{};
   std::string sysroot{};
 
+  bool native_target;
+
   void add_pcm_req(llvm::StringRef path);
   void add_pcm_framework(llvm::StringRef path, llvm::StringRef fw);
   void add_pcm_dep(llvm::StringRef from, llvm::StringRef to);

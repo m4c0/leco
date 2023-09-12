@@ -50,6 +50,8 @@ public:
     auto file_stem = sys::path::stem(getCurrentFile());
     bool root = pp.isInNamedModule() && pp.getNamedModuleName() == pwd_stem;
 
+    tool &= cur_ctx().native_target;
+
     if (!root && !tool)
       return;
 
