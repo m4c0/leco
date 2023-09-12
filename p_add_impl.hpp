@@ -5,7 +5,7 @@ class id_list_pragma_handler : public clang::PragmaHandler {
   llvm::StringRef m_cur_file;
 
 protected:
-  virtual void process_id(llvm::StringRef id) = 0;
+  virtual bool process_id(clang::Preprocessor &pp, clang::Token &t) = 0;
 
   [[nodiscard]] constexpr auto current_file() const noexcept {
     return m_cur_file;
@@ -19,20 +19,18 @@ public:
   void HandlePragma(clang::Preprocessor &pp, clang::PragmaIntroducer introducer,
                     clang::Token &pragma_tok);
 };
-class add_impl_pragma_handler : public clang::PragmaHandler {
-  llvm::StringRef m_cur_file;
+class add_impl_pragma_handler : public id_list_pragma_handler {
+protected:
+  bool process_id(clang::Preprocessor &pp, clang::Token &t) override;
 
 public:
   explicit add_impl_pragma_handler(llvm::StringRef f)
-      : PragmaHandler{"add_impl"}, m_cur_file{f} {}
-
-  void HandlePragma(clang::Preprocessor &pp, clang::PragmaIntroducer introducer,
-                    clang::Token &pragma_tok);
+      : id_list_pragma_handler{"add_impl", f} {}
 };
 
 class add_framework_pragma_handler : public id_list_pragma_handler {
 protected:
-  void process_id(llvm::StringRef id) override;
+  bool process_id(clang::Preprocessor &pp, clang::Token &t) override;
 
 public:
   explicit add_framework_pragma_handler(llvm::StringRef f)
