@@ -9,11 +9,6 @@
 using namespace clang;
 using namespace llvm;
 
-static auto missing_impl() {
-  auto lvl = DiagnosticsEngine::Error;
-  return diags().getCustomDiagID(lvl, "module impl not found");
-}
-
 void id_list_pragma_handler::HandlePragma(Preprocessor &pp,
                                           PragmaIntroducer introducer,
                                           Token &pragma_tok) {
@@ -28,8 +23,9 @@ void id_list_pragma_handler::HandlePragma(Preprocessor &pp,
       return;
     }
 
-    if (!process_id(pp, t))
+    if (!process_id(pp, t)) {
       return;
+    }
   } while (true);
 }
 
@@ -42,12 +38,22 @@ bool add_impl_pragma_handler::process_id(Preprocessor &pp, Token &t) {
   bool res{};
   sys::fs::is_regular_file(f, res); // TODO: check error
   if (!res) {
-    pp.Diag(t, missing_impl());
+    auto &d = pp.getDiagnostics();
+    auto d_id =
+        d.getCustomDiagID(DiagnosticsEngine::Error, "module impl not found");
+    d.Report(t.getLocation(), d_id);
     return false;
   }
 
   cur_ctx().add_pcm_dep(current_file(), f);
-  return compile(f);
+  if (!compile(f)) {
+    auto &d = pp.getDiagnostics();
+    auto d_id = d.getCustomDiagID(DiagnosticsEngine::Error,
+                                  "module impl failed to compile");
+    d.Report(t.getLocation(), d_id);
+    return false;
+  }
+  return true;
 }
 
 bool add_framework_pragma_handler::process_id(Preprocessor &pp, Token &t) {
