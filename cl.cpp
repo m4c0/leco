@@ -1,6 +1,9 @@
 #include "cl.hpp"
 #include "context.hpp"
+#include "droid_path.hpp"
+#include "llvm/ADT/SmallString.h"
 #include "llvm/Support/CommandLine.h"
+#include "llvm/Support/Path.h"
 #include "llvm/TargetParser/Host.h"
 
 using namespace llvm;
@@ -44,6 +47,18 @@ bool for_each_target(bool (*fn)()) {
     cur_ctx() = {.target = tgt};
     return fn();
   };
+  const auto run_droid = [&](std::string tgt) {
+    SmallString<256> llvm{};
+    find_android_llvm(llvm);
+    sys::path::append(llvm, "sysroot");
+
+    cur_ctx() = context{
+        .target = tgt,
+        .sysroot = llvm.str().str(),
+    };
+    return fn();
+  };
+
   switch (target) {
   case host:
     return run(sys::getDefaultTargetTriple());
@@ -62,10 +77,10 @@ bool for_each_target(bool (*fn)()) {
     return run("x86_64-pc-windows-msvc");
 
   case android:
-    return run("aarch64-none-linux-android26") &&
-           run("armv7-none-linux-androideabi26") &&
-           run("i686-none-linux-android26") &&
-           run("x86_64-none-linux-android26");
+    return run_droid("aarch64-none-linux-android26") &&
+           run_droid("armv7-none-linux-androideabi26") &&
+           run_droid("i686-none-linux-android26") &&
+           run_droid("x86_64-none-linux-android26");
   };
 
   return false;
