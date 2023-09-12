@@ -5,20 +5,49 @@
 
 using namespace llvm;
 
-[[nodiscard]] static inline auto find_latest_ndk(SmallVectorImpl<char> &res) {
+enum ndk_error {
+  no_error,
+  undefined_environment,
+  ndk_isnt_directory,
+  prebuilt_isnt_directory,
+  llvm_not_found,
+};
+
+class ndk_category : public std::error_category {
+public:
+  const char *name() const noexcept override { return "ndk-search"; }
+  std::string message(int condition) const override {
+    switch (condition) {
+    case no_error:
+      return "No error";
+    case undefined_environment:
+      return "Undefined ANDROID_SDK_ROOT";
+    case ndk_isnt_directory:
+      return "'ndk' isn't a directory in ANDROID_SDK_ROOT";
+    case prebuilt_isnt_directory:
+      return "prebuilt path isn't a directory";
+    case llvm_not_found:
+      return "no LLVM inside prebuilt dir";
+    default:
+      return "unknown error";
+    }
+  }
+};
+
+static std::error_code find_latest_ndk(SmallVectorImpl<char> &res) {
   const auto sdk = sys::Process::GetEnv("ANDROID_SDK_ROOT");
   if (!sdk)
-    return false;
+    return {undefined_environment, ndk_category()};
 
   sys::path::append(res, *sdk, "ndk-bundle");
   if (sys::fs::is_directory(res)) {
-    return true;
+    return {};
   }
 
   res.clear();
   sys::path::append(res, *sdk, "ndk");
   if (!sys::fs::is_directory(res)) {
-    return false;
+    return {ndk_isnt_directory, ndk_category()};
   }
 
   llvm::StringRef max = "";
@@ -30,24 +59,22 @@ using namespace llvm;
     max = it->path();
     res.assign(max.begin(), max.end());
   }
-  return true;
+  return {};
 }
 
-std::string find_android_llvm() {
-  SmallString<256> res{};
-  if (!find_latest_ndk(res)) {
-    throw std::runtime_error("NDK not found based on ANDROID_SDK_ROOT");
-  }
+std::error_code find_android_llvm(SmallVectorImpl<char> &res) {
+  std::error_code ec = find_latest_ndk(res);
+  if (ec)
+    return ec;
 
   sys::path::append(res, "toolchains", "llvm", "prebuilt");
-  if (!sys::fs::is_directory(res)) {
-    throw std::runtime_error("LLVM not found in NDK");
-  }
+  if (!sys::fs::is_directory(res))
+    return {prebuilt_isnt_directory, ndk_category{}};
 
-  std::error_code ec;
   sys::fs::directory_iterator it{res, ec};
   if (it == sys::fs::directory_iterator{})
-    throw std::runtime_error("LLVM not found in NDK");
+    return {llvm_not_found, ndk_category{}};
 
-  return it->path();
+  res.assign(it->path().begin(), it->path().end());
+  return {};
 }
