@@ -55,6 +55,6 @@ void find_deps_pp_callbacks::moduleImport(SourceLocation loc, ModuleIdPath path,
       return;
   }
 
-  report_missing_module(loc);
+  report_compilation_error(loc);
   return;
 }
