@@ -16,7 +16,7 @@ auto &already_built() {
   return i;
 }
 
-bool try_compile(StringRef file) {
+[[nodiscard]] bool try_compile(StringRef file) {
   auto ext = sys::path::extension(file);
   if (ext == ".cppm") {
     auto pcm =

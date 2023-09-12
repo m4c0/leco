@@ -18,7 +18,7 @@ void find_deps_pp_callbacks::report_missing_module(SourceLocation loc) {
   m_diags->Report(loc, did);
 }
 
-static bool compile_wd(StringRef who, StringRef d) {
+[[nodiscard]] static bool compile_wd(StringRef who, StringRef d) {
   cur_ctx().add_pcm_dep(d, who);
   return compile(who.str());
 }
