@@ -7,7 +7,7 @@ using namespace llvm;
 
 static void recurse(StringSet<> &uniq, StringRef cur) {
   uniq.insert(cur);
-  for (auto &p : cur_ctx().pcm_dep_map[cur.str()]) {
+  for (auto &p : cur_ctx().pcm_dep_map[cur.str()].modules) {
     recurse(uniq, p);
   }
 }

@@ -4,8 +4,12 @@
 #include <set>
 #include <string>
 
+struct dep {
+  std::set<std::string> modules{};
+  std::set<std::string> ld_flags{};
+};
 struct context {
-  std::map<std::string, std::set<std::string>> pcm_dep_map{};
+  std::map<std::string, dep> pcm_dep_map{};
   std::set<std::string> pcm_reqs{};
 
   std::string target{};

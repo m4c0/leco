@@ -16,5 +16,5 @@ static std::string to_abs(StringRef path) {
 }
 void context::add_pcm_req(StringRef path) { pcm_reqs.insert(to_abs(path)); }
 void context::add_pcm_dep(StringRef from, StringRef to) {
-  pcm_dep_map[to_abs(from)].insert(to_abs(to));
+  pcm_dep_map[to_abs(from)].modules.insert(to_abs(to));
 }
