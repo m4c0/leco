@@ -14,6 +14,24 @@ static auto missing_impl() {
   return diags().getCustomDiagID(lvl, "module impl %0 not found");
 }
 
+void id_list_pragma_handler::HandlePragma(Preprocessor &pp,
+                                          PragmaIntroducer introducer,
+                                          Token &pragma_tok) {
+  Token t;
+  do {
+    pp.LexUnexpandedToken(t);
+    if (t.getKind() == tok::eod) {
+      return;
+    }
+    if (!t.isAnyIdentifier()) {
+      pp.Diag(t, diag::err_pp_identifier_arg_not_identifier) << t.getKind();
+      return;
+    }
+
+    process_id(t.getIdentifierInfo()->getName());
+  } while (true);
+}
+
 void add_impl_pragma_handler::HandlePragma(Preprocessor &pp,
                                            PragmaIntroducer introducer,
                                            Token &pragma_tok) {
@@ -44,4 +62,8 @@ void add_impl_pragma_handler::HandlePragma(Preprocessor &pp,
     if (!compile(f))
       return;
   } while (true);
+}
+
+void add_framework_pragma_handler::process_id(StringRef id) {
+  cur_ctx().add_pcm_framework(current_file(), id);
 }

@@ -14,6 +14,8 @@ bool wrapper_action::BeginSourceFileAction(CompilerInstance &ci) {
       std::make_unique<find_deps_pp_callbacks>(diags, getCurrentFile()));
 
   pp.AddPragmaHandler("leco", new add_impl_pragma_handler(getCurrentFile()));
+  pp.AddPragmaHandler("leco",
+                      new add_framework_pragma_handler(getCurrentFile()));
 
   return WrapperFrontendAction::BeginSourceFileAction(ci);
 }
