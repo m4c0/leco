@@ -63,30 +63,35 @@ bool for_each_target(bool (*fn)()) {
   };
 
   switch (target) {
-  case host:
-    return run(sys::getDefaultTargetTriple());
-
+#ifdef __APPLE__
   case apple:
     return run("x86_64-apple-macosx11.6.0", true) &&
            run("arm64-apple-ios13.0") && run("x86_64-apple-ios13.0-simulator");
+
+  case host:
   case macosx:
     return run("x86_64-apple-macosx11.6.0", true);
   case iphoneos:
     return run("arm64-apple-ios13.0");
   case iphonesimulator:
     return run("x86_64-apple-ios13.0-simulator");
+#endif
 
+#ifdef _WIN32
+  case host:
   case windows:
     return run("x86_64-pc-windows-msvc", true);
+#endif
 
   case android:
     return run_droid("aarch64-none-linux-android26") &&
            run_droid("armv7-none-linux-androideabi26") &&
            run_droid("i686-none-linux-android26") &&
            run_droid("x86_64-none-linux-android26");
-  };
 
-  return false;
+  default:
+    return false;
+  };
 }
 
 void parse_args(int argc, char **argv) {
