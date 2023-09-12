@@ -6,9 +6,9 @@
 #include <sys/stat.h>
 
 static constexpr const char *files[]{
-    "leco",     "bouncer", "cl",         "compile",
-    "context",  "diags",   "evoker",     "find_deps_action",
-    "instance", "link",    "p_add_impl", "wrapper",
+    "leco",  "bouncer",    "cl",      "compile",          "context",
+    "diags", "droid_path", "evoker",  "find_deps_action", "instance",
+    "link",  "p_add_impl", "wrapper",
 };
 
 constexpr const char *cmd =
