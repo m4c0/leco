@@ -1,4 +1,5 @@
 #include "compile.hpp"
+#include "context.hpp"
 #include "find_deps_action.hpp"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Lex/Preprocessor.h"
@@ -17,6 +18,11 @@ void find_deps_pp_callbacks::report_missing_module(SourceLocation loc) {
   m_diags->Report(loc, did);
 }
 
+static bool compile_wd(StringRef who, StringRef d) {
+  cur_ctx().add_pcm_dep(d, who);
+  return compile(who.str());
+}
+
 void find_deps_pp_callbacks::moduleImport(SourceLocation loc, ModuleIdPath path,
                                           const Module *imported) {
   assert(path.size() == 1 && "path isn't atomic");
@@ -32,7 +38,7 @@ void find_deps_pp_callbacks::moduleImport(SourceLocation loc, ModuleIdPath path,
     auto part = mod_name.substr(p + 1);
 
     sys::path::append(dep, dir, me + "-" + part + ".cppm");
-    if (compile(dep.c_str()))
+    if (compile_wd(dep, m_cur_file))
       return;
 
   } else {
@@ -45,7 +51,7 @@ void find_deps_pp_callbacks::moduleImport(SourceLocation loc, ModuleIdPath path,
     if (!sys::fs::is_regular_file(dep.c_str()))
       return report_missing_module(loc);
 
-    if (compile(dep.c_str()))
+    if (compile_wd(dep, m_cur_file))
       return;
   }
 

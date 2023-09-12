@@ -1,4 +1,5 @@
 #include "cl.hpp"
+#include "context.hpp"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/TargetParser/Host.h"
 
@@ -38,11 +39,9 @@ cl::opt<targets> target(
                clEnumVal(windows, "Windows 64bits"),
                clEnumVal(android, "All Android targets")),
     cl::cat(leco_cat));
-std::string cur_target{};
-const char *current_target() { return cur_target.c_str(); }
 bool for_each_target(bool (*fn)()) {
   const auto run = [&](std::string tgt) {
-    cur_target = tgt;
+    cur_ctx() = {.target = tgt};
     return fn();
   };
   switch (target) {

@@ -4,8 +4,8 @@
 #define EXE_EXT ""
 #endif
 
-#include "cl.hpp"
 #include "clang_dir.hpp"
+#include "context.hpp"
 #include "diags.hpp"
 #include "evoker.hpp"
 #include "instance.hpp"
@@ -32,7 +32,7 @@ const char *clang_exe() {
 std::shared_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
   auto clang = std::make_shared<CompilerInstance>();
 
-  Driver drv{clang_exe(), current_target(), diags()};
+  Driver drv{clang_exe(), cur_ctx().target, diags()};
   std::unique_ptr<Compilation> c{drv.BuildCompilation(args)};
   if (!c || c->containsError() || c->getJobs().size() == 0)
     // We did a mistake in clang args. Bail out and let the diagnostics
@@ -56,7 +56,7 @@ void in2out(llvm::StringRef in, llvm::SmallVectorImpl<char> &out,
   auto gpath = sys::path::parent_path(path);
   if (sys::path::stem(gpath) != "out") {
     auto name = sys::path::stem(in);
-    auto triple = current_target();
+    auto triple = cur_ctx().target;
     sys::path::append(out, path, "out", triple, name);
   } else {
     sys::path::append(out, in);
@@ -70,7 +70,7 @@ evoker::evoker() {
   m_args.push_back(clang_exe());
   m_args.push_back("-std=c++20");
   m_args.push_back("-target");
-  m_args.push_back(current_target());
+  m_args.push_back(cur_ctx().target.c_str());
 }
 evoker &evoker::set_inout(StringRef in, StringRef ext) {
   in2out(in, m_obj, ext);
@@ -83,7 +83,7 @@ evoker &evoker::set_inout(StringRef in, StringRef ext) {
 instance evoker::build() { return instance{createCI(m_args), m_obj.str()}; }
 
 bool evoker::execute() {
-  Driver drv{clang_exe(), current_target(), diags()};
+  Driver drv{clang_exe(), cur_ctx().target, diags()};
   std::unique_ptr<Compilation> c{drv.BuildCompilation(m_args)};
   if (!c || c->containsError() || c->getJobs().size() == 0)
     // We did a mistake in clang args. Bail out and let the diagnostics

@@ -53,13 +53,14 @@ public:
     if (!root && !tool)
       return;
 
-    cur_ctx() = {};
+    cur_ctx().pcm_reqs.clear();
     if (!compile(getCurrentFile()))
       return;
 
     if (!tool)
       return;
 
+    cur_ctx().add_pcm_req(getCurrentFile());
     link(getCurrentFile());
   }
 };

@@ -1,14 +1,26 @@
 #include "context.hpp"
 #include "evoker.hpp"
 #include "link.hpp"
+#include "llvm/ADT/StringSet.h"
 
 using namespace llvm;
 
+static void recurse(StringSet<> &uniq, StringRef cur) {
+  uniq.insert(cur);
+  for (auto &p : cur_ctx().pcm_dep_map[cur.str()]) {
+    recurse(uniq, p);
+  }
+}
 bool link(StringRef main_src) {
+  StringSet<> uniq{};
+  for (auto &p : cur_ctx().pcm_reqs) {
+    recurse(uniq, p);
+  }
+
   std::vector<std::string> args{};
-  for (auto &p : cur_ctx().object_files) {
+  for (auto &p : uniq) {
     SmallString<128> pp{};
-    in2out(p, pp, "o");
+    in2out(p.first(), pp, "o");
     args.push_back(pp.str().str());
   }
 
