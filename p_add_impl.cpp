@@ -1,4 +1,5 @@
 #include "compile.hpp"
+#include "context.hpp"
 #include "diags.hpp"
 #include "p_add_impl.hpp"
 #include "clang/Lex/LexDiagnostic.h"
@@ -39,6 +40,7 @@ void add_impl_pragma_handler::HandlePragma(Preprocessor &pp,
       return;
     }
 
+    cur_ctx().add_pcm_dep(m_cur_file, f);
     if (!compile(f))
       return;
   } while (true);
