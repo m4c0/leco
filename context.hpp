@@ -13,6 +13,7 @@ struct context {
   std::set<std::string> pcm_reqs{};
 
   std::string target{};
+  std::string sysroot{};
 
   void add_pcm_req(llvm::StringRef path);
   void add_pcm_framework(llvm::StringRef path, llvm::StringRef fw);

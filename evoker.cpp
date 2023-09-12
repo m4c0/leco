@@ -71,6 +71,11 @@ evoker::evoker() {
   m_args.push_back("-std=c++20");
   m_args.push_back("-target");
   m_args.push_back(cur_ctx().target.c_str());
+
+  if (cur_ctx().sysroot != "") {
+    m_args.push_back("--sysroot");
+    m_args.push_back(cur_ctx().sysroot.c_str());
+  }
 }
 evoker &evoker::set_inout(StringRef in, StringRef ext) {
   in2out(in, m_obj, ext);
