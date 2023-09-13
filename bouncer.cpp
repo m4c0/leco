@@ -6,6 +6,7 @@
 #include "link.hpp"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendAction.h"
+#include "clang/Frontend/FrontendActions.h"
 #include "clang/Lex/PreprocessorOptions.h"
 #include "llvm/Support/Path.h"
 
@@ -36,26 +37,23 @@ static bool compile_pending() {
   return true;
 }
 
-class bouncer : public PreprocessorFrontendAction {
+class bouncer : public PreprocessOnlyAction {
+  bool tool;
+
 public:
-  void ExecuteAction() override {
-    bool tool = false;
-
-    auto &pp = getCompilerInstance().getPreprocessor();
+  bool BeginSourceFileAction(CompilerInstance &ci) override {
+    auto &pp = ci.getPreprocessor();
     pp.AddPragmaHandler("leco", new tool_pragma_handler(&tool));
-    pp.SetSuppressIncludeNotFoundError(true);
-    pp.EnterMainSourceFile();
+    return true;
+  }
 
-    Token t;
-    do {
-      pp.Lex(t);
-    } while (t.isNot(tok::eof));
-
+  void EndSourceFileAction() override {
     SmallString<128> pwd;
     sys::fs::current_path(pwd); // TODO: check errors
     auto pwd_stem = sys::path::stem(pwd);
     auto file_stem = sys::path::stem(getCurrentFile());
     auto file_ext = sys::path::extension(getCurrentFile());
+    auto &pp = getCompilerInstance().getPreprocessor();
     bool root = pp.isInNamedModule() && pp.getNamedModuleName() == pwd_stem &&
                 file_ext == ".cppm";
 
