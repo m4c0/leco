@@ -2,8 +2,9 @@
 #include "llvm/ADT/SmallString.h"
 
 namespace clang {
+class CompilerInstance;
 class FrontendAction;
-}
+} // namespace clang
 
 void in2out(llvm::StringRef in, llvm::SmallVectorImpl<char> &out,
             llvm::StringRef ext);
@@ -23,10 +24,5 @@ public:
 
   [[nodiscard]] instance build();
   [[nodiscard]] bool execute();
-  [[nodiscard]] bool run(clang::FrontendAction *a);
-
-  template <typename T> [[nodiscard]] bool run() {
-    T action{};
-    return run(&action);
-  }
+  [[nodiscard]] std::shared_ptr<clang::CompilerInstance> createCI();
 };

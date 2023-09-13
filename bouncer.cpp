@@ -39,12 +39,9 @@ static bool compile_pending() {
 class bouncer : public PreprocessorFrontendAction {
 public:
   void ExecuteAction() override {
-    auto &ci = getCompilerInstance();
-    ci.getPreprocessorOpts().SingleFileParseMode = true;
-
     bool tool = false;
 
-    auto &pp = ci.getPreprocessor();
+    auto &pp = getCompilerInstance().getPreprocessor();
     pp.AddPragmaHandler("leco", new tool_pragma_handler(&tool));
     pp.SetSuppressIncludeNotFoundError(true);
     pp.EnterMainSourceFile();
@@ -89,5 +86,9 @@ bool bounce(StringRef path) {
   if (ext != ".cppm" && ext != ".cpp")
     return true;
 
-  return evoker{}.push_arg("-E").push_arg(path).run<bouncer>();
+  auto ci = evoker{}.push_arg("-E").push_arg(path).createCI();
+  ci->getPreprocessorOpts().SingleFileParseMode = true;
+
+  bouncer b{};
+  return ci->ExecuteAction(b);
 }

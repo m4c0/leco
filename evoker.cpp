@@ -95,10 +95,10 @@ evoker &evoker::set_inout(StringRef in, StringRef ext) {
   m_args.push_back(m_obj.c_str());
   return *this;
 }
-instance evoker::build() { return instance{createCI(m_args), m_obj.str()}; }
+instance evoker::build() { return instance{createCI(), m_obj.str()}; }
 
-bool evoker::run(FrontendAction *a) {
-  return createCI(m_args)->ExecuteAction(*a);
+std::shared_ptr<CompilerInstance> evoker::createCI() {
+  return ::createCI(m_args);
 }
 
 bool evoker::execute() {
