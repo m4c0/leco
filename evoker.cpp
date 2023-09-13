@@ -6,13 +6,13 @@
 
 #include "clang_dir.hpp"
 #include "context.hpp"
-#include "diags.hpp"
 #include "evoker.hpp"
 #include "instance.hpp"
 #include "clang/CodeGen/ObjectFilePCHContainerOperations.h"
 #include "clang/Driver/Compilation.h"
 #include "clang/Driver/Driver.h"
 #include "clang/Frontend/CompilerInstance.h"
+#include "clang/Frontend/TextDiagnosticPrinter.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Host.h"
 
@@ -29,10 +29,20 @@ const char *clang_exe() {
   return exe.data();
 }
 
+static DiagnosticsEngine diags() {
+  IntrusiveRefCntPtr<DiagnosticOptions> diag_opts{new DiagnosticOptions()};
+  IntrusiveRefCntPtr<DiagnosticIDs> diag_ids{new DiagnosticIDs()};
+  auto diag_cli = new TextDiagnosticPrinter(errs(), &*diag_opts);
+
+  return DiagnosticsEngine{diag_ids, diag_opts, diag_cli};
+}
+
 std::shared_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
   auto clang = std::make_shared<CompilerInstance>();
 
-  Driver drv{clang_exe(), cur_ctx().target, diags()};
+  auto diags = ::diags();
+
+  Driver drv{clang_exe(), cur_ctx().target, diags};
   std::unique_ptr<Compilation> c{drv.BuildCompilation(args)};
   if (!c || c->containsError() || c->getJobs().size() == 0)
     // We did a mistake in clang args. Bail out and let the diagnostics
@@ -41,7 +51,7 @@ std::shared_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
 
   auto cc1args = c->getJobs().begin()->getArguments();
   if (!CompilerInvocation::CreateFromArgs(clang->getInvocation(), cc1args,
-                                          diags()))
+                                          diags))
     return {};
 
   clang->createDiagnostics();
@@ -88,7 +98,8 @@ evoker &evoker::set_inout(StringRef in, StringRef ext) {
 instance evoker::build() { return instance{createCI(m_args), m_obj.str()}; }
 
 bool evoker::execute() {
-  Driver drv{clang_exe(), cur_ctx().target, diags()};
+  auto diags = ::diags();
+  Driver drv{clang_exe(), cur_ctx().target, diags};
   std::unique_ptr<Compilation> c{drv.BuildCompilation(m_args)};
   if (!c || c->containsError() || c->getJobs().size() == 0)
     // We did a mistake in clang args. Bail out and let the diagnostics
