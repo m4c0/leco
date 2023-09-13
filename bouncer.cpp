@@ -58,7 +58,9 @@ public:
     sys::fs::current_path(pwd); // TODO: check errors
     auto pwd_stem = sys::path::stem(pwd);
     auto file_stem = sys::path::stem(getCurrentFile());
-    bool root = pp.isInNamedModule() && pp.getNamedModuleName() == pwd_stem;
+    auto file_ext = sys::path::extension(getCurrentFile());
+    bool root = pp.isInNamedModule() && pp.getNamedModuleName() == pwd_stem &&
+                file_ext == ".cppm";
 
     tool &= cur_ctx().native_target;
 
