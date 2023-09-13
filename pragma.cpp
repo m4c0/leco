@@ -69,6 +69,9 @@ struct add_framework_pragma : public id_list_pragma {
 };
 
 struct ns_pragma : public PragmaNamespace {
-  ns_pragma() : PragmaNamespace{"leco"} { AddPragma(new add_impl_pragma()); }
+  ns_pragma() : PragmaNamespace{"leco"} {
+    AddPragma(new add_impl_pragma());
+    AddPragma(new add_framework_pragma());
+  }
 };
 static PragmaHandlerRegistry::Add<ns_pragma> NS{"leco", "leco extensions"};
