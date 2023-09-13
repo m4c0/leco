@@ -8,7 +8,7 @@
 static constexpr const char *files[]{
     "leco",  "bouncer",    "cl",      "compile",          "context",
     "diags", "droid_path", "evoker",  "find_deps_action", "instance",
-    "link",  "p_add_impl", "wrapper",
+    "link",  "pragma",     "wrapper",
 };
 
 constexpr const char *cmd =
