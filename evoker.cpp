@@ -97,6 +97,10 @@ evoker &evoker::set_inout(StringRef in, StringRef ext) {
 }
 instance evoker::build() { return instance{createCI(m_args), m_obj.str()}; }
 
+bool evoker::run(FrontendAction *a) {
+  return createCI(m_args)->ExecuteAction(*a);
+}
+
 bool evoker::execute() {
   auto diags = ::diags();
   Driver drv{clang_exe(), cur_ctx().target, diags};

@@ -89,5 +89,5 @@ bool bounce(StringRef path) {
   if (ext != ".cppm" && ext != ".cpp")
     return true;
 
-  return evoker{}.push_arg("-E").push_arg(path).build().run<bouncer>(false);
+  return evoker{}.push_arg("-E").push_arg(path).run<bouncer>();
 }
