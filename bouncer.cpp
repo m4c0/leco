@@ -86,6 +86,7 @@ bool bounce(StringRef path) {
 
   auto ci = evoker{}.push_arg("-E").push_arg(path).createCI();
   ci->getPreprocessorOpts().SingleFileParseMode = true;
+  ci->getDiagnostics().setClient(new IgnoringDiagConsumer());
 
   bouncer b{};
   return ci->ExecuteAction(b);
