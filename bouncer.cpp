@@ -28,12 +28,9 @@ public:
 } // namespace
 
 static bool compile_pending() {
-  auto &pend = cur_ctx().pending_compilation;
-  while (!pend.empty()) {
-    auto f = pend.extract(pend.begin()).value();
+  for (auto f : cur_ctx().pending_compilation)
     if (!compile(f))
       return false;
-  }
   return true;
 }
 
@@ -63,6 +60,7 @@ public:
       return;
 
     cur_ctx().pcm_reqs.clear();
+    cur_ctx().pending_compilation.clear();
     if (!compile(getCurrentFile()))
       return;
 
