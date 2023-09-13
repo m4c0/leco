@@ -21,3 +21,6 @@ void context::add_pcm_dep(StringRef from, StringRef to) {
 void context::add_pcm_framework(StringRef path, StringRef fw) {
   pcm_dep_map[to_abs(path)].frameworks.insert(fw.str());
 }
+void context::add_pcm_impl(StringRef from, StringRef to) {
+  pcm_dep_map[to_abs(from)].impls.insert(to_abs(to));
+}
