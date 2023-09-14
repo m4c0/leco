@@ -32,7 +32,8 @@ public:
     bool root = pp.isInNamedModule() && pp.getNamedModuleName() == pwd_stem &&
                 file_ext == ".cppm";
 
-    auto exe = cur_ctx().exe_type != exe_t::none && cur_ctx().native_target;
+    auto tool = cur_ctx().exe_type == exe_t::tool && cur_ctx().native_target;
+    auto exe = tool || (cur_ctx().exe_type == exe_t::app);
 
     if (!root && !exe)
       return;
