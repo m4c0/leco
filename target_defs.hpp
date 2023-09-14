@@ -18,6 +18,27 @@ static auto android(llvm::StringRef tgt) {
       .predefs = predefs,
   };
 }
+static std::string apple_sysroot(llvm::StringRef sdk) {
+#ifdef __APPLE__
+  constexpr const auto limit = 256;
+  llvm::SmallString<limit> buf{};
+
+  buf.assign("xcrun --show-sdk-path --sdk ");
+  buf.append(sdk);
+
+  auto f = popen(buf.c_str(), "r");
+  auto path = fgets(buf.data(), limit, f);
+  pclose(f);
+
+  if (path == nullptr)
+    return "";
+
+  path[strlen(path) - 1] = 0; // chomp "\n"
+  return path;
+#else
+  return "";
+#endif
+}
 } // namespace t::impl
 namespace t {
 static auto macosx() {
@@ -29,6 +50,7 @@ static auto macosx() {
       .target = "x86_64-apple-macosx11.6.0",
       .native_target = true,
       .predefs = predefs,
+      .sysroot = impl::apple_sysroot("macosx"),
   };
 }
 static auto iphoneos() {
@@ -40,6 +62,7 @@ static auto iphoneos() {
   return context{
       .target = "arm64-apple-ios13.0",
       .predefs = predefs,
+      .sysroot = impl::apple_sysroot("iphoneos"),
   };
 }
 static auto iphonesimulator() {
@@ -51,6 +74,7 @@ static auto iphonesimulator() {
   return context{
       .target = "x86_64-apple-ios13.0-simulator",
       .predefs = predefs,
+      .sysroot = impl::apple_sysroot("iphonesimulator"),
   };
 }
 
