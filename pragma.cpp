@@ -37,20 +37,27 @@ public:
 struct add_impl_pragma : public id_list_pragma {
   add_impl_pragma() : id_list_pragma{"add_impl"} {}
 
+  template <unsigned N>
+  static bool report(Preprocessor &pp, Token &t, const char (&msg)[N]) {
+    auto &d = pp.getDiagnostics();
+    auto d_id = d.getCustomDiagID(DiagnosticsEngine::Error, msg);
+    d.Report(t.getLocation(), d_id);
+    return false;
+  }
+  static bool check_ext(SmallVectorImpl<char> &f, StringRef ext) {
+    bool res{};
+    sys::path::replace_extension(f, ext);
+    sys::fs::is_regular_file(f, res);
+    return res;
+  }
+
   bool process_id(Preprocessor &pp, Token &t, StringRef fname) override {
     SmallString<128> f{};
     auto dir = sys::path::parent_path(fname);
     sys::path::append(f, dir, t.getIdentifierInfo()->getName());
-    sys::path::replace_extension(f, "cpp");
 
-    bool res{};
-    sys::fs::is_regular_file(f, res); // TODO: check error
-    if (!res) {
-      auto &d = pp.getDiagnostics();
-      auto d_id =
-          d.getCustomDiagID(DiagnosticsEngine::Error, "module impl not found");
-      d.Report(t.getLocation(), d_id);
-      return false;
+    if (!check_ext(f, "cpp") && !check_ext(f, "mm") && !check_ext(f, "m")) {
+      return report(pp, t, "module impl not found");
     }
 
     cur_ctx().add_pcm_dep(fname, f);
