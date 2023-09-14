@@ -1,7 +1,9 @@
+#include "cl.hpp"
 #include "context.hpp"
 #include "evoker.hpp"
 #include "link.hpp"
 #include "llvm/ADT/StringSet.h"
+#include "llvm/Support/raw_ostream.h"
 
 using namespace llvm;
 
@@ -32,6 +34,10 @@ bool link(StringRef main_src) {
 
   SmallString<128> exe{};
   in2out(main_src, exe, "exe");
+
+  if (is_verbose()) {
+    errs() << "linking " << exe << "\n";
+  }
 
   evoker e{};
   for (auto &p : args) {
