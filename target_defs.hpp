@@ -16,6 +16,7 @@ static auto android(llvm::StringRef tgt) {
       .target = tgt.str(),
       .sysroot = llvm.str().str(),
       .predefs = predefs,
+      .app_exe_path = [](auto exe, auto stem) {},
   };
 }
 static std::string apple_sysroot(llvm::StringRef sdk) {
@@ -39,6 +40,11 @@ static std::string apple_sysroot(llvm::StringRef sdk) {
   return "";
 #endif
 }
+void apple_bundle_path(llvm::SmallVectorImpl<char> &exe, llvm::StringRef stem) {
+  llvm::sys::path::remove_filename(exe);
+  llvm::sys::path::append(exe, stem);
+  llvm::sys::path::replace_extension(exe, "app");
+}
 } // namespace t::impl
 namespace t {
 static auto macosx() {
@@ -51,7 +57,12 @@ static auto macosx() {
       .native_target = true,
       .predefs = predefs,
       .sysroot = impl::apple_sysroot("macosx"),
-      .app_exe_subpath = "Contents/MacOS",
+      .app_exe_path =
+          [](auto &exe, auto stem) {
+            impl::apple_bundle_path(exe, stem);
+            llvm::sys::path::append(exe, "Contents", "MacOS");
+            llvm::sys::path::append(exe, stem);
+          },
   };
 }
 static auto iphoneos() {
@@ -64,6 +75,11 @@ static auto iphoneos() {
       .target = "arm64-apple-ios13.0",
       .predefs = predefs,
       .sysroot = impl::apple_sysroot("iphoneos"),
+      .app_exe_path =
+          [](auto &exe, auto stem) {
+            impl::apple_bundle_path(exe, stem);
+            llvm::sys::path::append(exe, stem);
+          },
   };
 }
 static auto iphonesimulator() {
@@ -76,6 +92,11 @@ static auto iphonesimulator() {
       .target = "x86_64-apple-ios13.0-simulator",
       .predefs = predefs,
       .sysroot = impl::apple_sysroot("iphonesimulator"),
+      .app_exe_path =
+          [](auto &exe, auto stem) {
+            impl::apple_bundle_path(exe, stem);
+            llvm::sys::path::append(exe, stem);
+          },
   };
 }
 
@@ -87,6 +108,7 @@ static auto windows() {
       .target = "x86_64-pc-windows-msvc",
       .native_target = true,
       .predefs = predefs,
+      .app_exe_path = [](auto exe, auto stem) {},
   };
 }
 

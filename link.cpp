@@ -3,6 +3,8 @@
 #include "evoker.hpp"
 #include "link.hpp"
 #include "llvm/ADT/StringSet.h"
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/Path.h"
 #include "llvm/Support/raw_ostream.h"
 
 using namespace llvm;
@@ -34,6 +36,11 @@ bool link(StringRef main_src) {
 
   SmallString<128> exe{};
   in2out(main_src, exe, "exe");
+
+  if (cur_ctx().exe_type == exe_t::app) {
+    cur_ctx().app_exe_path(exe, sys::path::stem(main_src));
+    sys::fs::create_directories(sys::path::parent_path(exe));
+  }
 
   if (is_verbose()) {
     errs() << "linking " << exe << "\n";

@@ -32,10 +32,9 @@ public:
     bool root = pp.isInNamedModule() && pp.getNamedModuleName() == pwd_stem &&
                 file_ext == ".cppm";
 
-    auto tool = cur_ctx().exe_type == exe_t::tool && cur_ctx().native_target;
-    auto app = cur_ctx().exe_type == exe_t::app && cur_ctx().native_target;
+    auto exe = cur_ctx().exe_type != exe_t::none && cur_ctx().native_target;
 
-    if (!root && !tool && !app)
+    if (!root && !exe)
       return;
 
     cur_ctx().pcm_reqs.clear();
@@ -46,7 +45,7 @@ public:
     if (!compile_pending())
       return;
 
-    if (!tool && !app)
+    if (!exe)
       return;
 
     cur_ctx().add_pcm_req(getCurrentFile());
