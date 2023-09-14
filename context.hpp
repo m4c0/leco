@@ -15,21 +15,22 @@ struct dep {
   std::set<std::string> frameworks{};
 };
 struct context {
-  std::map<std::string, dep> pcm_dep_map{};
-  std::set<std::string> pcm_reqs{};
-
+  // Defined via CLI
   llvm::ArrayRef<llvm::StringRef> predefs{};
   std::string target{};
   std::string sysroot{};
   bool native_target{};
-  exe_t exe_type{};
 
-  std::set<std::string> pending_compilation{};
-
-  void add_pcm_req(llvm::StringRef path);
+  // Kept per session
+  std::map<std::string, dep> pcm_dep_map{};
   void add_pcm_framework(llvm::StringRef path, llvm::StringRef fw);
   void add_pcm_dep(llvm::StringRef from, llvm::StringRef to);
 
+  // Once per file
+  exe_t exe_type{};
+  std::set<std::string> pending_compilation{};
+  std::set<std::string> pcm_reqs{};
+  void add_pcm_req(llvm::StringRef path);
   void add_pending(llvm::StringRef file);
 };
 
