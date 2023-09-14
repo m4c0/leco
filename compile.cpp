@@ -49,7 +49,6 @@ auto &already_built() {
   } else if (ext == ".mm" || ext == ".m") {
     return evoker{}
         .push_arg("-c")
-        .push_arg("-fmodules")
         .push_arg("-fobjc-arc")
         .set_inout(file, ".o")
         .build()
