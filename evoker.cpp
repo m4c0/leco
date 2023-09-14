@@ -115,10 +115,10 @@ bool evoker::execute() {
     return {};
 
   SmallVector<std::pair<int, const Command *>, 4> fails;
-  auto res = drv.ExecuteCompilation(*c, fails);
+  int res = drv.ExecuteCompilation(*c, fails);
   for (auto &p : fails) {
-    if (!res)
+    if (res == 0)
       res = p.first;
   }
-  return res;
+  return res == 0;
 }
