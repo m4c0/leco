@@ -1,9 +1,7 @@
 #include "cl.hpp"
 #include "context.hpp"
-#include "droid_path.hpp"
-#include "llvm/ADT/SmallString.h"
+#include "target_defs.hpp"
 #include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Path.h"
 #include "llvm/TargetParser/Host.h"
 
 using namespace llvm;
@@ -28,6 +26,7 @@ enum targets {
   host,
   apple,
   macosx,
+  ios,
   iphoneos,
   iphonesimulator,
   windows,
@@ -37,57 +36,44 @@ cl::opt<targets> target(
     "target", cl::desc("Targets of build"),
     cl::values(clEnumVal(host, "Same as host"),
                clEnumVal(apple, "All Apple targets"),
+               clEnumVal(ios, "All iOS targets (iPhone OS + Simulator)"),
                clEnumVal(macosx, "MacOSX"), clEnumVal(iphoneos, "iPhone OS"),
                clEnumVal(iphonesimulator, "iPhone Simulator"),
                clEnumVal(windows, "Windows 64bits"),
                clEnumVal(android, "All Android targets")),
     cl::cat(leco_cat));
 bool for_each_target(bool (*fn)()) {
-  const auto run = [&](std::string tgt, bool native = false) {
-    cur_ctx() = context{
-        .target = tgt,
-        .native_target = native,
-    };
-    return fn();
-  };
-  const auto run_droid = [&](std::string tgt) {
-    SmallString<256> llvm{};
-    find_android_llvm(llvm);
-    sys::path::append(llvm, "sysroot");
-
-    cur_ctx() = context{
-        .target = tgt,
-        .sysroot = llvm.str().str(),
-    };
+  const auto run = [&](auto &&ctx_fn) {
+    cur_ctx() = ctx_fn();
     return fn();
   };
 
   switch (target) {
 #ifdef __APPLE__
   case apple:
-    return run("x86_64-apple-macosx11.6.0", true) &&
-           run("arm64-apple-ios13.0") && run("x86_64-apple-ios13.0-simulator");
+    return run(t::macosx) && run(t::iphoneos) && run(t::iphonesimulator);
+
+  case ios:
+    return run(t::iphoneos) && run(t::iphonesimulator);
 
   case host:
   case macosx:
-    return run("x86_64-apple-macosx11.6.0", true);
+    return run(t::macosx);
   case iphoneos:
-    return run("arm64-apple-ios13.0");
+    return run(t::iphoneos);
   case iphonesimulator:
-    return run("x86_64-apple-ios13.0-simulator");
+    return run(t::iphonesimulator);
 #endif
 
 #ifdef _WIN32
   case host:
   case windows:
-    return run("x86_64-pc-windows-msvc", true);
+    return run(t::windows);
 #endif
 
   case android:
-    return run_droid("aarch64-none-linux-android26") &&
-           run_droid("armv7-none-linux-androideabi26") &&
-           run_droid("i686-none-linux-android26") &&
-           run_droid("x86_64-none-linux-android26");
+    return run(t::android_aarch64) && run(t::android_armv7) &&
+           run(t::android_i686) && run(t::android_x86_64);
 
   default:
     return false;
