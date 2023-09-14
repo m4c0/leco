@@ -1,4 +1,5 @@
 #pragma once
+#include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/StringRef.h"
 #include <map>
 #include <set>
@@ -12,12 +13,12 @@ struct context {
   std::map<std::string, dep> pcm_dep_map{};
   std::set<std::string> pcm_reqs{};
 
+  llvm::ArrayRef<llvm::StringRef> predefs{};
   std::string target{};
   std::string sysroot{};
+  bool native_target{};
 
   std::set<std::string> pending_compilation{};
-
-  bool native_target;
 
   void add_pcm_req(llvm::StringRef path);
   void add_pcm_framework(llvm::StringRef path, llvm::StringRef fw);

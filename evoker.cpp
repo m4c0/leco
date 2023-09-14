@@ -13,6 +13,7 @@
 #include "clang/Driver/Driver.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/TextDiagnosticPrinter.h"
+#include "clang/Lex/PreprocessorOptions.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Host.h"
 
@@ -55,6 +56,10 @@ std::shared_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
     return {};
 
   clang->createDiagnostics();
+
+  for (auto def : cur_ctx().predefs)
+    clang->getPreprocessorOpts().addMacroDef(def);
+
   return clang;
 }
 
