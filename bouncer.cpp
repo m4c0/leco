@@ -82,7 +82,7 @@ bool bounce(StringRef path) {
   if (ext != ".cppm" && ext != ".cpp")
     return true;
 
-  auto ci = evoker{}.push_arg("-E").push_arg(path).createCI();
+  auto ci = evoker{}.set_cpp_std().push_arg("-E").push_arg(path).createCI();
   ci->getPreprocessorOpts().SingleFileParseMode = true;
   ci->getDiagnostics().setClient(new IgnoringDiagConsumer());
 

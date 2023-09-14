@@ -19,8 +19,11 @@ auto &already_built() {
 [[nodiscard]] bool try_compile(StringRef file) {
   auto ext = sys::path::extension(file);
   if (ext == ".cppm") {
-    auto pcm =
-        evoker{}.push_arg("--precompile").set_inout(file, ".pcm").build();
+    auto pcm = evoker{}
+                   .set_cpp_std()
+                   .push_arg("--precompile")
+                   .set_inout(file, ".pcm")
+                   .build();
 
     if (!pcm.run<GenerateModuleInterfaceAction>())
       return false;
@@ -30,7 +33,14 @@ auto &already_built() {
         .set_inout(pcm.output(), ".o")
         .build()
         .run<EmitObjAction>(false);
-  } else if (ext == ".cpp" || ext == ".c" || ext == ".pcm") {
+  } else if (ext == ".cpp") {
+    return evoker{}
+        .set_cpp_std()
+        .push_arg("-c")
+        .set_inout(file, ".o")
+        .build()
+        .run<EmitObjAction>();
+  } else if (ext == ".c") {
     return evoker{}
         .push_arg("-c")
         .set_inout(file, ".o")
