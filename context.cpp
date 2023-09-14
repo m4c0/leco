@@ -21,6 +21,9 @@ void context::add_pcm_dep(StringRef from, StringRef to) {
 void context::add_pcm_framework(StringRef path, StringRef fw) {
   pcm_dep_map[to_abs(path)].frameworks.insert(fw.str());
 }
+void context::add_pcm_resource(StringRef path, StringRef res) {
+  pcm_dep_map[to_abs(path)].resources.insert(to_abs(res));
+}
 
 void context::add_pending(StringRef f) {
   pending_compilation.insert(to_abs(f));

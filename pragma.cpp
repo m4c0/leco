@@ -5,6 +5,14 @@
 using namespace clang;
 using namespace llvm;
 
+template <unsigned N>
+static bool report(Preprocessor &pp, Token &t, const char (&msg)[N]) {
+  auto &d = pp.getDiagnostics();
+  auto d_id = d.getCustomDiagID(DiagnosticsEngine::Error, msg);
+  d.Report(t.getLocation(), d_id);
+  return false;
+}
+
 class id_list_pragma : public PragmaHandler {
 protected:
   virtual bool process_id(Preprocessor &pp, Token &t, StringRef fname) = 0;
@@ -13,7 +21,7 @@ public:
   using PragmaHandler::PragmaHandler;
 
   void HandlePragma(Preprocessor &pp, PragmaIntroducer introducer,
-                    Token &pragma_tok) {
+                    Token &pragma_tok) override {
     auto fname = pp.getSourceManager().getFilename(introducer.Loc);
 
     Token t;
@@ -37,13 +45,6 @@ public:
 struct add_impl_pragma : public id_list_pragma {
   add_impl_pragma() : id_list_pragma{"add_impl"} {}
 
-  template <unsigned N>
-  static bool report(Preprocessor &pp, Token &t, const char (&msg)[N]) {
-    auto &d = pp.getDiagnostics();
-    auto d_id = d.getCustomDiagID(DiagnosticsEngine::Error, msg);
-    d.Report(t.getLocation(), d_id);
-    return false;
-  }
   static bool check_ext(SmallVectorImpl<char> &f, StringRef ext) {
     bool res{};
     sys::path::replace_extension(f, ext);
@@ -75,6 +76,41 @@ struct add_framework_pragma : public id_list_pragma {
   }
 };
 
+struct add_resource_pragma : public PragmaHandler {
+  add_resource_pragma() : PragmaHandler{"add_resource"} {}
+
+  bool process_id(Preprocessor &pp, Token &t, StringRef fname) {
+    auto lit = StringRef{t.getLiteralData(), t.getLength()}.trim('"');
+    bool res{};
+    if (sys::fs::is_regular_file(lit, res) && !res) {
+      report(pp, t, "resource not found");
+      return false;
+    }
+    cur_ctx().add_pcm_resource(fname, lit);
+    return true;
+  }
+  void HandlePragma(Preprocessor &pp, PragmaIntroducer introducer,
+                    Token &pragma_tok) override {
+    auto fname = pp.getSourceManager().getFilename(introducer.Loc);
+
+    Token t;
+    do {
+      pp.LexUnexpandedToken(t);
+      if (t.getKind() == tok::eod) {
+        return;
+      }
+      if (!t.isLiteral()) {
+        pp.Diag(t, diag::err_pp_identifier_arg_not_identifier) << t.getKind();
+        return;
+      }
+
+      if (!process_id(pp, t, fname)) {
+        return;
+      }
+    } while (true);
+  }
+};
+
 struct app_pragma : public PragmaHandler {
   app_pragma() : PragmaHandler{"app"} {}
 
@@ -96,6 +132,7 @@ struct ns_pragma : public PragmaNamespace {
   ns_pragma() : PragmaNamespace{"leco"} {
     AddPragma(new add_impl_pragma());
     AddPragma(new add_framework_pragma());
+    AddPragma(new add_resource_pragma());
     AddPragma(new app_pragma());
     AddPragma(new tool_pragma());
   }

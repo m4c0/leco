@@ -13,6 +13,7 @@ enum class exe_t {
 struct dep {
   std::set<std::string> modules{};
   std::set<std::string> frameworks{};
+  std::set<std::string> resources{};
 };
 struct context {
   // Defined via CLI
@@ -26,6 +27,7 @@ struct context {
   std::map<std::string, dep> pcm_dep_map{};
   void add_pcm_framework(llvm::StringRef path, llvm::StringRef fw);
   void add_pcm_dep(llvm::StringRef from, llvm::StringRef to);
+  void add_pcm_resource(llvm::StringRef from, llvm::StringRef res);
 
   // Once per file
   exe_t exe_type{};
