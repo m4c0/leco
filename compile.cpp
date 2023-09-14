@@ -30,9 +30,17 @@ auto &already_built() {
         .set_inout(pcm.output(), ".o")
         .build()
         .run<EmitObjAction>(false);
-  } else if (ext == ".cpp" || ext == ".c" || ext == ".pcm" || ext == ".m") {
+  } else if (ext == ".cpp" || ext == ".c" || ext == ".pcm") {
     return evoker{}
         .push_arg("-c")
+        .set_inout(file, ".o")
+        .build()
+        .run<EmitObjAction>();
+  } else if (ext == ".mm" || ext == ".m") {
+    return evoker{}
+        .push_arg("-c")
+        .push_arg("-fmodules")
+        .push_arg("-fobjc-arc")
         .set_inout(file, ".o")
         .build()
         .run<EmitObjAction>();
