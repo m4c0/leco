@@ -17,6 +17,7 @@ static auto android(llvm::StringRef tgt) {
       .sysroot = llvm.str().str(),
       .predefs = predefs,
       .app_exe_path = [](auto exe, auto stem) {},
+      .app_res_path = [](auto exe) {},
   };
 }
 static std::string apple_sysroot(llvm::StringRef sdk) {
@@ -63,6 +64,13 @@ static auto macosx() {
             llvm::sys::path::append(exe, "Contents", "MacOS");
             llvm::sys::path::append(exe, stem);
           },
+      .app_res_path =
+          [](auto exe) {
+            llvm::sys::path::remove_filename(exe); // fname
+            llvm::sys::path::remove_filename(exe); // slash
+            llvm::sys::path::remove_filename(exe); // "MacOS"
+            llvm::sys::path::append(exe, "Resources");
+          },
   };
 }
 static auto iphoneos() {
@@ -80,6 +88,7 @@ static auto iphoneos() {
             impl::apple_bundle_path(exe, stem);
             llvm::sys::path::append(exe, stem);
           },
+      .app_res_path = [](auto exe) {},
   };
 }
 static auto iphonesimulator() {
@@ -97,6 +106,7 @@ static auto iphonesimulator() {
             impl::apple_bundle_path(exe, stem);
             llvm::sys::path::append(exe, stem);
           },
+      .app_res_path = [](auto exe) {},
   };
 }
 
@@ -109,6 +119,7 @@ static auto windows() {
       .native_target = true,
       .predefs = predefs,
       .app_exe_path = [](auto exe, auto stem) {},
+      .app_res_path = [](auto exe) {},
   };
 }
 

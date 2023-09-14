@@ -21,6 +21,7 @@ struct context {
   std::string target{};
   std::string sysroot{};
   void (*app_exe_path)(llvm::SmallVectorImpl<char> &exe, llvm::StringRef stem);
+  void (*app_res_path)(llvm::SmallVectorImpl<char> &exe);
   bool native_target{};
 
   // Kept per session
