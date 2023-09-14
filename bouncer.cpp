@@ -13,20 +13,6 @@
 using namespace clang;
 using namespace llvm;
 
-namespace {
-class tool_pragma_handler : public PragmaHandler {
-  bool *m_found_it;
-
-public:
-  tool_pragma_handler(bool *f) : PragmaHandler{"tool"}, m_found_it{f} {}
-
-  void HandlePragma(Preprocessor &PP, PragmaIntroducer Introducer,
-                    Token &PragmaTok) {
-    *m_found_it = true;
-  }
-};
-} // namespace
-
 static bool compile_pending() {
   for (auto f : cur_ctx().pending_compilation)
     if (!compile(f))
@@ -35,15 +21,7 @@ static bool compile_pending() {
 }
 
 class bouncer : public PreprocessOnlyAction {
-  bool tool;
-
 public:
-  bool BeginSourceFileAction(CompilerInstance &ci) override {
-    auto &pp = ci.getPreprocessor();
-    pp.AddPragmaHandler("leco", new tool_pragma_handler(&tool));
-    return true;
-  }
-
   void EndSourceFileAction() override {
     SmallString<128> pwd;
     sys::fs::current_path(pwd); // TODO: check errors
@@ -54,9 +32,10 @@ public:
     bool root = pp.isInNamedModule() && pp.getNamedModuleName() == pwd_stem &&
                 file_ext == ".cppm";
 
-    tool &= cur_ctx().native_target;
+    auto tool = cur_ctx().exe_type == exe_t::tool && cur_ctx().native_target;
+    auto app = cur_ctx().exe_type == exe_t::app && cur_ctx().native_target;
 
-    if (!root && !tool)
+    if (!root && !tool && !app)
       return;
 
     cur_ctx().pcm_reqs.clear();
@@ -67,11 +46,12 @@ public:
     if (!compile_pending())
       return;
 
-    if (!tool)
+    if (!tool && !app)
       return;
 
     cur_ctx().add_pcm_req(getCurrentFile());
     link(getCurrentFile());
+    cur_ctx().exe_type = exe_t::none;
   }
 };
 

@@ -5,6 +5,11 @@
 #include <set>
 #include <string>
 
+enum class exe_t {
+  none,
+  tool,
+  app,
+};
 struct dep {
   std::set<std::string> modules{};
   std::set<std::string> frameworks{};
@@ -17,6 +22,7 @@ struct context {
   std::string target{};
   std::string sysroot{};
   bool native_target{};
+  exe_t exe_type{};
 
   std::set<std::string> pending_compilation{};
 

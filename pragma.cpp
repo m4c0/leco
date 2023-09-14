@@ -75,10 +75,29 @@ struct add_framework_pragma : public id_list_pragma {
   }
 };
 
+struct app_pragma : public PragmaHandler {
+  app_pragma() : PragmaHandler{"app"} {}
+
+  void HandlePragma(Preprocessor &PP, PragmaIntroducer Introducer,
+                    Token &PragmaTok) {
+    cur_ctx().exe_type = exe_t::app;
+  }
+};
+struct tool_pragma : public PragmaHandler {
+  tool_pragma() : PragmaHandler{"tool"} {}
+
+  void HandlePragma(Preprocessor &PP, PragmaIntroducer Introducer,
+                    Token &PragmaTok) {
+    cur_ctx().exe_type = exe_t::tool;
+  }
+};
+
 struct ns_pragma : public PragmaNamespace {
   ns_pragma() : PragmaNamespace{"leco"} {
     AddPragma(new add_impl_pragma());
     AddPragma(new add_framework_pragma());
+    AddPragma(new app_pragma());
+    AddPragma(new tool_pragma());
   }
 };
 static PragmaHandlerRegistry::Add<ns_pragma> NS{"leco", "leco extensions"};
