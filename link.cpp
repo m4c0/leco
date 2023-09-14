@@ -15,7 +15,7 @@ static void recurse(StringSet<> &uniq, StringRef cur) {
     recurse(uniq, p);
   }
 }
-bool link(StringRef main_src) {
+std::string link(StringRef main_src) {
   StringSet<> uniq{};
   for (auto &p : cur_ctx().pcm_reqs) {
     recurse(uniq, p);
@@ -56,5 +56,5 @@ bool link(StringRef main_src) {
   }
   e.push_arg("-o");
   e.push_arg(exe);
-  return e.execute();
+  return e.execute() ? std::string{exe} : std::string{};
 }

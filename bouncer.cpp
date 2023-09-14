@@ -1,4 +1,5 @@
 #include "bouncer.hpp"
+#include "cl.hpp"
 #include "compile.hpp"
 #include "context.hpp"
 #include "evoker.hpp"
@@ -18,6 +19,29 @@ static bool compile_pending() {
     if (!compile(f))
       return false;
   return true;
+}
+
+void copy_resources(StringRef exe) {
+  SmallString<256> path{exe};
+  cur_ctx().app_res_path(path);
+  sys::fs::create_directories(path);
+
+  const auto rec = [&](auto &rec, const std::string &m) -> void {
+    for (auto &r : cur_ctx().pcm_dep_map[m].resources) {
+      sys::path::append(path, sys::path::filename(r));
+      if (is_verbose()) {
+        errs() << "copying resource " << path << "\n";
+      }
+      sys::fs::copy_file(r, path);
+      sys::path::remove_filename(path);
+    }
+    for (auto &m : cur_ctx().pcm_dep_map[m].modules) {
+      rec(rec, m);
+    }
+  };
+  for (auto &p : cur_ctx().pcm_reqs) {
+    rec(rec, p);
+  }
 }
 
 class bouncer : public PreprocessOnlyAction {
@@ -50,7 +74,10 @@ public:
       return;
 
     cur_ctx().add_pcm_req(getCurrentFile());
-    link(getCurrentFile());
+    auto exe_path = link(getCurrentFile());
+    if (exe_path != "")
+      copy_resources(exe_path);
+
     cur_ctx().exe_type = exe_t::none;
   }
 };
