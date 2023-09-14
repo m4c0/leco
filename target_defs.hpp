@@ -51,6 +51,7 @@ static auto macosx() {
       .native_target = true,
       .predefs = predefs,
       .sysroot = impl::apple_sysroot("macosx"),
+      .app_exe_subpath = "Contents/MacOS",
   };
 }
 static auto iphoneos() {

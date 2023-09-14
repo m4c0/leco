@@ -19,6 +19,7 @@ struct context {
   llvm::ArrayRef<llvm::StringRef> predefs{};
   std::string target{};
   std::string sysroot{};
+  std::string app_exe_subpath{};
   bool native_target{};
 
   // Kept per session
