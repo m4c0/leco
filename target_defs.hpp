@@ -66,9 +66,8 @@ static auto macosx() {
           },
       .app_res_path =
           [](auto exe) {
-            llvm::sys::path::remove_filename(exe); // fname
-            llvm::sys::path::remove_filename(exe); // slash
-            llvm::sys::path::remove_filename(exe); // "MacOS"
+            llvm::sys::path::remove_filename(exe);
+            llvm::sys::path::remove_filename(exe);
             llvm::sys::path::append(exe, "Resources");
           },
   };
