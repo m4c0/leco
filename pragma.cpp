@@ -1,5 +1,5 @@
-#include "cl.hpp"
 #include "context.hpp"
+#include "diags.hpp"
 #include "clang/Lex/LexDiagnostic.h"
 #include "clang/Lex/Preprocessor.h"
 
@@ -8,18 +8,11 @@ using namespace llvm;
 
 template <unsigned N>
 static void report(Preprocessor &pp, Token &t, const char (&msg)[N]) {
-  auto &d = pp.getDiagnostics();
-  auto d_id = d.getCustomDiagID(DiagnosticsEngine::Error, msg);
-  d.Report(t.getLocation(), d_id);
+  diag_error(pp.getDiagnostics(), t.getLocation(), msg);
 }
 template <unsigned N>
 static void notify(Preprocessor &pp, Token &t, const char (&msg)[N]) {
-  if (!is_verbose())
-    return;
-
-  auto &d = pp.getDiagnostics();
-  auto d_id = d.getCustomDiagID(DiagnosticsEngine::Remark, msg);
-  d.Report(t.getLocation(), d_id);
+  diag_remark(pp.getDiagnostics(), t.getLocation(), msg);
 }
 static StringRef to_str(Token &t) {
   StringRef txt{};

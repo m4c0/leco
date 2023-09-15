@@ -1,5 +1,6 @@
 #include "compile.hpp"
 #include "context.hpp"
+#include "diags.hpp"
 #include "find_deps_action.hpp"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Lex/Preprocessor.h"
@@ -7,25 +8,15 @@
 using namespace clang;
 using namespace llvm;
 
-void find_deps_pp_callbacks::report_compilation_error(SourceLocation loc) {
-  auto lvl = DiagnosticsEngine::Error;
-  auto did = m_diags->getCustomDiagID(lvl, "failed to compile dependency");
-  m_diags->Report(loc, did);
-}
-void find_deps_pp_callbacks::report_missing_module(SourceLocation loc) {
-  auto lvl = DiagnosticsEngine::Error;
-  auto did = m_diags->getCustomDiagID(lvl, "module not found");
-  m_diags->Report(loc, did);
-}
-
-[[nodiscard]] static bool compile_wd(StringRef who, StringRef d) {
-  cur_ctx().add_pcm_dep(d, who);
-  return compile(who.str());
-}
-
 void find_deps_pp_callbacks::moduleImport(SourceLocation loc, ModuleIdPath path,
                                           const Module *imported) {
   assert(path.size() == 1 && "path isn't atomic");
+
+  const auto compile_wd = [&](StringRef who, StringRef d) -> bool {
+    cur_ctx().add_pcm_dep(d, who);
+    // diag_remark(*m_diags, loc, "compiling dependency");
+    return compile(who.str());
+  };
 
   auto dir = sys::path::parent_path(m_cur_file);
 
@@ -49,12 +40,11 @@ void find_deps_pp_callbacks::moduleImport(SourceLocation loc, ModuleIdPath path,
       sys::path::append(dep, "..", mod_name, t);
     }
     if (!sys::fs::is_regular_file(dep.c_str()))
-      return report_missing_module(loc);
+      return diag_error(*m_diags, loc, "file not found");
 
     if (compile_wd(dep, m_cur_file))
       return;
   }
 
-  report_compilation_error(loc);
-  return;
+  return diag_error(*m_diags, loc, "failure compiling dependency");
 }
