@@ -1,3 +1,4 @@
+#include "cl.hpp"
 #include "context.hpp"
 #include "clang/Lex/LexDiagnostic.h"
 #include "clang/Lex/Preprocessor.h"
@@ -9,6 +10,15 @@ template <unsigned N>
 static void report(Preprocessor &pp, Token &t, const char (&msg)[N]) {
   auto &d = pp.getDiagnostics();
   auto d_id = d.getCustomDiagID(DiagnosticsEngine::Error, msg);
+  d.Report(t.getLocation(), d_id);
+}
+template <unsigned N>
+static void notify(Preprocessor &pp, Token &t, const char (&msg)[N]) {
+  if (!is_verbose())
+    return;
+
+  auto &d = pp.getDiagnostics();
+  auto d_id = d.getCustomDiagID(DiagnosticsEngine::Remark, msg);
   d.Report(t.getLocation(), d_id);
 }
 static StringRef to_str(Token &t) {
@@ -67,6 +77,7 @@ struct add_impl_pragma : public id_list_pragma {
       return report(pp, t, "module impl not found");
     }
 
+    notify(pp, t, "queueing implementation");
     cur_ctx().add_pcm_dep(fname, f);
     cur_ctx().add_pending(f);
   }
@@ -76,6 +87,7 @@ struct add_framework_pragma : public id_list_pragma {
   add_framework_pragma() : id_list_pragma{"add_framework"} {}
 
   void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
+    notify(pp, t, "added framework");
     cur_ctx().add_pcm_framework(fname, to_str(t));
   }
 };
@@ -89,6 +101,7 @@ struct add_object_pragma : public id_list_pragma {
     if (sys::fs::is_regular_file(lit, res) && !res) {
       report(pp, t, "object not found");
     } else {
+      notify(pp, t, "added as library");
       cur_ctx().add_pcm_library(fname, lit);
     }
   }
