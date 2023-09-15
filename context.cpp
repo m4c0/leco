@@ -25,7 +25,7 @@ void context::add_pcm_resource(StringRef path, StringRef res) {
   pcm_dep_map[to_abs(path)].resources.insert(to_abs(res));
 }
 void context::add_pcm_library(StringRef path, StringRef lib) {
-  pcm_dep_map[to_abs(path)].resources.insert(to_abs(lib));
+  pcm_dep_map[to_abs(path)].libraries.insert(to_abs(lib));
 }
 
 void context::add_pending(StringRef f) {
