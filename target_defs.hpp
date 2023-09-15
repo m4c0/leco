@@ -13,9 +13,9 @@ static auto android(llvm::StringRef tgt) {
   find_android_llvm(llvm);
   llvm::sys::path::append(llvm, "sysroot");
   return context{
+      .predefs = predefs,
       .target = tgt.str(),
       .sysroot = llvm.str().str(),
-      .predefs = predefs,
       .app_exe_path = [](auto exe, auto stem) {},
       .app_res_path = [](auto exe) {},
   };
@@ -54,9 +54,8 @@ static auto macosx() {
       "LECO_TARGET_APPLE",
   }};
   return context{
-      .target = "x86_64-apple-macosx11.6.0",
-      .native_target = true,
       .predefs = predefs,
+      .target = "x86_64-apple-macosx11.6.0",
       .sysroot = impl::apple_sysroot("macosx"),
       .app_exe_path =
           [](auto &exe, auto stem) {
@@ -70,6 +69,7 @@ static auto macosx() {
             llvm::sys::path::remove_filename(exe);
             llvm::sys::path::append(exe, "Resources");
           },
+      .native_target = true,
   };
 }
 static auto iphoneos() {
@@ -79,8 +79,8 @@ static auto iphoneos() {
       "LECO_TARGET_APPLE",
   }};
   return context{
-      .target = "arm64-apple-ios13.0",
       .predefs = predefs,
+      .target = "arm64-apple-ios13.0",
       .sysroot = impl::apple_sysroot("iphoneos"),
       .app_exe_path =
           [](auto &exe, auto stem) {
@@ -97,8 +97,8 @@ static auto iphonesimulator() {
       "LECO_TARGET_APPLE",
   }};
   return context{
-      .target = "x86_64-apple-ios13.0-simulator",
       .predefs = predefs,
+      .target = "x86_64-apple-ios13.0-simulator",
       .sysroot = impl::apple_sysroot("iphonesimulator"),
       .app_exe_path =
           [](auto &exe, auto stem) {
@@ -114,11 +114,11 @@ static auto windows() {
       "LECO_TARGET_WINDOWS",
   }};
   return context{
-      .target = "x86_64-pc-windows-msvc",
-      .native_target = true,
       .predefs = predefs,
+      .target = "x86_64-pc-windows-msvc",
       .app_exe_path = [](auto exe, auto stem) {},
       .app_res_path = [](auto exe) {},
+      .native_target = true,
   };
 }
 
