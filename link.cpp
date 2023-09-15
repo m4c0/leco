@@ -15,16 +15,27 @@ static void recurse(StringSet<> &uniq, StringRef cur) {
     recurse(uniq, p);
   }
 }
+static void recurse_libs(StringSet<> &uniq, StringRef cur) {
+  auto libs = cur_ctx().pcm_dep_map[cur.str()].libraries;
+  uniq.insert(libs.begin(), libs.end());
+  for (auto &p : cur_ctx().pcm_dep_map[cur.str()].modules) {
+    recurse_libs(uniq, p);
+  }
+}
 std::string link(StringRef main_src) {
-  StringSet<> uniq{};
+  StringSet<> mods{};
   for (auto &p : cur_ctx().pcm_reqs) {
-    recurse(uniq, p);
+    recurse(mods, p);
+  }
+  StringSet<> libs{};
+  for (auto &p : cur_ctx().pcm_reqs) {
+    recurse_libs(libs, p);
   }
 
   std::set<StringRef> fws{};
 
   std::vector<std::string> args{};
-  for (auto &p : uniq) {
+  for (auto &p : mods) {
     SmallString<128> pp{};
     in2out(p.first(), pp, "o");
     args.push_back(pp.str().str());
@@ -49,6 +60,9 @@ std::string link(StringRef main_src) {
   evoker e{};
   for (auto &p : args) {
     e.push_arg(p);
+  }
+  for (auto &p : libs) {
+    e.push_arg(p.first());
   }
   for (auto &fw : fws) {
     e.push_arg("-framework");
