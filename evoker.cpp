@@ -83,6 +83,7 @@ void in2out(llvm::StringRef in, llvm::SmallVectorImpl<char> &out,
 
 evoker::evoker() {
   m_args.push_back(clang_exe());
+  m_args.push_back("-Wall");
   m_args.push_back("-target");
   m_args.push_back(cur_ctx().target.c_str());
 
