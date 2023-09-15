@@ -14,6 +14,7 @@ struct dep {
   std::set<std::string> modules{};
   std::set<std::string> frameworks{};
   std::set<std::string> resources{};
+  std::set<std::string> libraries{};
 };
 struct context {
   // Defined via CLI
@@ -29,6 +30,7 @@ struct context {
   void add_pcm_framework(llvm::StringRef path, llvm::StringRef fw);
   void add_pcm_dep(llvm::StringRef from, llvm::StringRef to);
   void add_pcm_resource(llvm::StringRef from, llvm::StringRef res);
+  void add_pcm_library(llvm::StringRef from, llvm::StringRef lib);
 
   // Once per file
   exe_t exe_type{};

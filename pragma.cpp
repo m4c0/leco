@@ -76,6 +76,15 @@ struct add_framework_pragma : public id_list_pragma {
   }
 };
 
+struct add_object_pragma : public id_list_pragma {
+  add_object_pragma() : id_list_pragma{"add_object"} {}
+
+  bool process_id(Preprocessor &pp, Token &t, StringRef fname) override {
+    cur_ctx().add_pcm_library(fname, t.getIdentifierInfo()->getName());
+    return true;
+  }
+};
+
 struct add_resource_pragma : public PragmaHandler {
   add_resource_pragma() : PragmaHandler{"add_resource"} {}
 
@@ -132,6 +141,7 @@ struct ns_pragma : public PragmaNamespace {
   ns_pragma() : PragmaNamespace{"leco"} {
     AddPragma(new add_impl_pragma());
     AddPragma(new add_framework_pragma());
+    AddPragma(new add_object_pragma());
     AddPragma(new add_resource_pragma());
     AddPragma(new app_pragma());
     AddPragma(new tool_pragma());
