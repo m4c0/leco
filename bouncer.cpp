@@ -57,7 +57,8 @@ public:
                 file_ext == ".cppm";
 
     auto tool = cur_ctx().exe_type == exe_t::tool && cur_ctx().native_target;
-    auto exe = tool || (cur_ctx().exe_type == exe_t::app);
+    auto app = cur_ctx().exe_type == exe_t::app;
+    auto exe = tool || app;
 
     if (!root && !exe)
       return;
@@ -75,7 +76,7 @@ public:
 
     cur_ctx().add_pcm_req(getCurrentFile());
     auto exe_path = link(getCurrentFile());
-    if (exe_path != "")
+    if (exe_path != "" && app)
       copy_resources(exe_path);
 
     cur_ctx().exe_type = exe_t::none;
