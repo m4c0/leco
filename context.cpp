@@ -33,3 +33,18 @@ void context::add_pcm_library(StringRef path, StringRef lib) {
 void context::add_pending(StringRef f) {
   pending_compilation.insert(to_abs(f));
 }
+
+void context::list_unique_mods(llvm::StringSet<> &out) {
+  auto recurse = [&](auto &r, StringRef cur) {
+    auto [it, added] = out.insert(cur);
+    if (!added)
+      return;
+
+    for (auto &p : pcm_dep_map[cur.str()].modules) {
+      r(r, p);
+    }
+  };
+  for (auto &p : pcm_reqs) {
+    recurse(recurse, p);
+  }
+}

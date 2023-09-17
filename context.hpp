@@ -1,6 +1,7 @@
 #pragma once
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/StringRef.h"
+#include "llvm/ADT/StringSet.h"
 #include <map>
 #include <set>
 #include <string>
@@ -38,6 +39,7 @@ struct context {
   std::set<std::string> pcm_reqs{};
   void add_pcm_req(llvm::StringRef path);
   void add_pending(llvm::StringRef file);
+  void list_unique_mods(llvm::StringSet<> &out);
 };
 
 context &cur_ctx();

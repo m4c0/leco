@@ -9,20 +9,9 @@
 
 using namespace llvm;
 
-static void recurse(StringSet<> &uniq, StringRef cur) {
-  auto [it, added] = uniq.insert(cur);
-  if (!added)
-    return;
-
-  for (auto &p : cur_ctx().pcm_dep_map[cur.str()].modules) {
-    recurse(uniq, p);
-  }
-}
 std::string link(StringRef main_src) {
   StringSet<> mods{};
-  for (auto &p : cur_ctx().pcm_reqs) {
-    recurse(mods, p);
-  }
+  cur_ctx().list_unique_mods(mods);
 
   StringSet<> libs{};
   std::set<StringRef> fws{};

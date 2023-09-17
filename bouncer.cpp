@@ -26,8 +26,10 @@ void copy_resources(StringRef exe) {
   cur_ctx().app_res_path(path);
   sys::fs::create_directories(path);
 
-  const auto rec = [&](auto &rec, const std::string &m) -> void {
-    for (auto &r : cur_ctx().pcm_dep_map[m].resources) {
+  StringSet<> mods{};
+  cur_ctx().list_unique_mods(mods);
+  for (auto &p : mods) {
+    for (auto &r : cur_ctx().pcm_dep_map[p.first().str()].resources) {
       sys::path::append(path, sys::path::filename(r));
       if (is_verbose()) {
         errs() << "copying resource " << path << "\n";
@@ -35,12 +37,6 @@ void copy_resources(StringRef exe) {
       sys::fs::copy_file(r, path);
       sys::path::remove_filename(path);
     }
-    for (auto &m : cur_ctx().pcm_dep_map[m].modules) {
-      rec(rec, m);
-    }
-  };
-  for (auto &p : cur_ctx().pcm_reqs) {
-    rec(rec, p);
   }
 }
 
