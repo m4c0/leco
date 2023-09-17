@@ -11,7 +11,7 @@ using namespace llvm;
 
 static void recurse(StringSet<> &uniq, StringRef cur) {
   auto [it, added] = uniq.insert(cur);
-  if (added)
+  if (!added)
     return;
 
   for (auto &p : cur_ctx().pcm_dep_map[cur.str()].modules) {
@@ -25,11 +25,6 @@ std::string link(StringRef main_src) {
   }
 
   StringSet<> libs{};
-  for (auto &p : mods) {
-    auto &l = cur_ctx().pcm_dep_map[p.first().str()].libraries;
-    libs.insert(l.begin(), l.end());
-  }
-
   std::set<StringRef> fws{};
 
   std::vector<std::string> args{};
@@ -38,8 +33,12 @@ std::string link(StringRef main_src) {
     in2out(p.first(), pp, "o");
     args.push_back(pp.str().str());
 
-    for (auto &fw : cur_ctx().pcm_dep_map[p.first().str()].frameworks) {
+    auto &pdm = cur_ctx().pcm_dep_map[p.first().str()];
+    for (auto &fw : pdm.frameworks) {
       fws.insert(fw);
+    }
+    for (auto &l : pdm.libraries) {
+      libs.insert(l);
     }
   }
 
