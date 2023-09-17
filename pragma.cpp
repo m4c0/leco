@@ -85,6 +85,17 @@ struct add_framework_pragma : public id_list_pragma {
   }
 };
 
+struct add_library_pragma : public id_list_pragma {
+  add_library_pragma() : id_list_pragma{"add_library"} {}
+
+  void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
+    notify(pp, t, "added library");
+    SmallString<128> lib{"-l"};
+    lib.append(to_str(t));
+    cur_ctx().add_pcm_library(fname, lib);
+  }
+};
+
 struct add_object_pragma : public id_list_pragma {
   add_object_pragma() : id_list_pragma{"add_object"} {}
 
@@ -135,6 +146,7 @@ struct ns_pragma : public PragmaNamespace {
   ns_pragma() : PragmaNamespace{"leco"} {
     AddPragma(new add_impl_pragma());
     AddPragma(new add_framework_pragma());
+    AddPragma(new add_library_pragma());
     AddPragma(new add_object_pragma());
     AddPragma(new add_resource_pragma());
     AddPragma(new app_pragma());
