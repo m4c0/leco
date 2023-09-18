@@ -87,7 +87,7 @@ static auto iphoneos() {
             impl::apple_bundle_path(exe, stem);
             llvm::sys::path::append(exe, stem);
           },
-      .app_res_path = [](auto exe) {},
+      .app_res_path = [](auto exe) { llvm::sys::path::remove_filename(exe); },
   };
 }
 static auto iphonesimulator() {
@@ -105,7 +105,7 @@ static auto iphonesimulator() {
             impl::apple_bundle_path(exe, stem);
             llvm::sys::path::append(exe, stem);
           },
-      .app_res_path = [](auto exe) {},
+      .app_res_path = [](auto exe) { llvm::sys::path::remove_filename(exe); },
   };
 }
 
@@ -117,7 +117,7 @@ static auto windows() {
       .predefs = predefs,
       .target = "x86_64-pc-windows-msvc",
       .app_exe_path = [](auto exe, auto stem) {},
-      .app_res_path = [](auto exe) {},
+      .app_res_path = [](auto exe) { llvm::sys::path::remove_filename(exe); },
       .native_target = true,
   };
 }
