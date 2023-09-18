@@ -132,14 +132,17 @@ struct add_shader_pragma : public id_list_pragma {
   void process_id(Preprocessor &pp, Token &t, StringRef fname) {
     notify(pp, t, "adding shader");
 
+    SmallString<256> in{fname};
+    llvm::sys::path::remove_filename(in);
+    llvm::sys::path::append(in, to_str(t));
+
     SmallString<256> out{};
-    auto lit = to_str(t);
-    in2out(lit, out);
+    in2out(in, out);
     out.append(".spv");
 
     llvm::sys::fs::create_directories(llvm::sys::path::parent_path(out));
 
-    auto cmd = ("glslangValidator -V -o " + out + " " + lit).str();
+    auto cmd = ("glslangValidator -V -o " + out + " " + in).str();
     if (0 == system(cmd.c_str())) {
       cur_ctx().add_pcm_resource(fname, out);
     } else {
