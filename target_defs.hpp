@@ -116,7 +116,12 @@ static auto windows() {
   return context{
       .predefs = predefs,
       .target = "x86_64-pc-windows-msvc",
-      .app_exe_path = [](auto exe, auto stem) {},
+      .app_exe_path =
+          [](auto exe, auto stem) {
+            impl::apple_bundle_path(exe, stem);
+            llvm::sys::path::append(exe, stem);
+            llvm::sys::path::replace_extension(exe, "exe");
+          },
       .app_res_path = [](auto exe) { llvm::sys::path::remove_filename(exe); },
       .native_target = true,
   };
