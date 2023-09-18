@@ -93,7 +93,11 @@ struct add_include_dir_pragma : public id_list_pragma {
   void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
     notify(pp, t, "added include directory");
 
-    auto de = pp.getFileManager().getDirectoryRef(to_str(t));
+    SmallString<256> in{fname};
+    llvm::sys::path::remove_filename(in);
+    llvm::sys::path::append(in, to_str(t));
+
+    auto de = pp.getFileManager().getDirectoryRef(in);
     if (auto err = de.takeError()) {
       report(pp, t, "error adding include directory: %0")
           << toString(std::move(err));
