@@ -137,6 +137,8 @@ struct add_shader_pragma : public id_list_pragma {
     in2out(lit, out);
     out.append(".spv");
 
+    llvm::sys::fs::create_directories(llvm::sys::path::parent_path(out));
+
     auto cmd = ("glslangValidator -V -o " + out + " " + lit).str();
     if (0 == system(cmd.c_str())) {
       cur_ctx().add_pcm_resource(fname, out);
