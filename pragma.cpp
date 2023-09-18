@@ -8,8 +8,8 @@ using namespace clang;
 using namespace llvm;
 
 template <unsigned N>
-static void report(Preprocessor &pp, Token &t, const char (&msg)[N]) {
-  diag_error(pp.getDiagnostics(), t.getLocation(), msg);
+static auto report(Preprocessor &pp, Token &t, const char (&msg)[N]) {
+  return diag_error(pp.getDiagnostics(), t.getLocation(), msg);
 }
 template <unsigned N>
 static void notify(Preprocessor &pp, Token &t, const char (&msg)[N]) {
@@ -68,7 +68,8 @@ struct add_impl_pragma : public id_list_pragma {
     sys::path::append(f, dir, to_str(t));
 
     if (!check_ext(f, "cpp") && !check_ext(f, "mm") && !check_ext(f, "m")) {
-      return report(pp, t, "module impl not found");
+      report(pp, t, "module impl not found");
+      return;
     }
 
     notify(pp, t, "queueing implementation");
@@ -83,6 +84,24 @@ struct add_framework_pragma : public id_list_pragma {
   void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
     notify(pp, t, "added framework");
     cur_ctx().add_pcm_framework(fname, to_str(t));
+  }
+};
+
+struct add_include_dir_pragma : public id_list_pragma {
+  add_include_dir_pragma() : id_list_pragma{"add_include_dir"} {}
+
+  void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
+    notify(pp, t, "added include directory");
+
+    auto de = pp.getFileManager().getDirectoryRef(to_str(t));
+    if (auto err = de.takeError()) {
+      report(pp, t, "error adding include directory: %0")
+          << toString(std::move(err));
+      return;
+    }
+    DirectoryLookup dl{*de, SrcMgr::C_User, false};
+    pp.getHeaderSearchInfo().AddSearchPath(dl, false);
+    pp.getHeaderSearchInfo().AddSearchPath(dl, true);
   }
 };
 
@@ -171,6 +190,7 @@ struct tool_pragma : public PragmaHandler {
 struct ns_pragma : public PragmaNamespace {
   ns_pragma() : PragmaNamespace{"leco"} {
     AddPragma(new add_impl_pragma());
+    AddPragma(new add_include_dir_pragma());
     AddPragma(new add_framework_pragma());
     AddPragma(new add_library_pragma());
     AddPragma(new add_object_pragma());
