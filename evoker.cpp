@@ -7,6 +7,7 @@
 #include "clang_dir.hpp"
 #include "context.hpp"
 #include "evoker.hpp"
+#include "in2out.hpp"
 #include "instance.hpp"
 #include "clang/CodeGen/ObjectFilePCHContainerOperations.h"
 #include "clang/Driver/Compilation.h"
@@ -61,24 +62,6 @@ std::shared_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
     clang->getPreprocessorOpts().addMacroDef(def);
 
   return clang;
-}
-
-void in2out(llvm::StringRef in, llvm::SmallVectorImpl<char> &out,
-            llvm::StringRef ext) {
-  out.clear();
-
-  auto path = sys::path::parent_path(in);
-  auto gpath = sys::path::parent_path(path);
-  if (sys::path::stem(gpath) != "out") {
-    auto name = sys::path::stem(in);
-    auto triple = cur_ctx().target;
-    sys::path::append(out, path, "out", triple, name);
-  } else {
-    sys::path::append(out, in);
-  }
-  // TODO: check errors
-  sys::fs::make_absolute(out);
-  sys::path::replace_extension(out, ext);
 }
 
 evoker::evoker() {
