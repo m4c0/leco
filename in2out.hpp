@@ -9,7 +9,7 @@ static void in2out(llvm::StringRef in, llvm::SmallVectorImpl<char> &out) {
   auto path = llvm::sys::path::parent_path(in);
   auto gpath = llvm::sys::path::parent_path(path);
   if (llvm::sys::path::stem(gpath) != "out") {
-    auto name = llvm::sys::path::stem(in);
+    auto name = llvm::sys::path::filename(in);
     auto triple = cur_ctx().target;
     llvm::sys::path::append(out, path, "out", triple, name);
   } else {

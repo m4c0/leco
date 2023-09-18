@@ -1,5 +1,6 @@
 #include "context.hpp"
 #include "diags.hpp"
+#include "in2out.hpp"
 #include "clang/Lex/LexDiagnostic.h"
 #include "clang/Lex/Preprocessor.h"
 
@@ -125,6 +126,26 @@ struct add_resource_pragma : public id_list_pragma {
   }
 };
 
+struct add_shader_pragma : public id_list_pragma {
+  add_shader_pragma() : id_list_pragma{"add_shader"} {}
+
+  void process_id(Preprocessor &pp, Token &t, StringRef fname) {
+    notify(pp, t, "adding shader");
+
+    SmallString<256> out{};
+    auto lit = to_str(t);
+    in2out(lit, out);
+    out.append(".spv");
+
+    auto cmd = ("glslangValidator -V -o " + out + " " + lit).str();
+    if (0 == system(cmd.c_str())) {
+      cur_ctx().add_pcm_resource(fname, out);
+    } else {
+      report(pp, t, "failed to compile shader");
+    }
+  }
+};
+
 struct app_pragma : public PragmaHandler {
   app_pragma() : PragmaHandler{"app"} {}
 
@@ -149,6 +170,7 @@ struct ns_pragma : public PragmaNamespace {
     AddPragma(new add_library_pragma());
     AddPragma(new add_object_pragma());
     AddPragma(new add_resource_pragma());
+    AddPragma(new add_shader_pragma());
     AddPragma(new app_pragma());
     AddPragma(new tool_pragma());
   }
