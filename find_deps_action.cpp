@@ -49,12 +49,14 @@ void find_deps_pp_callbacks::moduleImport(SourceLocation loc, ModuleIdPath path,
       dep.clear();
       sys::path::append(dep, "..", camel, t);
     }
-    if (!sys::fs::is_regular_file(dep.c_str()))
-      return diag_error(*m_diags, loc, "file not found");
+    if (!sys::fs::is_regular_file(dep.c_str())) {
+      diag_error(*m_diags, loc, "file not found");
+      return;
+    }
 
     if (compile_wd(dep, m_cur_file))
       return;
   }
 
-  return diag_error(*m_diags, loc, "failure compiling dependency");
+  diag_error(*m_diags, loc, "failure compiling dependency");
 }
