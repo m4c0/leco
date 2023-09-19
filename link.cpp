@@ -43,6 +43,7 @@ std::string link(StringRef main_src) {
   if (is_verbose()) {
     errs() << "linking " << exe << "\n";
   }
+  exe.c_str();
 
   evoker e{};
   for (auto &p : args) {
