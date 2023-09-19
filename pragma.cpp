@@ -124,13 +124,16 @@ struct add_object_pragma : public id_list_pragma {
   add_object_pragma() : id_list_pragma{"add_object"} {}
 
   void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
-    auto lit = to_str(t);
+    SmallString<256> in{fname};
+    llvm::sys::path::remove_filename(in);
+    llvm::sys::path::append(in, to_str(t));
+
     bool res{};
-    if (sys::fs::is_regular_file(lit, res) && !res) {
+    if (sys::fs::is_regular_file(in, res) && !res) {
       report(pp, t, "object not found");
     } else {
-      notify(pp, t, "added as library");
-      cur_ctx().add_pcm_library(fname, lit);
+      notify(pp, t, "added object");
+      cur_ctx().add_pcm_library(fname, in);
     }
   }
 };
