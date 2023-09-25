@@ -6,10 +6,10 @@
 #include <sys/stat.h>
 
 static constexpr const char *files[]{
-    "leco",     "bouncer",    "cl",     "compile",
-    "context",  "droid_path", "evoker", "find_deps_action",
-    "instance", "link",       "plist",  "pragma",
-    "wrapper",
+    "leco",        "bouncer",    "cl",     "compile",
+    "context",     "droid_path", "evoker", "find_deps_action",
+    "instance",    "link",       "plist",  "pragma",
+    "target_defs", "wrapper",
 };
 
 constexpr const char *cmd =
