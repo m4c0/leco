@@ -79,6 +79,8 @@ void common_app_plist(dict &d, StringRef name, StringRef sdk) {
   d.string("CFBundleShortVersionString", "1.0.0");
   d.string("CFBundleVersion", "1.0.0");
   d.string("DTPlatformName", sdk);
+  d.string("DTPlatformBuild", "21A325");
+  d.string("DTXcodeBuild", "15A240d");
 }
 } // namespace plist
 
