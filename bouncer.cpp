@@ -39,6 +39,10 @@ void copy_resources(StringRef exe) {
     }
   }
 }
+void bundle_app(StringRef exe) {
+  SmallString<256> path{exe};
+  cur_ctx().bundle(path, sys::path::stem(exe));
+}
 
 class bouncer : public PreprocessOnlyAction {
 public:
@@ -72,8 +76,10 @@ public:
 
     cur_ctx().add_pcm_req(getCurrentFile());
     auto exe_path = link(getCurrentFile());
-    if (exe_path != "" && app)
+    if (exe_path != "" && app) {
       copy_resources(exe_path);
+      bundle_app(exe_path);
+    }
 
     cur_ctx().exe_type = exe_t::none;
   }

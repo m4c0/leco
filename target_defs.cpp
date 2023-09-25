@@ -1,7 +1,10 @@
 #include "context.hpp"
 #include "droid_path.hpp"
+#include "plist.hpp"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/Support/Path.h"
+
+using namespace llvm;
 
 namespace t::impl {
 context android(llvm::StringRef tgt) {
@@ -17,6 +20,7 @@ context android(llvm::StringRef tgt) {
       .sysroot = llvm.str().str(),
       .app_exe_path = [](auto exe, auto stem) {},
       .app_res_path = [](auto exe) {},
+      .bundle = [](auto &exe, auto stem) {},
   };
 }
 static std::string apple_sysroot(llvm::StringRef sdk) {
@@ -68,6 +72,7 @@ context macosx() {
             llvm::sys::path::remove_filename(exe);
             llvm::sys::path::append(exe, "Resources");
           },
+      .bundle = [](auto &exe, auto stem) {},
       .native_target = true,
   };
 }
@@ -84,9 +89,18 @@ context iphoneos() {
       .app_exe_path =
           [](auto &exe, auto stem) {
             impl::apple_bundle_path(exe, stem);
-            llvm::sys::path::append(exe, stem);
+            sys::path::append(exe, stem);
           },
-      .app_res_path = [](auto exe) { llvm::sys::path::remove_filename(exe); },
+      .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
+      .bundle =
+          [](auto &exe, auto stem) {
+            impl::apple_bundle_path(exe, stem);
+
+            auto b_path = StringRef{exe.begin(), exe.size()};
+            gen_info_plist(b_path, stem);
+            gen_archive_plist(sys::path::parent_path(b_path), stem);
+            gen_export_plist(sys::path::parent_path(b_path), stem);
+          },
   };
 }
 context iphonesimulator() {
@@ -104,7 +118,8 @@ context iphonesimulator() {
             impl::apple_bundle_path(exe, stem);
             llvm::sys::path::append(exe, stem);
           },
-      .app_res_path = [](auto exe) { llvm::sys::path::remove_filename(exe); },
+      .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
+      .bundle = [](auto &exe, auto stem) {},
   };
 }
 
@@ -121,7 +136,8 @@ context windows() {
             llvm::sys::path::append(exe, stem);
             llvm::sys::path::replace_extension(exe, "exe");
           },
-      .app_res_path = [](auto exe) { llvm::sys::path::remove_filename(exe); },
+      .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
+      .bundle = [](auto &exe, auto stem) {},
       .native_target = true,
   };
 }
