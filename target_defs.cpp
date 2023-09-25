@@ -7,13 +7,13 @@
 using namespace llvm;
 
 namespace t::impl {
-context android(llvm::StringRef tgt) {
-  static llvm::SmallVector<llvm::StringRef, 3> predefs{{
+context android(StringRef tgt) {
+  static SmallVector<StringRef, 3> predefs{{
       "LECO_TARGET_ANDROID",
   }};
-  llvm::SmallString<256> llvm{};
+  SmallString<256> llvm{};
   find_android_llvm(llvm);
-  llvm::sys::path::append(llvm, "sysroot");
+  sys::path::append(llvm, "sysroot");
   return context{
       .predefs = predefs,
       .target = tgt.str(),
@@ -23,10 +23,10 @@ context android(llvm::StringRef tgt) {
       .bundle = [](auto &exe, auto stem) {},
   };
 }
-static std::string apple_sysroot(llvm::StringRef sdk) {
+static std::string apple_sysroot(StringRef sdk) {
 #ifdef __APPLE__
   constexpr const auto limit = 256;
-  llvm::SmallString<limit> buf{};
+  SmallString<limit> buf{};
 
   buf.assign("xcrun --show-sdk-path --sdk ");
   buf.append(sdk);
@@ -44,15 +44,15 @@ static std::string apple_sysroot(llvm::StringRef sdk) {
   return "";
 #endif
 }
-void apple_bundle_path(llvm::SmallVectorImpl<char> &exe, llvm::StringRef stem) {
-  llvm::sys::path::remove_filename(exe);
-  llvm::sys::path::append(exe, stem);
-  llvm::sys::path::replace_extension(exe, "app");
+void apple_bundle_path(SmallVectorImpl<char> &exe, StringRef stem) {
+  sys::path::remove_filename(exe);
+  sys::path::append(exe, stem);
+  sys::path::replace_extension(exe, "app");
 }
 } // namespace t::impl
 namespace t {
 context macosx() {
-  static llvm::SmallVector<llvm::StringRef, 2> predefs{{
+  static SmallVector<StringRef, 2> predefs{{
       "LECO_TARGET_MACOSX",
       "LECO_TARGET_APPLE",
   }};
@@ -63,21 +63,21 @@ context macosx() {
       .app_exe_path =
           [](auto &exe, auto stem) {
             impl::apple_bundle_path(exe, stem);
-            llvm::sys::path::append(exe, "Contents", "MacOS");
-            llvm::sys::path::append(exe, stem);
+            sys::path::append(exe, "Contents", "MacOS");
+            sys::path::append(exe, stem);
           },
       .app_res_path =
           [](auto exe) {
-            llvm::sys::path::remove_filename(exe);
-            llvm::sys::path::remove_filename(exe);
-            llvm::sys::path::append(exe, "Resources");
+            sys::path::remove_filename(exe);
+            sys::path::remove_filename(exe);
+            sys::path::append(exe, "Resources");
           },
       .bundle = [](auto &exe, auto stem) {},
       .native_target = true,
   };
 }
 context iphoneos() {
-  static llvm::SmallVector<llvm::StringRef, 3> predefs{{
+  static SmallVector<StringRef, 3> predefs{{
       "LECO_TARGET_IPHONEOS",
       "LECO_TARGET_IOS",
       "LECO_TARGET_APPLE",
@@ -104,7 +104,7 @@ context iphoneos() {
   };
 }
 context iphonesimulator() {
-  static llvm::SmallVector<llvm::StringRef, 3> predefs{{
+  static SmallVector<StringRef, 3> predefs{{
       "LECO_TARGET_IPHONESIMULATOR",
       "LECO_TARGET_IOS",
       "LECO_TARGET_APPLE",
@@ -116,7 +116,7 @@ context iphonesimulator() {
       .app_exe_path =
           [](auto &exe, auto stem) {
             impl::apple_bundle_path(exe, stem);
-            llvm::sys::path::append(exe, stem);
+            sys::path::append(exe, stem);
           },
       .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
       .bundle = [](auto &exe, auto stem) {},
@@ -124,7 +124,7 @@ context iphonesimulator() {
 }
 
 context windows() {
-  static llvm::SmallVector<llvm::StringRef, 3> predefs{{
+  static SmallVector<StringRef, 3> predefs{{
       "LECO_TARGET_WINDOWS",
   }};
   return context{
@@ -133,8 +133,8 @@ context windows() {
       .app_exe_path =
           [](auto exe, auto stem) {
             impl::apple_bundle_path(exe, stem);
-            llvm::sys::path::append(exe, stem);
-            llvm::sys::path::replace_extension(exe, "exe");
+            sys::path::append(exe, stem);
+            sys::path::replace_extension(exe, "exe");
           },
       .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
       .bundle = [](auto &exe, auto stem) {},
