@@ -1,4 +1,5 @@
 #include "context.hpp"
+#include "plist.hpp"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/Twine.h"
 #include "llvm/Support/Path.h"
@@ -77,13 +78,12 @@ void common_app_plist(dict &d, StringRef name, StringRef sdk) {
   return (v == nullptr) ? "TBD" : std::string{v};
 }
 
-namespace plist::iphone {
 void gen_info_plist(StringRef exe_path, StringRef name) {
   SmallString<256> path{};
   sys::path::append(path, exe_path, "Info.plist");
   std::error_code ec;
   auto o = raw_fd_stream(path, ec);
-  gen(o, [&](auto &&d) {
+  plist::gen(o, [&](auto &&d) {
     common_app_plist(d, name, "iphoneos");
     d.array("CFBundleSupportedPlatforms", "iPhoneOS");
     d.string("MinimumOSVersion", "13.0");
@@ -96,7 +96,7 @@ void gen_archive_plist(StringRef build_path, StringRef name) {
   sys::path::append(path, build_path, "export.xcarchive", "Info.plist");
   std::error_code ec;
   auto o = raw_fd_stream(path, ec);
-  gen(o, [&](auto &&d) {
+  plist::gen(o, [&](auto &&d) {
     d.dictionary("ApplicationProperties", [&](auto &&dd) {
       dd.string("ApplicationPath", "Applications/" + name + ".app");
       dd.array("Architectures", "arm64");
@@ -117,7 +117,7 @@ void gen_export_plist(StringRef build_path, StringRef name) {
   sys::path::append(path, build_path, "export.plist");
   std::error_code ec;
   auto o = raw_fd_stream(path, ec);
-  gen(o, [&](auto &&d) {
+  plist::gen(o, [&](auto &&d) {
     d.string("method", "ad-hoc");
     d.string("teamID", env("LECO_IOS_TEAM"));
     d.string("thinning", "&lt;none&gt;");
@@ -126,4 +126,3 @@ void gen_export_plist(StringRef build_path, StringRef name) {
     });
   });
 }
-} // namespace plist::iphone
