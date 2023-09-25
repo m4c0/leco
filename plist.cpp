@@ -128,3 +128,8 @@ void gen_export_plist(StringRef build_path, StringRef name) {
     });
   });
 }
+void gen_iphone_plists(StringRef bundle_path, StringRef name) {
+  gen_info_plist(bundle_path, name);
+  gen_archive_plist(sys::path::parent_path(bundle_path), name);
+  gen_export_plist(sys::path::parent_path(bundle_path), name);
+}
