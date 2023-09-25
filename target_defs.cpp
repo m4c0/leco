@@ -94,8 +94,7 @@ context iphoneos() {
       .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
       .bundle =
           [](auto &exe, auto stem) {
-            impl::apple_bundle_path(exe, stem);
-
+            sys::path::remove_filename(exe);
             auto b_path = StringRef{exe.begin(), exe.size()};
             gen_info_plist(b_path, stem);
             gen_archive_plist(sys::path::parent_path(b_path), stem);

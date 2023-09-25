@@ -2,6 +2,7 @@
 #include "plist.hpp"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/Twine.h"
+#include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
 #include "llvm/Support/raw_ostream.h"
 
@@ -95,6 +96,7 @@ void gen_archive_plist(StringRef build_path, StringRef name) {
   SmallString<256> path{};
   sys::path::append(path, build_path, "export.xcarchive", "Info.plist");
   std::error_code ec;
+  sys::fs::create_directories(sys::path::parent_path(path));
   auto o = raw_fd_stream(path, ec);
   plist::gen(o, [&](auto &&d) {
     d.dictionary("ApplicationProperties", [&](auto &&dd) {
