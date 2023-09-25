@@ -50,6 +50,7 @@ public:
 };
 
 void gen(raw_ostream &o, function_ref<void(dict &&)> fn) {
+  // https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html
   o << R"(<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -91,6 +92,8 @@ void gen_info_plist(StringRef exe_path, StringRef name) {
     d.string("MinimumOSVersion", "13.0");
     d.boolean("LSRequiresIPhoneOS", true);
     d.integer("UIDeviceFamily", 1); // iPhone
+    d.array("UISupportedInterfaceOrientations",
+            "UIInterfaceOrientationPortrait");
   });
 }
 void gen_archive_plist(StringRef xca_path, StringRef name) {
