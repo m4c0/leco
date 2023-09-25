@@ -100,6 +100,10 @@ void gen_info_plist(StringRef exe_path, StringRef name) {
     d.boolean("LSRequiresIPhoneOS", true);
     d.array("UIDeviceFamily", 1); // iPhone
     d.string("UILaunchStoryboardName", "launch.storyboard");
+    d.dictionary("UIRequiredDeviceCapabilities", [](auto &&dd) {
+      dd.boolean("arm64", true);
+      dd.boolean("metal", true);
+    });
     d.array("UISupportedInterfaceOrientations",
             "UIInterfaceOrientationPortrait");
   });
