@@ -88,13 +88,16 @@ context iphoneos() {
       .sysroot = impl::apple_sysroot("iphoneos"),
       .app_exe_path =
           [](auto &exe, auto stem) {
-            impl::apple_bundle_path(exe, stem);
+            sys::path::remove_filename(exe);
+            sys::path::append(exe, "export.xcarchive", "Products",
+                              "Applications", stem);
+            sys::path::replace_extension(exe, "app");
+
             sys::path::append(exe, stem);
           },
       .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
       .bundle =
           [](auto &exe, auto stem) {
-            sys::path::remove_filename(exe);
             auto b_path = StringRef{exe.begin(), exe.size()};
             gen_iphone_plists(b_path, stem);
           },

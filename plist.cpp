@@ -81,8 +81,8 @@ void common_app_plist(dict &d, StringRef name, StringRef sdk) {
 [[nodiscard]] static std::string team_id() { return env("LECO_IOS_TEAM"); }
 
 void gen_info_plist(StringRef exe_path, StringRef name) {
-  SmallString<256> path{};
-  sys::path::append(path, exe_path, "Info.plist");
+  SmallString<256> path{exe_path};
+  sys::path::append(path, "Info.plist");
   std::error_code ec;
   auto o = raw_fd_stream(path, ec);
   plist::gen(o, [&](auto &&d) {
@@ -93,11 +93,10 @@ void gen_info_plist(StringRef exe_path, StringRef name) {
     d.integer("UIDeviceFamily", 1); // iPhone
   });
 }
-void gen_archive_plist(StringRef build_path, StringRef name) {
+void gen_archive_plist(StringRef xca_path, StringRef name) {
   SmallString<256> path{};
-  sys::path::append(path, build_path, "export.xcarchive", "Info.plist");
+  sys::path::append(path, xca_path, "Info.plist");
   std::error_code ec;
-  sys::fs::create_directories(sys::path::parent_path(path));
   auto o = raw_fd_stream(path, ec);
   plist::gen(o, [&](auto &&d) {
     d.dictionary("ApplicationProperties", [&](auto &&dd) {
@@ -135,9 +134,7 @@ static bool code_sign(StringRef bundle_path) {
   // TODO: improve error
   return 0 == std::system(cmd.c_str());
 }
-static bool export_archive(StringRef bundle_path) {
-  SmallString<256> xca_path{};
-  sys::path::append(xca_path, bundle_path, "export.xcarchive");
+static bool export_archive(StringRef bundle_path, StringRef xca_path) {
   SmallString<256> exp_path{};
   sys::path::append(exp_path, bundle_path, "export");
   SmallString<256> pl_path{};
@@ -148,14 +145,18 @@ static bool export_archive(StringRef bundle_path) {
                  .str();
   return 0 == std::system(cmd.c_str());
 }
-void gen_iphone_plists(StringRef bundle_path, StringRef name) {
-  auto pp = sys::path::parent_path(bundle_path);
-  gen_info_plist(bundle_path, name);
-  gen_archive_plist(pp, name);
-  gen_export_plist(pp, name);
-
-  if (!code_sign(bundle_path))
+void gen_iphone_plists(StringRef exe, StringRef name) {
+  auto app_path = sys::path::parent_path(exe);
+  gen_info_plist(app_path, name);
+  if (!code_sign(app_path))
     return;
 
-  export_archive(pp);
+  auto apps = sys::path::parent_path(app_path);
+  auto prod = sys::path::parent_path(apps);
+  auto exca = sys::path::parent_path(prod);
+  gen_archive_plist(exca, name);
+
+  auto build_path = sys::path::parent_path(exca);
+  gen_export_plist(build_path, name);
+  export_archive(build_path, exca);
 }
