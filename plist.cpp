@@ -140,6 +140,13 @@ void gen_export_plist(StringRef build_path, StringRef name) {
   });
 }
 
+static bool compile_launch(StringRef bundle_path) {
+  auto cmd = ("ibtool ../leco/launch.storyboard --compile " + bundle_path +
+              "/Base.lproj/launch.storyboard")
+                 .str();
+  // TODO: improve error
+  return 0 == std::system(cmd.c_str());
+}
 static bool code_sign(StringRef bundle_path) {
   auto cmd = ("codesign -f -s " + team_id() + " " + bundle_path).str();
   // TODO: improve error
@@ -159,6 +166,8 @@ static bool export_archive(StringRef bundle_path, StringRef xca_path) {
 void gen_iphone_plists(StringRef exe, StringRef name) {
   auto app_path = sys::path::parent_path(exe);
   gen_info_plist(app_path, name);
+  if (!compile_launch(app_path))
+    return;
   if (!code_sign(app_path))
     return;
 
