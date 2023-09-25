@@ -78,6 +78,7 @@ void common_app_plist(dict &d, StringRef name, StringRef sdk) {
   const auto v = std::getenv(key);
   return (v == nullptr) ? "TBD" : std::string{v};
 }
+[[nodiscard]] static std::string team_id() { return env("LECO_IOS_TEAM"); }
 
 void gen_info_plist(StringRef exe_path, StringRef name) {
   SmallString<256> path{};
@@ -106,7 +107,7 @@ void gen_archive_plist(StringRef build_path, StringRef name) {
       dd.string("CFBundleShortVersionString", "1.0.0");
       dd.string("CFBundleVersion", "0");
       dd.string("SigningIdentity", env("LECO_IOS_SIGN_ID"));
-      dd.string("Team", env("LECO_IOS_TEAM"));
+      dd.string("Team", team_id());
     });
     d.integer("ArchiveVersion", 1);
     d.date("CreationDate");
@@ -121,15 +122,40 @@ void gen_export_plist(StringRef build_path, StringRef name) {
   auto o = raw_fd_stream(path, ec);
   plist::gen(o, [&](auto &&d) {
     d.string("method", "ad-hoc");
-    d.string("teamID", env("LECO_IOS_TEAM"));
+    d.string("teamID", team_id());
     d.string("thinning", "&lt;none&gt;");
     d.dictionary("provisioningProfiles", [&](auto &&dd) {
       dd.string("br.com.tpk." + name, env("LECO_IOS_PROV_PROF"));
     });
   });
 }
+
+static bool code_sign(StringRef bundle_path) {
+  auto cmd = ("codesign -f -s " + team_id() + " " + bundle_path).str();
+  // TODO: improve error
+  return 0 == std::system(cmd.c_str());
+}
+static bool export_archive(StringRef bundle_path) {
+  SmallString<256> xca_path{};
+  sys::path::append(xca_path, bundle_path, "export.xcarchive");
+  SmallString<256> exp_path{};
+  sys::path::append(exp_path, bundle_path, "export");
+  SmallString<256> pl_path{};
+  sys::path::append(pl_path, bundle_path, "export.plist");
+
+  auto cmd = ("xcodebuild -exportArchive -archivePath " + xca_path +
+              " -exportPath " + exp_path + " -exportOptionsPlist " + pl_path)
+                 .str();
+  return 0 == std::system(cmd.c_str());
+}
 void gen_iphone_plists(StringRef bundle_path, StringRef name) {
+  auto pp = sys::path::parent_path(bundle_path);
   gen_info_plist(bundle_path, name);
-  gen_archive_plist(sys::path::parent_path(bundle_path), name);
-  gen_export_plist(sys::path::parent_path(bundle_path), name);
+  gen_archive_plist(pp, name);
+  gen_export_plist(pp, name);
+
+  if (!code_sign(bundle_path))
+    return;
+
+  export_archive(pp);
 }
