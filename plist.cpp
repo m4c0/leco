@@ -12,12 +12,19 @@ namespace plist {
 class dict {
   raw_ostream &o;
 
+  void array_element(Twine t) {
+    o << "<string>";
+    t.print(o);
+    o << "</string>";
+  }
+  void array_element(int i) { o << "<integer>" << i << "</integer>"; }
+
 public:
   explicit constexpr dict(raw_ostream &o) : o{o} {}
 
   void array(StringRef key, auto &&...v) {
     o << "<key>" << key << "</key><array>\n";
-    ((o << "<string>" << v << "</string>"), ...);
+    (array_element(v), ...);
     o << "</array>\n";
   }
   void boolean(StringRef key, bool v) {
@@ -91,7 +98,8 @@ void gen_info_plist(StringRef exe_path, StringRef name) {
     d.array("CFBundleSupportedPlatforms", "iPhoneOS");
     d.string("MinimumOSVersion", "13.0");
     d.boolean("LSRequiresIPhoneOS", true);
-    d.integer("UIDeviceFamily", 1); // iPhone
+    d.array("UIDeviceFamily", 1); // iPhone
+    d.string("UILaunchStoryboardName", "launch.storyboard");
     d.array("UISupportedInterfaceOrientations",
             "UIInterfaceOrientationPortrait");
   });
