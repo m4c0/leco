@@ -84,7 +84,7 @@ context iphoneos() {
   }};
   return context{
       .predefs = predefs,
-      .target = "arm64-apple-ios13.0",
+      .target = "arm64-apple-ios16.1",
       .sysroot = impl::apple_sysroot("iphoneos"),
       .app_exe_path =
           [](auto &exe, auto stem) {
@@ -111,7 +111,7 @@ context iphonesimulator() {
   }};
   return context{
       .predefs = predefs,
-      .target = "x86_64-apple-ios13.0-simulator",
+      .target = "x86_64-apple-ios16.1-simulator",
       .sysroot = impl::apple_sysroot("iphonesimulator"),
       .app_exe_path =
           [](auto &exe, auto stem) {

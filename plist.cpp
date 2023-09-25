@@ -96,7 +96,7 @@ void gen_info_plist(StringRef exe_path, StringRef name) {
   plist::gen(o, [&](auto &&d) {
     common_app_plist(d, name, "iphoneos");
     d.array("CFBundleSupportedPlatforms", "iPhoneOS");
-    d.string("MinimumOSVersion", "13.0");
+    d.string("MinimumOSVersion", "16.1");
     d.boolean("LSRequiresIPhoneOS", true);
     d.array("UIDeviceFamily", 1); // iPhone
     d.string("UILaunchStoryboardName", "launch.storyboard");
