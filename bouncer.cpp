@@ -38,6 +38,18 @@ void copy_resources(StringRef exe) {
       sys::path::remove_filename(path);
     }
   }
+
+  path = exe;
+  for (auto &p : mods) {
+    for (auto &e : cur_ctx().pcm_dep_map[p.first().str()].executables) {
+      sys::path::remove_filename(path);
+      sys::path::append(path, sys::path::filename(e));
+      if (is_verbose()) {
+        errs() << "copying library " << path << "\n";
+      }
+      sys::fs::copy_file(e, path);
+    }
+  }
 }
 void bundle_app(StringRef exe) {
   SmallString<256> path{exe};

@@ -16,6 +16,7 @@ struct dep {
   std::set<std::string> frameworks{};
   std::set<std::string> resources{};
   std::set<std::string> libraries{};
+  std::set<std::string> executables{};
 };
 struct context {
   // Defined via CLI
@@ -29,6 +30,7 @@ struct context {
 
   // Kept per session
   std::map<std::string, dep> pcm_dep_map{};
+  void add_pcm_executable(llvm::StringRef from, llvm::StringRef dll);
   void add_pcm_framework(llvm::StringRef path, llvm::StringRef fw);
   void add_pcm_dep(llvm::StringRef from, llvm::StringRef to);
   void add_pcm_resource(llvm::StringRef from, llvm::StringRef res);

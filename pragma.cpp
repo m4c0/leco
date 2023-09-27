@@ -52,6 +52,23 @@ public:
   }
 };
 
+struct add_dll_pragma : public id_list_pragma {
+  add_dll_pragma() : id_list_pragma("add_dll") {}
+
+  void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
+    SmallString<256> in{fname};
+    llvm::sys::path::remove_filename(in);
+    llvm::sys::path::append(in, to_str(t));
+
+    bool res{};
+    if (sys::fs::is_regular_file(in, res) && !res) {
+      report(pp, t, "library not found");
+    } else {
+      notify(pp, t, "added library to bundle");
+      cur_ctx().add_pcm_executable(fname, in);
+    }
+  }
+};
 struct add_impl_pragma : public id_list_pragma {
   add_impl_pragma() : id_list_pragma{"add_impl"} {}
 
@@ -196,6 +213,7 @@ struct tool_pragma : public PragmaHandler {
 
 struct ns_pragma : public PragmaNamespace {
   ns_pragma() : PragmaNamespace{"leco"} {
+    AddPragma(new add_dll_pragma());
     AddPragma(new add_impl_pragma());
     AddPragma(new add_include_dir_pragma());
     AddPragma(new add_framework_pragma());
