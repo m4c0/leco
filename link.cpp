@@ -56,6 +56,8 @@ std::string link(StringRef main_src) {
     e.push_arg("-framework");
     e.push_arg(fw);
   }
+  e.push_arg("-rpath");
+  e.push_arg("@executable_path");
   e.push_arg("-o");
   e.push_arg(exe);
   return e.execute() ? std::string{exe} : std::string{};
