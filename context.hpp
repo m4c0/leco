@@ -21,6 +21,7 @@ struct dep {
 struct context {
   // Defined via CLI
   llvm::ArrayRef<llvm::StringRef> predefs{};
+  llvm::ArrayRef<llvm::StringRef> link_flags{};
   std::string target{};
   std::string sysroot{};
   void (*app_exe_path)(llvm::SmallVectorImpl<char> &exe, llvm::StringRef stem);

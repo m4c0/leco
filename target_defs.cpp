@@ -44,6 +44,13 @@ static std::string apple_sysroot(StringRef sdk) {
   return "";
 #endif
 }
+llvm::ArrayRef<llvm::StringRef> apple_link_flags() {
+  static SmallVector<StringRef, 3> flags{{
+      "-rpath",
+      "@executable_path",
+  }};
+  return flags;
+}
 void apple_bundle_path(SmallVectorImpl<char> &exe, StringRef stem) {
   sys::path::remove_filename(exe);
   sys::path::append(exe, stem);
@@ -58,6 +65,7 @@ context macosx() {
   }};
   return context{
       .predefs = predefs,
+      .link_flags = apple_link_flags(),
       .target = "x86_64-apple-macosx11.6.0",
       .sysroot = impl::apple_sysroot("macosx"),
       .app_exe_path =
@@ -84,6 +92,7 @@ context iphoneos() {
   }};
   return context{
       .predefs = predefs,
+      .link_flags = apple_link_flags(),
       .target = "arm64-apple-ios16.1",
       .sysroot = impl::apple_sysroot("iphoneos"),
       .app_exe_path =
@@ -111,6 +120,7 @@ context iphonesimulator() {
   }};
   return context{
       .predefs = predefs,
+      .link_flags = apple_link_flags(),
       .target = "x86_64-apple-ios16.1-simulator",
       .sysroot = impl::apple_sysroot("iphonesimulator"),
       .app_exe_path =
