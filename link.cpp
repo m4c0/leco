@@ -56,7 +56,7 @@ std::string link(StringRef main_src) {
     e.push_arg("-framework");
     e.push_arg(fw);
   }
-  for (auto l : cur_ctx().link_flags()) {
+  for (auto l : cur_ctx().link_flags) {
     e.push_arg(l);
   }
   e.push_arg("-o");

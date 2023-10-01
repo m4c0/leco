@@ -65,7 +65,7 @@ context macosx() {
   }};
   return context{
       .predefs = predefs,
-      .link_flags = apple_link_flags(),
+      .link_flags = impl::apple_link_flags(),
       .target = "x86_64-apple-macosx11.6.0",
       .sysroot = impl::apple_sysroot("macosx"),
       .app_exe_path =
@@ -92,7 +92,7 @@ context iphoneos() {
   }};
   return context{
       .predefs = predefs,
-      .link_flags = apple_link_flags(),
+      .link_flags = impl::apple_link_flags(),
       .target = "arm64-apple-ios16.1",
       .sysroot = impl::apple_sysroot("iphoneos"),
       .app_exe_path =
@@ -120,7 +120,7 @@ context iphonesimulator() {
   }};
   return context{
       .predefs = predefs,
-      .link_flags = apple_link_flags(),
+      .link_flags = impl::apple_link_flags(),
       .target = "x86_64-apple-ios16.1-simulator",
       .sysroot = impl::apple_sysroot("iphonesimulator"),
       .app_exe_path =
