@@ -17,7 +17,7 @@ public:
     m_args.push_back(mode.data());
     return *this;
   }
-  evoker &set_cpp_std() { return push_arg("-std=c++20"); }
+  evoker &set_cpp_std() { return push_arg("-std=c++2b"); }
   evoker &set_inout(llvm::StringRef in, llvm::StringRef ext);
 
   [[nodiscard]] instance build();
