@@ -4,6 +4,7 @@
 #define EXE_EXT ""
 #endif
 
+#include "cl.hpp"
 #include "clang_dir.hpp"
 #include "context.hpp"
 #include "evoker.hpp"
@@ -69,6 +70,13 @@ evoker::evoker() {
   m_args.push_back("-Wall");
   m_args.push_back("-target");
   m_args.push_back(cur_ctx().target.c_str());
+
+  if (is_optimised()) {
+    m_args.push_back("-O3");
+  }
+  if (enable_debug_syms()) {
+    m_args.push_back("-g");
+  }
 
   if (cur_ctx().sysroot != "") {
     m_args.push_back("--sysroot");
