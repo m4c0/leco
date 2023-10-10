@@ -59,7 +59,6 @@ std::string link(StringRef main_src) {
   for (auto l : cur_ctx().link_flags) {
     e.push_arg(l);
   }
-  e.push_arg("-o");
-  e.push_arg(exe);
+  e.set_out(exe);
   return e.execute() ? std::string{exe} : std::string{};
 }

@@ -19,6 +19,7 @@ public:
   }
   evoker &set_cpp_std() { return push_arg("-std=c++2b"); }
   evoker &set_inout(llvm::StringRef in, llvm::StringRef ext);
+  evoker &set_out(llvm::StringRef out);
 
   [[nodiscard]] instance build();
   [[nodiscard]] bool execute();
