@@ -1,4 +1,5 @@
 #pragma once
+#include "clang/Frontend/FrontendAction.h"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/StringSet.h"
 
@@ -22,4 +23,6 @@ public:
     return m_source;
   }
 };
+
+std::unique_ptr<node> process(llvm::StringRef path);
 } // namespace dag
