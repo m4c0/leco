@@ -24,5 +24,5 @@ public:
   }
 };
 
-std::unique_ptr<node> process(llvm::StringRef path);
+node *process(llvm::StringRef path);
 } // namespace dag

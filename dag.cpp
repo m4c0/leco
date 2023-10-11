@@ -2,12 +2,13 @@
 #include "evoker.hpp"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendActions.h"
+#include "llvm/ADT/StringMap.h"
 #include "llvm/Support/FileSystem.h"
 
 using namespace clang;
 using namespace llvm;
 
-dag::node::node(StringRef n) {
+dag::node::node(StringRef n) : m_source{} {
   sys::fs::real_path(n, m_source);
   sys::fs::make_absolute(m_source);
 }
@@ -52,15 +53,23 @@ public:
 };
 } // namespace
 
-std::unique_ptr<dag::node> dag::process(StringRef path) {
-  auto ci = evoker{}.set_cpp_std().push_arg("-E").push_arg(path).createCI();
+static StringMap<dag::node> cache{};
+dag::node *dag::process(StringRef path) {
+  node n{path};
+
+  auto [it, inserted] = cache.try_emplace(n.source(), n);
+  auto *ptr = &(*it).second;
+  if (!inserted) {
+    return ptr;
+  }
+
+  auto ci =
+      evoker{}.set_cpp_std().push_arg("-E").push_arg(n.source()).createCI();
   ci->getDiagnostics().setClient(new IgnoringDiagConsumer());
 
-  auto res = std::make_unique<node>(path);
-
-  action a{res.get()};
+  action a{ptr};
   if (!ci->ExecuteAction(a))
     return {};
 
-  return std::move(res);
+  return ptr;
 }
