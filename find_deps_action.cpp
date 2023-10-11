@@ -12,8 +12,8 @@ void find_deps_pp_callbacks::moduleImport(SourceLocation loc, ModuleIdPath path,
                                           const Module *imported) {
   assert(path.size() == 1 && "path isn't atomic");
 
-  const auto compile_wd = [&](StringRef who, StringRef d) -> bool {
-    cur_ctx().add_pcm_dep(d, who);
+  const auto compile_wd = [&](StringRef who) -> bool {
+    cur_ctx().add_pcm_dep(m_cur_file, who);
     // diag_remark(*m_diags, loc, "compiling dependency");
     return compile(who.str());
   };
@@ -29,7 +29,7 @@ void find_deps_pp_callbacks::moduleImport(SourceLocation loc, ModuleIdPath path,
     auto part = mod_name.substr(p + 1);
 
     sys::path::append(dep, dir, me + "-" + part + ".cppm");
-    if (compile_wd(dep, m_cur_file))
+    if (compile_wd(dep))
       return;
 
   } else {
@@ -54,7 +54,7 @@ void find_deps_pp_callbacks::moduleImport(SourceLocation loc, ModuleIdPath path,
       return;
     }
 
-    if (compile_wd(dep, m_cur_file))
+    if (compile_wd(dep))
       return;
   }
 
