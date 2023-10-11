@@ -12,7 +12,7 @@ class node {
 public:
   explicit node(llvm::StringRef n);
 
-  void add_mod_dep(llvm::StringRef name) { m_mod_deps.insert(name); }
+  void add_mod_dep(llvm::StringRef mod_name);
   void set_root() { m_root = true; }
 
   [[nodiscard]] constexpr const auto &mod_deps() const noexcept {
