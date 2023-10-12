@@ -1,6 +1,7 @@
 #include "context.hpp"
 #include "diags.hpp"
 #include "in2out.hpp"
+#include "pragma.hpp"
 #include "clang/Lex/LexDiagnostic.h"
 #include "clang/Lex/Preprocessor.h"
 
@@ -211,18 +212,16 @@ struct tool_pragma : public PragmaHandler {
   }
 };
 
-struct ns_pragma : public PragmaNamespace {
-  ns_pragma() : PragmaNamespace{"leco"} {
-    AddPragma(new add_dll_pragma());
-    AddPragma(new add_impl_pragma());
-    AddPragma(new add_include_dir_pragma());
-    AddPragma(new add_framework_pragma());
-    AddPragma(new add_library_pragma());
-    AddPragma(new add_object_pragma());
-    AddPragma(new add_resource_pragma());
-    AddPragma(new add_shader_pragma());
-    AddPragma(new app_pragma());
-    AddPragma(new tool_pragma());
-  }
-};
+ns_pragma::ns_pragma() : PragmaNamespace{"leco"} {
+  AddPragma(new add_dll_pragma());
+  AddPragma(new add_impl_pragma());
+  AddPragma(new add_include_dir_pragma());
+  AddPragma(new add_framework_pragma());
+  AddPragma(new add_library_pragma());
+  AddPragma(new add_object_pragma());
+  AddPragma(new add_resource_pragma());
+  AddPragma(new add_shader_pragma());
+  AddPragma(new app_pragma());
+  AddPragma(new tool_pragma());
+}
 static PragmaHandlerRegistry::Add<ns_pragma> NS{"leco", "leco extensions"};
