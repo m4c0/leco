@@ -1,5 +1,6 @@
 #include "dag.hpp"
 #include "evoker.hpp"
+#include "pragma.hpp"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendActions.h"
 #include "llvm/ADT/StringMap.h"
@@ -69,6 +70,7 @@ public:
 
   bool BeginSourceFileAction(CompilerInstance &ci) override {
     ci.getPreprocessor().addPPCallbacks(std::make_unique<ppc>(m_dag));
+    ci.getPreprocessor().AddPragmaHandler(new ns_pragma(m_dag));
     return true;
   }
   void EndSourceFileAction() override {

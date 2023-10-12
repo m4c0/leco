@@ -1,4 +1,5 @@
 #include "context.hpp"
+#include "dag.hpp"
 #include "diags.hpp"
 #include "in2out.hpp"
 #include "pragma.hpp"
@@ -7,6 +8,7 @@
 
 using namespace clang;
 using namespace llvm;
+using namespace dag;
 
 template <unsigned N>
 static auto report(Preprocessor &pp, Token &t, const char (&msg)[N]) {
@@ -25,6 +27,14 @@ static StringRef to_str(Token &t) {
   }
   return txt;
 }
+
+class node_holder {
+protected:
+  node *m_node;
+
+public:
+  node_holder(node *n) : m_node{n} {}
+};
 
 class id_list_pragma : public PragmaHandler {
 protected:
@@ -195,22 +205,31 @@ struct add_shader_pragma : public id_list_pragma {
   }
 };
 
-struct app_pragma : public PragmaHandler {
-  app_pragma() : PragmaHandler{"app"} {}
+struct app_pragma : public PragmaHandler, node_holder {
+  app_pragma(node *n) : PragmaHandler{"app"}, node_holder{n} {}
 
   void HandlePragma(Preprocessor &PP, PragmaIntroducer Introducer,
                     Token &PragmaTok) {
+    if (m_node)
+      m_node->set_root();
     cur_ctx().exe_type = exe_t::app;
   }
 };
-struct tool_pragma : public PragmaHandler {
-  tool_pragma() : PragmaHandler{"tool"} {}
+struct tool_pragma : public PragmaHandler, node_holder {
+  tool_pragma(node *n) : PragmaHandler{"tool"}, node_holder{n} {}
 
   void HandlePragma(Preprocessor &PP, PragmaIntroducer Introducer,
                     Token &PragmaTok) {
+    if (m_node)
+      m_node->set_root();
     cur_ctx().exe_type = exe_t::tool;
   }
 };
+
+ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
+  AddPragma(new app_pragma(n));
+  AddPragma(new tool_pragma(n));
+}
 
 ns_pragma::ns_pragma() : PragmaNamespace{"leco"} {
   AddPragma(new add_dll_pragma());
@@ -221,7 +240,7 @@ ns_pragma::ns_pragma() : PragmaNamespace{"leco"} {
   AddPragma(new add_object_pragma());
   AddPragma(new add_resource_pragma());
   AddPragma(new add_shader_pragma());
-  AddPragma(new app_pragma());
-  AddPragma(new tool_pragma());
+  AddPragma(new app_pragma(nullptr));
+  AddPragma(new tool_pragma(nullptr));
 }
 static PragmaHandlerRegistry::Add<ns_pragma> NS{"leco", "leco extensions"};
