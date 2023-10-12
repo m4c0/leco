@@ -89,22 +89,52 @@ public:
 } // namespace
 
 static StringMap<dag::node> cache{};
-dag::node *dag::process(StringRef path) {
-  node n{path};
+
+static bool compile(dag::node *n) {
+  auto ci =
+      evoker{}.set_cpp_std().push_arg("-E").push_arg(n->source()).createCI();
+  // ci->getDiagnostics().setClient(new IgnoringDiagConsumer());
+
+  action a{n};
+  return ci->ExecuteAction(a);
+}
+
+static auto find(StringRef path) {
+  dag::node n{path};
 
   auto [it, inserted] = cache.try_emplace(n.source(), n);
   auto *ptr = &(*it).second;
-  if (!inserted) {
-    return ptr;
+
+  struct res {
+    dag::node *n;
+    bool i;
+  };
+  return res{ptr, inserted};
+}
+
+static bool recurse(dag::node *n) {
+  for (auto &dep : n->mod_deps()) {
+    auto [d, ins] = find(dep.first());
+    if (!d)
+      return false;
+    if (!ins)
+      return true;
+    if (!compile(d))
+      return false;
+    if (!recurse(d))
+      return false;
   }
+  return true;
+}
 
-  auto ci =
-      evoker{}.set_cpp_std().push_arg("-E").push_arg(n.source()).createCI();
-  // ci->getDiagnostics().setClient(new IgnoringDiagConsumer());
+dag::node *dag::process(StringRef path) {
+  auto [n, ins] = find(path);
+  if (!n || !ins)
+    return n;
+  if (!compile(n))
+    return nullptr;
+  if (!n->root())
+    return n;
 
-  action a{ptr};
-  if (!ci->ExecuteAction(a))
-    return {};
-
-  return ptr;
+  return recurse(n) ? n : nullptr;
 }
