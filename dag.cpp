@@ -99,6 +99,7 @@ public:
 } // namespace
 
 static StringMap<dag::node> cache{};
+void dag::clear_cache() { cache.clear(); }
 
 static bool compile(dag::node *n) {
   auto ci =
