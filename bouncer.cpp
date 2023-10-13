@@ -15,6 +15,7 @@
 using namespace clang;
 using namespace llvm;
 
+/*
 void copy_resources(StringRef exe) {
   SmallString<256> path{exe};
   cur_ctx().app_res_path(path);
@@ -49,6 +50,7 @@ void bundle_app(StringRef exe) {
   SmallString<256> path{exe};
   cur_ctx().bundle(path, sys::path::stem(exe));
 }
+*/
 
 bool lets_do_it(StringRef path) {
   auto *n = dag::get_node(path);
@@ -102,8 +104,8 @@ bool bounce(StringRef path) {
 
   auto exe_path = link(n);
   if (exe_path != "" && n->app()) {
-    copy_resources(exe_path);
-    bundle_app(exe_path);
+    // copy_resources(exe_path);
+    // bundle_app(exe_path);
   }
 
   return true;

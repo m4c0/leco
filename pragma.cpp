@@ -76,7 +76,7 @@ struct add_dll_pragma : public id_list_pragma {
       report(pp, t, "library not found");
     } else {
       notify(pp, t, "added library to bundle");
-      cur_ctx().add_pcm_executable(fname, in);
+      // cur_ctx().add_pcm_executable(fname, in);
     }
   }
 };
@@ -101,10 +101,7 @@ struct add_impl_pragma : public id_list_pragma, node_holder {
     }
 
     notify(pp, t, "queueing implementation");
-    if (m_node)
-      m_node->add_mod_impl(f);
-
-    cur_ctx().add_pcm_dep(fname, f);
+    m_node->add_mod_impl(f);
   }
 };
 
@@ -113,7 +110,7 @@ struct add_framework_pragma : public id_list_pragma {
 
   void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
     notify(pp, t, "added framework");
-    cur_ctx().add_pcm_framework(fname, to_str(t));
+    // cur_ctx().add_pcm_framework(fname, to_str(t));
   }
 };
 
@@ -146,7 +143,7 @@ struct add_library_pragma : public id_list_pragma {
     notify(pp, t, "added library");
     SmallString<128> lib{"-l"};
     lib.append(to_str(t));
-    cur_ctx().add_pcm_library(fname, lib);
+    // cur_ctx().add_pcm_library(fname, lib);
   }
 };
 
@@ -163,7 +160,7 @@ struct add_object_pragma : public id_list_pragma {
       report(pp, t, "object not found");
     } else {
       notify(pp, t, "added object");
-      cur_ctx().add_pcm_library(fname, in);
+      // cur_ctx().add_pcm_library(fname, in);
     }
   }
 };
@@ -177,7 +174,7 @@ struct add_resource_pragma : public id_list_pragma {
     if (sys::fs::is_regular_file(lit, res) && !res) {
       report(pp, t, "resource not found");
     } else {
-      cur_ctx().add_pcm_resource(fname, lit);
+      // cur_ctx().add_pcm_resource(fname, lit);
     }
   }
 };
@@ -198,12 +195,12 @@ struct add_shader_pragma : public id_list_pragma {
 
     llvm::sys::fs::create_directories(llvm::sys::path::parent_path(out));
 
-    auto cmd = ("glslangValidator --quiet -V -o " + out + " " + in).str();
-    if (0 == system(cmd.c_str())) {
-      cur_ctx().add_pcm_resource(fname, out);
-    } else {
-      report(pp, t, "failed to compile shader");
-    }
+    // auto cmd = ("glslangValidator --quiet -V -o " + out + " " + in).str();
+    // if (0 == system(cmd.c_str())) {
+    //   cur_ctx().add_pcm_resource(fname, out);
+    // } else {
+    //   report(pp, t, "failed to compile shader");
+    // }
   }
 };
 
@@ -233,13 +230,13 @@ ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
 
 ns_pragma::ns_pragma() : PragmaNamespace{"leco"} {
   AddPragma(new add_dll_pragma());
-  AddPragma(new add_impl_pragma(nullptr));
   AddPragma(new add_include_dir_pragma());
   AddPragma(new add_framework_pragma());
   AddPragma(new add_library_pragma());
   AddPragma(new add_object_pragma());
   AddPragma(new add_resource_pragma());
   AddPragma(new add_shader_pragma());
+  AddPragma(new EmptyPragmaHandler("add_impl"));
   AddPragma(new EmptyPragmaHandler("app"));
   AddPragma(new EmptyPragmaHandler("tool"));
 }
