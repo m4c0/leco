@@ -11,12 +11,7 @@
 using namespace clang;
 using namespace llvm;
 
-auto &already_built() {
-  static std::set<std::string> i{};
-  return i;
-}
-
-[[nodiscard]] bool try_compile(StringRef file) {
+bool compile(StringRef file) {
   auto ext = sys::path::extension(file);
   if (ext == ".cppm") {
     auto pcm = evoker{}
@@ -58,28 +53,4 @@ auto &already_built() {
     errs() << "don't know how to build " << file << "\n";
     return false;
   }
-}
-
-std::string make_abs(StringRef file) {
-  SmallString<1024> buf;
-  // TODO: check errors
-  sys::fs::real_path(file, buf);
-  return buf.str().str();
-}
-bool compile(StringRef rel_file) {
-  auto file = make_abs(rel_file);
-
-  if (already_built().contains(file))
-    return true;
-
-  if (!try_compile(file))
-    return false;
-
-  already_built().insert(file);
-  return true;
-}
-
-void clear_compile_cache() {
-  already_built().clear();
-  clear_module_path_cache();
 }

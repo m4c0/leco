@@ -2,6 +2,7 @@
 #include "cl.hpp"
 #include "compile.hpp"
 #include "context.hpp"
+#include "dag.hpp"
 #include "evoker.hpp"
 #include "instance.hpp"
 #include "link.hpp"
@@ -97,6 +98,34 @@ public:
   }
 };
 
+bool lets_do_it(StringSet<> &seen, StringRef path) {
+  if (seen.contains(path))
+    return true;
+
+  auto *n = dag::get_node(path);
+  if (!n)
+    return false;
+
+  // Recurse dependencies
+  for (auto &d : n->mod_deps()) {
+    if (!lets_do_it(seen, d.first()))
+      return false;
+  }
+
+  // Compile self
+  if (!compile(path))
+    return false;
+
+  // Compile impls
+  for (auto &d : n->mod_impls()) {
+    if (!compile(d.first()))
+      return false;
+  }
+
+  seen.insert(path);
+  return true;
+}
+
 bool bounce(StringRef path) {
   auto stem = sys::path::stem(path);
   auto ext = sys::path::extension(path);
@@ -104,9 +133,12 @@ bool bounce(StringRef path) {
   if (ext != ".cppm" && ext != ".cpp")
     return true;
 
-  auto ci = evoker{}.set_cpp_std().push_arg("-E").push_arg(path).createCI();
-  ci->getDiagnostics().setClient(new IgnoringDiagConsumer());
+  auto n = dag::process(path);
+  if (!n)
+    return false;
+  if (!n->root())
+    return true;
 
-  bouncer b{};
-  return ci->ExecuteAction(b);
+  StringSet<> seen{};
+  return lets_do_it(seen, n->source());
 }

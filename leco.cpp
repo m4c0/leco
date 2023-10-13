@@ -1,6 +1,6 @@
 #include "bouncer.hpp"
 #include "cl.hpp"
-#include "compile.hpp"
+#include "dag.hpp"
 #include "llvm/Support/CrashRecoveryContext.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/ManagedStatic.h"
@@ -11,7 +11,7 @@
 using namespace llvm;
 
 bool run_target() {
-  clear_compile_cache();
+  dag::clear_cache();
 
   std::error_code ec;
   for (sys::fs::directory_iterator it{".", ec}, e; it != e; it.increment(ec)) {
