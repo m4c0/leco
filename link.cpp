@@ -17,6 +17,13 @@ struct things {
   std::vector<std::string> args{};
 };
 } // namespace
+
+static std::string i2o(StringRef src) {
+  SmallString<128> pp{};
+  in2out(src, pp, "o");
+  return pp.str().str();
+}
+
 static void recurse(things &t, const dag::node *n) {
   if (t.visited.contains(n->source()))
     return;
@@ -26,9 +33,12 @@ static void recurse(things &t, const dag::node *n) {
     recurse(t, dn);
   }
 
-  SmallString<128> pp{};
-  in2out(n->source(), pp, "o");
-  t.args.push_back(pp.str().str());
+  t.args.push_back(i2o(n->source()));
+
+  for (auto &i : n->mod_impls()) {
+    t.args.push_back(i2o(i.first()));
+  }
+
   t.visited.insert(n->source());
 }
 std::string link(const dag::node *n) {
@@ -37,9 +47,6 @@ std::string link(const dag::node *n) {
   things t{};
   recurse(t, n);
   /*
-  StringSet<> mods{};
-  cur_ctx().list_unique_mods(mods);
-
   StringSet<> libs{};
   std::set<StringRef> fws{};
 
