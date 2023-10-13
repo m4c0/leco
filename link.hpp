@@ -1,4 +1,7 @@
 #pragma once
-#include "llvm/ADT/StringRef.h"
+#include <string>
 
-[[nodiscard]] std::string link(llvm::StringRef main_src);
+namespace dag {
+class node;
+}
+[[nodiscard]] std::string link(const dag::node *n);

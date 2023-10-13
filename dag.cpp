@@ -93,7 +93,7 @@ public:
     bool root = pp.isInNamedModule() && pp.getNamedModuleName() == pwd_stem &&
                 file_ext == ".cppm";
     if (root)
-      m_dag->set_root();
+      m_dag->set_main_mod();
   }
 };
 } // namespace

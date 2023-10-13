@@ -212,9 +212,7 @@ struct app_pragma : public PragmaHandler, node_holder {
 
   void HandlePragma(Preprocessor &PP, PragmaIntroducer Introducer,
                     Token &PragmaTok) {
-    if (m_node)
-      m_node->set_root();
-    cur_ctx().exe_type = exe_t::app;
+    m_node->set_app();
   }
 };
 struct tool_pragma : public PragmaHandler, node_holder {
@@ -222,9 +220,7 @@ struct tool_pragma : public PragmaHandler, node_holder {
 
   void HandlePragma(Preprocessor &PP, PragmaIntroducer Introducer,
                     Token &PragmaTok) {
-    if (m_node)
-      m_node->set_root();
-    cur_ctx().exe_type = exe_t::tool;
+    m_node->set_tool();
   }
 };
 
@@ -244,7 +240,7 @@ ns_pragma::ns_pragma() : PragmaNamespace{"leco"} {
   AddPragma(new add_object_pragma());
   AddPragma(new add_resource_pragma());
   AddPragma(new add_shader_pragma());
-  AddPragma(new app_pragma(nullptr));
-  AddPragma(new tool_pragma(nullptr));
+  AddPragma(new EmptyPragmaHandler("app"));
+  AddPragma(new EmptyPragmaHandler("tool"));
 }
 static PragmaHandlerRegistry::Add<ns_pragma> NS{"leco", "leco extensions"};

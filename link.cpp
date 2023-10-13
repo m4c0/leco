@@ -1,5 +1,6 @@
 #include "cl.hpp"
 #include "context.hpp"
+#include "dag.hpp"
 #include "evoker.hpp"
 #include "in2out.hpp"
 #include "link.hpp"
@@ -10,7 +11,9 @@
 
 using namespace llvm;
 
-std::string link(StringRef main_src) {
+std::string link(const dag::node *n) {
+  auto main_src = n->source();
+
   StringSet<> mods{};
   cur_ctx().list_unique_mods(mods);
 
@@ -35,7 +38,7 @@ std::string link(StringRef main_src) {
   SmallString<128> exe{};
   in2out(main_src, exe, "exe");
 
-  if (cur_ctx().exe_type == exe_t::app) {
+  if (n->app()) {
     cur_ctx().app_exe_path(exe, sys::path::stem(main_src));
     sys::fs::create_directories(sys::path::parent_path(exe));
   }

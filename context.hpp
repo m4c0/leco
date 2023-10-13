@@ -6,11 +6,6 @@
 #include <set>
 #include <string>
 
-enum class exe_t {
-  none,
-  tool,
-  app,
-};
 struct dep {
   std::set<std::string> modules{};
   std::set<std::string> frameworks{};
@@ -38,7 +33,6 @@ struct context {
   void add_pcm_library(llvm::StringRef from, llvm::StringRef lib);
 
   // Once per file
-  exe_t exe_type{};
   std::set<std::string> pcm_reqs{};
   void add_pcm_req(llvm::StringRef path);
   void list_unique_mods(llvm::StringSet<> &out);

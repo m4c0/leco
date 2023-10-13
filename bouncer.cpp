@@ -50,43 +50,6 @@ void bundle_app(StringRef exe) {
   cur_ctx().bundle(path, sys::path::stem(exe));
 }
 
-class bouncer : public PreprocessOnlyAction {
-public:
-  void EndSourceFileAction() override {
-    SmallString<128> pwd;
-    sys::fs::current_path(pwd); // TODO: check errors
-    auto pwd_stem = sys::path::stem(pwd);
-    auto file_stem = sys::path::stem(getCurrentFile());
-    auto file_ext = sys::path::extension(getCurrentFile());
-    auto &pp = getCompilerInstance().getPreprocessor();
-    bool root = pp.isInNamedModule() && pp.getNamedModuleName() == pwd_stem &&
-                file_ext == ".cppm";
-
-    auto tool = cur_ctx().exe_type == exe_t::tool && cur_ctx().native_target;
-    auto app = cur_ctx().exe_type == exe_t::app;
-    auto exe = tool || app;
-
-    if (!root && !exe)
-      return;
-
-    cur_ctx().pcm_reqs.clear();
-    if (!compile(getCurrentFile()))
-      return;
-
-    if (!exe)
-      return;
-
-    cur_ctx().add_pcm_req(getCurrentFile());
-    auto exe_path = link(getCurrentFile());
-    if (exe_path != "" && app) {
-      copy_resources(exe_path);
-      bundle_app(exe_path);
-    }
-
-    cur_ctx().exe_type = exe_t::none;
-  }
-};
-
 bool lets_do_it(StringRef path) {
   auto *n = dag::get_node(path);
   if (!n)
@@ -128,9 +91,20 @@ bool bounce(StringRef path) {
   if (!n->root())
     return true;
 
+  if (n->tool() && !cur_ctx().native_target)
+    return true;
+
   if (!lets_do_it(n->source()))
     return false;
 
-  // link, copy, bundle, etc
+  if (!n->app() && !n->tool())
+    return true;
+
+  auto exe_path = link(n);
+  if (exe_path != "" && n->app()) {
+    copy_resources(exe_path);
+    bundle_app(exe_path);
+  }
+
   return true;
 }
