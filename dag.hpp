@@ -66,4 +66,21 @@ public:
 node *get_node(llvm::StringRef source);
 node *process(llvm::StringRef path);
 void clear_cache();
+
+void visit(const node *n, auto &&fn) {
+  llvm::StringSet<> visited{};
+
+  const auto rec = [&](auto rec, auto *n) {
+    if (visited.contains(n->source()))
+      return;
+
+    for (auto &d : n->mod_deps()) {
+      rec(rec, get_node(d.first()));
+    }
+
+    fn(n);
+    visited.insert(n->source());
+  };
+  rec(rec, n);
+}
 } // namespace dag

@@ -13,7 +13,6 @@ using namespace llvm;
 
 namespace {
 struct things {
-  StringSet<> visited{};
   StringSet<> frameworks{};
   std::vector<std::string> args{};
 };
@@ -25,15 +24,7 @@ static std::string i2o(StringRef src) {
   return pp.str().str();
 }
 
-static void recurse(things &t, const dag::node *n) {
-  if (t.visited.contains(n->source()))
-    return;
-
-  for (auto &d : n->mod_deps()) {
-    auto *dn = dag::get_node(d.first());
-    recurse(t, dn);
-  }
-
+static void visit(things &t, const dag::node *n) {
   t.args.push_back(i2o(n->source()));
 
   for (auto &i : n->mod_impls()) {
@@ -46,14 +37,12 @@ static void recurse(things &t, const dag::node *n) {
     t.args.push_back("-framework");
     t.args.push_back(fw.first().str());
   }
-
-  t.visited.insert(n->source());
 }
 std::string link(const dag::node *n) {
   auto main_src = n->source();
 
   things t{};
-  recurse(t, n);
+  dag::visit(n, [&](auto *n) { visit(t, n); });
   /*
   StringSet<> libs{};
   std::set<StringRef> fws{};
