@@ -80,8 +80,8 @@ struct add_dll_pragma : public id_list_pragma {
     }
   }
 };
-struct add_impl_pragma : public id_list_pragma {
-  add_impl_pragma() : id_list_pragma{"add_impl"} {}
+struct add_impl_pragma : public id_list_pragma, node_holder {
+  add_impl_pragma(dag::node *n) : id_list_pragma{"add_impl"}, node_holder{n} {}
 
   static bool check_ext(SmallVectorImpl<char> &f, StringRef ext) {
     bool res{};
@@ -101,6 +101,9 @@ struct add_impl_pragma : public id_list_pragma {
     }
 
     notify(pp, t, "queueing implementation");
+    if (m_node)
+      m_node->add_mod_impl(f);
+
     cur_ctx().add_pcm_dep(fname, f);
     cur_ctx().add_pending(f);
   }
@@ -227,13 +230,15 @@ struct tool_pragma : public PragmaHandler, node_holder {
 };
 
 ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
+  AddPragma(new add_impl_pragma(n));
+  AddPragma(new add_include_dir_pragma());
   AddPragma(new app_pragma(n));
   AddPragma(new tool_pragma(n));
 }
 
 ns_pragma::ns_pragma() : PragmaNamespace{"leco"} {
   AddPragma(new add_dll_pragma());
-  AddPragma(new add_impl_pragma());
+  AddPragma(new add_impl_pragma(nullptr));
   AddPragma(new add_include_dir_pragma());
   AddPragma(new add_framework_pragma());
   AddPragma(new add_library_pragma());

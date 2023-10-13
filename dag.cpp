@@ -51,6 +51,11 @@ void dag::node::add_mod_dep(llvm::StringRef mod_name) {
   real_abs(abs, dep);
   m_mod_deps.insert(abs);
 }
+void dag::node::add_mod_impl(llvm::StringRef mod_impl) {
+  SmallString<256> abs{};
+  real_abs(abs, mod_impl);
+  m_mod_impls.insert(abs);
+}
 
 namespace {
 class ppc : public PPCallbacks {
