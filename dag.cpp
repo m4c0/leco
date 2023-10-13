@@ -132,6 +132,10 @@ static bool recurse(dag::node *n) {
   return true;
 }
 
+dag::node *dag::get_node(StringRef source) {
+  auto it = cache.find(source);
+  return it == cache.end() ? nullptr : &(*it).second;
+}
 dag::node *dag::process(StringRef path) {
   auto [n, ins] = find(path);
   if (!n || !ins)
