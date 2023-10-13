@@ -13,6 +13,7 @@ enum class root_t {
 
 class node {
   llvm::SmallString<256> m_source;
+  llvm::StringSet<> m_executables{};
   llvm::StringSet<> m_frameworks{};
   llvm::StringSet<> m_mod_deps{};
   llvm::StringSet<> m_mod_impls{};
@@ -23,9 +24,10 @@ class node {
 public:
   explicit node(llvm::StringRef n);
 
+  void add_executable(llvm::StringRef fw) { m_executables.insert(fw); }
+  void add_framework(llvm::StringRef fw) { m_frameworks.insert(fw); }
   void add_mod_dep(llvm::StringRef mod_name);
   void add_mod_impl(llvm::StringRef mod_impl);
-  void add_framework(llvm::StringRef fw) { m_frameworks.insert(fw); }
 
   void set_app() { m_root = root_t::app; }
   void set_compiled() { m_compiled = true; }
@@ -33,6 +35,9 @@ public:
   void set_recursed() { m_recursed = true; }
   void set_tool() { m_root = root_t::tool; }
 
+  [[nodiscard]] constexpr const auto &executables() const noexcept {
+    return m_executables;
+  }
   [[nodiscard]] constexpr const auto &frameworks() const noexcept {
     return m_frameworks;
   }

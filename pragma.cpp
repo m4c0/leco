@@ -63,8 +63,8 @@ public:
   }
 };
 
-struct add_dll_pragma : public id_list_pragma {
-  add_dll_pragma() : id_list_pragma("add_dll") {}
+struct add_dll_pragma : public id_list_pragma, node_holder {
+  add_dll_pragma(dag::node *n) : id_list_pragma("add_dll"), node_holder{n} {}
 
   void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
     SmallString<256> in{fname};
@@ -76,7 +76,7 @@ struct add_dll_pragma : public id_list_pragma {
       report(pp, t, "library not found");
     } else {
       notify(pp, t, "added library to bundle");
-      // cur_ctx().add_pcm_executable(fname, in);
+      m_node->add_executable(in);
     }
   }
 };
@@ -223,6 +223,7 @@ struct tool_pragma : public PragmaHandler, node_holder {
 };
 
 ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
+  AddPragma(new add_dll_pragma(n));
   AddPragma(new add_framework_pragma(n));
   AddPragma(new add_impl_pragma(n));
   AddPragma(new add_include_dir_pragma());
@@ -231,15 +232,6 @@ ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
 }
 
 ns_pragma::ns_pragma() : PragmaNamespace{"leco"} {
-  AddPragma(new add_dll_pragma());
-  AddPragma(new add_include_dir_pragma());
-  AddPragma(new add_library_pragma());
-  AddPragma(new add_object_pragma());
-  AddPragma(new add_resource_pragma());
-  AddPragma(new add_shader_pragma());
-  AddPragma(new EmptyPragmaHandler("add_framework"));
-  AddPragma(new EmptyPragmaHandler("add_impl"));
-  AddPragma(new EmptyPragmaHandler("app"));
-  AddPragma(new EmptyPragmaHandler("tool"));
+  AddPragma(new EmptyPragmaHandler());
 }
 static PragmaHandlerRegistry::Add<ns_pragma> NS{"leco", "leco extensions"};
