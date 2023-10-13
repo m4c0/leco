@@ -39,10 +39,8 @@ struct context {
 
   // Once per file
   exe_t exe_type{};
-  std::set<std::string> pending_compilation{};
   std::set<std::string> pcm_reqs{};
   void add_pcm_req(llvm::StringRef path);
-  void add_pending(llvm::StringRef file);
   void list_unique_mods(llvm::StringSet<> &out);
 };
 

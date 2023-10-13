@@ -105,7 +105,6 @@ struct add_impl_pragma : public id_list_pragma, node_holder {
       m_node->add_mod_impl(f);
 
     cur_ctx().add_pcm_dep(fname, f);
-    cur_ctx().add_pending(f);
   }
 };
 

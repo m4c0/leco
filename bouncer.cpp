@@ -15,13 +15,6 @@
 using namespace clang;
 using namespace llvm;
 
-static bool compile_pending() {
-  for (auto f : cur_ctx().pending_compilation)
-    if (!compile(f))
-      return false;
-  return true;
-}
-
 void copy_resources(StringRef exe) {
   SmallString<256> path{exe};
   cur_ctx().app_res_path(path);
@@ -77,11 +70,7 @@ public:
       return;
 
     cur_ctx().pcm_reqs.clear();
-    cur_ctx().pending_compilation.clear();
     if (!compile(getCurrentFile()))
-      return;
-
-    if (!compile_pending())
       return;
 
     if (!exe)
@@ -140,5 +129,9 @@ bool bounce(StringRef path) {
     return true;
 
   StringSet<> seen{};
-  return lets_do_it(seen, n->source());
+  if (!lets_do_it(seen, n->source()))
+    return false;
+
+  // link, copy, bundle, etc
+  return true;
 }
