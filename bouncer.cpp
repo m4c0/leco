@@ -15,12 +15,20 @@
 using namespace clang;
 using namespace llvm;
 
+void copy_exes(const dag::node *n, StringRef exe_path) {
+  SmallString<256> path{exe_path};
+
+  for (auto &e : n->executables()) {
+    sys::path::remove_filename(path);
+    sys::path::append(path, sys::path::filename(e.first()));
+    if (is_verbose()) {
+      errs() << "copying library " << path << "\n";
+    }
+    sys::fs::copy_file(e.first(), path);
+  }
+}
 /*
 void copy_resources(StringRef exe) {
-  SmallString<256> path{exe};
-  cur_ctx().app_res_path(path);
-  sys::fs::create_directories(path);
-
   StringSet<> mods{};
   cur_ctx().list_unique_mods(mods);
   for (auto &p : mods) {
@@ -104,7 +112,11 @@ bool bounce(StringRef path) {
 
   auto exe_path = link(n);
   if (exe_path != "" && n->app()) {
-    // copy_resources(exe_path);
+    SmallString<256> res_path{exe_path};
+    cur_ctx().app_res_path(res_path);
+    sys::fs::create_directories(res_path);
+    dag::visit(n, [&](auto *n) { copy_exes(n, exe_path); });
+
     // bundle_app(exe_path);
   }
 
