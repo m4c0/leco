@@ -14,6 +14,7 @@ using namespace llvm;
 namespace {
 struct things {
   StringSet<> visited{};
+  StringSet<> frameworks{};
   std::vector<std::string> args{};
 };
 } // namespace
@@ -38,6 +39,13 @@ static void recurse(things &t, const dag::node *n) {
   for (auto &i : n->mod_impls()) {
     t.args.push_back(i2o(i.first()));
   }
+  for (auto &fw : n->frameworks()) {
+    if (t.frameworks.contains(fw.first()))
+      continue;
+    t.frameworks.insert(fw.first());
+    t.args.push_back("-framework");
+    t.args.push_back(fw.first().str());
+  }
 
   t.visited.insert(n->source());
 }
@@ -51,10 +59,6 @@ std::string link(const dag::node *n) {
   std::set<StringRef> fws{};
 
   for (auto &p : mods) {
-    SmallString<128> pp{};
-    in2out(p.first(), pp, "o");
-    args.push_back(pp.str().str());
-
     auto &pdm = cur_ctx().pcm_dep_map[p.first().str()];
     for (auto &fw : pdm.frameworks) {
       fws.insert(fw);

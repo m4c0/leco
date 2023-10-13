@@ -105,12 +105,13 @@ struct add_impl_pragma : public id_list_pragma, node_holder {
   }
 };
 
-struct add_framework_pragma : public id_list_pragma {
-  add_framework_pragma() : id_list_pragma{"add_framework"} {}
+struct add_framework_pragma : public id_list_pragma, node_holder {
+  add_framework_pragma(node *n)
+      : id_list_pragma{"add_framework"}, node_holder{n} {}
 
   void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
     notify(pp, t, "added framework");
-    // cur_ctx().add_pcm_framework(fname, to_str(t));
+    m_node->add_framework(to_str(t));
   }
 };
 
@@ -222,6 +223,7 @@ struct tool_pragma : public PragmaHandler, node_holder {
 };
 
 ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
+  AddPragma(new add_framework_pragma(n));
   AddPragma(new add_impl_pragma(n));
   AddPragma(new add_include_dir_pragma());
   AddPragma(new app_pragma(n));
@@ -231,11 +233,11 @@ ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
 ns_pragma::ns_pragma() : PragmaNamespace{"leco"} {
   AddPragma(new add_dll_pragma());
   AddPragma(new add_include_dir_pragma());
-  AddPragma(new add_framework_pragma());
   AddPragma(new add_library_pragma());
   AddPragma(new add_object_pragma());
   AddPragma(new add_resource_pragma());
   AddPragma(new add_shader_pragma());
+  AddPragma(new EmptyPragmaHandler("add_framework"));
   AddPragma(new EmptyPragmaHandler("add_impl"));
   AddPragma(new EmptyPragmaHandler("app"));
   AddPragma(new EmptyPragmaHandler("tool"));
