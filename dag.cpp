@@ -120,10 +120,11 @@ static auto find(StringRef path) {
 static bool recurse(dag::node *n) {
   for (auto &dep : n->mod_deps()) {
     auto [d, ins] = find(dep.first());
+
     if (!d)
       return false;
     if (!ins)
-      return true;
+      continue;
     if (!compile(d))
       return false;
     if (!recurse(d))
