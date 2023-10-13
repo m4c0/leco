@@ -87,17 +87,17 @@ public:
   }
 };
 
-bool lets_do_it(StringSet<> &seen, StringRef path) {
-  if (seen.contains(path))
-    return true;
-
+bool lets_do_it(StringRef path) {
   auto *n = dag::get_node(path);
   if (!n)
     return false;
 
+  if (n->compiled())
+    return true;
+
   // Recurse dependencies
   for (auto &d : n->mod_deps()) {
-    if (!lets_do_it(seen, d.first()))
+    if (!lets_do_it(d.first()))
       return false;
   }
 
@@ -111,7 +111,7 @@ bool lets_do_it(StringSet<> &seen, StringRef path) {
       return false;
   }
 
-  seen.insert(path);
+  n->set_compiled();
   return true;
 }
 
@@ -128,8 +128,7 @@ bool bounce(StringRef path) {
   if (!n->root())
     return true;
 
-  StringSet<> seen{};
-  if (!lets_do_it(seen, n->source()))
+  if (!lets_do_it(n->source()))
     return false;
 
   // link, copy, bundle, etc
