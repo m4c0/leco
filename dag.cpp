@@ -9,10 +9,12 @@
 using namespace clang;
 using namespace llvm;
 
-dag::node::node(StringRef n) : m_source{} {
-  sys::fs::real_path(n, m_source);
-  sys::fs::make_absolute(m_source);
+static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
+  sys::fs::real_path(path, buf);
+  sys::fs::make_absolute(buf);
 }
+
+dag::node::node(StringRef n) : m_source{} { real_abs(m_source, n); }
 void dag::node::add_mod_dep(llvm::StringRef mod_name) {
   auto dir = sys::path::parent_path(source());
 
@@ -44,7 +46,10 @@ void dag::node::add_mod_dep(llvm::StringRef mod_name) {
       return;
     }
   }
-  m_mod_deps.insert(dep);
+
+  SmallString<256> abs{};
+  real_abs(abs, dep);
+  m_mod_deps.insert(abs);
 }
 
 namespace {
