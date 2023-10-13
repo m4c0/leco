@@ -123,12 +123,14 @@ static bool recurse(dag::node *n) {
 
     if (!d)
       return false;
-    if (!ins)
+    if (d->recursed())
       continue;
     if (!compile(d))
       return false;
     if (!recurse(d))
       return false;
+
+    d->set_recursed();
   }
   return true;
 }

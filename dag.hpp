@@ -8,16 +8,19 @@ class node {
   llvm::SmallString<256> m_source;
   llvm::StringSet<> m_mod_deps{};
   bool m_root{};
+  bool m_recursed{};
 
 public:
   explicit node(llvm::StringRef n);
 
   void add_mod_dep(llvm::StringRef mod_name);
+  void set_recursed() { m_recursed = true; }
   void set_root() { m_root = true; }
 
   [[nodiscard]] constexpr const auto &mod_deps() const noexcept {
     return m_mod_deps;
   }
+  [[nodiscard]] constexpr bool recursed() const noexcept { return m_recursed; }
   [[nodiscard]] constexpr bool root() const noexcept { return m_root; }
   [[nodiscard]] constexpr llvm::StringRef source() const noexcept {
     return m_source;
