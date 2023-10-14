@@ -3,13 +3,8 @@
 #include "compile.hpp"
 #include "context.hpp"
 #include "dag.hpp"
-#include "evoker.hpp"
 #include "instance.hpp"
 #include "link.hpp"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/Frontend/FrontendAction.h"
-#include "clang/Frontend/FrontendActions.h"
-#include "clang/Lex/PreprocessorOptions.h"
 #include "llvm/Support/Path.h"
 
 using namespace clang;
