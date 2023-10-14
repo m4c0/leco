@@ -47,7 +47,7 @@ bool compile(StringRef file) {
         .push_arg(pcm)
         .set_out(obj)
         .build()
-        .run<EmitObjAction>(false);
+        .run<EmitObjAction>();
   } else if (ext == ".cpp") {
     return evoker{}
         .set_cpp_std()
@@ -71,7 +71,7 @@ bool compile(StringRef file) {
         .push_arg(file)
         .set_out(obj)
         .build()
-        .run<EmitObjAction>(false);
+        .run<EmitObjAction>();
   } else {
     errs() << "don't know how to build " << file << "\n";
     return false;

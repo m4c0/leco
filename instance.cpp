@@ -1,6 +1,5 @@
 #include "cl.hpp"
 #include "instance.hpp"
-#include "wrapper.hpp"
 #include "clang/Frontend/CompilerInstance.h"
 
 using namespace clang;
@@ -63,15 +62,8 @@ instance::~instance() {
     std::erase(in_flights(), m_ci);
 }
 
-bool instance::run_wo_ctx(std::unique_ptr<FrontendAction> a) {
-  return m_ci ? m_ci->ExecuteAction(*a) : false;
-}
 bool instance::run(std::unique_ptr<FrontendAction> a) {
-  if (!m_ci)
-    return false;
-
-  wrapper_action fd{std::move(a)};
-  return m_ci->ExecuteAction(fd);
+  return m_ci ? m_ci->ExecuteAction(*a) : false;
 }
 
 StringRef instance::output() { return m_output; }

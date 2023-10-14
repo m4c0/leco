@@ -19,11 +19,7 @@ public:
   [[nodiscard]] llvm::StringRef output();
 
   [[nodiscard]] bool run(std::unique_ptr<clang::FrontendAction> a);
-  [[nodiscard]] bool run_wo_ctx(std::unique_ptr<clang::FrontendAction> a);
 
-  template <typename Tp> bool run(bool use_ctx = true) {
-    return use_ctx ? run(std::make_unique<Tp>())
-                   : run_wo_ctx(std::make_unique<Tp>());
-  }
+  template <typename Tp> bool run() { return run(std::make_unique<Tp>()); }
 };
 void clear_module_path_cache();
