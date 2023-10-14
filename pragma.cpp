@@ -98,7 +98,7 @@ struct add_impl_pragma : public id_list_pragma, node_holder {
       return;
     }
 
-    notify(pp, t, "queueing implementation");
+    notify(pp, t, "added implementation");
     m_node->add_mod_impl(f);
   }
 };
@@ -135,32 +135,12 @@ struct add_include_dir_pragma : public id_list_pragma {
   }
 };
 
-struct add_library_pragma : public id_list_pragma {
-  add_library_pragma() : id_list_pragma{"add_library"} {}
+struct add_library_pragma : public id_list_pragma, node_holder {
+  add_library_pragma(node *n) : id_list_pragma{"add_library"}, node_holder{n} {}
 
   void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
     notify(pp, t, "added library");
-    SmallString<128> lib{"-l"};
-    lib.append(to_str(t));
-    // cur_ctx().add_pcm_library(fname, lib);
-  }
-};
-
-struct add_object_pragma : public id_list_pragma {
-  add_object_pragma() : id_list_pragma{"add_object"} {}
-
-  void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
-    SmallString<256> in{fname};
-    llvm::sys::path::remove_filename(in);
-    llvm::sys::path::append(in, to_str(t));
-
-    bool res{};
-    if (sys::fs::is_regular_file(in, res) && !res) {
-      report(pp, t, "object not found");
-    } else {
-      notify(pp, t, "added object");
-      // cur_ctx().add_pcm_library(fname, in);
-    }
+    m_node->add_library(to_str(t));
   }
 };
 
@@ -215,6 +195,7 @@ ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
   AddPragma(new add_framework_pragma(n));
   AddPragma(new add_impl_pragma(n));
   AddPragma(new add_include_dir_pragma());
+  AddPragma(new add_library_pragma(n));
   AddPragma(new add_resource_pragma(n));
   AddPragma(new add_shader_pragma(n));
   AddPragma(new app_pragma(n));
