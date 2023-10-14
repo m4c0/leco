@@ -12,9 +12,21 @@
 using namespace clang;
 using namespace llvm;
 
+static auto mod_time(Twine file) {
+  sys::fs::file_status s{};
+  if (sys::fs::status(file, s))
+    return sys::TimePoint<>{};
+
+  return s.getLastModificationTime();
+}
+
 bool compile(StringRef file) {
   SmallString<256> obj{};
   in2out(file, obj, "o");
+
+  auto fm = mod_time(file);
+  auto fo = mod_time(obj);
+  // if (fo > fm) return true;
 
   auto ext = sys::path::extension(file);
   if (ext == ".cppm") {
