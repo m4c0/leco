@@ -39,12 +39,10 @@ static void copy_resources(const dag::node *n, StringRef res_path) {
     sys::path::remove_filename(path);
   }
 }
-/*
-void bundle_app(StringRef exe) {
+static void bundle_app(StringRef exe) {
   SmallString<256> path{exe};
   cur_ctx().bundle(path, sys::path::stem(exe));
 }
-*/
 
 bool lets_do_it(StringRef path) {
   auto *n = dag::get_node(path);
@@ -107,7 +105,7 @@ bool bounce(StringRef path) {
       copy_resources(n, res_path);
     });
 
-    // bundle_app(exe_path);
+    bundle_app(exe_path);
   }
 
   return true;
