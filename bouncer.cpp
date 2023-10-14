@@ -10,6 +10,20 @@
 using namespace clang;
 using namespace llvm;
 
+static bool compile_shaders(const dag::node *n, StringRef res_path) {
+  for (auto &s : n->shaders()) {
+    StringRef in = s.first();
+
+    SmallString<256> out{};
+    sys::path::append(out, res_path, sys::path::filename(in));
+    out.append(".spv");
+
+    auto cmd = ("glslangValidator --quiet -V -o " + out + " " + in).str();
+    if (0 != system(cmd.c_str()))
+      return false;
+  }
+  return true;
+}
 static void copy_exes(const dag::node *n, StringRef exe_path) {
   SmallString<256> path{exe_path};
 
@@ -95,10 +109,14 @@ bool bounce(StringRef path) {
     cur_ctx().app_res_path(res_path);
     sys::fs::create_directories(res_path);
 
+    bool success = true;
     dag::visit(n, [&](auto *n) {
+      success &= compile_shaders(n, res_path);
       copy_exes(n, exe_path);
       copy_resources(n, res_path);
     });
+    if (!success)
+      return false;
 
     bundle_app(exe_path);
   }
