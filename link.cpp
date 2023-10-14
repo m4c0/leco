@@ -14,6 +14,7 @@ using namespace llvm;
 namespace {
 struct things {
   StringSet<> frameworks{};
+  StringSet<> libraries{};
   std::vector<std::string> args{};
 };
 } // namespace
@@ -37,26 +38,18 @@ static void visit(things &t, const dag::node *n) {
     t.args.push_back("-framework");
     t.args.push_back(fw.first().str());
   }
+  for (auto &lib : n->libraries()) {
+    if (t.libraries.contains(lib.first()))
+      continue;
+    t.libraries.insert(lib.first());
+    t.args.push_back(lib.first().str());
+  }
 }
 std::string link(const dag::node *n) {
   auto main_src = n->source();
 
   things t{};
   dag::visit(n, [&](auto *n) { visit(t, n); });
-  /*
-  StringSet<> libs{};
-  std::set<StringRef> fws{};
-
-  for (auto &p : mods) {
-    auto &pdm = cur_ctx().pcm_dep_map[p.first().str()];
-    for (auto &fw : pdm.frameworks) {
-      fws.insert(fw);
-    }
-    for (auto &l : pdm.libraries) {
-      libs.insert(l);
-    }
-  }
-  */
 
   SmallString<128> exe{};
   in2out(main_src, exe, "exe");
@@ -75,18 +68,9 @@ std::string link(const dag::node *n) {
   for (auto &p : t.args) {
     e.push_arg(p);
   }
-  /*
-  for (auto &p : libs) {
-    e.push_arg(p.first());
-  }
-  for (auto &fw : fws) {
-    e.push_arg("-framework");
-    e.push_arg(fw);
-  }
   for (auto l : cur_ctx().link_flags) {
     e.push_arg(l);
   }
-  */
   e.set_out(exe);
   return e.execute() ? std::string{exe} : std::string{};
 }
