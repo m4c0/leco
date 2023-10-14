@@ -90,14 +90,6 @@ evoker &evoker::set_out(StringRef out) {
   m_args.push_back(m_obj.c_str());
   return *this;
 }
-evoker &evoker::set_inout(StringRef in, StringRef ext) {
-  in2out(in, m_obj, ext);
-
-  m_args.push_back(in.data());
-  m_args.push_back("-o");
-  m_args.push_back(m_obj.c_str());
-  return *this;
-}
 instance evoker::build() { return instance{createCI(), m_obj.str()}; }
 
 std::shared_ptr<CompilerInstance> evoker::createCI() {
