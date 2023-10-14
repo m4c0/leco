@@ -25,6 +25,10 @@ static StringRef to_str(Token &t) {
   }
   return txt;
 }
+static void to_file(SmallVectorImpl<char> &fname, Token &t) {
+  sys::path::remove_filename(fname);
+  sys::path::append(fname, to_str(t));
+}
 
 class node_holder {
 protected:
@@ -163,13 +167,10 @@ struct add_shader_pragma : public id_list_pragma, node_holder {
   add_shader_pragma(node *n) : id_list_pragma{"add_shader"}, node_holder{n} {}
 
   void process_id(Preprocessor &pp, Token &t, StringRef fname) {
-    auto lit = to_str(t);
-    bool res{};
-    if (sys::fs::is_regular_file(lit, res) && !res) {
+    SmallString<256> in{fname};
+    to_file(in, t);
+    if (!m_node->add_shader(in))
       report(pp, t, "shader not found");
-    } else {
-      m_node->add_shader(lit);
-    }
   }
 };
 

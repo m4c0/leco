@@ -13,10 +13,14 @@ static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
   sys::fs::real_path(path, buf);
   sys::fs::make_absolute(buf);
 }
-static void add_real_abs(StringSet<> &set, StringRef path) {
+static bool add_real_abs(StringSet<> &set, StringRef path) {
   SmallString<256> abs{};
   real_abs(abs, path);
+  if (!sys::fs::is_regular_file(abs))
+    return false;
+
   set.insert(abs);
+  return true;
 }
 
 dag::node::node(StringRef n) : m_source{} { real_abs(m_source, n); }
@@ -64,8 +68,8 @@ void dag::node::add_mod_impl(llvm::StringRef mod_impl) {
 void dag::node::add_resource(llvm::StringRef resource) {
   add_real_abs(m_resources, resource);
 }
-void dag::node::add_shader(llvm::StringRef shader) {
-  add_real_abs(m_shaders, shader);
+bool dag::node::add_shader(llvm::StringRef shader) {
+  return add_real_abs(m_shaders, shader);
 }
 
 namespace {

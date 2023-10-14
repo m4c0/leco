@@ -33,7 +33,7 @@ public:
   void add_mod_dep(llvm::StringRef mod_name);
   void add_mod_impl(llvm::StringRef mod_impl);
   void add_resource(llvm::StringRef fw);
-  void add_shader(llvm::StringRef fw);
+  [[nodiscard]] bool add_shader(llvm::StringRef fw);
 
   void set_app() { m_root = root_t::app; }
   void set_compiled() { m_compiled = true; }
