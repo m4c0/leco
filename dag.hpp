@@ -27,11 +27,11 @@ class node {
 public:
   explicit node(llvm::StringRef n);
 
-  void add_executable(llvm::StringRef e);
+  [[nodiscard]] bool add_executable(llvm::StringRef e);
   void add_framework(llvm::StringRef fw) { m_frameworks.insert(fw); }
   void add_library(llvm::StringRef lib) { m_libraries.insert(lib); }
-  void add_mod_dep(llvm::StringRef mod_name);
-  void add_mod_impl(llvm::StringRef mod_impl);
+  [[nodiscard]] bool add_mod_dep(llvm::StringRef mod_name);
+  [[nodiscard]] bool add_mod_impl(llvm::StringRef mod_impl);
   [[nodiscard]] bool add_resource(llvm::StringRef res);
   [[nodiscard]] bool add_shader(llvm::StringRef shd);
 

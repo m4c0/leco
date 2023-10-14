@@ -78,45 +78,26 @@ protected:
   }
 };
 
-struct add_dll_pragma : public id_list_pragma, node_holder {
-  add_dll_pragma(dag::node *n) : id_list_pragma("add_dll"), node_holder{n} {}
+struct add_dll_pragma : public file_list_pragma, node_holder {
+  add_dll_pragma(node *n) : file_list_pragma{"add_dll"}, node_holder{n} {}
 
-  void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
-    SmallString<256> in{fname};
-    llvm::sys::path::remove_filename(in);
-    llvm::sys::path::append(in, to_str(t));
-
-    bool res{};
-    if (sys::fs::is_regular_file(in, res) && !res) {
-      report(pp, t, "library not found");
-    } else {
-      notify(pp, t, "added library to bundle");
-      m_node->add_executable(in);
-    }
+  bool process_file(StringRef in) override {
+    return m_node->add_executable(in);
   }
 };
-struct add_impl_pragma : public id_list_pragma, node_holder {
-  add_impl_pragma(dag::node *n) : id_list_pragma{"add_impl"}, node_holder{n} {}
 
-  static bool check_ext(SmallVectorImpl<char> &f, StringRef ext) {
-    bool res{};
+struct add_impl_pragma : public file_list_pragma, node_holder {
+  add_impl_pragma(dag::node *n)
+      : file_list_pragma{"add_impl"}, node_holder{n} {}
+
+  bool check_ext(auto &f, StringRef ext) {
     sys::path::replace_extension(f, ext);
-    sys::fs::is_regular_file(f, res);
-    return res;
+    return m_node->add_mod_impl(f);
   }
 
-  void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
-    SmallString<128> f{};
-    auto dir = sys::path::parent_path(fname);
-    sys::path::append(f, dir, to_str(t));
-
-    if (!check_ext(f, "cpp") && !check_ext(f, "mm") && !check_ext(f, "m")) {
-      report(pp, t, "module impl not found");
-      return;
-    }
-
-    notify(pp, t, "added implementation");
-    m_node->add_mod_impl(f);
+  bool process_file(StringRef in) override {
+    SmallString<128> f{in};
+    return check_ext(f, "cpp") || check_ext(f, "mm") || check_ext(f, "m");
   }
 };
 

@@ -1,4 +1,5 @@
 #include "dag.hpp"
+#include "diags.hpp"
 #include "evoker.hpp"
 #include "pragma.hpp"
 #include "clang/Frontend/CompilerInstance.h"
@@ -13,7 +14,7 @@ static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
   sys::fs::real_path(path, buf);
   sys::fs::make_absolute(buf);
 }
-static bool add_real_abs(StringSet<> &set, StringRef path) {
+[[nodiscard]] static bool add_real_abs(StringSet<> &set, StringRef path) {
   SmallString<256> abs{};
   real_abs(abs, path);
   if (!sys::fs::is_regular_file(abs))
@@ -25,10 +26,10 @@ static bool add_real_abs(StringSet<> &set, StringRef path) {
 
 dag::node::node(StringRef n) : m_source{} { real_abs(m_source, n); }
 
-void dag::node::add_executable(llvm::StringRef executable) {
-  add_real_abs(m_executables, executable);
+bool dag::node::add_executable(llvm::StringRef executable) {
+  return add_real_abs(m_executables, executable);
 }
-void dag::node::add_mod_dep(llvm::StringRef mod_name) {
+bool dag::node::add_mod_dep(llvm::StringRef mod_name) {
   auto dir = sys::path::parent_path(source());
 
   auto p = mod_name.find(":");
@@ -56,14 +57,14 @@ void dag::node::add_mod_dep(llvm::StringRef mod_name) {
       sys::path::append(dep, "..", camel, t);
     }
     if (!sys::fs::is_regular_file(dep.c_str())) {
-      return;
+      return false;
     }
   }
 
-  add_real_abs(m_mod_deps, dep);
+  return add_real_abs(m_mod_deps, dep);
 }
-void dag::node::add_mod_impl(llvm::StringRef mod_impl) {
-  add_real_abs(m_mod_impls, mod_impl);
+bool dag::node::add_mod_impl(llvm::StringRef mod_impl) {
+  return add_real_abs(m_mod_impls, mod_impl);
 }
 bool dag::node::add_resource(llvm::StringRef resource) {
   return add_real_abs(m_resources, resource);
@@ -74,16 +75,20 @@ bool dag::node::add_shader(llvm::StringRef shader) {
 
 namespace {
 class ppc : public PPCallbacks {
+  DiagnosticsEngine *m_diag;
   dag::node *m_dag;
 
 public:
-  explicit ppc(dag::node *d) : m_dag{d} {}
+  explicit ppc(DiagnosticsEngine *diag, dag::node *d)
+      : m_diag{diag}, m_dag{d} {}
 
   void moduleImport(SourceLocation loc, ModuleIdPath path,
                     const Module *imp) override {
     assert(path.size() == 1 && "path isn't atomic");
     auto &[id, _] = path[0];
-    m_dag->add_mod_dep(id->getName());
+    if (!m_dag->add_mod_dep(id->getName())) {
+      diag_error(*m_diag, loc, "module not found");
+    }
   }
 };
 
@@ -94,7 +99,8 @@ public:
   explicit action(dag::node *d) : m_dag{d} {}
 
   bool BeginSourceFileAction(CompilerInstance &ci) override {
-    ci.getPreprocessor().addPPCallbacks(std::make_unique<ppc>(m_dag));
+    auto *diag = &ci.getDiagnostics();
+    ci.getPreprocessor().addPPCallbacks(std::make_unique<ppc>(diag, m_dag));
     ci.getPreprocessor().AddPragmaHandler(new ns_pragma(m_dag));
     return true;
   }
