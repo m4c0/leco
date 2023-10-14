@@ -15,6 +15,12 @@ static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
 }
 
 dag::node::node(StringRef n) : m_source{} { real_abs(m_source, n); }
+
+void dag::node::add_executable(llvm::StringRef executable) {
+  SmallString<256> abs{};
+  real_abs(abs, executable);
+  m_executables.insert(abs);
+}
 void dag::node::add_mod_dep(llvm::StringRef mod_name) {
   auto dir = sys::path::parent_path(source());
 
@@ -55,6 +61,11 @@ void dag::node::add_mod_impl(llvm::StringRef mod_impl) {
   SmallString<256> abs{};
   real_abs(abs, mod_impl);
   m_mod_impls.insert(abs);
+}
+void dag::node::add_resource(llvm::StringRef resource) {
+  SmallString<256> abs{};
+  real_abs(abs, resource);
+  m_resources.insert(abs);
 }
 
 namespace {

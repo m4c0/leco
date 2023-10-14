@@ -17,6 +17,7 @@ class node {
   llvm::StringSet<> m_frameworks{};
   llvm::StringSet<> m_mod_deps{};
   llvm::StringSet<> m_mod_impls{};
+  llvm::StringSet<> m_resources{};
   bool m_compiled{};
   root_t m_root{};
   bool m_recursed{};
@@ -24,10 +25,11 @@ class node {
 public:
   explicit node(llvm::StringRef n);
 
-  void add_executable(llvm::StringRef fw) { m_executables.insert(fw); }
+  void add_executable(llvm::StringRef e);
   void add_framework(llvm::StringRef fw) { m_frameworks.insert(fw); }
   void add_mod_dep(llvm::StringRef mod_name);
   void add_mod_impl(llvm::StringRef mod_impl);
+  void add_resource(llvm::StringRef fw);
 
   void set_app() { m_root = root_t::app; }
   void set_compiled() { m_compiled = true; }
@@ -47,6 +49,10 @@ public:
   [[nodiscard]] constexpr const auto &mod_impls() const noexcept {
     return m_mod_impls;
   }
+  [[nodiscard]] constexpr const auto &resources() const noexcept {
+    return m_resources;
+  }
+
   [[nodiscard]] constexpr bool app() const noexcept {
     return m_root == root_t::app;
   }

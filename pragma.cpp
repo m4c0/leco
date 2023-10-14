@@ -166,8 +166,9 @@ struct add_object_pragma : public id_list_pragma {
   }
 };
 
-struct add_resource_pragma : public id_list_pragma {
-  add_resource_pragma() : id_list_pragma{"add_resource"} {}
+struct add_resource_pragma : public id_list_pragma, node_holder {
+  add_resource_pragma(node *n)
+      : id_list_pragma{"add_resource"}, node_holder{n} {}
 
   void process_id(Preprocessor &pp, Token &t, StringRef fname) {
     auto lit = to_str(t);
@@ -175,7 +176,7 @@ struct add_resource_pragma : public id_list_pragma {
     if (sys::fs::is_regular_file(lit, res) && !res) {
       report(pp, t, "resource not found");
     } else {
-      // cur_ctx().add_pcm_resource(fname, lit);
+      m_node->add_resource(lit);
     }
   }
 };
@@ -227,6 +228,7 @@ ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
   AddPragma(new add_framework_pragma(n));
   AddPragma(new add_impl_pragma(n));
   AddPragma(new add_include_dir_pragma());
+  AddPragma(new add_resource_pragma(n));
   AddPragma(new app_pragma(n));
   AddPragma(new tool_pragma(n));
 }
