@@ -32,8 +32,8 @@ public:
   void add_library(llvm::StringRef lib) { m_libraries.insert(lib); }
   void add_mod_dep(llvm::StringRef mod_name);
   void add_mod_impl(llvm::StringRef mod_impl);
-  void add_resource(llvm::StringRef fw);
-  [[nodiscard]] bool add_shader(llvm::StringRef fw);
+  [[nodiscard]] bool add_resource(llvm::StringRef res);
+  [[nodiscard]] bool add_shader(llvm::StringRef shd);
 
   void set_app() { m_root = root_t::app; }
   void set_compiled() { m_compiled = true; }

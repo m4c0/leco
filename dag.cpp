@@ -65,8 +65,8 @@ void dag::node::add_mod_dep(llvm::StringRef mod_name) {
 void dag::node::add_mod_impl(llvm::StringRef mod_impl) {
   add_real_abs(m_mod_impls, mod_impl);
 }
-void dag::node::add_resource(llvm::StringRef resource) {
-  add_real_abs(m_resources, resource);
+bool dag::node::add_resource(llvm::StringRef resource) {
+  return add_real_abs(m_resources, resource);
 }
 bool dag::node::add_shader(llvm::StringRef shader) {
   return add_real_abs(m_shaders, shader);

@@ -160,19 +160,12 @@ struct add_library_pragma : public id_list_pragma, node_holder {
     m_node->add_library(to_str(t));
   }
 };
-struct add_resource_pragma : public id_list_pragma, node_holder {
-  add_resource_pragma(node *n)
-      : id_list_pragma{"add_resource"}, node_holder{n} {}
 
-  void process_id(Preprocessor &pp, Token &t, StringRef fname) {
-    auto lit = to_str(t);
-    bool res{};
-    if (sys::fs::is_regular_file(lit, res) && !res) {
-      report(pp, t, "resource not found");
-    } else {
-      m_node->add_resource(lit);
-    }
-  }
+struct add_resource_pragma : public file_list_pragma, node_holder {
+  add_resource_pragma(node *n)
+      : file_list_pragma{"add_resource"}, node_holder{n} {}
+
+  bool process_file(StringRef in) override { return m_node->add_resource(in); }
 };
 
 struct add_shader_pragma : public file_list_pragma, node_holder {
