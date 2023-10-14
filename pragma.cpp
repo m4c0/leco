@@ -64,6 +64,19 @@ public:
     } while (true);
   }
 };
+class file_list_pragma : public id_list_pragma {
+protected:
+  using id_list_pragma::id_list_pragma;
+
+  virtual bool process_file(StringRef f) = 0;
+
+  void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
+    SmallString<256> in{fname};
+    to_file(in, t);
+    if (!process_file(in))
+      report(pp, t, "file not found");
+  }
+};
 
 struct add_dll_pragma : public id_list_pragma, node_holder {
   add_dll_pragma(dag::node *n) : id_list_pragma("add_dll"), node_holder{n} {}
@@ -147,7 +160,6 @@ struct add_library_pragma : public id_list_pragma, node_holder {
     m_node->add_library(to_str(t));
   }
 };
-
 struct add_resource_pragma : public id_list_pragma, node_holder {
   add_resource_pragma(node *n)
       : id_list_pragma{"add_resource"}, node_holder{n} {}
@@ -163,15 +175,10 @@ struct add_resource_pragma : public id_list_pragma, node_holder {
   }
 };
 
-struct add_shader_pragma : public id_list_pragma, node_holder {
-  add_shader_pragma(node *n) : id_list_pragma{"add_shader"}, node_holder{n} {}
+struct add_shader_pragma : public file_list_pragma, node_holder {
+  add_shader_pragma(node *n) : file_list_pragma{"add_shader"}, node_holder{n} {}
 
-  void process_id(Preprocessor &pp, Token &t, StringRef fname) {
-    SmallString<256> in{fname};
-    to_file(in, t);
-    if (!m_node->add_shader(in))
-      report(pp, t, "shader not found");
-  }
+  bool process_file(StringRef in) override { return m_node->add_shader(in); }
 };
 
 struct app_pragma : public PragmaHandler, node_holder {
