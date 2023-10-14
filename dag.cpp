@@ -64,6 +64,9 @@ void dag::node::add_mod_impl(llvm::StringRef mod_impl) {
 void dag::node::add_resource(llvm::StringRef resource) {
   add_real_abs(m_resources, resource);
 }
+void dag::node::add_shader(llvm::StringRef shader) {
+  add_real_abs(m_shaders, shader);
+}
 
 namespace {
 class ppc : public PPCallbacks {

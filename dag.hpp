@@ -18,6 +18,7 @@ class node {
   llvm::StringSet<> m_mod_deps{};
   llvm::StringSet<> m_mod_impls{};
   llvm::StringSet<> m_resources{};
+  llvm::StringSet<> m_shaders{};
   bool m_compiled{};
   root_t m_root{};
   bool m_recursed{};
@@ -30,6 +31,7 @@ public:
   void add_mod_dep(llvm::StringRef mod_name);
   void add_mod_impl(llvm::StringRef mod_impl);
   void add_resource(llvm::StringRef fw);
+  void add_shader(llvm::StringRef fw);
 
   void set_app() { m_root = root_t::app; }
   void set_compiled() { m_compiled = true; }
@@ -51,6 +53,9 @@ public:
   }
   [[nodiscard]] constexpr const auto &resources() const noexcept {
     return m_resources;
+  }
+  [[nodiscard]] constexpr const auto &shaders() const noexcept {
+    return m_shaders;
   }
 
   [[nodiscard]] constexpr bool app() const noexcept {

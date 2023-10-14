@@ -181,28 +181,17 @@ struct add_resource_pragma : public id_list_pragma, node_holder {
   }
 };
 
-struct add_shader_pragma : public id_list_pragma {
-  add_shader_pragma() : id_list_pragma{"add_shader"} {}
+struct add_shader_pragma : public id_list_pragma, node_holder {
+  add_shader_pragma(node *n) : id_list_pragma{"add_shader"}, node_holder{n} {}
 
   void process_id(Preprocessor &pp, Token &t, StringRef fname) {
-    notify(pp, t, "adding shader");
-
-    SmallString<256> in{fname};
-    llvm::sys::path::remove_filename(in);
-    llvm::sys::path::append(in, to_str(t));
-
-    SmallString<256> out{};
-    in2out(in, out);
-    out.append(".spv");
-
-    llvm::sys::fs::create_directories(llvm::sys::path::parent_path(out));
-
-    // auto cmd = ("glslangValidator --quiet -V -o " + out + " " + in).str();
-    // if (0 == system(cmd.c_str())) {
-    //   cur_ctx().add_pcm_resource(fname, out);
-    // } else {
-    //   report(pp, t, "failed to compile shader");
-    // }
+    auto lit = to_str(t);
+    bool res{};
+    if (sys::fs::is_regular_file(lit, res) && !res) {
+      report(pp, t, "shader not found");
+    } else {
+      m_node->add_shader(lit);
+    }
   }
 };
 
@@ -229,6 +218,7 @@ ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
   AddPragma(new add_impl_pragma(n));
   AddPragma(new add_include_dir_pragma());
   AddPragma(new add_resource_pragma(n));
+  AddPragma(new add_shader_pragma(n));
   AddPragma(new app_pragma(n));
   AddPragma(new tool_pragma(n));
 }
