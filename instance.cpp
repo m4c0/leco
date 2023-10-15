@@ -24,5 +24,3 @@ instance::~instance() {}
 bool instance::run(std::unique_ptr<FrontendAction> a) {
   return m_ci ? m_ci->ExecuteAction(*a) : false;
 }
-
-StringRef instance::output() { return m_output; }

@@ -16,8 +16,6 @@ public:
                     llvm::StringRef out);
   ~instance();
 
-  [[nodiscard]] llvm::StringRef output();
-
   [[nodiscard]] bool run(std::unique_ptr<clang::FrontendAction> a);
 
   template <typename Tp> bool run() { return run(std::make_unique<Tp>()); }
