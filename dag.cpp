@@ -212,3 +212,30 @@ dag::node *dag::process(StringRef path) {
 
   return recurse(n) ? n : nullptr;
 }
+
+void dag::visit_dirty(const node *n, function_ref<void(const node *)> fn) {
+  StringMap<bool> visited{};
+
+  const auto rec = [&](auto rec, auto *n, bool inh) -> bool {
+    auto it = visited.find(n->source());
+    if (it != visited.end()) {
+      return it->second;
+    }
+
+    bool dirty = n->dirty() || inh;
+    for (auto &d : n->mod_deps()) {
+      dirty |= rec(rec, get_node(d.first()), false);
+    }
+    if (dirty)
+      fn(n);
+
+    visited[n->source()] = dirty;
+
+    for (auto &d : n->mod_impls()) {
+      rec(rec, get_node(d.first()), dirty);
+    }
+
+    return dirty;
+  };
+  rec(rec, n, false);
+}

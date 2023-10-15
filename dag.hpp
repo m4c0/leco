@@ -106,30 +106,5 @@ void visit(const node *n, auto &&fn) {
   };
   rec(rec, n);
 }
-void visit_dirty(const node *n, auto &&fn) {
-  llvm::StringMap<bool> visited{};
-
-  const auto rec = [&](auto rec, auto *n, bool inh) -> bool {
-    auto it = visited.find(n->source());
-    if (it != visited.end()) {
-      return it->second;
-    }
-
-    bool dirty = n->dirty() || inh;
-    for (auto &d : n->mod_deps()) {
-      dirty |= rec(rec, get_node(d.first()), false);
-    }
-    if (dirty)
-      fn(n);
-
-    visited[n->source()] = dirty;
-
-    for (auto &d : n->mod_impls()) {
-      rec(rec, get_node(d.first()), dirty);
-    }
-
-    return dirty;
-  };
-  rec(rec, n, false);
-}
+void visit_dirty(const node *n, llvm::function_ref<void(const node *)> fn);
 } // namespace dag
