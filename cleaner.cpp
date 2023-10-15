@@ -19,12 +19,9 @@ void clean(const dag::node *n) {
 
   StringSet<> done{};
 
-  if (should_clean_current()) {
-    remove_parent(done, n->target());
-    return;
-  }
   if (should_clean_all()) {
     dag::visit(n, [&](auto *n) { remove_parent(done, n->target()); });
-    return;
+  } else if (should_clean_current()) {
+    remove_parent(done, n->target());
   }
 }
