@@ -1,4 +1,5 @@
 #pragma once
+#include "instance.hpp"
 #include "llvm/ADT/SmallString.h"
 
 namespace clang {
@@ -23,4 +24,8 @@ public:
   [[nodiscard]] instance build();
   [[nodiscard]] bool execute();
   [[nodiscard]] std::shared_ptr<clang::CompilerInstance> createCI();
+
+  template <typename Tp> bool run() {
+    return build().run(std::make_unique<Tp>());
+  }
 };

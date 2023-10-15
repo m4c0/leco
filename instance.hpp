@@ -20,6 +20,4 @@ public:
   [[nodiscard]] bool run(std::unique_ptr<clang::FrontendAction> a) {
     return m_ci ? m_ci->ExecuteAction(*a) : false;
   }
-
-  template <typename Tp> bool run() { return run(std::make_unique<Tp>()); }
 };

@@ -50,7 +50,6 @@ bool compile(const dag::node *n) {
              .push_arg("--precompile")
              .push_arg(file)
              .set_out(pcm)
-             .build()
              .run<GenerateModuleInterfaceAction>())
       return false;
 
@@ -58,7 +57,6 @@ bool compile(const dag::node *n) {
         .push_arg("-c")
         .push_arg(pcm)
         .set_out(obj)
-        .build()
         .run<EmitObjAction>();
   } else if (ext == ".cpp") {
     return evoker{}
@@ -66,14 +64,12 @@ bool compile(const dag::node *n) {
         .push_arg("-c")
         .push_arg(file)
         .set_out(obj)
-        .build()
         .run<EmitObjAction>();
   } else if (ext == ".c") {
     return evoker{}
         .push_arg("-c")
         .push_arg(file)
         .set_out(obj)
-        .build()
         .run<EmitObjAction>();
   } else if (ext == ".mm" || ext == ".m") {
     return evoker{}
@@ -82,7 +78,6 @@ bool compile(const dag::node *n) {
         .push_arg("-fobjc-arc")
         .push_arg(file)
         .set_out(obj)
-        .build()
         .run<EmitObjAction>();
   } else {
     errs() << "don't know how to build " << file << "\n";
