@@ -11,6 +11,8 @@
 using namespace clang;
 using namespace llvm;
 
+using time_point = sys::TimePoint<>;
+
 static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
   sys::fs::real_path(path, buf);
   sys::fs::make_absolute(buf);
@@ -28,7 +30,7 @@ static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
 static auto mod_time(Twine file) {
   sys::fs::file_status s{};
   if (sys::fs::status(file, s))
-    return sys::TimePoint<>{};
+    return time_point{};
 
   return s.getLastModificationTime();
 }
@@ -36,12 +38,6 @@ static auto mod_time(Twine file) {
 dag::node::node(StringRef n) : m_source{} {
   real_abs(m_source, n);
   in2out(m_source, m_target, "o");
-}
-
-bool dag::node::dirty() const noexcept {
-  auto sm = mod_time(m_source);
-  auto tm = mod_time(m_target);
-  return tm < sm;
 }
 
 bool dag::node::add_executable(llvm::StringRef executable) {
@@ -214,28 +210,32 @@ dag::node *dag::process(StringRef path) {
 }
 
 void dag::visit_dirty(const node *n, function_ref<void(const node *)> fn) {
-  StringMap<bool> visited{};
+  StringMap<time_point> visited{};
 
-  const auto rec = [&](auto rec, auto *n, bool inh) -> bool {
+  const auto rec = [&](auto rec, auto *n, time_point pmt) -> time_point {
     auto it = visited.find(n->source());
     if (it != visited.end()) {
       return it->second;
     }
 
-    bool dirty = n->dirty() || inh;
+    auto mtime = mod_time(n->source());
+    mtime = mtime > pmt ? mtime : pmt;
+
     for (auto &d : n->mod_deps()) {
-      dirty |= rec(rec, get_node(d.first()), false);
+      auto dmt = rec(rec, get_node(d.first()), {});
+      mtime = mtime > dmt ? mtime : dmt;
     }
-    if (dirty)
+
+    if (mtime > mod_time(n->target()))
       fn(n);
 
-    visited[n->source()] = dirty;
+    visited[n->source()] = mtime;
 
     for (auto &d : n->mod_impls()) {
-      rec(rec, get_node(d.first()), dirty);
+      rec(rec, get_node(d.first()), mtime);
     }
 
-    return dirty;
+    return mtime;
   };
-  rec(rec, n, false);
+  rec(rec, n, {});
 }

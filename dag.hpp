@@ -82,8 +82,6 @@ public:
   [[nodiscard]] constexpr llvm::StringRef target() const noexcept {
     return m_target;
   }
-
-  [[nodiscard]] bool dirty() const noexcept;
 };
 
 node *get_node(llvm::StringRef source);
