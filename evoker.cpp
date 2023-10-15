@@ -9,7 +9,6 @@
 #include "context.hpp"
 #include "evoker.hpp"
 #include "in2out.hpp"
-#include "instance.hpp"
 #include "clang/CodeGen/ObjectFilePCHContainerOperations.h"
 #include "clang/Driver/Compilation.h"
 #include "clang/Driver/Driver.h"
@@ -90,7 +89,13 @@ evoker &evoker::set_out(StringRef out) {
   m_args.push_back(m_obj.c_str());
   return *this;
 }
-instance evoker::build() { return instance{createCI(), m_obj.str()}; }
+bool evoker::run(FrontendAction &a) {
+  auto ci = createCI();
+  if (!ci)
+    return false;
+
+  return ci->ExecuteAction(a);
+}
 
 std::shared_ptr<CompilerInstance> evoker::createCI() {
   return ::createCI(m_args);

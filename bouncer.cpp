@@ -4,7 +4,6 @@
 #include "compile.hpp"
 #include "context.hpp"
 #include "dag.hpp"
-#include "instance.hpp"
 #include "link.hpp"
 #include "llvm/Support/Path.h"
 
