@@ -36,10 +36,12 @@ static auto mod_time(Twine file) {
 dag::node::node(StringRef n) : m_source{} {
   real_abs(m_source, n);
   in2out(m_source, m_target, "o");
+}
 
+bool dag::node::dirty() const noexcept {
   auto sm = mod_time(m_source);
   auto tm = mod_time(m_target);
-  m_dirty = tm < sm;
+  return tm < sm;
 }
 
 bool dag::node::add_executable(llvm::StringRef executable) {

@@ -53,33 +53,6 @@ static void bundle_app(StringRef exe) {
   cur_ctx().bundle(path, sys::path::stem(exe));
 }
 
-bool lets_do_it(StringRef path) {
-  auto *n = dag::get_node(path);
-  assert(n && "Trying to compile a file outside DAG");
-
-  if (n->compiled())
-    return true;
-
-  // Recurse dependencies
-  for (auto &d : n->mod_deps()) {
-    if (!lets_do_it(d.first()))
-      return false;
-  }
-
-  // Compile self
-  if (!compile(n))
-    return false;
-
-  // Compile impls
-  for (auto &d : n->mod_impls()) {
-    if (!lets_do_it(d.first()))
-      return false;
-  }
-
-  n->set_compiled();
-  return true;
-}
-
 bool bounce(StringRef path) {
   auto stem = sys::path::stem(path);
   auto ext = sys::path::extension(path);
@@ -98,9 +71,13 @@ bool bounce(StringRef path) {
   if (n->tool() && !cur_ctx().native_target)
     return true;
 
-  dag::visit_dirty(n, [](auto *n) { outs() << n->source() << "\n"; });
-
-  if (!lets_do_it(n->source()))
+  bool failed = false;
+  dag::visit_dirty(n, [&](auto *n) {
+    if (failed)
+      return;
+    failed |= !compile(n);
+  });
+  if (failed)
     return false;
 
   if (!n->app() && !n->tool())
