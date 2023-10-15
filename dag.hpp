@@ -24,6 +24,7 @@ class node {
   bool m_compiled{};
   root_t m_root{};
   bool m_recursed{};
+  bool m_dirty{};
 
 public:
   explicit node(llvm::StringRef n);
@@ -68,6 +69,7 @@ public:
     return m_root == root_t::app;
   }
   [[nodiscard]] constexpr bool compiled() const noexcept { return m_compiled; }
+  [[nodiscard]] constexpr bool dirty() const noexcept { return m_dirty; }
   [[nodiscard]] constexpr bool recursed() const noexcept { return m_recursed; }
   [[nodiscard]] constexpr bool root() const noexcept {
     return m_root != root_t::none;

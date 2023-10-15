@@ -12,21 +12,9 @@
 using namespace clang;
 using namespace llvm;
 
-static auto mod_time(Twine file) {
-  sys::fs::file_status s{};
-  if (sys::fs::status(file, s))
-    return sys::TimePoint<>{};
-
-  return s.getLastModificationTime();
-}
-
 bool compile(const dag::node *n) {
   auto file = n->source();
   auto obj = n->target();
-
-  auto fm = mod_time(file);
-  auto fo = mod_time(obj);
-  // if (fo > fm) return true;
 
   auto path = sys::path::parent_path(obj);
   sys::fs::create_directories(path);

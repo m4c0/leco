@@ -25,9 +25,21 @@ static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
   return true;
 }
 
+static auto mod_time(Twine file) {
+  sys::fs::file_status s{};
+  if (sys::fs::status(file, s))
+    return sys::TimePoint<>{};
+
+  return s.getLastModificationTime();
+}
+
 dag::node::node(StringRef n) : m_source{} {
   real_abs(m_source, n);
   in2out(m_source, m_target, "o");
+
+  auto sm = mod_time(m_source);
+  auto tm = mod_time(m_target);
+  m_dirty = tm < sm;
 }
 
 bool dag::node::add_executable(llvm::StringRef executable) {
