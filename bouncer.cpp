@@ -98,6 +98,8 @@ bool bounce(StringRef path) {
   if (n->tool() && !cur_ctx().native_target)
     return true;
 
+  dag::visit_dirty(n, [](auto *n) { outs() << n->source() << "\n"; });
+
   if (!lets_do_it(n->source()))
     return false;
 
