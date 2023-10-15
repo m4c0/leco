@@ -2,6 +2,7 @@
 #include "diags.hpp"
 #include "evoker.hpp"
 #include "in2out.hpp"
+#include "mtime.hpp"
 #include "pragma.hpp"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendActions.h"
@@ -25,14 +26,6 @@ static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
 
   set.insert(abs);
   return true;
-}
-
-static auto mod_time(Twine file) {
-  sys::fs::file_status s{};
-  if (sys::fs::status(file, s))
-    return time_point{};
-
-  return s.getLastModificationTime();
 }
 
 dag::node::node(StringRef n) : m_source{} {

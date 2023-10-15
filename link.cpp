@@ -4,6 +4,7 @@
 #include "evoker.hpp"
 #include "in2out.hpp"
 #include "link.hpp"
+#include "mtime.hpp"
 #include "llvm/ADT/StringSet.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
@@ -23,14 +24,6 @@ static std::string i2o(StringRef src) {
   SmallString<128> pp{};
   in2out(src, pp, "o");
   return pp.str().str();
-}
-
-static auto mod_time(Twine file) {
-  sys::fs::file_status s{};
-  if (sys::fs::status(file, s))
-    return sys::TimePoint<>{};
-
-  return s.getLastModificationTime();
 }
 
 static void visit(things &t, const dag::node *n) {

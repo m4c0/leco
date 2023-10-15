@@ -5,6 +5,7 @@
 #include "context.hpp"
 #include "dag.hpp"
 #include "link.hpp"
+#include "mtime.hpp"
 #include "llvm/Support/Path.h"
 
 using namespace clang;
@@ -17,6 +18,9 @@ static bool compile_shaders(const dag::node *n, StringRef res_path) {
     SmallString<256> out{};
     sys::path::append(out, res_path, sys::path::filename(in));
     out.append(".spv");
+
+    if (mod_time(out) > mod_time(in))
+      continue;
 
     if (is_verbose()) {
       errs() << "compiling shader " << out << "\n";
@@ -33,6 +37,9 @@ static void copy_exes(const dag::node *n, StringRef exe_path) {
   for (auto &e : n->executables()) {
     sys::path::remove_filename(path);
     sys::path::append(path, sys::path::filename(e.first()));
+    if (mod_time(path) > mod_time(e.first()))
+      continue;
+
     if (is_verbose()) {
       errs() << "copying library " << path << "\n";
     }
@@ -44,6 +51,8 @@ static void copy_resources(const dag::node *n, StringRef res_path) {
 
   for (auto &r : n->resources()) {
     sys::path::append(path, sys::path::filename(r.first()));
+    if (mod_time(path) > mod_time(r.first()))
+      continue;
     if (is_verbose()) {
       errs() << "copying resource " << path << "\n";
     }
