@@ -185,6 +185,7 @@ ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
 }
 
 ns_pragma::ns_pragma() : PragmaNamespace{"leco"} {
+  AddPragma(new add_include_dir_pragma());
   AddPragma(new EmptyPragmaHandler());
 }
 static PragmaHandlerRegistry::Add<ns_pragma> NS{"leco", "leco extensions"};
