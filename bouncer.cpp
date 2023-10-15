@@ -68,12 +68,12 @@ bool lets_do_it(StringRef path) {
   }
 
   // Compile self
-  if (!compile(path))
+  if (!compile(n))
     return false;
 
   // Compile impls
   for (auto &d : n->mod_impls()) {
-    if (!compile(d.first()))
+    if (!lets_do_it(d.first()))
       return false;
   }
 

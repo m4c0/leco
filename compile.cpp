@@ -1,4 +1,5 @@
 #include "compile.hpp"
+#include "dag.hpp"
 #include "evoker.hpp"
 #include "in2out.hpp"
 #include "instance.hpp"
@@ -20,7 +21,9 @@ static auto mod_time(Twine file) {
   return s.getLastModificationTime();
 }
 
-bool compile(StringRef file) {
+bool compile(const dag::node *n) {
+  auto file = n->source();
+
   SmallString<256> obj{};
   in2out(file, obj, "o");
 

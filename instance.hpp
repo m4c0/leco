@@ -22,4 +22,3 @@ public:
 
   template <typename Tp> bool run() { return run(std::make_unique<Tp>()); }
 };
-void clear_module_path_cache();
