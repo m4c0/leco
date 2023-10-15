@@ -7,6 +7,7 @@
 #include "cl.hpp"
 #include "clang_dir.hpp"
 #include "context.hpp"
+#include "dag.hpp"
 #include "evoker.hpp"
 #include "in2out.hpp"
 #include "clang/CodeGen/ObjectFilePCHContainerOperations.h"
@@ -98,7 +99,21 @@ bool evoker::run(FrontendAction &a) {
 }
 
 std::shared_ptr<CompilerInstance> evoker::createCI() {
-  return ::createCI(m_args);
+  auto ci = ::createCI(m_args);
+
+  if (m_node == nullptr)
+    return ci;
+
+  StringSet<> uniq{};
+  dag::visit(m_node, [&](auto *n) {
+    auto path = sys::path::parent_path(n->target());
+    uniq.insert(path);
+  });
+  for (auto &p : uniq) {
+    ci->getHeaderSearchOpts().AddPrebuiltModulePath(p.first());
+  }
+
+  return ci;
 }
 
 bool evoker::execute() {

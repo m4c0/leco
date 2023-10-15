@@ -46,6 +46,7 @@ bool compile(const dag::node *n) {
              .push_arg("--precompile")
              .push_arg(file)
              .set_out(pcm)
+             .pull_deps_from(n)
              .run<GenerateModuleInterfaceAction>())
       return false;
 
@@ -60,6 +61,7 @@ bool compile(const dag::node *n) {
         .push_arg("-c")
         .push_arg(file)
         .set_out(obj)
+        .pull_deps_from(n)
         .run<EmitObjAction>();
   } else if (ext == ".c") {
     return evoker{}
