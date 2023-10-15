@@ -35,6 +35,7 @@ bool compile(const dag::node *n) {
   if (ext == ".cppm") {
     SmallString<256> pcm{};
     in2out(file, pcm, "pcm");
+    pcm.c_str();
 
     if (!evoker{}
              .set_cpp_std()
