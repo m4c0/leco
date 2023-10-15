@@ -75,7 +75,7 @@ bool bounce(StringRef path) {
     return true;
 
   bool failed = false;
-  dag::visit_dirty(n, [&](auto *n) {
+  auto mtime = dag::visit_dirty(n, [&](auto *n) {
     if (failed)
       return;
     failed |= !compile(n);
@@ -86,7 +86,7 @@ bool bounce(StringRef path) {
   if (!n->app() && !n->tool())
     return true;
 
-  auto exe_path = link(n);
+  auto exe_path = link(n, mtime);
   if (exe_path != "" && n->app()) {
     SmallString<256> res_path{exe_path};
     cur_ctx().app_res_path(res_path);

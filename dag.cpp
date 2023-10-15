@@ -209,12 +209,15 @@ dag::node *dag::process(StringRef path) {
   return recurse(n) ? n : nullptr;
 }
 
-void dag::visit_dirty(const node *n, function_ref<void(const node *)> fn) {
+time_point dag::visit_dirty(const node *n,
+                            function_ref<void(const node *)> fn) {
   StringMap<time_point> visited{};
 
+  time_point max{};
   const auto rec = [&](auto rec, auto *n, time_point pmt) -> time_point {
     auto it = visited.find(n->source());
     if (it != visited.end()) {
+      max = max > it->second ? max : it->second;
       return it->second;
     }
 
@@ -226,9 +229,12 @@ void dag::visit_dirty(const node *n, function_ref<void(const node *)> fn) {
       mtime = mtime > dmt ? mtime : dmt;
     }
 
-    if (mtime > mod_time(n->target()))
+    if (mtime > mod_time(n->target())) {
       fn(n);
+      mtime = mod_time(n->target());
+    }
 
+    max = max > mtime ? max : mtime;
     visited[n->source()] = mtime;
 
     for (auto &d : n->mod_impls()) {
@@ -238,4 +244,5 @@ void dag::visit_dirty(const node *n, function_ref<void(const node *)> fn) {
     return mtime;
   };
   rec(rec, n, {});
+  return max;
 }

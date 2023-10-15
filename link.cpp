@@ -25,6 +25,14 @@ static std::string i2o(StringRef src) {
   return pp.str().str();
 }
 
+static auto mod_time(Twine file) {
+  sys::fs::file_status s{};
+  if (sys::fs::status(file, s))
+    return sys::TimePoint<>{};
+
+  return s.getLastModificationTime();
+}
+
 static void visit(things &t, const dag::node *n) {
   t.args.push_back(i2o(n->source()));
 
@@ -45,7 +53,7 @@ static void visit(things &t, const dag::node *n) {
     t.args.push_back(lib.first().str());
   }
 }
-std::string link(const dag::node *n) {
+std::string link(const dag::node *n, sys::TimePoint<> mtime) {
   auto main_src = n->source();
 
   things t{};
@@ -58,6 +66,9 @@ std::string link(const dag::node *n) {
     cur_ctx().app_exe_path(exe, sys::path::stem(main_src));
     sys::fs::create_directories(sys::path::parent_path(exe));
   }
+
+  if (mtime < mod_time(exe))
+    return std::string{exe};
 
   if (is_verbose()) {
     errs() << "linking " << exe << "\n";

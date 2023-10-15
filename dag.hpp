@@ -104,5 +104,6 @@ void visit(const node *n, auto &&fn) {
   };
   rec(rec, n);
 }
-void visit_dirty(const node *n, llvm::function_ref<void(const node *)> fn);
+llvm::sys::TimePoint<> visit_dirty(const node *n,
+                                   llvm::function_ref<void(const node *)> fn);
 } // namespace dag
