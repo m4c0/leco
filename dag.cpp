@@ -1,6 +1,7 @@
 #include "dag.hpp"
 #include "diags.hpp"
 #include "evoker.hpp"
+#include "in2out.hpp"
 #include "pragma.hpp"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendActions.h"
@@ -24,7 +25,10 @@ static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
   return true;
 }
 
-dag::node::node(StringRef n) : m_source{} { real_abs(m_source, n); }
+dag::node::node(StringRef n) : m_source{} {
+  real_abs(m_source, n);
+  in2out(m_source, m_target, "o");
+}
 
 bool dag::node::add_executable(llvm::StringRef executable) {
   return add_real_abs(m_executables, executable);

@@ -13,6 +13,7 @@ enum class root_t {
 
 class node {
   llvm::SmallString<256> m_source;
+  llvm::SmallString<256> m_target;
   llvm::StringSet<> m_executables{};
   llvm::StringSet<> m_frameworks{};
   llvm::StringSet<> m_libraries{};
@@ -74,8 +75,12 @@ public:
   [[nodiscard]] constexpr bool tool() const noexcept {
     return m_root == root_t::tool;
   }
+
   [[nodiscard]] constexpr llvm::StringRef source() const noexcept {
     return m_source;
+  }
+  [[nodiscard]] constexpr llvm::StringRef target() const noexcept {
+    return m_target;
   }
 };
 

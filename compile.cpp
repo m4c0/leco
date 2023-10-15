@@ -2,7 +2,6 @@
 #include "compile.hpp"
 #include "dag.hpp"
 #include "evoker.hpp"
-#include "in2out.hpp"
 #include "clang/CodeGen/CodeGenAction.h"
 #include "clang/Frontend/FrontendActions.h"
 #include "llvm/ADT/StringRef.h"
@@ -23,9 +22,7 @@ static auto mod_time(Twine file) {
 
 bool compile(const dag::node *n) {
   auto file = n->source();
-
-  SmallString<256> obj{};
-  in2out(file, obj, "o");
+  auto obj = n->target();
 
   auto fm = mod_time(file);
   auto fo = mod_time(obj);
@@ -40,8 +37,8 @@ bool compile(const dag::node *n) {
 
   auto ext = sys::path::extension(file);
   if (ext == ".cppm") {
-    SmallString<256> pcm{};
-    in2out(file, pcm, "pcm");
+    SmallString<256> pcm{obj};
+    sys::path::replace_extension(pcm, "pcm");
     pcm.c_str();
 
     if (!evoker{}
