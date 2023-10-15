@@ -55,8 +55,10 @@ static void bundle_app(StringRef exe) {
 
 bool lets_do_it(StringRef path) {
   auto *n = dag::get_node(path);
-  if (!n)
+  if (!n) {
+    errs() << "Unparsed path: [" << path << "]\n";
     return false;
+  }
 
   if (n->compiled())
     return true;
