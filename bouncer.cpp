@@ -1,5 +1,6 @@
 #include "bouncer.hpp"
 #include "cl.hpp"
+#include "cleaner.hpp"
 #include "compile.hpp"
 #include "context.hpp"
 #include "dag.hpp"
@@ -96,6 +97,8 @@ bool bounce(StringRef path) {
     return false;
   if (!n->root())
     return true;
+
+  clean(n);
 
   if (n->tool() && !cur_ctx().native_target)
     return true;
