@@ -1,3 +1,4 @@
+#include "cl.hpp"
 #include "compile.hpp"
 #include "dag.hpp"
 #include "evoker.hpp"
@@ -30,6 +31,13 @@ bool compile(const dag::node *n) {
   auto fm = mod_time(file);
   auto fo = mod_time(obj);
   // if (fo > fm) return true;
+
+  auto path = sys::path::parent_path(obj);
+  sys::fs::create_directories(path);
+
+  if (is_verbose()) {
+    errs() << "compiling " << obj << "\n";
+  }
 
   auto ext = sys::path::extension(file);
   if (ext == ".cppm") {
