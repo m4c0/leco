@@ -75,7 +75,8 @@ bool lets_do_it(StringRef path) {
 
   // Compile impls
   for (auto &d : n->mod_impls()) {
-    if (!lets_do_it(d.first()))
+    dag::node n{d.first()};
+    if (!compile(&n))
       return false;
   }
 
