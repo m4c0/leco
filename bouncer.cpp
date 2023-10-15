@@ -18,6 +18,9 @@ static bool compile_shaders(const dag::node *n, StringRef res_path) {
     sys::path::append(out, res_path, sys::path::filename(in));
     out.append(".spv");
 
+    if (is_verbose()) {
+      errs() << "compiling shader " << out << "\n";
+    }
     auto cmd = ("glslangValidator --quiet -V -o " + out + " " + in).str();
     if (0 != system(cmd.c_str()))
       return false;
