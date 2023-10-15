@@ -163,6 +163,23 @@ static bool recurse(dag::node *n) {
 
     d->set_recursed();
   }
+  for (auto &impl : n->mod_impls()) {
+    auto [d, ins] = find(impl.first());
+
+    if (!d)
+      return false;
+    if (d->recursed())
+      continue;
+
+    if (sys::path::extension(impl.first()) == ".cpp") {
+      if (!compile(d))
+        return false;
+      if (!recurse(d))
+        return false;
+    }
+
+    d->set_recursed();
+  }
   return true;
 }
 

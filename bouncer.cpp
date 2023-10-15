@@ -55,10 +55,7 @@ static void bundle_app(StringRef exe) {
 
 bool lets_do_it(StringRef path) {
   auto *n = dag::get_node(path);
-  if (!n) {
-    errs() << "Unparsed path: [" << path << "]\n";
-    return false;
-  }
+  assert(n && "Trying to compile a file outside DAG");
 
   if (n->compiled())
     return true;
@@ -75,8 +72,7 @@ bool lets_do_it(StringRef path) {
 
   // Compile impls
   for (auto &d : n->mod_impls()) {
-    dag::node n{d.first()};
-    if (!compile(&n))
+    if (!lets_do_it(d.first()))
       return false;
   }
 
