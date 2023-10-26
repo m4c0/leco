@@ -89,6 +89,7 @@ public:
   explicit ppc(DiagnosticsEngine *diag, dag::node *d)
       : m_diag{diag}, m_dag{d} {}
 
+  bool FileNotFound(StringRef filename) override { return true; }
   void moduleImport(SourceLocation loc, ModuleIdPath path,
                     const Module *imp) override {
     assert(path.size() == 1 && "path isn't atomic");
