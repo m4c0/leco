@@ -6,6 +6,8 @@
 #include "llvm/Support/Path.h"
 #include "llvm/Support/raw_ostream.h"
 
+#include <fstream>
+
 using namespace llvm;
 
 namespace plist {
@@ -90,7 +92,25 @@ void common_app_plist(dict &d, StringRef name, StringRef sdk) {
 }
 [[nodiscard]] static std::string team_id() { return env("LECO_IOS_TEAM"); }
 
-void gen_info_plist(StringRef exe_path, StringRef name) {
+void merge_icon_partial(StringRef build_path, raw_ostream &o) {
+  SmallString<256> plist{};
+  sys::path::append(plist, build_path, "icon-partial.plist");
+
+  auto i = std::ifstream{plist.c_str()};
+  std::string line;
+  std::getline(i, line); // xml
+  std::getline(i, line); // doctype
+  std::getline(i, line); // plist
+  std::getline(i, line); // dict
+  while (i) {
+    std::getline(i, line);
+    if (line == "</dict>")
+      break;
+    o << line << "\n";
+  }
+}
+
+void gen_info_plist(StringRef exe_path, StringRef name, StringRef build_path) {
   SmallString<256> path{exe_path};
   sys::path::append(path, "Info.plist");
   std::error_code ec;
@@ -108,6 +128,7 @@ void gen_info_plist(StringRef exe_path, StringRef name) {
     });
     d.array("UISupportedInterfaceOrientations",
             "UIInterfaceOrientationPortrait");
+    merge_icon_partial(build_path, o);
   });
 }
 void gen_archive_plist(StringRef xca_path, StringRef name) {
@@ -171,18 +192,18 @@ static bool export_archive(StringRef bundle_path, StringRef xca_path) {
 }
 void gen_iphone_plists(StringRef exe, StringRef name) {
   auto app_path = sys::path::parent_path(exe);
-  gen_info_plist(app_path, name);
+  auto apps = sys::path::parent_path(app_path);
+  auto prod = sys::path::parent_path(apps);
+  auto exca = sys::path::parent_path(prod);
+  auto build_path = sys::path::parent_path(exca);
+
+  gen_info_plist(app_path, name, build_path);
   if (!compile_launch(app_path))
     return;
   if (!code_sign(app_path))
     return;
 
-  auto apps = sys::path::parent_path(app_path);
-  auto prod = sys::path::parent_path(apps);
-  auto exca = sys::path::parent_path(prod);
   gen_archive_plist(exca, name);
-
-  auto build_path = sys::path::parent_path(exca);
   gen_export_plist(build_path, name);
   export_archive(build_path, exca);
 }
