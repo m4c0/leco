@@ -66,6 +66,12 @@ static void create_icon_contents(StringRef xca) {
   });
 }
 
+static void copy_icon(StringRef xca) {
+  SmallString<256> file{};
+  sys::path::append(file, xca, "icon.png");
+  sys::fs::copy_file("icon.png", file);
+}
+
 bool actool(StringRef path) {
   auto app_path = sys::path::parent_path(path);
   auto apps = sys::path::parent_path(app_path);
@@ -85,6 +91,7 @@ bool actool(StringRef path) {
 
   create_xca_contents(xcassets);
   create_icon_contents(appiconset);
+  copy_icon(appiconset);
 
   auto cmd = ("actool "
               "--notices --warnings --errors "

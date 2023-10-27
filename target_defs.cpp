@@ -1,3 +1,4 @@
+#include "actool.hpp"
 #include "context.hpp"
 #include "droid_path.hpp"
 #include "plist.hpp"
@@ -108,6 +109,8 @@ context iphoneos() {
       .bundle =
           [](auto &exe, auto stem) {
             auto b_path = StringRef{exe.begin(), exe.size()};
+            if (!actool(b_path))
+              return;
             gen_iphone_plists(b_path, stem);
           },
   };
