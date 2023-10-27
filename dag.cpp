@@ -154,6 +154,12 @@ static auto find(StringRef path) {
 
 static bool recurse(dag::node *n) {
   for (auto &dep : n->mod_deps()) {
+    if (dep.first() == n->source()) {
+      errs() << "Self-referencing detected - are you using `import "
+                "<mod>:<part>` instead of `import :<part>`?\n";
+      return false;
+    }
+
     auto [d, ins] = find(dep.first());
 
     if (!d)
