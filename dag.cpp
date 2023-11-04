@@ -142,7 +142,7 @@ static bool compile(dag::node *n) {
 static auto find(StringRef path) {
   dag::node n{path};
 
-  auto [it, inserted] = cache.try_emplace(n.source(), n);
+  auto [it, inserted] = cache.try_emplace(n.source(), n.source());
   auto *ptr = &(*it).second;
 
   struct res {
