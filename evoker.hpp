@@ -31,9 +31,8 @@ public:
   [[nodiscard]] bool execute();
   [[nodiscard]] std::shared_ptr<clang::CompilerInstance> createCI();
 
-  [[nodiscard]] bool run(clang::FrontendAction &a);
+  [[nodiscard]] bool run(std::unique_ptr<clang::FrontendAction> a);
   template <typename Tp> [[nodiscard]] bool run() {
-    Tp action{};
-    return run(action);
+    return run(std::make_unique<Tp>());
   }
 };
