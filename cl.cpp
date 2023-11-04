@@ -22,7 +22,7 @@ cl::opt<bool> verbose("verbose", cl::desc("Output important actions"),
                       cl::cat(leco_cat));
 bool is_verbose() { return verbose; }
 
-cl::opt<bool> debug("debug", cl::desc("Enable debug symbols"),
+cl::opt<bool> debug("debug-syms", cl::desc("Enable debug symbols"),
                     cl::cat(leco_cat));
 bool enable_debug_syms() { return debug; }
 
