@@ -37,8 +37,8 @@ static bool emit_obj(const evoker &e) {
   if (!ci)
     return false;
 
-  EmitObjAction a{};
-  return ci->ExecuteAction(a);
+  wrapped w{std::make_unique<EmitObjAction>()};
+  return ci->ExecuteAction(w);
 }
 
 bool compile(const dag::node *n) {
