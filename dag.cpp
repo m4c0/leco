@@ -32,6 +32,8 @@ static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
 dag::node::node(StringRef n) : m_source{} {
   real_abs(m_source, n);
   in2out(m_source, m_target, "o");
+  m_source.c_str();
+  m_target.c_str();
 }
 
 bool dag::node::add_executable(llvm::StringRef executable) {
