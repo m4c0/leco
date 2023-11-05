@@ -42,17 +42,20 @@ static DiagnosticsEngine diags() {
 }
 
 std::shared_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
+  auto tgt = cur_ctx().target;
+
   if (is_extra_verbose()) {
-    errs() << "create compiler instance for args:\n";
+    errs() << "create compiler instance for args (target = [" << tgt << "]):\n";
     for (auto a : args)
       errs() << a << " ";
     errs() << "\n";
   }
+
   auto clang = std::make_shared<CompilerInstance>();
 
   auto diags = ::diags();
 
-  Driver drv{clang_exe(), cur_ctx().target, diags};
+  Driver drv{clang_exe(), tgt, diags};
   std::unique_ptr<Compilation> c{drv.BuildCompilation(args)};
   if (!c || c->containsError() || c->getJobs().size() == 0)
     // We did a mistake in clang args. Bail out and let the diagnostics
