@@ -103,7 +103,7 @@ public:
     return WrapperFrontendAction::BeginSourceFileAction(ci);
   }
 };
-bool evoker::run(std::unique_ptr<clang::FrontendAction> a) {
+bool evoker::run(std::unique_ptr<clang::FrontendAction> a) const {
   auto ci = createCI();
   if (!ci)
     return false;
@@ -112,7 +112,7 @@ bool evoker::run(std::unique_ptr<clang::FrontendAction> a) {
   return ci->ExecuteAction(w);
 }
 
-std::shared_ptr<CompilerInstance> evoker::createCI() {
+std::shared_ptr<CompilerInstance> evoker::createCI() const {
   auto ci = ::createCI(m_args);
 
   if (m_node == nullptr)

@@ -12,6 +12,13 @@
 using namespace clang;
 using namespace llvm;
 
+static bool gen_pcm(const evoker &e) {
+  return e.run(std::make_unique<GenerateModuleInterfaceAction>());
+}
+static bool emit_obj(const evoker &e) {
+  return e.run(std::make_unique<EmitObjAction>());
+}
+
 bool compile(const dag::node *n) {
   auto file = n->source();
   auto obj = n->target();
@@ -29,42 +36,31 @@ bool compile(const dag::node *n) {
     sys::path::replace_extension(pcm, "pcm");
     pcm.c_str();
 
-    if (!evoker{}
-             .set_cpp_std()
-             .push_arg("--precompile")
-             .push_arg(file)
-             .set_out(pcm)
-             .pull_deps_from(n)
-             .run<GenerateModuleInterfaceAction>())
+    if (!gen_pcm(evoker{}
+                     .set_cpp_std()
+                     .push_arg("--precompile")
+                     .push_arg(file)
+                     .set_out(pcm)
+                     .pull_deps_from(n)))
       return false;
 
-    return evoker{}
-        .push_arg("-c")
-        .push_arg(pcm)
-        .set_out(obj)
-        .run<EmitObjAction>();
+    return emit_obj(evoker{}.push_arg("-c").push_arg(pcm).set_out(obj));
   } else if (ext == ".cpp") {
-    return evoker{}
-        .set_cpp_std()
-        .push_arg("-c")
-        .push_arg(file)
-        .set_out(obj)
-        .pull_deps_from(n)
-        .run<EmitObjAction>();
+    return emit_obj(evoker{}
+                        .set_cpp_std()
+                        .push_arg("-c")
+                        .push_arg(file)
+                        .set_out(obj)
+                        .pull_deps_from(n));
   } else if (ext == ".c") {
-    return evoker{}
-        .push_arg("-c")
-        .push_arg(file)
-        .set_out(obj)
-        .run<EmitObjAction>();
+    return emit_obj(evoker{}.push_arg("-c").push_arg(file).set_out(obj));
   } else if (ext == ".mm" || ext == ".m") {
-    return evoker{}
-        .push_arg("-c")
-        .push_arg("-fmodules")
-        .push_arg("-fobjc-arc")
-        .push_arg(file)
-        .set_out(obj)
-        .run<EmitObjAction>();
+    return emit_obj(evoker{}
+                        .push_arg("-c")
+                        .push_arg("-fmodules")
+                        .push_arg("-fobjc-arc")
+                        .push_arg(file)
+                        .set_out(obj));
   } else {
     errs() << "don't know how to build " << file << "\n";
     return false;
