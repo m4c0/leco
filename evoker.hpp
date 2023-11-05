@@ -11,7 +11,6 @@ class node;
 
 class evoker {
   std::vector<const char *> m_args{};
-  llvm::SmallString<128> m_obj{};
   const dag::node *m_node{};
 
 public:
@@ -21,7 +20,10 @@ public:
     return *this;
   }
   evoker &set_cpp_std() { return push_arg("-std=c++2b"); }
-  evoker &set_out(llvm::StringRef out);
+  evoker &set_out(llvm::StringRef out) {
+    push_arg("-o");
+    return push_arg(out);
+  }
 
   evoker &pull_deps_from(const dag::node *n) {
     m_node = n;

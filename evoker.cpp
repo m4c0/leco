@@ -93,13 +93,6 @@ evoker::evoker() {
     m_args.push_back(cur_ctx().sysroot.c_str());
   }
 }
-evoker &evoker::set_out(StringRef out) {
-  m_obj = out;
-
-  m_args.push_back("-o");
-  m_args.push_back(m_obj.c_str());
-  return *this;
-}
 
 class wrapped : public clang::WrapperFrontendAction {
 public:
