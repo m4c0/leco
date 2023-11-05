@@ -32,6 +32,4 @@ public:
 
   [[nodiscard]] bool execute();
   [[nodiscard]] std::shared_ptr<clang::CompilerInstance> createCI() const;
-
-  [[nodiscard]] bool run(std::unique_ptr<clang::FrontendAction> a) const;
 };

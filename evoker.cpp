@@ -10,7 +10,6 @@
 #include "dag.hpp"
 #include "evoker.hpp"
 #include "in2out.hpp"
-#include "pragma.hpp"
 #include "clang/CodeGen/ObjectFilePCHContainerOperations.h"
 #include "clang/Driver/Compilation.h"
 #include "clang/Driver/Driver.h"
@@ -92,24 +91,6 @@ evoker::evoker() {
     m_args.push_back("--sysroot");
     m_args.push_back(cur_ctx().sysroot.c_str());
   }
-}
-
-class wrapped : public clang::WrapperFrontendAction {
-public:
-  using WrapperFrontendAction::WrapperFrontendAction;
-
-  bool BeginSourceFileAction(CompilerInstance &ci) override {
-    ci.getPreprocessor().AddPragmaHandler(new ns_pragma());
-    return WrapperFrontendAction::BeginSourceFileAction(ci);
-  }
-};
-bool evoker::run(std::unique_ptr<clang::FrontendAction> a) const {
-  auto ci = createCI();
-  if (!ci)
-    return false;
-
-  wrapped w{std::move(a)};
-  return ci->ExecuteAction(w);
 }
 
 std::shared_ptr<CompilerInstance> evoker::createCI() const {

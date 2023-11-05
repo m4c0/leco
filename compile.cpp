@@ -2,7 +2,9 @@
 #include "compile.hpp"
 #include "dag.hpp"
 #include "evoker.hpp"
+#include "pragma.hpp"
 #include "clang/CodeGen/CodeGenAction.h"
+#include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendActions.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Support/FileSystem.h"
@@ -12,11 +14,31 @@
 using namespace clang;
 using namespace llvm;
 
+class wrapped : public clang::WrapperFrontendAction {
+public:
+  using WrapperFrontendAction::WrapperFrontendAction;
+
+  bool BeginSourceFileAction(CompilerInstance &ci) override {
+    ci.getPreprocessor().AddPragmaHandler(new ns_pragma());
+    return WrapperFrontendAction::BeginSourceFileAction(ci);
+  }
+};
+
 static bool gen_pcm(const evoker &e) {
-  return e.run(std::make_unique<GenerateModuleInterfaceAction>());
+  auto ci = e.createCI();
+  if (!ci)
+    return false;
+
+  wrapped w{std::make_unique<GenerateModuleInterfaceAction>()};
+  return ci->ExecuteAction(w);
 }
 static bool emit_obj(const evoker &e) {
-  return e.run(std::make_unique<EmitObjAction>());
+  auto ci = e.createCI();
+  if (!ci)
+    return false;
+
+  EmitObjAction a{};
+  return ci->ExecuteAction(a);
 }
 
 bool compile(const dag::node *n) {
