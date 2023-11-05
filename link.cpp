@@ -43,7 +43,7 @@ static void visit(things &t, const dag::node *n) {
     if (t.libraries.contains(lib.first()))
       continue;
     t.libraries.insert(lib.first());
-    t.args.push_back(lib.first().str());
+    t.args.push_back("-l" + lib.first().str());
   }
 }
 std::string link(const dag::node *n, sys::TimePoint<> mtime) {
