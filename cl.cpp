@@ -20,7 +20,11 @@ bool should_clean_all() { return clean_level >= cup_all; }
 
 cl::opt<bool> verbose("verbose", cl::desc("Output important actions"),
                       cl::cat(leco_cat));
-bool is_verbose() { return verbose; }
+cl::opt<bool> x_verbose("extra-verbose",
+                        cl::desc("Output as much actions as possible"),
+                        cl::cat(leco_cat));
+bool is_verbose() { return verbose || x_verbose; }
+bool is_extra_verbose() { return x_verbose; }
 
 cl::opt<bool> debug("debug-syms", cl::desc("Enable debug symbols"),
                     cl::cat(leco_cat));

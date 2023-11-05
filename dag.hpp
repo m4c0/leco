@@ -84,6 +84,8 @@ public:
   }
 };
 
+void xlog(const node *n, const char *msg);
+
 node *get_node(llvm::StringRef source);
 node *process(llvm::StringRef path);
 void clear_cache();

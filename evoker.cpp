@@ -42,6 +42,12 @@ static DiagnosticsEngine diags() {
 }
 
 std::shared_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
+  if (is_extra_verbose()) {
+    errs() << "create compiler instance for args:\n";
+    for (auto a : args)
+      errs() << a << " ";
+    errs() << "\n";
+  }
   auto clang = std::make_shared<CompilerInstance>();
 
   auto diags = ::diags();

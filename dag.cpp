@@ -1,3 +1,4 @@
+#include "cl.hpp"
 #include "dag.hpp"
 #include "diags.hpp"
 #include "evoker.hpp"
@@ -130,7 +131,15 @@ public:
 static StringMap<dag::node> cache{};
 void dag::clear_cache() { cache.clear(); }
 
+void dag::xlog(const dag::node *n, const char *msg) {
+  if (!is_extra_verbose())
+    return;
+  errs() << msg << " " << n->source() << "\n";
+}
+
 static bool compile(dag::node *n) {
+  dag::xlog(n, "dag compilation");
+
   auto ci =
       evoker{}.set_cpp_std().push_arg("-E").push_arg(n->source()).createCI();
   // ci->getDiagnostics().setClient(new IgnoringDiagConsumer());
