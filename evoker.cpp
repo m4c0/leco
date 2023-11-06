@@ -40,7 +40,7 @@ static DiagnosticsEngine diags() {
   return DiagnosticsEngine{diag_ids, diag_opts, diag_cli};
 }
 
-std::shared_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
+static std::shared_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
   auto tgt = cur_ctx().target;
 
   if (is_extra_verbose()) {
@@ -94,7 +94,12 @@ evoker::evoker() {
 }
 
 std::shared_ptr<CompilerInstance> evoker::createCI() const {
-  auto ci = ::createCI(m_args);
+  std::vector<const char *> args{};
+  for (const auto &s : m_args) {
+    args.push_back(s.c_str());
+  }
+
+  auto ci = ::createCI({args});
 
   if (m_node == nullptr)
     return ci;
@@ -112,9 +117,14 @@ std::shared_ptr<CompilerInstance> evoker::createCI() const {
 }
 
 bool evoker::execute() {
+  std::vector<const char *> args{};
+  for (const auto &s : m_args) {
+    args.push_back(s.c_str());
+  }
+
   auto diags = ::diags();
   Driver drv{clang_exe(), cur_ctx().target, diags};
-  std::unique_ptr<Compilation> c{drv.BuildCompilation(m_args)};
+  std::unique_ptr<Compilation> c{drv.BuildCompilation(args)};
   if (!c || c->containsError() || c->getJobs().size() == 0)
     // We did a mistake in clang args. Bail out and let the diagnostics
     // client do its job informing the user

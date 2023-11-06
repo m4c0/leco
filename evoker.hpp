@@ -1,5 +1,5 @@
 #pragma once
-#include "llvm/ADT/SmallString.h"
+#include "llvm/ADT/StringRef.h"
 
 namespace clang {
 class CompilerInstance;
@@ -10,13 +10,13 @@ class node;
 }
 
 class evoker {
-  std::vector<const char *> m_args{};
+  std::vector<std::string> m_args{};
   const dag::node *m_node{};
 
 public:
   evoker();
   evoker &push_arg(llvm::StringRef mode) {
-    m_args.push_back(mode.data());
+    m_args.push_back({mode.data(), mode.size()});
     return *this;
   }
   evoker &set_cpp_std() { return push_arg("-std=c++2b"); }
