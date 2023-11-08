@@ -19,10 +19,13 @@ static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
   sys::fs::real_path(path, buf);
   sys::fs::make_absolute(buf);
 }
-[[nodiscard]] static bool add_real_abs(StringSet<> &set, StringRef path) {
+[[nodiscard]] static bool add_real_abs(StringSet<> &set, StringRef path,
+                                       bool is_file = true) {
   SmallString<256> abs{};
   real_abs(abs, path);
-  if (!sys::fs::is_regular_file(abs))
+  if (is_file && !sys::fs::is_regular_file(abs))
+    return false;
+  if (!is_file && !sys::fs::is_directory(abs))
     return false;
 
   set.insert(abs);
@@ -38,6 +41,9 @@ dag::node::node(StringRef n) : m_source{} {
 
 bool dag::node::add_executable(llvm::StringRef executable) {
   return add_real_abs(m_executables, executable);
+}
+bool dag::node::add_library_dir(llvm::StringRef dir) {
+  return add_real_abs(m_library_dirs, dir, false);
 }
 bool dag::node::add_mod_dep(llvm::StringRef mod_name) {
   auto dir = sys::path::parent_path(source());

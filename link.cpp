@@ -16,6 +16,7 @@ namespace {
 struct things {
   StringSet<> frameworks{};
   StringSet<> libraries{};
+  StringSet<> library_dirs{};
   std::vector<std::string> args{};
 };
 } // namespace
@@ -44,6 +45,12 @@ static void visit(things &t, const dag::node *n) {
       continue;
     t.libraries.insert(lib.first());
     t.args.push_back("-l" + lib.first().str());
+  }
+  for (auto &lib : n->library_dirs()) {
+    if (t.library_dirs.contains(lib.first()))
+      continue;
+    t.library_dirs.insert(lib.first());
+    t.args.push_back("-L" + lib.first().str());
   }
 }
 std::string link(const dag::node *n, sys::TimePoint<> mtime) {

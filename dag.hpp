@@ -17,6 +17,7 @@ class node {
   llvm::StringSet<> m_executables{};
   llvm::StringSet<> m_frameworks{};
   llvm::StringSet<> m_libraries{};
+  llvm::StringSet<> m_library_dirs{};
   llvm::StringSet<> m_mod_deps{};
   llvm::StringSet<> m_mod_impls{};
   llvm::StringSet<> m_resources{};
@@ -31,6 +32,7 @@ public:
   [[nodiscard]] bool add_executable(llvm::StringRef e);
   void add_framework(llvm::StringRef fw) { m_frameworks.insert(fw); }
   void add_library(llvm::StringRef lib) { m_libraries.insert(lib); }
+  [[nodiscard]] bool add_library_dir(llvm::StringRef dir);
   [[nodiscard]] bool add_mod_dep(llvm::StringRef mod_name);
   [[nodiscard]] bool add_mod_impl(llvm::StringRef mod_impl);
   [[nodiscard]] bool add_resource(llvm::StringRef res);
@@ -50,6 +52,9 @@ public:
   }
   [[nodiscard]] constexpr const auto &libraries() const noexcept {
     return m_libraries;
+  }
+  [[nodiscard]] constexpr const auto &library_dirs() const noexcept {
+    return m_library_dirs;
   }
   [[nodiscard]] constexpr const auto &mod_deps() const noexcept {
     return m_mod_deps;

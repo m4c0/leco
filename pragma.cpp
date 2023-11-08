@@ -142,6 +142,15 @@ struct add_library_pragma : public id_list_pragma, node_holder {
   }
 };
 
+struct add_library_dir_pragma : public file_list_pragma, node_holder {
+  add_library_dir_pragma(node *n)
+      : file_list_pragma{"add_library_dir"}, node_holder{n} {}
+
+  bool process_file(StringRef in) override {
+    return m_node->add_library_dir(in);
+  }
+};
+
 struct add_resource_pragma : public file_list_pragma, node_holder {
   add_resource_pragma(node *n)
       : file_list_pragma{"add_resource"}, node_holder{n} {}
@@ -178,6 +187,7 @@ ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
   AddPragma(new add_impl_pragma(n));
   AddPragma(new add_include_dir_pragma());
   AddPragma(new add_library_pragma(n));
+  AddPragma(new add_library_dir_pragma(n));
   AddPragma(new add_resource_pragma(n));
   AddPragma(new add_shader_pragma(n));
   AddPragma(new app_pragma(n));
