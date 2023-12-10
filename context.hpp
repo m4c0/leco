@@ -9,6 +9,7 @@ struct context {
   llvm::ArrayRef<llvm::StringRef> link_flags{};
   std::string target{};
   std::string sysroot{};
+  std::string rpath{};
   void (*app_exe_path)(llvm::SmallVectorImpl<char> &exe, llvm::StringRef stem);
   void (*app_res_path)(llvm::SmallVectorImpl<char> &exe);
   void (*bundle)(llvm::SmallVectorImpl<char> &exe, llvm::StringRef stem);

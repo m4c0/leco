@@ -6,6 +6,7 @@
 #include "dag.hpp"
 #include "link.hpp"
 #include "mtime.hpp"
+#include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
 
 using namespace clang;
@@ -32,10 +33,15 @@ static bool compile_shaders(const dag::node *n, StringRef res_path) {
   return true;
 }
 static void copy_exes(const dag::node *n, StringRef exe_path) {
-  SmallString<256> path{exe_path};
+  const auto &rpath = cur_ctx().rpath;
 
   for (auto &e : n->executables()) {
+    SmallString<256> path{exe_path};
     sys::path::remove_filename(path);
+    if (rpath != "") {
+      sys::path::append(path, rpath);
+      sys::fs::create_directories(path);
+    }
     sys::path::append(path, sys::path::filename(e.first()));
     if (mod_time(path) > mod_time(e.first()))
       continue;

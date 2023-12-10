@@ -103,6 +103,7 @@ context iphoneos() {
       .link_flags = impl::ios_link_flags(),
       .target = "arm64-apple-ios16.1",
       .sysroot = impl::apple_sysroot("iphoneos"),
+      .rpath = "Frameworks",
       .app_exe_path =
           [](auto &exe, auto stem) {
             sys::path::remove_filename(exe);
