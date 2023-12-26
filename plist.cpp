@@ -86,9 +86,9 @@ void common_app_plist(dict &d, StringRef name, StringRef sdk) {
 }
 } // namespace plist
 
-[[nodiscard]] static std::string env(const char *key) {
+[[nodiscard]] static std::string env(const char *key, const char *def = "TBD") {
   const auto v = std::getenv(key);
-  return (v == nullptr) ? "TBD" : std::string{v};
+  return (v == nullptr) ? def : std::string{v};
 }
 [[nodiscard]] static std::string team_id() { return env("LECO_IOS_TEAM"); }
 
@@ -158,7 +158,7 @@ void gen_export_plist(StringRef build_path, StringRef name) {
   std::error_code ec;
   auto o = raw_fd_stream(path, ec);
   plist::gen(o, [&](auto &&d) {
-    d.string("method", "ad-hoc");
+    d.string("method", env("LECO_IOS_METHOD", "ad-hoc"));
     d.string("teamID", team_id());
     d.string("thinning", "&lt;none&gt;");
     d.dictionary("provisioningProfiles", [&](auto &&dd) {
