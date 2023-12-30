@@ -14,6 +14,8 @@ enum class root_t {
 class node {
   llvm::SmallString<256> m_source;
   llvm::SmallString<256> m_target;
+  llvm::SmallString<256> m_module_name;
+  llvm::SmallString<256> m_module_pcm;
   llvm::StringSet<> m_executables{};
   llvm::StringSet<> m_frameworks{};
   llvm::StringSet<> m_libraries{};
@@ -86,6 +88,12 @@ public:
   }
   [[nodiscard]] constexpr llvm::StringRef target() const noexcept {
     return m_target;
+  }
+  [[nodiscard]] constexpr llvm::StringRef module_name() const noexcept {
+    return m_module_name;
+  }
+  [[nodiscard]] constexpr llvm::StringRef module_pcm() const noexcept {
+    return m_module_pcm;
   }
 };
 

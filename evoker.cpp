@@ -104,14 +104,10 @@ std::shared_ptr<CompilerInstance> evoker::createCI() const {
   if (m_node == nullptr)
     return ci;
 
-  StringSet<> uniq{};
+  auto &mod_files = ci->getHeaderSearchOpts().PrebuiltModuleFiles;
   dag::visit(m_node, [&](auto *n) {
-    auto path = sys::path::parent_path(n->target());
-    uniq.insert(path);
+    mod_files.insert({n->module_name().str(), n->module_pcm().str()});
   });
-  for (auto &p : uniq) {
-    ci->getHeaderSearchOpts().AddPrebuiltModulePath(p.first());
-  }
 
   return ci;
 }

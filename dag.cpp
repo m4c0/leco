@@ -35,8 +35,22 @@ static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
 dag::node::node(StringRef n) : m_source{} {
   real_abs(m_source, n);
   in2out(m_source, m_target, "o");
+  in2out(m_source, m_module_pcm, "pcm");
   m_source.c_str();
   m_target.c_str();
+  m_module_pcm.c_str();
+
+  auto stem = sys::path::stem(n);
+  auto p = stem.find("-");
+  if (p != StringRef::npos) {
+    auto me = stem.substr(0, p);
+    auto part = stem.substr(p + 1);
+
+    sys::path::append(m_module_name, me + ":" + part);
+  } else {
+    sys::path::append(m_module_name, stem);
+  }
+  m_module_name.c_str();
 }
 
 bool dag::node::add_executable(llvm::StringRef executable) {
