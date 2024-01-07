@@ -3,7 +3,6 @@
 
 namespace clang {
 class CompilerInstance;
-class FrontendAction;
 } // namespace clang
 namespace dag {
 class node;
