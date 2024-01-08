@@ -217,6 +217,9 @@ static bool recurse(dag::node *n) {
         return false;
       if (!recurse(d))
         return false;
+      // TODO: do we care if we have a CPP file which isn't a C++20 impl unit?
+      if (!d->add_mod_dep(n->module_name()))
+        return false;
     }
 
     d->set_recursed();
