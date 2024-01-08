@@ -74,11 +74,8 @@ bool compile(const dag::node *n) {
                      .pull_deps_from(n)))
       return false;
 
-    evoker e = evoker{}.push_arg("-c").push_arg(pcm).set_out(obj);
-#if __clang_major__ >= 17
-    e.pull_deps_from(n);
-#endif
-    return emit_obj_simpler(e);
+    return emit_obj_simpler(
+        evoker{}.push_arg("-c").push_arg(pcm).set_out(obj).pull_deps_from(n));
   } else if (ext == ".cpp") {
     return emit_obj(evoker{}
                         .set_cpp_std()
