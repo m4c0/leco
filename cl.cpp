@@ -34,6 +34,10 @@ cl::opt<bool> optimise("opt", cl::desc("Enable optimisations"),
                        cl::cat(leco_cat));
 bool is_optimised() { return optimise; }
 
+cl::opt<bool> dump_dag("dump-dag", cl::desc("Dump the dependency graph"),
+                       cl::cat(leco_cat));
+bool is_dumping_dag() { return dump_dag; }
+
 enum targets {
   host,
   apple,

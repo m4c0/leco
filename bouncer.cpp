@@ -84,6 +84,14 @@ bool bounce(StringRef path) {
   if (!n->root())
     return true;
 
+  if (is_dumping_dag()) {
+    outs() << "-=-=-=-=- " << path << "\n";
+    dag::visit(n, [&](auto *n) {
+      outs() << "  " << n->module_name() << " ==> " << n->module_pcm() << "\n";
+    });
+    return true;
+  }
+
   clean(n);
 
   if (n->tool() && !cur_ctx().native_target)
