@@ -89,6 +89,14 @@ bool bounce(StringRef path) {
     dag::visit(n, [&](auto *n) {
       outs() << "  " << n->module_name() << " ==> " << n->module_pcm() << "\n";
     });
+    for (auto &d : n->mod_impls()) {
+      auto impl = dag::get_node(d.first());
+      outs() << "  -- impl: " << impl->source() << "\n";
+      dag::visit(impl, [&](auto *n) {
+        outs() << "     " << n->module_name() << " ==> " << n->module_pcm()
+               << "\n";
+      });
+    }
     return true;
   }
 
