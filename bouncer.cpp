@@ -85,7 +85,14 @@ bool bounce(StringRef path) {
     return true;
 
   if (is_dumping_dag()) {
-    outs() << "-=-=-=-=- " << path << "\n";
+    outs() << "-=-=-=-=- " << path;
+    if (n->root())
+      outs() << " root";
+    if (n->app())
+      outs() << " app";
+    if (n->tool())
+      outs() << " tool";
+    outs() << "\n";
     dag::visit(n, [&](auto *n) {
       outs() << "  " << n->module_name() << " ==> " << n->module_pcm() << "\n";
     });
