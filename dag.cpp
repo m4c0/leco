@@ -144,7 +144,7 @@ public:
     auto &pp = getCompilerInstance().getPreprocessor();
     bool root = pp.isInNamedModule() && pp.getNamedModuleName() == pwd_stem &&
                 file_ext == ".cppm";
-    if (root)
+    if (root && !m_dag->root())
       m_dag->set_main_mod();
   }
 };
