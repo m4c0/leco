@@ -81,6 +81,7 @@ context macosx() {
             impl::apple_bundle_path(exe, stem);
             sys::path::append(exe, "Contents", "MacOS");
             sys::path::append(exe, stem);
+            sys::path::replace_extension(exe, "exe");
           },
       .app_res_path =
           [](auto exe) {
