@@ -53,9 +53,8 @@ static void copy_exes(const dag::node *n, StringRef exe_path) {
   }
 }
 static void copy_resources(const dag::node *n, StringRef res_path) {
-  SmallString<256> path{res_path};
-
   for (auto &r : n->resources()) {
+    SmallString<256> path{res_path};
     sys::path::append(path, sys::path::filename(r.first()));
     if (mod_time(path) > mod_time(r.first()))
       continue;
@@ -63,7 +62,6 @@ static void copy_resources(const dag::node *n, StringRef res_path) {
       errs() << "copying resource " << path << "\n";
     }
     sys::fs::copy_file(r.first(), path);
-    sys::path::remove_filename(path);
   }
 }
 static void bundle_app(StringRef exe) {
