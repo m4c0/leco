@@ -172,6 +172,14 @@ struct app_pragma : public PragmaHandler, node_holder {
     m_node->set_app();
   }
 };
+struct dll_pragma : public PragmaHandler, node_holder {
+  dll_pragma(node *n) : PragmaHandler{"dll"}, node_holder{n} {}
+
+  void HandlePragma(Preprocessor &PP, PragmaIntroducer Introducer,
+                    Token &PragmaTok) {
+    m_node->set_dll();
+  }
+};
 struct tool_pragma : public PragmaHandler, node_holder {
   tool_pragma(node *n) : PragmaHandler{"tool"}, node_holder{n} {}
 
@@ -191,6 +199,7 @@ ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
   AddPragma(new add_resource_pragma(n));
   AddPragma(new add_shader_pragma(n));
   AddPragma(new app_pragma(n));
+  AddPragma(new dll_pragma(n));
   AddPragma(new tool_pragma(n));
 }
 

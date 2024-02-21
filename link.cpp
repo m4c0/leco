@@ -54,6 +54,11 @@ static void visit(things &t, const dag::node *n) {
   }
 }
 std::string link(const dag::node *n, sys::TimePoint<> mtime) {
+  if (n->dll()) {
+    errs() << "TODO: dll linking\n";
+    return "";
+  }
+
   auto main_src = n->source();
 
   things t{};

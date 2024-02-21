@@ -88,6 +88,8 @@ bool bounce(StringRef path) {
       outs() << " root";
     if (n->app())
       outs() << " app";
+    if (n->dll())
+      outs() << " dll";
     if (n->tool())
       outs() << " tool";
     outs() << "\n";
@@ -119,7 +121,7 @@ bool bounce(StringRef path) {
   if (failed)
     return false;
 
-  if (!n->app() && !n->tool())
+  if (!n->app() && !n->tool() && !n->dll())
     return true;
 
   auto exe_path = link(n, mtime);

@@ -7,6 +7,7 @@ namespace dag {
 enum class root_t {
   none,
   main_mod,
+  dll,
   tool,
   app,
 };
@@ -42,6 +43,7 @@ public:
 
   void set_app() { m_root = root_t::app; }
   void set_compiled() { m_compiled = true; }
+  void set_dll() { m_root = root_t::dll; }
   void set_main_mod() { m_root = root_t::main_mod; }
   void set_recursed() { m_recursed = true; }
   void set_tool() { m_root = root_t::tool; }
@@ -75,6 +77,9 @@ public:
     return m_root == root_t::app;
   }
   [[nodiscard]] constexpr bool compiled() const noexcept { return m_compiled; }
+  [[nodiscard]] constexpr bool dll() const noexcept {
+    return m_root == root_t::dll;
+  }
   [[nodiscard]] constexpr bool recursed() const noexcept { return m_recursed; }
   [[nodiscard]] constexpr bool root() const noexcept {
     return m_root != root_t::none;
