@@ -54,18 +54,17 @@ static void visit(things &t, const dag::node *n) {
   }
 }
 std::string link(const dag::node *n, sys::TimePoint<> mtime) {
-  if (n->dll()) {
-    errs() << "TODO: dll linking\n";
-    return "";
-  }
-
   auto main_src = n->source();
 
   things t{};
   dag::visit(n, [&](auto *n) { visit(t, n); });
 
   SmallString<128> exe{};
-  in2out(main_src, exe, "exe");
+  if (n->dll()) {
+    in2out(main_src, exe, cur_ctx().dll_ext);
+  } else {
+    in2out(main_src, exe, "exe");
+  }
 
   if (n->app()) {
     cur_ctx().app_exe_path(exe, sys::path::stem(main_src));

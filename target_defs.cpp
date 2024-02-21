@@ -19,6 +19,7 @@ context android(StringRef tgt) {
       .predefs = predefs,
       .target = tgt.str(),
       .sysroot = llvm.str().str(),
+      .dll_ext = "so",
       .app_exe_path = [](auto exe, auto stem) {},
       .app_res_path = [](auto exe) {},
       .bundle = [](auto &exe, auto stem) {},
@@ -76,6 +77,7 @@ context macosx() {
       .link_flags = impl::macos_link_flags(),
       .target = "x86_64-apple-macosx11.6.0",
       .sysroot = impl::apple_sysroot("macosx"),
+      .dll_ext = "dylib",
       .app_exe_path =
           [](auto &exe, auto stem) {
             impl::apple_bundle_path(exe, stem);
@@ -105,6 +107,7 @@ context iphoneos() {
       .target = "arm64-apple-ios16.1",
       .sysroot = impl::apple_sysroot("iphoneos"),
       .rpath = "Frameworks",
+      .dll_ext = "dylib",
       .app_exe_path =
           [](auto &exe, auto stem) {
             sys::path::remove_filename(exe);
@@ -135,6 +138,7 @@ context iphonesimulator() {
       .link_flags = impl::ios_link_flags(),
       .target = "x86_64-apple-ios16.1-simulator",
       .sysroot = impl::apple_sysroot("iphonesimulator"),
+      .dll_ext = "dylib",
       .app_exe_path =
           [](auto &exe, auto stem) {
             impl::apple_bundle_path(exe, stem);
@@ -152,6 +156,7 @@ context windows() {
   return context{
       .predefs = predefs,
       .target = "x86_64-pc-windows-msvc",
+      .dll_ext = "dll",
       .app_exe_path =
           [](auto exe, auto stem) {
             impl::apple_bundle_path(exe, stem);
