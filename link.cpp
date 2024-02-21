@@ -83,6 +83,9 @@ std::string link(const dag::node *n, sys::TimePoint<> mtime) {
   for (auto &p : t.args) {
     e.push_arg(p);
   }
+  if (n->dll()) {
+    e.push_arg("-shared");
+  }
   for (auto l : cur_ctx().link_flags) {
     e.push_arg(l);
   }
