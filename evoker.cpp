@@ -117,6 +117,13 @@ bool evoker::execute() {
   for (const auto &s : m_args) {
     args.push_back(s.c_str());
   }
+  if (is_extra_verbose()) {
+    errs() << "execute compiler with args (target = [" << cur_ctx().target
+           << "]):\n";
+    for (auto a : args)
+      errs() << a << " ";
+    errs() << "\n";
+  }
 
   auto diags = ::diags();
   Driver drv{clang_exe(), cur_ctx().target, diags};
