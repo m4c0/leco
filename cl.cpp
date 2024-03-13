@@ -45,6 +45,7 @@ enum targets {
   ios,
   iphoneos,
   iphonesimulator,
+  linux,
   windows,
   android
 };
@@ -55,6 +56,7 @@ cl::opt<targets> target(
                clEnumVal(ios, "All iOS targets (iPhone OS + Simulator)"),
                clEnumVal(macosx, "MacOSX"), clEnumVal(iphoneos, "iPhone OS"),
                clEnumVal(iphonesimulator, "iPhone Simulator"),
+               clEnumVal(linux, "Linux"),
                clEnumVal(windows, "Windows 64bits"),
                clEnumVal(android, "All Android targets")),
     cl::cat(leco_cat));
@@ -85,6 +87,12 @@ bool for_each_target(bool (*fn)()) {
   case host:
   case windows:
     return run(t::windows);
+#endif
+
+#ifdef __linux__
+  case host:
+  case linux:
+    return run(t::linux);
 #endif
 
   case android:

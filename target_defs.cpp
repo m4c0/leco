@@ -169,6 +169,26 @@ context windows() {
   };
 }
 
+context linux() {
+  static SmallVector<StringRef, 3> predefs{{
+      "LECO_TARGET_WINDOWS",
+  }};
+  return context{
+      .predefs = predefs,
+      .target = "x86_64-pc-linux-gnu",
+      .dll_ext = "so",
+      .app_exe_path =
+          [](auto exe, auto stem) {
+            impl::apple_bundle_path(exe, stem);
+            sys::path::append(exe, stem);
+            sys::path::replace_extension(exe, "exe");
+          },
+      .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
+      .bundle = [](auto &exe, auto stem) {},
+      .native_target = true,
+  };
+}
+
 context android_aarch64() {
   return impl::android("aarch64-none-linux-android26");
 }
