@@ -82,6 +82,8 @@ evoker::evoker() {
 
   if (is_optimised()) {
     m_args.push_back("-O3");
+    m_args.push_back("-flto");
+    m_args.push_back("-fvisibility=hidden");
   }
   if (enable_debug_syms()) {
     m_args.push_back("-g");
