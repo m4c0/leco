@@ -14,7 +14,7 @@ const char *clang_dir() {
   *strrchr(buf, '\\') = 0;
   return buf;
 }
-#else
+#elif __APPLE__
 const char *clang_dir() {
   static char buf[1024];
   auto f = popen("brew --prefix llvm@16", "r");
@@ -23,5 +23,9 @@ const char *clang_dir() {
 
   buf[strlen(buf) - 1] = 0;
   return buf;
+}
+#else
+const char *clang_dir() {
+  return "clang++";
 }
 #endif

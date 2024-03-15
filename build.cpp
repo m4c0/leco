@@ -64,10 +64,16 @@ uint64_t mtime(const char *stem, const char *ext) {
   struct __stat64 s {};
   _stat64(buf, &s);
   return s.st_mtime;
-#else
+#elif __APPLE__
   struct stat s {};
   stat(buf, &s);
   auto mtime = s.st_mtimespec;
+  return static_cast<uint64_t>(mtime.tv_sec) * 1000000000ul +
+         static_cast<uint64_t>(mtime.tv_nsec);
+#else
+  struct stat s {};
+  stat(buf, &s);
+  auto mtime = s.st_mtim;
   return static_cast<uint64_t>(mtime.tv_sec) * 1000000000ul +
          static_cast<uint64_t>(mtime.tv_nsec);
 #endif
