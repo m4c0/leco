@@ -6,6 +6,7 @@
 struct context {
   // Defined via CLI
   llvm::ArrayRef<llvm::StringRef> predefs{};
+  llvm::ArrayRef<llvm::StringRef> cxx_flags{};
   llvm::ArrayRef<llvm::StringRef> link_flags{};
   std::string target{};
   std::string sysroot{};

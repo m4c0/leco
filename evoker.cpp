@@ -93,6 +93,10 @@ evoker::evoker() {
     m_args.push_back("--sysroot");
     m_args.push_back(cur_ctx().sysroot.c_str());
   }
+
+  for (auto f : cur_ctx().cxx_flags) {
+    m_args.push_back(f.str());
+  }
 }
 
 std::shared_ptr<CompilerInstance> evoker::createCI() const {
