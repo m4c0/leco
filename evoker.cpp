@@ -57,7 +57,9 @@ static std::vector<const char *> prepare_args(const auto &margs,
   return args;
 }
 
-static std::shared_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
+static std::shared_ptr<CompilerInstance> createCI(const auto &margs) {
+  auto args = prepare_args(margs, "preparing");
+
   auto tgt = cur_ctx().target;
 
   auto clang = std::make_shared<CompilerInstance>();
@@ -110,9 +112,7 @@ evoker::evoker() {
 }
 
 std::shared_ptr<CompilerInstance> evoker::createCI() const {
-  auto args = prepare_args(m_args, "preparing");
-
-  auto ci = ::createCI({args});
+  auto ci = ::createCI(m_args);
 
   if (m_node == nullptr)
     return ci;
