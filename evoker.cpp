@@ -58,15 +58,11 @@ static std::vector<const char *> prepare_args(const auto &margs,
 }
 
 static std::shared_ptr<CompilerInstance> createCI(const auto &margs) {
-  auto args = prepare_args(margs, "preparing");
-
-  auto tgt = cur_ctx().target;
-
   auto clang = std::make_shared<CompilerInstance>();
 
+  auto args = prepare_args(margs, "preparing");
   auto diags = ::diags();
-
-  Driver drv{clang_exe(), tgt, diags};
+  Driver drv{clang_exe(), cur_ctx().target, diags};
   std::unique_ptr<Compilation> c{drv.BuildCompilation(args)};
   if (!c || c->containsError() || c->getJobs().size() == 0)
     // We did a mistake in clang args. Bail out and let the diagnostics
@@ -127,7 +123,6 @@ std::shared_ptr<CompilerInstance> evoker::createCI() const {
 
 bool evoker::execute() {
   auto args = prepare_args(m_args, "executing");
-
   auto diags = ::diags();
   Driver drv{clang_exe(), cur_ctx().target, diags};
   std::unique_ptr<Compilation> c{drv.BuildCompilation(args)};
