@@ -40,15 +40,25 @@ static DiagnosticsEngine diags() {
   return DiagnosticsEngine{diag_ids, diag_opts, diag_cli};
 }
 
-static std::shared_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
-  auto tgt = cur_ctx().target;
-
+static std::vector<const char *> prepare_args(const auto &margs,
+                                              const char *verb) {
+  std::vector<const char *> args{};
+  for (const auto &s : margs) {
+    args.push_back(s.c_str());
+  }
   if (is_extra_verbose()) {
-    errs() << "create compiler instance for args (target = [" << tgt << "]):\n";
+    auto tgt = cur_ctx().target;
+    errs() << verb << " compiler instance for args (target = [" << tgt
+           << "]):\n";
     for (auto a : args)
       errs() << a << " ";
     errs() << "\n";
   }
+  return args;
+}
+
+static std::shared_ptr<CompilerInstance> createCI(ArrayRef<const char *> args) {
+  auto tgt = cur_ctx().target;
 
   auto clang = std::make_shared<CompilerInstance>();
 
@@ -100,10 +110,7 @@ evoker::evoker() {
 }
 
 std::shared_ptr<CompilerInstance> evoker::createCI() const {
-  std::vector<const char *> args{};
-  for (const auto &s : m_args) {
-    args.push_back(s.c_str());
-  }
+  auto args = prepare_args(m_args, "preparing");
 
   auto ci = ::createCI({args});
 
@@ -119,17 +126,7 @@ std::shared_ptr<CompilerInstance> evoker::createCI() const {
 }
 
 bool evoker::execute() {
-  std::vector<const char *> args{};
-  for (const auto &s : m_args) {
-    args.push_back(s.c_str());
-  }
-  if (is_extra_verbose()) {
-    errs() << "execute compiler with args (target = [" << cur_ctx().target
-           << "]):\n";
-    for (auto a : args)
-      errs() << a << " ";
-    errs() << "\n";
-  }
+  auto args = prepare_args(m_args, "executing");
 
   auto diags = ::diags();
   Driver drv{clang_exe(), cur_ctx().target, diags};
