@@ -18,6 +18,11 @@
 #include "clang/Lex/PreprocessorOptions.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Host.h"
+#include <fstream>
+
+#define TEMPSIE_IMPLEMENTATION
+#define TEMPSIE_ERROR(x) llvm::errs() << (x) << "\n";
+#include "../tempsie/tempsie.h"
 
 using namespace clang;
 using namespace clang::driver;
@@ -121,27 +126,36 @@ std::shared_ptr<CompilerInstance> evoker::createCI() const {
   return ci;
 }
 
+static std::string create_args_file(const auto &args) {
+  char file[1024];
+  if (!tempsie_get_temp_filename("leco", file, sizeof(file)))
+    return "";
+
+  std::ofstream f{file};
+  bool first{true};
+  for (const auto &a : args) {
+    if (first) {
+      first = false;
+      continue;
+    }
+    for (auto c : a) {
+      if (c == '\\')
+        f << '\\';
+      f << c;
+    }
+    f << "\n";
+  }
+  return file;
+}
 bool evoker::execute() {
   if (m_node != nullptr)
     dag::visit(m_node, [&](auto *n) {
       auto arg = "-fmodule-file=" + n->module_name() + "=" + n->module_pcm();
       m_args.push_back(arg.str());
     });
-  auto args = prepare_args(m_args, "executing");
-
-  auto diags = ::diags();
-  Driver drv{clang_exe(), cur_ctx().target, diags};
-  std::unique_ptr<Compilation> c{drv.BuildCompilation(args)};
-  if (!c || c->containsError() || c->getJobs().size() == 0)
-    // We did a mistake in clang args. Bail out and let the diagnostics
-    // client do its job informing the user
-    return {};
-
-  SmallVector<std::pair<int, const Command *>, 4> fails;
-  int res = drv.ExecuteCompilation(*c, fails);
-  for (auto &p : fails) {
-    if (res == 0)
-      res = p.first;
+  std::string cmd = std::string{clang_exe()} + " @" + create_args_file(m_args);
+  if (is_extra_verbose()) {
+    errs() << "executing [" << cmd << "]\n";
   }
-  return res == 0;
+  return system(cmd.c_str()) == 0;
 }
