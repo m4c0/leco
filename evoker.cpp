@@ -128,7 +128,7 @@ std::shared_ptr<CompilerInstance> evoker::createCI() const {
 
 static std::string create_args_file(const auto &args) {
   char file[1024];
-  if (!tempsie_get_temp_filename("leco", file, sizeof(file)))
+  if (0 != tempsie_get_temp_filename("leco", file, sizeof(file)))
     return "";
 
   std::ofstream f{file};
@@ -153,9 +153,16 @@ bool evoker::execute() {
       auto arg = "-fmodule-file=" + n->module_name() + "=" + n->module_pcm();
       m_args.push_back(arg.str());
     });
-  std::string cmd = std::string{clang_exe()} + " @" + create_args_file(m_args);
+  auto argfile = create_args_file(m_args);
+  if (argfile == "")
+    return false;
+  std::string cmd = std::string{clang_exe()} + " @" + argfile;
   if (is_extra_verbose()) {
     errs() << "executing [" << cmd << "]\n";
   }
-  return system(cmd.c_str()) == 0;
+  if (system(cmd.c_str()) != 0) {
+    return false;
+  }
+  unlink(argfile.c_str());
+  return true;
 }
