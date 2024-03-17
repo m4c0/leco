@@ -40,14 +40,6 @@ static bool emit_obj(const evoker &e) {
   wrapped w{std::make_unique<EmitObjAction>()};
   return ci->ExecuteAction(w);
 }
-static bool emit_obj_simpler(const evoker &e) {
-  auto ci = e.createCI();
-  if (!ci)
-    return false;
-
-  EmitObjAction a{};
-  return ci->ExecuteAction(a);
-}
 
 bool compile(const dag::node *n) {
   auto file = n->source();
@@ -74,8 +66,12 @@ bool compile(const dag::node *n) {
                      .pull_deps_from(n)))
       return false;
 
-    return emit_obj_simpler(
-        evoker{}.push_arg("-c").push_arg(pcm).set_out(obj).pull_deps_from(n));
+    return evoker{}
+        .push_arg("-c")
+        .push_arg(pcm)
+        .set_out(obj)
+        .pull_deps_from(n)
+        .execute();
   } else if (ext == ".cpp") {
     return emit_obj(evoker{}
                         .set_cpp_std()
@@ -86,12 +82,13 @@ bool compile(const dag::node *n) {
   } else if (ext == ".c") {
     return emit_obj(evoker{}.push_arg("-c").push_arg(file).set_out(obj));
   } else if (ext == ".mm" || ext == ".m") {
-    return emit_obj_simpler(evoker{}
-                                .push_arg("-c")
-                                .push_arg("-fmodules")
-                                .push_arg("-fobjc-arc")
-                                .push_arg(file)
-                                .set_out(obj));
+    return evoker{}
+        .push_arg("-c")
+        .push_arg("-fmodules")
+        .push_arg("-fobjc-arc")
+        .push_arg(file)
+        .set_out(obj)
+        .execute();
   } else {
     errs() << "don't know how to build " << file << "\n";
     return false;
