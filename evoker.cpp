@@ -122,7 +122,13 @@ std::shared_ptr<CompilerInstance> evoker::createCI() const {
 }
 
 bool evoker::execute() {
+  if (m_node != nullptr)
+    dag::visit(m_node, [&](auto *n) {
+      auto arg = "-fmodule-file=" + n->module_name() + "=" + n->module_pcm();
+      m_args.push_back(arg.str());
+    });
   auto args = prepare_args(m_args, "executing");
+
   auto diags = ::diags();
   Driver drv{clang_exe(), cur_ctx().target, diags};
   std::unique_ptr<Compilation> c{drv.BuildCompilation(args)};
