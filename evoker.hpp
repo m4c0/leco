@@ -1,5 +1,7 @@
 #pragma once
 #include "llvm/ADT/StringRef.h"
+#include <memory>
+#include <vector>
 
 namespace clang {
 class CompilerInstance;
