@@ -45,6 +45,9 @@ extern "C" int main(int argc, char **argv) {
 
   try {
     return for_each_target(run_target) ? 0 : 1;
+  } catch (const std::exception &e) {
+    errs() << "exception: " << e.what() << "\n";
+    return 1;
   } catch (...) {
     errs() << "unexpected exception\n";
     return 1;
