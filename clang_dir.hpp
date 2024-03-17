@@ -26,6 +26,13 @@ const char *clang_dir() {
 }
 #else
 const char *clang_dir() {
-  return "clang++";
+  static char buf[1024];
+  auto f = popen("which clang++", "r");
+  if (fgets(buf, 1024, f) == nullptr)
+    throw 0;
+
+  *strrchr(buf, '/') = 0;
+  *strrchr(buf, '/') = 0;
+  return buf;
 }
 #endif
