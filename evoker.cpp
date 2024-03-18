@@ -159,6 +159,9 @@ static std::string create_args_file(const auto &args, const dag::node *node) {
 
   return file;
 }
+#ifdef _WIN32
+#define unlink _unlink
+#endif
 bool evoker::execute() {
   auto argfile = create_args_file(m_args, m_node);
   if (argfile == "")

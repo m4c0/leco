@@ -105,8 +105,8 @@ bool link(const char *outf) {
     strncat(buf, f, sizeof(buf) - 1);
     strncat(buf, ".o", sizeof(buf) - 1);
   }
-  strcat(buf, " ");
-  strcat(buf, outf);
+  strncat(buf, " ", sizeof(buf) - 1);
+  strncat(buf, outf, sizeof(buf) - 1);
   return 0 == system(buf);
 }
 
