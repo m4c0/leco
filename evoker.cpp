@@ -126,7 +126,14 @@ std::shared_ptr<CompilerInstance> evoker::createCI() const {
   return ci;
 }
 
-static std::string create_args_file(const auto &args) {
+static void out_file(auto &f, const auto &a) {
+  for (auto c : a) {
+    if (c == '\\')
+      f << '\\';
+    f << c;
+  }
+}
+static std::string create_args_file(const auto &args, const dag::node *node) {
   char file[1024];
   if (0 != tempsie_get_temp_filename("leco", file, sizeof(file)))
     return "";
@@ -138,22 +145,22 @@ static std::string create_args_file(const auto &args) {
       first = false;
       continue;
     }
-    for (auto c : a) {
-      if (c == '\\')
-        f << '\\';
-      f << c;
-    }
+    out_file(f, a);
     f << "\n";
   }
+
+  if (node != nullptr) {
+    dag::visit(node, [&](auto *n) {
+      f << "-fmodule-file=" << n->module_name().str() << "=";
+      out_file(f, n->module_pcm().str());
+      f << "\n";
+    });
+  }
+
   return file;
 }
 bool evoker::execute() {
-  if (m_node != nullptr)
-    dag::visit(m_node, [&](auto *n) {
-      auto arg = "-fmodule-file=" + n->module_name() + "=" + n->module_pcm();
-      m_args.push_back(arg.str());
-    });
-  auto argfile = create_args_file(m_args);
+  auto argfile = create_args_file(m_args, m_node);
   if (argfile == "")
     return false;
   std::string cmd = std::string{clang_exe()} + " @" + argfile;
