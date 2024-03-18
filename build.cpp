@@ -6,13 +6,12 @@
 #include <sys/stat.h>
 
 static constexpr const char *files[]{
-    "leco",    "actool",  "bouncer", "cl",          "cleaner",
-    "compile", "context", "dag",     "droid_path",  "evoker",
-    "link",    "plist",   "pragma",  "target_defs",
+    "actool",     "bouncer", "cl",   "cleaner", "compile", "context",     "dag",
+    "droid_path", "evoker",  "link", "plist",   "pragma",  "target_defs",
 };
 
 constexpr const char *cmd =
-    "clang++ -std=c++20 -o leco.exe -I%s/include -L%s/lib "
+    "clang++ -std=c++20 -I%s/include -L%s/lib "
 #if _WIN32
     "-fms-runtime-lib=dll -nostdlib -nostdlib++ -lVersion "
     "-lclangAnalysis -lclangAnalysisFlowSensitive "
@@ -97,7 +96,7 @@ bool compile(const char *stem) {
 #ifdef _WIN32
 #define strncat strncat_s
 #endif
-bool link() {
+bool link(const char *outf) {
   auto cdir = clang_dir();
   char buf[10240];
   snprintf(buf, sizeof(buf), cmd, cdir, cdir);
@@ -106,6 +105,8 @@ bool link() {
     strncat(buf, f, sizeof(buf) - 1);
     strncat(buf, ".o", sizeof(buf) - 1);
   }
+  strcat(buf, " ");
+  strcat(buf, outf);
   return 0 == system(buf);
 }
 
@@ -114,5 +115,13 @@ int main(int argc, char **argv) {
     if (!compile(f))
       return 1;
   }
-  return link() ? 0 : 1;
+  if (!compile("leco"))
+    return 1;
+  if (!link("leco.o -o leco.exe"))
+    return 1;
+  if (!compile("null_pragma"))
+    return 1;
+  if (!link("null_pragma.o -o null_pragma.dll -shared"))
+    return 1;
+  return 0;
 }
