@@ -3,9 +3,6 @@
 #include "dag.hpp"
 #include "evoker.hpp"
 #include "pragma.hpp"
-#include "clang/CodeGen/CodeGenAction.h"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/Frontend/FrontendActions.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
@@ -13,33 +10,6 @@
 
 using namespace clang;
 using namespace llvm;
-
-class wrapped : public clang::WrapperFrontendAction {
-public:
-  using WrapperFrontendAction::WrapperFrontendAction;
-
-  bool BeginSourceFileAction(CompilerInstance &ci) override {
-    ci.getPreprocessor().AddPragmaHandler(new ns_pragma());
-    return WrapperFrontendAction::BeginSourceFileAction(ci);
-  }
-};
-
-static bool gen_pcm(const evoker &e) {
-  auto ci = e.createCI();
-  if (!ci)
-    return false;
-
-  wrapped w{std::make_unique<GenerateModuleInterfaceAction>()};
-  return ci->ExecuteAction(w);
-}
-static bool emit_obj(const evoker &e) {
-  auto ci = e.createCI();
-  if (!ci)
-    return false;
-
-  wrapped w{std::make_unique<EmitObjAction>()};
-  return ci->ExecuteAction(w);
-}
 
 bool compile(const dag::node *n) {
   auto file = n->source();
@@ -58,12 +28,14 @@ bool compile(const dag::node *n) {
     sys::path::replace_extension(pcm, "pcm");
     pcm.c_str();
 
-    if (!gen_pcm(evoker{}
-                     .set_cpp_std()
-                     .push_arg("--precompile")
-                     .push_arg(file)
-                     .set_out(pcm)
-                     .pull_deps_from(n)))
+    if (!evoker{}
+             .set_cpp_std()
+             .push_arg("--precompile")
+             .push_arg(file)
+             .set_out(pcm)
+             .pull_deps_from(n)
+             .push_arg("-fplugin=../leco/null_pragma.dll")
+             .execute())
       return false;
 
     return evoker{}
@@ -73,14 +45,21 @@ bool compile(const dag::node *n) {
         .pull_deps_from(n)
         .execute();
   } else if (ext == ".cpp") {
-    return emit_obj(evoker{}
-                        .set_cpp_std()
-                        .push_arg("-c")
-                        .push_arg(file)
-                        .set_out(obj)
-                        .pull_deps_from(n));
+    return evoker{}
+        .set_cpp_std()
+        .push_arg("-c")
+        .push_arg(file)
+        .set_out(obj)
+        .pull_deps_from(n)
+        .push_arg("-fplugin=../leco/null_pragma.dll")
+        .execute();
   } else if (ext == ".c") {
-    return emit_obj(evoker{}.push_arg("-c").push_arg(file).set_out(obj));
+    return evoker{}
+        .push_arg("-c")
+        .push_arg(file)
+        .set_out(obj)
+        .push_arg("-fplugin=../leco/null_pragma.dll")
+        .execute();
   } else if (ext == ".mm" || ext == ".m") {
     return evoker{}
         .push_arg("-c")
