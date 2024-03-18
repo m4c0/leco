@@ -169,31 +169,12 @@ context windows() {
   };
 }
 
-static auto split(const char *ptr) {
-  std::vector<StringRef> res{};
-  while (*ptr) {
-    auto nptr = strchr(ptr, ' ');
-    if (nptr == nullptr) {
-      res.push_back({ptr});
-    } else {
-      res.push_back({ptr, static_cast<unsigned>(nptr - ptr)});
-    }
-    ptr = nptr;
-  }
-  return res;
-}
 context linux() {
   static SmallVector<StringRef, 3> predefs{{
       "LECO_TARGET_LINUX",
   }};
-  static std::string cxx_flags_env{getenv("NIX_CFLAGS_COMPILE")};
-  static auto cxx_flags = split(cxx_flags_env.data());
-  static std::string link_flags_env{getenv("NIX_LDFLAGS")};
-  static auto link_flags = split(link_flags_env.data());
   return context{
       .predefs = predefs,
-      .cxx_flags = cxx_flags,
-      .link_flags = link_flags,
       .target = "x86_64-pc-linux-gnu",
       .dll_ext = "so",
       .app_exe_path =
