@@ -1,4 +1,5 @@
 #pragma once
+#include "context.hpp"
 #include "llvm/ADT/StringRef.h"
 #include <memory>
 #include <vector>
@@ -26,6 +27,12 @@ public:
     return push_arg(out);
   }
 
+  evoker &add_predefs() {
+    for (auto def : cur_ctx().predefs) {
+      push_arg("-D" + def);
+    }
+    return *this;
+  }
   evoker &pull_deps_from(const dag::node *n) {
     m_node = n;
     return *this;

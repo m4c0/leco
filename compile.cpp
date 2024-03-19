@@ -30,6 +30,7 @@ bool compile(const dag::node *n) {
 
     if (!evoker{}
              .set_cpp_std()
+             .add_predefs()
              .push_arg("--precompile")
              .push_arg(file)
              .set_out(pcm)
@@ -47,6 +48,7 @@ bool compile(const dag::node *n) {
   } else if (ext == ".cpp") {
     return evoker{}
         .set_cpp_std()
+        .add_predefs()
         .push_arg("-c")
         .push_arg(file)
         .set_out(obj)
@@ -58,6 +60,7 @@ bool compile(const dag::node *n) {
         .push_arg("-c")
         .push_arg(file)
         .set_out(obj)
+        .add_predefs()
         .push_arg("-fplugin=../leco/null_pragma.dll")
         .execute();
   } else if (ext == ".mm" || ext == ".m") {
