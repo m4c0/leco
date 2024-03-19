@@ -1,11 +1,12 @@
+#define MTIME_IMPLEMENTATION
 #include "bouncer.hpp"
+#include "../mtime/mtime.h"
 #include "cl.hpp"
 #include "cleaner.hpp"
 #include "compile.hpp"
 #include "context.hpp"
 #include "dag.hpp"
 #include "link.hpp"
-#include "mtime.hpp"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
 
@@ -20,7 +21,7 @@ static bool compile_shaders(const dag::node *n, StringRef res_path) {
     sys::path::append(out, res_path, sys::path::filename(in));
     out.append(".spv");
 
-    if (mod_time(out) > mod_time(in))
+    if (mtime_of(out.c_str()) > mtime_of(in.str().c_str()))
       continue;
 
     if (is_verbose()) {
@@ -43,7 +44,7 @@ static void copy_exes(const dag::node *n, StringRef exe_path) {
       sys::fs::create_directories(path);
     }
     sys::path::append(path, sys::path::filename(e.first()));
-    if (mod_time(path) > mod_time(e.first()))
+    if (mtime_of(path.c_str()) > mtime_of(e.first().str().c_str()))
       continue;
 
     if (is_verbose()) {
@@ -56,7 +57,7 @@ static void copy_resources(const dag::node *n, StringRef res_path) {
   for (auto &r : n->resources()) {
     SmallString<256> path{res_path};
     sys::path::append(path, sys::path::filename(r.first()));
-    if (mod_time(path) > mod_time(r.first()))
+    if (mtime_of(path.c_str()) > mtime_of(r.first().str().c_str()))
       continue;
     if (is_verbose()) {
       errs() << "copying resource " << path << "\n";

@@ -1,9 +1,10 @@
+#define MTIME_IMPLEMENTATION
+#include "../mtime/mtime.h"
 #include "clang_dir.hpp"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 
 static constexpr const char *files[]{
     "actool",     "bouncer", "cl",   "cleaner", "compile", "context",     "dag",
@@ -58,24 +59,7 @@ constexpr const char *cmd =
 uint64_t mtime(const char *stem, const char *ext) {
   char buf[128];
   snprintf(buf, sizeof(buf), "%s.%s", stem, ext);
-
-#if _WIN32
-  struct __stat64 s {};
-  _stat64(buf, &s);
-  return s.st_mtime;
-#elif __APPLE__
-  struct stat s {};
-  stat(buf, &s);
-  auto mtime = s.st_mtimespec;
-  return static_cast<uint64_t>(mtime.tv_sec) * 1000000000ul +
-         static_cast<uint64_t>(mtime.tv_nsec);
-#else
-  struct stat s {};
-  stat(buf, &s);
-  auto mtime = s.st_mtim;
-  return static_cast<uint64_t>(mtime.tv_sec) * 1000000000ul +
-         static_cast<uint64_t>(mtime.tv_nsec);
-#endif
+  return mtime_of(buf);
 }
 
 bool compile(const char *stem) {
