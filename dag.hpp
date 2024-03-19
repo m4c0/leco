@@ -73,6 +73,7 @@ public:
     return m_shaders;
   }
 
+  void set_root_type(root_t t) noexcept { m_root = t; }
   [[nodiscard]] constexpr auto root_type() const noexcept { return m_root; }
 
   [[nodiscard]] constexpr bool app() const noexcept {

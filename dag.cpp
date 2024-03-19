@@ -113,7 +113,8 @@ class ppc : public PPCallbacks {
 
 public:
   explicit ppc(DiagnosticsEngine *diag, dag::node *d)
-      : m_diag{diag}, m_dag{d} {}
+      : m_diag{diag}
+      , m_dag{d} {}
 
   bool FileNotFound(StringRef filename) override { return true; }
   void moduleImport(SourceLocation loc, ModuleIdPath path,
@@ -167,6 +168,44 @@ static void persist(std::ostream &o, const llvm::StringSet<> &items) {
   for (const auto &s : items) {
     o << s.first().str() << "\n";
   }
+}
+static bool read(std::istream &i, dag::node *n,
+                 bool (dag::node::*m)(llvm::StringRef)) {
+  return false;
+}
+static bool read(std::istream &i, dag::node *n,
+                 void (dag::node::*m)(llvm::StringRef)) {
+  return false;
+}
+static bool read(dag::node *n) {
+  std::ifstream f{n->dag().str()};
+  if (!f)
+    return false;
+
+  std::string magic{};
+  f >> magic;
+  if (magic != "LECO")
+    return false;
+
+  int ver{};
+  f >> ver;
+  if (ver != 1)
+    return false;
+
+  // TODO: validate CRC or something
+
+  int root_type{};
+  f >> root_type;
+  n->set_root_type(static_cast<dag::root_t>(root_type));
+
+  return read(f, n, &dag::node::add_executable) &&
+         read(f, n, &dag::node::add_framework) &&
+         read(f, n, &dag::node::add_library) &&
+         read(f, n, &dag::node::add_library_dir) &&
+         read(f, n, &dag::node::add_mod_dep) &&
+         read(f, n, &dag::node::add_mod_impl) &&
+         read(f, n, &dag::node::add_resource) &&
+         read(f, n, &dag::node::add_shader);
 }
 static bool compile(dag::node *n) {
   auto dag_mtime = mtime_of(n->dag().str().c_str());
