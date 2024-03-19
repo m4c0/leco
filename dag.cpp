@@ -209,8 +209,8 @@ static bool read(dag::node *n) {
 }
 static bool compile(dag::node *n) {
   auto dag_mtime = mtime_of(n->dag().str().c_str());
-  if (dag_mtime > mtime_of(n->source().str().c_str()) ||
-      mtime_of("../leco/leco.exe") > dag_mtime) {
+  if (dag_mtime > mtime_of(n->source().str().c_str()) &&
+      dag_mtime > mtime_of("../leco/leco.exe")) {
     if (read(n))
       return true;
   }
@@ -230,16 +230,7 @@ static bool compile(dag::node *n) {
 
   // TODO: create a proper file format
   std::ofstream of{n->dag().str()};
-  of << "LECO 1\n"; // fourcc-ish+version
-  of << static_cast<int>(n->root_type());
-  persist(of, n->executables());
-  persist(of, n->frameworks());
-  persist(of, n->libraries());
-  persist(of, n->library_dirs());
-  persist(of, n->mod_deps());
-  persist(of, n->mod_impls());
-  persist(of, n->resources());
-  persist(of, n->shaders());
+  persist(of, n);
   return true;
 }
 
