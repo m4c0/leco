@@ -11,7 +11,7 @@ static auto diag_error(clang::DiagnosticsEngine &d, clang::SourceLocation loc,
 template <unsigned N>
 static void diag_remark(clang::DiagnosticsEngine &d, clang::SourceLocation loc,
                         const char (&msg)[N]) {
-  if (!is_verbose())
+  if (!is_extra_verbose())
     return;
 
   auto d_id = d.getCustomDiagID(clang::DiagnosticsEngine::Remark, msg);
