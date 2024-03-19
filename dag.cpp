@@ -10,6 +10,7 @@
 #include "clang/Frontend/FrontendActions.h"
 #include "llvm/ADT/StringMap.h"
 #include "llvm/Support/FileSystem.h"
+#include <fstream>
 
 using namespace clang;
 using namespace llvm;
@@ -161,9 +162,15 @@ void dag::xlog(const dag::node *n, const char *msg) {
   errs() << msg << " " << n->source() << "\n";
 }
 
+static void persist(std::ostream &o, const llvm::StringSet<> &items) {
+  o << items.size() << "\n";
+  for (const auto &s : items) {
+    o << s.first().str() << "\n";
+  }
+}
 static bool compile(dag::node *n) {
-  if (mtime_of(n->dag().str().c_str()) > mtime_of(n->source().str().c_str()))
-    return true;
+  // if (mtime_of(n->dag().str().c_str()) > mtime_of(n->source().str().c_str()))
+  // return true;
 
   dag::xlog(n, "dag compilation");
 
@@ -175,7 +182,22 @@ static bool compile(dag::node *n) {
                 .createCI();
 
   action a{n};
-  return ci->ExecuteAction(a);
+  if (!ci->ExecuteAction(a))
+    return false;
+
+  // TODO: create a proper file format
+  std::ofstream of{n->dag().str()};
+  of << "LECO 1\n"; // fourcc-ish+version
+  of << static_cast<int>(n->root_type());
+  persist(of, n->executables());
+  persist(of, n->frameworks());
+  persist(of, n->libraries());
+  persist(of, n->library_dirs());
+  persist(of, n->mod_deps());
+  persist(of, n->mod_impls());
+  persist(of, n->resources());
+  persist(of, n->shaders());
+  return true;
 }
 
 static auto find(StringRef path) {
