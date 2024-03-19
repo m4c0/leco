@@ -169,8 +169,12 @@ static void persist(std::ostream &o, const llvm::StringSet<> &items) {
   }
 }
 static bool compile(dag::node *n) {
-  // if (mtime_of(n->dag().str().c_str()) > mtime_of(n->source().str().c_str()))
-  // return true;
+  auto dag_mtime = mtime_of(n->dag().str().c_str());
+  if (dag_mtime > mtime_of(n->source().str().c_str()) ||
+      mtime_of("../leco/leco.exe") > dag_mtime) {
+    if (read(n))
+      return true;
+  }
 
   dag::xlog(n, "dag compilation");
 
