@@ -169,11 +169,23 @@ static void persist(std::ostream &o, const llvm::StringSet<> &items) {
     o << s.first().str() << "\n";
   }
 }
-static bool read(std::istream &i, dag::node *n,
+static void persist(std::ostream &o, const dag::node *n) {
+  o << "LECO 1\n"; // fourcc-ish+version
+  o << static_cast<int>(n->root_type()) << "\n";
+  persist(o, n->executables());
+  persist(o, n->frameworks());
+  persist(o, n->libraries());
+  persist(o, n->library_dirs());
+  persist(o, n->mod_deps());
+  persist(o, n->mod_impls());
+  persist(o, n->resources());
+  persist(o, n->shaders());
+}
+static bool read(std::istream &f, dag::node *n,
                  bool (dag::node::*m)(llvm::StringRef)) {
   return false;
 }
-static bool read(std::istream &i, dag::node *n,
+static bool read(std::istream &f, dag::node *n,
                  void (dag::node::*m)(llvm::StringRef)) {
   return false;
 }
