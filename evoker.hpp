@@ -29,7 +29,7 @@ public:
 
   evoker &add_predefs() {
     for (auto def : cur_ctx().predefs) {
-      push_arg("-D" + def);
+      push_arg(std::string{"-D"} + def.str());
     }
     return *this;
   }

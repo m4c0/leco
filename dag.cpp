@@ -163,8 +163,12 @@ void dag::xlog(const dag::node *n, const char *msg) {
 static bool compile(dag::node *n) {
   dag::xlog(n, "dag compilation");
 
-  auto ci =
-      evoker{}.set_cpp_std().push_arg("-E").push_arg(n->source()).createCI();
+  auto ci = evoker{}
+                .set_cpp_std()
+                .push_arg("-E")
+                .push_arg(n->source())
+                .add_predefs()
+                .createCI();
   // ci->getDiagnostics().setClient(new IgnoringDiagConsumer());
 
   action a{n};

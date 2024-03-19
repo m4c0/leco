@@ -80,10 +80,6 @@ static std::shared_ptr<CompilerInstance> createCI(const auto &margs) {
     return {};
 
   clang->createDiagnostics();
-
-  for (auto def : cur_ctx().predefs)
-    clang->getPreprocessorOpts().addMacroDef(def);
-
   return clang;
 }
 
