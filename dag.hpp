@@ -14,6 +14,7 @@ enum class root_t {
 class node {
   llvm::SmallString<256> m_source;
   llvm::SmallString<256> m_target;
+  llvm::SmallString<256> m_dag;
   llvm::SmallString<256> m_module_name;
   llvm::SmallString<256> m_module_pcm;
   llvm::StringSet<> m_executables{};
@@ -72,6 +73,8 @@ public:
     return m_shaders;
   }
 
+  [[nodiscard]] constexpr auto root_type() const noexcept { return m_root; }
+
   [[nodiscard]] constexpr bool app() const noexcept {
     return m_root == root_t::app;
   }
@@ -93,6 +96,7 @@ public:
   [[nodiscard]] constexpr llvm::StringRef target() const noexcept {
     return m_target;
   }
+  [[nodiscard]] constexpr llvm::StringRef dag() const noexcept { return m_dag; }
   [[nodiscard]] constexpr llvm::StringRef module_name() const noexcept {
     return m_module_name;
   }

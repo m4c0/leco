@@ -36,6 +36,7 @@ static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
 dag::node::node(StringRef n) : m_source{} {
   real_abs(m_source, n);
   in2out(m_source, m_target, "o");
+  in2out(m_source, m_dag, "dag");
   in2out(m_source, m_module_pcm, "pcm");
   m_source.c_str();
   m_target.c_str();
@@ -161,6 +162,9 @@ void dag::xlog(const dag::node *n, const char *msg) {
 }
 
 static bool compile(dag::node *n) {
+  if (mtime_of(n->dag().str().c_str()) > mtime_of(n->source().str().c_str()))
+    return true;
+
   dag::xlog(n, "dag compilation");
 
   auto ci = evoker{}
@@ -169,7 +173,6 @@ static bool compile(dag::node *n) {
                 .push_arg(n->source())
                 .add_predefs()
                 .createCI();
-  // ci->getDiagnostics().setClient(new IgnoringDiagConsumer());
 
   action a{n};
   return ci->ExecuteAction(a);
