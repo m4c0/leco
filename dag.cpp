@@ -196,13 +196,17 @@ static bool read(dag::node *n) {
 
   std::string magic{};
   f >> magic;
-  if (magic != "LECO")
+  if (magic != "LECO") {
+    dag::xlog(n, "invalid dag cache");
     return false;
+  }
 
   int ver{};
   f >> ver;
-  if (ver != 1)
+  if (ver != 1) {
+    dag::xlog(n, "invalid dag cache version");
     return false;
+  }
 
   // TODO: validate CRC or something
 
