@@ -32,6 +32,8 @@ class node {
 public:
   explicit node(llvm::StringRef n);
 
+  bool read_from_cache_file();
+
   [[nodiscard]] bool add_executable(llvm::StringRef e);
   void add_framework(llvm::StringRef fw) { m_frameworks.insert(fw); }
   void add_library(llvm::StringRef lib) { m_libraries.insert(lib); }
@@ -73,7 +75,6 @@ public:
     return m_shaders;
   }
 
-  void set_root_type(root_t t) noexcept { m_root = t; }
   [[nodiscard]] constexpr auto root_type() const noexcept { return m_root; }
 
   [[nodiscard]] constexpr bool app() const noexcept {

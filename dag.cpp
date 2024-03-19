@@ -157,10 +157,13 @@ public:
 static StringMap<dag::node> cache{};
 void dag::clear_cache() { cache.clear(); }
 
+static void error(const dag::node *n, const char *msg) {
+  errs() << msg << " " << n->source() << "\n";
+}
 void dag::xlog(const dag::node *n, const char *msg) {
   if (!is_extra_verbose())
     return;
-  errs() << msg << " " << n->source() << "\n";
+  error(n, msg);
 }
 
 static void persist(std::ostream &o, const llvm::StringSet<> &items) {
@@ -181,54 +184,62 @@ static void persist(std::ostream &o, const dag::node *n) {
   persist(o, n->resources());
   persist(o, n->shaders());
 }
-static bool read(std::istream &f, dag::node *n,
-                 bool (dag::node::*m)(llvm::StringRef)) {
-  return false;
+static bool read(std::istream &f, dag::node *n, llvm::StringSet<> *set) {
+  int size{};
+  f >> size;
+  char c = f.get();
+  if (c != '\n') {
+    error(n, "invalid char after dag list size");
+    return false;
+  }
+
+  for (auto i = 0; i < size; i++) {
+    std::string line{};
+    if (!std::getline(f, line)) {
+      error(n, "error in dag entry");
+      return false;
+    }
+    set->insert(line);
+  }
+  return true;
 }
-static bool read(std::istream &f, dag::node *n,
-                 void (dag::node::*m)(llvm::StringRef)) {
-  return false;
-}
-static bool read(dag::node *n) {
-  std::ifstream f{n->dag().str()};
+bool dag::node::read_from_cache_file() {
+  std::ifstream f{dag().str()};
   if (!f)
     return false;
 
   std::string magic{};
   f >> magic;
   if (magic != "LECO") {
-    dag::xlog(n, "invalid dag cache");
+    error(this, "invalid dag cache");
     return false;
   }
 
   int ver{};
   f >> ver;
   if (ver != 1) {
-    dag::xlog(n, "invalid dag cache version");
+    error(this, "invalid dag cache version");
     return false;
   }
 
   // TODO: validate CRC or something
 
-  int root_type{};
-  f >> root_type;
-  n->set_root_type(static_cast<dag::root_t>(root_type));
+  int r;
+  f >> r;
+  m_root = static_cast<root_t>(r);
 
-  return read(f, n, &dag::node::add_executable) &&
-         read(f, n, &dag::node::add_framework) &&
-         read(f, n, &dag::node::add_library) &&
-         read(f, n, &dag::node::add_library_dir) &&
-         read(f, n, &dag::node::add_mod_dep) &&
-         read(f, n, &dag::node::add_mod_impl) &&
-         read(f, n, &dag::node::add_resource) &&
-         read(f, n, &dag::node::add_shader);
+  return read(f, this, &m_executables) && read(f, this, &m_frameworks) &&
+         read(f, this, &m_libraries) && read(f, this, &m_library_dirs) &&
+         read(f, this, &m_mod_deps) && read(f, this, &m_mod_impls) &&
+         read(f, this, &m_resources) && read(f, this, &m_shaders);
 }
 static bool compile(dag::node *n) {
   auto dag_mtime = mtime_of(n->dag().str().c_str());
   if (dag_mtime > mtime_of(n->source().str().c_str()) &&
       dag_mtime > mtime_of("../leco/leco.exe")) {
-    if (read(n))
-      return true;
+    // Capture both success and failures. Failures might leave inconsistencies
+    // in the node, which would be worse if we read and store it again
+    return n->read_from_cache_file();
   }
 
   dag::xlog(n, "dag compilation");
