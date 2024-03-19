@@ -10,7 +10,6 @@
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
 
-using namespace clang;
 using namespace llvm;
 
 static bool compile_shaders(const dag::node *n, StringRef res_path) {

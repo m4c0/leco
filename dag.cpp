@@ -1,9 +1,10 @@
-#include "cl.hpp"
 #include "dag.hpp"
+
+#include "../mtime/mtime.h"
+#include "cl.hpp"
 #include "diags.hpp"
 #include "evoker.hpp"
 #include "in2out.hpp"
-#include "mtime.hpp"
 #include "pragma.hpp"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendActions.h"
@@ -243,19 +244,18 @@ dag::node *dag::process(StringRef path) {
   return recurse(n) ? n : nullptr;
 }
 
-time_point dag::visit_dirty(const node *n,
-                            function_ref<void(const node *)> fn) {
-  StringMap<time_point> visited{};
+uint64_t dag::visit_dirty(const node *n, function_ref<void(const node *)> fn) {
+  StringMap<uint64_t> visited{};
 
-  time_point max{};
-  const auto rec = [&](auto rec, auto *n, time_point pmt) -> time_point {
+  uint64_t max{};
+  const auto rec = [&](auto rec, auto *n, uint64_t pmt) -> uint64_t {
     auto it = visited.find(n->source());
     if (it != visited.end()) {
       max = max > it->second ? max : it->second;
       return it->second;
     }
 
-    auto mtime = mod_time(n->source());
+    auto mtime = mtime_of(n->source().str().c_str());
     mtime = mtime > pmt ? mtime : pmt;
 
     for (auto &d : n->mod_deps()) {
@@ -263,9 +263,10 @@ time_point dag::visit_dirty(const node *n,
       mtime = mtime > dmt ? mtime : dmt;
     }
 
-    if (mtime > mod_time(n->target())) {
+    if (mtime > mtime_of(n->target().str().c_str())) {
       fn(n);
-      mtime = mod_time(n->target());
+      // Get the mtime again after `fn` possibly changed it
+      mtime = mtime_of(n->target().str().c_str());
     }
 
     max = max > mtime ? max : mtime;

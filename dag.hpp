@@ -1,5 +1,4 @@
 #pragma once
-#include "clang/Frontend/FrontendAction.h"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/StringSet.h"
 
@@ -124,6 +123,5 @@ void visit(const node *n, auto &&fn) {
   };
   rec(rec, n);
 }
-llvm::sys::TimePoint<> visit_dirty(const node *n,
-                                   llvm::function_ref<void(const node *)> fn);
+uint64_t visit_dirty(const node *n, llvm::function_ref<void(const node *)> fn);
 } // namespace dag

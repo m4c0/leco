@@ -1,10 +1,11 @@
+#include "link.hpp"
+
+#include "../mtime/mtime.h"
 #include "cl.hpp"
 #include "context.hpp"
 #include "dag.hpp"
 #include "evoker.hpp"
 #include "in2out.hpp"
-#include "link.hpp"
-#include "mtime.hpp"
 #include "llvm/ADT/StringSet.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
@@ -53,7 +54,7 @@ static void visit(things &t, const dag::node *n) {
     t.args.push_back("-L" + lib.first().str());
   }
 }
-std::string link(const dag::node *n, sys::TimePoint<> mtime) {
+std::string link(const dag::node *n, uint64_t mtime) {
   auto main_src = n->source();
 
   things t{};
@@ -71,7 +72,7 @@ std::string link(const dag::node *n, sys::TimePoint<> mtime) {
     sys::fs::create_directories(sys::path::parent_path(exe));
   }
 
-  if (mtime < mod_time(exe))
+  if (mtime < mtime_of(exe.c_str()))
     return std::string{exe};
 
   if (is_verbose()) {
