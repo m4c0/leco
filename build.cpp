@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 static constexpr const char *files[]{
     "actool",     "bouncer", "cl",   "cleaner", "compile", "context",     "dag",
@@ -73,7 +74,7 @@ bool compile(const char *stem) {
 #ifdef _WIN32
            "-D_CRT_SECURE_NO_WARNINGS -fms-runtime-lib=dll "
 #endif
-           "-I%s/include -c %s.cpp -o %s.o",
+           "-I%s/include -c %s.cpp -o out/%s.o",
            cdir, stem, stem);
   return 0 == system(buf);
 }
@@ -85,7 +86,7 @@ bool link(const char *outf) {
   char buf[10240];
   snprintf(buf, sizeof(buf), cmd, cdir, cdir);
   for (auto f : files) {
-    strncat(buf, " ", sizeof(buf) - 1);
+    strncat(buf, " out/", sizeof(buf) - 1);
     strncat(buf, f, sizeof(buf) - 1);
     strncat(buf, ".o", sizeof(buf) - 1);
   }
@@ -95,17 +96,18 @@ bool link(const char *outf) {
 }
 
 int main(int argc, char **argv) {
+  mkdir("out", 0777);
   for (auto f : files) {
     if (!compile(f))
       return 1;
   }
   if (!compile("leco"))
     return 1;
-  if (!link("leco.o -o leco.exe"))
+  if (!link("out/leco.o -o leco.exe"))
     return 1;
   if (!compile("null_pragma"))
     return 1;
-  if (!link("null_pragma.o -o null_pragma.dll -shared"))
+  if (!link("out/null_pragma.o -o null_pragma.dll -shared"))
     return 1;
   return 0;
 }
