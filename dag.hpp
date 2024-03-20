@@ -33,6 +33,7 @@ public:
   explicit node(llvm::StringRef n);
 
   bool read_from_cache_file();
+  void write_to_cache_file() const;
 
   [[nodiscard]] bool add_executable(llvm::StringRef e);
   void add_framework(llvm::StringRef fw) { m_frameworks.insert(fw); }

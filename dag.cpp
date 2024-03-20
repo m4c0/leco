@@ -184,6 +184,12 @@ static void persist(std::ostream &o, const dag::node *n) {
   persist(o, n->resources());
   persist(o, n->shaders());
 }
+void dag::node::write_to_cache_file() const {
+  // TODO: create a proper file format
+  std::ofstream of{dag().str()};
+  persist(of, this);
+}
+
 static bool read(std::istream &f, dag::node *n, llvm::StringSet<> *set) {
   int size{};
   f >> size;
@@ -255,9 +261,7 @@ static bool compile(dag::node *n) {
   if (!ci->ExecuteAction(a))
     return false;
 
-  // TODO: create a proper file format
-  std::ofstream of{n->dag().str()};
-  persist(of, n);
+  n->write_to_cache_file();
   return true;
 }
 
