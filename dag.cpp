@@ -15,8 +15,6 @@
 using namespace clang;
 using namespace llvm;
 
-using time_point = sys::TimePoint<>;
-
 static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
   sys::fs::real_path(path, buf);
   sys::fs::make_absolute(buf);
@@ -173,8 +171,7 @@ static bool still_fresh(dag::node *n) {
 }
 
 static bool compile(dag::node *n) {
-  if (still_fresh(n)) {
-
+  if (!still_fresh(n)) {
     dag::xlog(n, "dag compilation");
 
     auto ci = evoker{}
