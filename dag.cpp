@@ -166,30 +166,35 @@ void dag::xlog(const dag::node *n, const char *msg) {
   dag::errlog(n, msg);
 }
 
-static bool compile(dag::node *n) {
+static bool still_fresh(dag::node *n) {
   auto dag_mtime = mtime_of(n->dag().str().c_str());
-  if (dag_mtime > mtime_of(n->source().str().c_str()) &&
-      dag_mtime > mtime_of("../leco/leco.exe")) {
-    // Capture both success and failures. Failures might leave inconsistencies
-    // in the node, which would be worse if we read and store it again
-    return n->read_from_cache_file();
+  return dag_mtime > mtime_of(n->source().str().c_str()) &&
+         dag_mtime > mtime_of("../leco/leco.exe");
+}
+
+static bool compile(dag::node *n) {
+  if (still_fresh(n)) {
+
+    dag::xlog(n, "dag compilation");
+
+    auto ci = evoker{}
+                  .set_cpp_std()
+                  .push_arg("-E")
+                  .push_arg(n->source())
+                  .add_predefs()
+                  .createCI();
+
+    action a{n};
+    if (!ci->ExecuteAction(a))
+      return false;
+
+    n->write_to_cache_file();
+    return true;
   }
 
-  dag::xlog(n, "dag compilation");
-
-  auto ci = evoker{}
-                .set_cpp_std()
-                .push_arg("-E")
-                .push_arg(n->source())
-                .add_predefs()
-                .createCI();
-
-  action a{n};
-  if (!ci->ExecuteAction(a))
-    return false;
-
-  n->write_to_cache_file();
-  return true;
+  // Capture both success and failures. Failures might leave inconsistencies
+  // in the node, which would be worse if we read and store it again
+  return n->read_from_cache_file();
 }
 
 static auto find(StringRef path) {
