@@ -57,14 +57,13 @@ constexpr const char *cmd =
     "-lclang -lclang-cpp -lLLVM";
 #endif
 
-uint64_t mtime(const char *stem, const char *ext) {
-  char buf[128];
-  snprintf(buf, sizeof(buf), "%s.%s", stem, ext);
-  return mtime_of(buf);
-}
-
 bool compile(const char *stem) {
-  if (mtime(stem, "cpp") < mtime(stem, "o"))
+  char in[32];
+  snprintf(in, sizeof(in), "%s.cpp", stem);
+  char out[32];
+  snprintf(out, sizeof(out), "out/%s.o", stem);
+
+  if (mtime_of(in) < mtime_of(out))
     return true;
 
   auto cdir = clang_dir();
@@ -74,8 +73,8 @@ bool compile(const char *stem) {
 #ifdef _WIN32
            "-D_CRT_SECURE_NO_WARNINGS -fms-runtime-lib=dll "
 #endif
-           "-I%s/include -c %s.cpp -o out/%s.o",
-           cdir, stem, stem);
+           "-I%s/include -c %s -o %s",
+           cdir, in, out);
   return 0 == system(buf);
 }
 #ifdef _WIN32
