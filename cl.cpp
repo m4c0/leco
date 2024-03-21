@@ -2,7 +2,6 @@
 #include "context.hpp"
 #include "target_defs.hpp"
 #include "llvm/Support/CommandLine.h"
-#include "llvm/TargetParser/Host.h"
 
 using namespace llvm;
 
