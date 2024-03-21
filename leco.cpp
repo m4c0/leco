@@ -41,7 +41,8 @@ extern "C" int main(int argc, char **argv) {
   InitializeAllAsmParsers();
   CrashRecoveryContext::Enable();
 
-  parse_args(argc, argv);
+  if (!parse_args(argc, argv))
+    return 1;
 
   try {
     return for_each_target(run_target) ? 0 : 1;

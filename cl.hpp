@@ -13,4 +13,4 @@ bool is_dumping_dag();
 
 bool for_each_target(bool (*)());
 
-void parse_args(int argc, char **argv);
+bool parse_args(int argc, char **argv);

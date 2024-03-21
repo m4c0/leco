@@ -1,44 +1,33 @@
 #include "cl.hpp"
 #include "context.hpp"
 #include "target_defs.hpp"
-#include "llvm/Support/CommandLine.h"
 
-using namespace llvm;
+#define GOPT_IMPLEMENTATION
+#include "../gopt/gopt.h"
 
-cl::OptionCategory leco_cat("Leco Options");
+#include <stdio.h>
+#include <string.h>
 
-enum clean_levels { cup_none, cup_cur, cup_all };
-cl::opt<clean_levels> clean_level(
-    "clean", cl::desc("Cleaning level before compilation:"),
-    cl::values(clEnumValN(cup_none, "none", "No cleanup, do incremental build"),
-               clEnumValN(cup_cur, "cur", "Cleanup current directory"),
-               clEnumValN(cup_all, "all", "Cleanup any traversed directory")),
-    cl::cat(leco_cat));
+enum clean_levels { cup_none = 0, cup_cur, cup_all };
+static clean_levels clean_level{};
 bool should_clean_current() { return clean_level >= cup_cur; }
 bool should_clean_all() { return clean_level >= cup_all; }
 
-cl::opt<bool> verbose("verbose", cl::desc("Output important actions"),
-                      cl::cat(leco_cat));
-cl::opt<bool> x_verbose("extra-verbose",
-                        cl::desc("Output as much actions as possible"),
-                        cl::cat(leco_cat));
-bool is_verbose() { return verbose || x_verbose; }
-bool is_extra_verbose() { return x_verbose; }
+static int verbose{};
+bool is_verbose() { return verbose > 0; }
+bool is_extra_verbose() { return verbose > 1; }
 
-cl::opt<bool> debug("debug-syms", cl::desc("Enable debug symbols"),
-                    cl::cat(leco_cat));
+static bool debug{};
 bool enable_debug_syms() { return debug; }
 
-cl::opt<bool> optimise("opt", cl::desc("Enable optimisations"),
-                       cl::cat(leco_cat));
+static bool optimise{};
 bool is_optimised() { return optimise; }
 
-cl::opt<bool> dump_dag("dump-dag", cl::desc("Dump the dependency graph"),
-                       cl::cat(leco_cat));
+static bool dump_dag{};
 bool is_dumping_dag() { return dump_dag; }
 
 enum targets {
-  host,
+  host = 0,
   apple,
   macosx,
   ios,
@@ -48,17 +37,21 @@ enum targets {
   windows,
   android
 };
-cl::opt<targets> target(
-    "target", cl::desc("Targets of build"),
-    cl::values(clEnumVal(host, "Same as host"),
-               clEnumVal(apple, "All Apple targets"),
-               clEnumVal(ios, "All iOS targets (iPhone OS + Simulator)"),
-               clEnumVal(macosx, "MacOSX"), clEnumVal(iphoneos, "iPhone OS"),
-               clEnumVal(iphonesimulator, "iPhone Simulator"),
-               clEnumVal(linux, "Linux"),
-               clEnumVal(windows, "Windows 64bits"),
-               clEnumVal(android, "All Android targets")),
-    cl::cat(leco_cat));
+static targets target;
+bool parse_target(const char *n) {
+  constexpr const char *vals[]{"host",  "apple",    "macosx",
+                               "ios",   "iphoneos", "iphonesimulator",
+                               "linux", "windows",  "android"};
+  int i = 0;
+  for (auto x : vals) {
+    if (strcmp(x, n) == 0) {
+      target = static_cast<targets>(i);
+      return true;
+    }
+    i++;
+  }
+  return false;
+}
 bool for_each_target(bool (*fn)()) {
   const auto run = [&](auto &&ctx_fn) {
     cur_ctx() = ctx_fn();
@@ -103,14 +96,71 @@ bool for_each_target(bool (*fn)()) {
   };
 }
 
-void parse_args(int argc, char **argv) {
-  for (auto &[k, v] : cl::getRegisteredOptions()) {
-    if (k == "help")
-      continue;
-    if (v->Categories[0] != &leco_cat)
-      v->setHiddenFlag(cl::Hidden);
+bool usage() {
+  fprintf(stderr, R"(
+  Usage: ../leco/leco.exe [-c|-C] [-D] [-g] [-O] [-t <target>] [-v]
+
+  Where:
+    -c -- clean current module before build (mutually exclusive with -C)
+
+    -C -- clean all modules before build (mutually exclusive with -c)
+
+    -D -- dump DAG (useful for troubleshooting LECO itself or module dependencies)
+
+    -g -- enable debug symbols
+
+    -O -- enable optimisations
+
+    -t <target> -- one of:
+      iphoneos, iphonesimulator: for its referring platform (requires Apple SDKs)
+      ios: for both iPhoneOS and iPhoneSimulator
+      android: for all four Android architectures (requires Android SDK)
+      apple, linux, macosx, windows: for their respective platforms (requires their SDKs)
+      host: for the same platform as the host (default)
+
+    -v -- enable verboseness (repeat for extra verbosiness)
+
+)");
+  return false;
+}
+
+bool parse_args(int argc, char **argv) {
+  struct gopt opts {};
+  GOPT(opts, argc, argv, "cCDgOt:v");
+
+  char *val{};
+  char ch;
+  while ((ch = gopt_parse(&opts, &val)) != 0) {
+    switch (ch) {
+    case 'c':
+      clean_level = cup_cur;
+      break;
+    case 'C':
+      clean_level = cup_all;
+      break;
+    case 'D':
+      dump_dag = true;
+      break;
+    case 'g':
+      debug = true;
+      break;
+    case 'O':
+      optimise = true;
+      break;
+    case 't':
+      if (!parse_target(val))
+        return false;
+      break;
+    case 'v':
+      verbose++;
+      break;
+    default:
+      return usage();
+    }
   }
 
-  cl::ParseCommandLineOptions(
-      argc, argv, "This is too cool and it doesn't require description");
+  if (opts.argc != 0)
+    return usage();
+
+  return true;
 }
