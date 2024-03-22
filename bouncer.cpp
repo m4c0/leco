@@ -6,6 +6,7 @@
 #include "context.hpp"
 #include "dag.hpp"
 #include "link.hpp"
+#include "log.hpp"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
 
@@ -25,9 +26,8 @@ static bool compile_shaders(const dag::node *n, StringRef res_path) {
     if (mtime_of(out.c_str()) > mtime_of(in.str().c_str()))
       continue;
 
-    if (is_verbose()) {
-      errs() << "compiling shader " << out << "\n";
-    }
+    vlog("compiling shader", out.data(), out.size());
+
     auto cmd = ("glslangValidator --quiet -V -o " + out + " " + in).str();
     if (0 != system(cmd.c_str()))
       return false;
@@ -48,9 +48,7 @@ static void copy_exes(const dag::node *n, StringRef exe_path) {
     if (mtime_of(path.c_str()) > mtime_of(e.first().str().c_str()))
       continue;
 
-    if (is_verbose()) {
-      errs() << "copying library " << path << "\n";
-    }
+    vlog("copying library", path.data(), path.size());
     sys::fs::copy_file(e.first(), path);
   }
 }
@@ -60,9 +58,7 @@ static void copy_resources(const dag::node *n, StringRef res_path) {
     sys::path::append(path, sys::path::filename(r.first()));
     if (mtime_of(path.c_str()) > mtime_of(r.first().str().c_str()))
       continue;
-    if (is_verbose()) {
-      errs() << "copying resource " << path << "\n";
-    }
+    vlog("copying resource", path.data(), path.size());
     sys::fs::copy_file(r.first(), path);
   }
 }

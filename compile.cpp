@@ -1,7 +1,8 @@
-#include "cl.hpp"
 #include "compile.hpp"
+#include "cl.hpp"
 #include "dag.hpp"
 #include "evoker.hpp"
+#include "log.hpp"
 #include "pragma.hpp"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Support/FileSystem.h"
@@ -18,9 +19,7 @@ bool compile(const dag::node *n) {
   auto path = sys::path::parent_path(obj);
   sys::fs::create_directories(path);
 
-  if (is_verbose()) {
-    errs() << "compiling " << obj << "\n";
-  }
+  vlog("compiling", obj.data(), obj.size());
 
   auto ext = sys::path::extension(file);
   if (ext == ".cppm") {

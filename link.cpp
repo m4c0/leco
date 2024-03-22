@@ -6,6 +6,7 @@
 #include "dag.hpp"
 #include "evoker.hpp"
 #include "in2out.hpp"
+#include "log.hpp"
 #include "llvm/ADT/StringSet.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
@@ -75,9 +76,7 @@ std::string link(const dag::node *n, uint64_t mtime) {
   if (mtime < mtime_of(exe.c_str()))
     return std::string{exe};
 
-  if (is_verbose()) {
-    errs() << "linking " << exe << "\n";
-  }
+  vlog("linking", exe.data(), exe.size());
   exe.c_str();
 
   evoker e{};
