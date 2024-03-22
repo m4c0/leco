@@ -71,7 +71,7 @@ static void bundle_app(StringRef exe) {
   cur_ctx().bundle(path, sys::path::stem(exe));
 }
 
-bool bounce(StringRef path) {
+bool bounce(const char *path) {
   auto stem = sys::path::stem(path);
   auto ext = sys::path::extension(path);
 
