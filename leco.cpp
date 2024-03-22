@@ -1,34 +1,37 @@
 #include "bouncer.hpp"
 #include "cl.hpp"
 #include "dag.hpp"
-#include "llvm/Support/CrashRecoveryContext.h"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/TargetSelect.h"
-#include "llvm/Support/raw_ostream.h"
+
+#define MINIRENT_IMPLEMENTATION
+#include "../minirent/minirent.h"
 
 using namespace llvm;
+
+static bool error() {
+  fprintf(stderr, "Could not list current directory: %s\n", strerror(errno));
+  return false;
+}
 
 bool run_target() {
   dag::clear_cache();
 
-  std::error_code ec;
-  for (sys::fs::directory_iterator it{".", ec}, e; it != e; it.increment(ec)) {
-    auto status = it->status();
-    if (!status) {
-      errs() << it->path() << ": " << status.getError().message() << "\n";
-      continue;
-    }
+  DIR *dir = opendir(".");
+  if (dir == nullptr)
+    return error();
 
-    if (status->type() != sys::fs::file_type::regular_file) {
-      continue;
-    }
-
-    if (!bounce(it->path())) {
+  struct dirent *dp{};
+  while ((dp = readdir(dir))) {
+    auto nm = dp->d_name;
+    if (!bounce(nm)) {
       return false;
     }
+
+    errno = 0;
   }
+  if (errno)
+    return error();
+
+  closedir(dir);
   return true;
 }
 
@@ -39,10 +42,10 @@ extern "C" int main(int argc, char **argv) {
   try {
     return for_each_target(run_target) ? 0 : 1;
   } catch (const std::exception &e) {
-    errs() << "exception: " << e.what() << "\n";
+    fprintf(stderr, "exception: %s\n", e.what());
     return 1;
   } catch (...) {
-    errs() << "unexpected exception\n";
+    fprintf(stderr, "unexpected exception\n");
     return 1;
   }
 }
