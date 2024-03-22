@@ -25,7 +25,7 @@
 #include <fstream>
 
 #define TEMPSIE_IMPLEMENTATION
-#define TEMPSIE_ERROR(x) llvm::errs() << (x) << "\n";
+#define TEMPSIE_ERROR(x) fprintf(stderr, "error: %s\n", (x))
 #include "../tempsie/tempsie.h"
 
 using namespace clang;
