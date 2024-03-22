@@ -4,11 +4,12 @@
 #define EXE_EXT ""
 #endif
 
+#include "evoker.hpp"
+
 #include "cl.hpp"
 #include "clang_dir.hpp"
 #include "context.hpp"
 #include "dag.hpp"
-#include "evoker.hpp"
 #include "in2out.hpp"
 #include "clang/CodeGen/ObjectFilePCHContainerOperations.h"
 #include "clang/Driver/Compilation.h"
@@ -16,6 +17,9 @@
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/TextDiagnosticPrinter.h"
 #include "clang/Lex/PreprocessorOptions.h"
+#include "llvm/Support/CrashRecoveryContext.h"
+#include "llvm/Support/ManagedStatic.h"
+#include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Host.h"
 #include <fstream>
@@ -172,3 +176,15 @@ bool evoker::execute() {
   unlink(argfile.c_str());
   return true;
 }
+
+struct init_llvm {
+  llvm_shutdown_obj sdo{};
+
+  init_llvm() {
+    InitializeAllTargets();
+    InitializeAllTargetMCs();
+    InitializeAllAsmPrinters();
+    InitializeAllAsmParsers();
+    CrashRecoveryContext::Enable();
+  }
+} i{};

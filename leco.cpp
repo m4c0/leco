@@ -33,14 +33,6 @@ bool run_target() {
 }
 
 extern "C" int main(int argc, char **argv) {
-  llvm_shutdown_obj sdo{};
-
-  InitializeAllTargets();
-  InitializeAllTargetMCs();
-  InitializeAllAsmPrinters();
-  InitializeAllAsmParsers();
-  CrashRecoveryContext::Enable();
-
   if (!parse_args(argc, argv))
     return 1;
 
