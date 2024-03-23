@@ -35,17 +35,17 @@ public:
 };
 
 static std::error_code find_latest_ndk(SmallVectorImpl<char> &res) {
-  const auto sdk = sys::Process::GetEnv("ANDROID_SDK_ROOT");
-  if (!sdk)
+  const auto sdk = getenv("ANDROID_SDK_ROOT");
+  if (sdk == nullptr)
     return {undefined_environment, ndk_category()};
 
-  sys::path::append(res, *sdk, "ndk-bundle");
+  sys::path::append(res, sdk, "ndk-bundle");
   if (sys::fs::is_directory(res)) {
     return {};
   }
 
   res.clear();
-  sys::path::append(res, *sdk, "ndk");
+  sys::path::append(res, sdk, "ndk");
   if (!sys::fs::is_directory(res)) {
     return {ndk_isnt_directory, ndk_category()};
   }
