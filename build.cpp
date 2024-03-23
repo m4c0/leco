@@ -7,6 +7,11 @@
 #include <string.h>
 #include <sys/stat.h>
 
+#ifdef _WIN32
+#include <direct.h>
+#define mkdir(x, _) _mkdir(x)
+#endif
+
 static constexpr const char *files[]{
     "actool",  "bouncer", "cl",     "cleaner",     "compile",
     "context", "dag",     "dag_io", "droid_path",  "evoker",
