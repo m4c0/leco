@@ -1,4 +1,6 @@
 #pragma once
+#include "cl.hpp"
+
 #include <stdio.h>
 
 #ifndef _WIN32

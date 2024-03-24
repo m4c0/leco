@@ -1,9 +1,8 @@
 #include "compile.hpp"
-#include "cl.hpp"
+
 #include "dag.hpp"
 #include "evoker.hpp"
 #include "log.hpp"
-#include "pragma.hpp"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
@@ -71,7 +70,7 @@ bool compile(const dag::node *n) {
         .set_out(obj)
         .execute();
   } else {
-    errs() << "don't know how to build " << file << "\n";
+    fprintf(stderr, "don't know how to build %s\n", file.str().c_str());
     return false;
   }
 }
