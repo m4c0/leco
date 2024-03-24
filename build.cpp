@@ -1,6 +1,7 @@
 #define MTIME_IMPLEMENTATION
 #include "../mtime/mtime.h"
 #include "clang_dir.hpp"
+#include "sim.h"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -64,24 +65,24 @@ constexpr const char *cmd =
 #endif
 
 bool compile(const char *stem) {
-  char in[32];
-  snprintf(in, sizeof(in), "%s.cpp", stem);
-  char out[32];
-  snprintf(out, sizeof(out), "out/%s.o", stem);
+  sim_sb in, out;
+  sim_sb_new(&in, 32);
+  sim_sb_printf(&in, "%s.cpp", stem);
+  sim_sb_new(&out, 32);
+  sim_sb_printf(&out, "out/%s.o", stem);
 
-  if (mtime_of(in) < mtime_of(out))
+  if (mtime_of(in.buffer) < mtime_of(out.buffer))
     return true;
 
   auto cdir = clang_dir();
-  char buf[1024];
-  snprintf(buf, sizeof(buf),
-           "clang++ -std=c++20 "
+  sim_sb buf;
+  sim_sb_new(&buf, 1024);
+  sim_sb_copy(&buf, "clang++ -std=c++20 ");
 #ifdef _WIN32
-           "-D_CRT_SECURE_NO_WARNINGS -fms-runtime-lib=dll "
+  sim_sb_copy(&buf, "-D_CRT_SECURE_NO_WARNINGS -fms-runtime-lib=dll ");
 #endif
-           "-I%s/include -c %s -o %s",
-           cdir, in, out);
-  return 0 == system(buf);
+  sim_sb_printf(&buf, "-I%s/include -c %s -o %s", cdir, in.buffer, out.buffer);
+  return 0 == system(buf.buffer);
 }
 #ifdef _WIN32
 #define strncat strncat_s
