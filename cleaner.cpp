@@ -4,23 +4,21 @@
 #include "dag.hpp"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
+#include <set>
 
 using namespace llvm;
 
-static void remove_parent(StringSet<> &already_done, StringRef tgt) {
+static void remove_parent(std::set<std::string> &already_done, StringRef tgt) {
   auto path = sys::path::parent_path(tgt);
-  if (already_done.contains(path))
-    return;
-
-  sys::fs::remove_directories(path);
-
-  already_done.insert(path);
+  auto [it, inserted] = already_done.insert(path.str());
+  if (inserted)
+    sys::fs::remove_directories(path);
 }
 
 void clean(const dag::node *n) {
   assert(n->root() && "only roots should be cleaned up");
 
-  StringSet<> done{};
+  std::set<std::string> done{};
 
   if (should_clean_all()) {
     dag::visit(n, [&](auto *n) { remove_parent(done, n->target()); });
