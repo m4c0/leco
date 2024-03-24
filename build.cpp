@@ -84,21 +84,16 @@ bool compile(const char *stem) {
   sim_sb_printf(&buf, "-I%s/include -c %s -o %s", cdir, in.buffer, out.buffer);
   return 0 == system(buf.buffer);
 }
-#ifdef _WIN32
-#define strncat strncat_s
-#endif
 bool link(const char *outf) {
   auto cdir = clang_dir();
-  char buf[10240];
-  snprintf(buf, sizeof(buf), cmd, cdir, cdir);
+  sim_sb buf;
+  sim_sb_new(&buf, 10240);
+  sim_sb_printf(&buf, cmd, cdir, cdir);
   for (auto f : files) {
-    strncat(buf, " out/", sizeof(buf) - 1);
-    strncat(buf, f, sizeof(buf) - 1);
-    strncat(buf, ".o", sizeof(buf) - 1);
+    sim_sb_printf(&buf, " out/%s.o ", f);
   }
-  strncat(buf, " ", sizeof(buf) - 1);
-  strncat(buf, outf, sizeof(buf) - 1);
-  return 0 == system(buf);
+  sim_sb_concat(&buf, outf);
+  return 0 == system(buf.buffer);
 }
 
 int main(int argc, char **argv) {

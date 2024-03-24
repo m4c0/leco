@@ -42,4 +42,5 @@ sim_sb_printf(sim_sb *dst, const char *src, ...) {
   va_start(va, src);
   vsnprintf(dst->buffer + dst->len, dst->size - dst->len, src, va);
   va_end(va);
+  dst->len = strlen(dst->buffer);
 }
