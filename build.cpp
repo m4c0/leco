@@ -75,7 +75,7 @@ bool compile(const char *stem) {
 
   auto cdir = clang_dir();
   sim_sbt buf{1024};
-  sim_sb_copy(&buf, "clang++ -std=c++20 ");
+  sim_sb_copy(&buf, "clang++ -std=c++20 -g ");
 #ifdef _WIN32
   sim_sb_copy(&buf, "-D_CRT_SECURE_NO_WARNINGS -fms-runtime-lib=dll ");
 #endif
