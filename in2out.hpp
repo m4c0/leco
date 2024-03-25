@@ -4,7 +4,8 @@
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
 
-static void in2out(llvm::StringRef in, llvm::SmallVectorImpl<char> &out) {
+static void in2out(llvm::StringRef in, llvm::SmallVectorImpl<char> &out,
+                   llvm::StringRef ext) {
   out.clear();
 
   auto path = llvm::sys::path::parent_path(in);
@@ -18,9 +19,5 @@ static void in2out(llvm::StringRef in, llvm::SmallVectorImpl<char> &out) {
   }
   // TODO: check errors
   llvm::sys::fs::make_absolute(out);
-}
-static void in2out(llvm::StringRef in, llvm::SmallVectorImpl<char> &out,
-                   llvm::StringRef ext) {
-  in2out(in, out);
   llvm::sys::path::replace_extension(out, ext);
 }
