@@ -1,51 +1,49 @@
 #include "actool.hpp"
 #include "sim.h"
 #include "llvm/Support/FileSystem.h"
-#include "llvm/Support/raw_ostream.h"
 
 using namespace llvm;
 
 namespace json {
 class dict {
-  raw_ostream &o;
+  FILE *f;
 
   void array_elements() {}
   void array_elements(auto &&v) {
-    o << "{";
-    v(dict{o});
-    o << "}";
+    fprintf(f, "{");
+    v(*this);
+    fprintf(f, "}");
   }
   void array_elements(auto &&v1, auto &&v2, auto &&...vs) {
     array_elements(v1);
-    o << ",";
+    fprintf(f, ",");
     array_elements(v2, vs...);
   }
 
 public:
-  explicit constexpr dict(raw_ostream &o) : o{o} {}
+  explicit constexpr dict(FILE *f) : f{f} {}
 
-  void array(StringRef key, auto &&...v) {
-    o << '"' << key << '"' << ": [";
+  void array(const char *key, auto &&...v) {
+    fprintf(f, R"("%s": [)", key);
     array_elements(v...);
-    o << "]";
+    fprintf(f, "]");
   }
 
-  void string(StringRef key, StringRef value, bool last = false) {
-    o << '"' << key << '"' << ": " << '"' << value << '"';
+  void string(const char *key, const char *value, bool last = false) {
+    fprintf(f, R"("%s": "%s")", key, value);
     if (!last)
-      o << ",";
+      fprintf(f, ",");
   }
 };
 void gen(const char *path, function_ref<void(dict &&)> fn) {
   sim_sbt file{256};
   sim_sb_path_append(&file, path, "Contents.json");
 
-  std::error_code ec;
-  auto o = raw_fd_stream(file.buffer, ec);
-
-  o << "{";
-  fn(dict{o});
-  o << "}";
+  FILE *f = fopen(file.buffer, "w");
+  fprintf(f, "{");
+  fn(dict{f});
+  fprintf(f, "}");
+  fclose(f);
 }
 } // namespace json
 
