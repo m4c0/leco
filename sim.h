@@ -1,17 +1,22 @@
+#include <assert.h>
 #include <stdarg.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-struct sim_sb {
+typedef struct sim_sb {
   char *buffer;
   unsigned size;
   unsigned len;
-};
+} sim_sb;
+void sim_sb_new(sim_sb *sb, unsigned size);
+void sim_sb_delete(sim_sb *sb);
+
 #ifdef __cplusplus
 }
 #endif
 
+// TODO: add "SIM_ASSERT"
 #define SIM_MALLOC malloc
 #define SIM_FREE free
 
