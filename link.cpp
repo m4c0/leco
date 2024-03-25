@@ -51,12 +51,9 @@ std::string link(const dag::node *n, uint64_t mtime) {
   things t{};
   dag::visit(n, true, [&](auto *n) { visit(t, n); });
 
+  std::string ext = n->dll() ? cur_ctx().dll_ext : "exe";
   SmallString<128> exe{};
-  if (n->dll()) {
-    in2out(main_src, exe, cur_ctx().dll_ext);
-  } else {
-    in2out(main_src, exe, "exe");
-  }
+  in2out(main_src, exe, ext);
 
   if (n->app()) {
     cur_ctx().app_exe_path(exe, sys::path::stem(main_src));
