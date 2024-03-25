@@ -127,13 +127,12 @@ void visit(const node *n, bool impls, auto &&fn) {
     }
 
     fn(n);
+    visited.insert(n->source());
 
     if (impls)
       for (auto &d : n->mod_impls()) {
         rec(rec, get_node(d.first()));
       }
-
-    visited.insert(n->source());
   };
   rec(rec, n);
 }
