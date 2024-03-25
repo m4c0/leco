@@ -24,18 +24,9 @@ struct things {
 };
 } // namespace
 
-static std::string i2o(StringRef src) {
-  SmallString<128> pp{};
-  in2out(src, pp, "o");
-  return pp.str().str();
-}
-
 static void visit(things &t, const dag::node *n) {
   t.args.push_back(n->target().str());
 
-  for (auto &i : n->mod_impls()) {
-    t.args.push_back(i2o(i.first()));
-  }
   for (auto &fw : n->frameworks()) {
     auto [it, added] = t.frameworks.insert(fw.first().str());
     if (added) {
@@ -58,7 +49,7 @@ std::string link(const dag::node *n, uint64_t mtime) {
   auto main_src = n->source();
 
   things t{};
-  dag::visit(n, false, [&](auto *n) { visit(t, n); });
+  dag::visit(n, true, [&](auto *n) { visit(t, n); });
 
   SmallString<128> exe{};
   if (n->dll()) {

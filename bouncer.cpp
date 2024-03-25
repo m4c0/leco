@@ -128,7 +128,7 @@ bool bounce(const char *path) {
     sys::fs::create_directories(res_path);
 
     bool success = true;
-    dag::visit(n, false, [&](auto *n) {
+    dag::visit(n, true, [&](auto *n) {
       success &= compile_shaders(n, res_path);
       copy_exes(n, exe_path);
       copy_resources(n, res_path);
