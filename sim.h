@@ -25,6 +25,7 @@ void sim_sb_path_append(sim_sb *dst, const char *part);
 void sim_sb_path_copy_append(sim_sb *dst, const char *path, const char *part);
 void sim_sb_path_parent(sim_sb *dst);
 void sim_sb_path_copy_parent(sim_sb *dst, const char *path);
+void sim_sb_path_set_extension(sim_sb *dst, const char *ext);
 
 #ifdef __cplusplus
 }
@@ -125,4 +126,36 @@ void sim_sb_path_copy_parent(sim_sb *dst, const char *path) {
 
   sim_sb_copy(dst, path);
   sim_sb_path_parent(dst);
+}
+
+//           /tmp/test ===> /tmp/test.uga
+//                   / ===> /
+//                 tmp ===> tmp.uga
+//       /test/asd.wer ===> /test/asd.uga
+//               as.we ===> as.uga
+//                     ===>
+//    /tmp.ggg/asd.qwe ===> /tmp.ggg/asd.uga
+//        /tmp.ggg/qwe ===> /tmp.ggg/qwe.uga
+//       /tmp/tmp.xxx/ ===> /tmp/tmp.xxx/
+void sim_sb_path_set_extension(sim_sb *dst, const char *ext) {
+  assert(dst->buffer && "uninitialised buffer");
+  assert(ext && "invalid extension");
+
+  if (dst->len == 0)
+    return;
+
+  char *p = strrchr(dst->buffer, '/');
+  char *e = strrchr(dst->buffer, '.');
+  // Path ends with '/'
+  if (p == dst->buffer + dst->len - 1)
+    return;
+  // No extension or extension isn't in stem
+  if (!e || (p && e && p > e)) {
+    sim_sb_concat(dst, ".");
+    sim_sb_concat(dst, ext);
+    return;
+  }
+  e[1] = 0;
+  dst->len = e - dst->buffer + 1;
+  sim_sb_concat(dst, ext);
 }
