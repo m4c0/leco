@@ -14,9 +14,9 @@
 #endif
 
 static constexpr const char *files[]{
-    "actool",  "bouncer", "cl",     "cleaner",     "compile",
-    "context", "dag",     "dag_io", "droid_path",  "evoker",
-    "link",    "plist",   "pragma", "target_defs",
+    "actool",  "bouncer", "cl",     "cleaner",    "compile",
+    "context", "dag",     "dag_io", "dag_plugin", "droid_path",
+    "evoker",  "link",    "plist",  "pragma",     "target_defs",
 };
 
 constexpr const char *cmd =

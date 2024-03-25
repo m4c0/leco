@@ -107,6 +107,7 @@ public:
     return m_module_pcm;
   }
 };
+[[nodiscard]] bool execute(node *n);
 
 void xlog(const node *n, const char *msg);
 void errlog(const node *n, const char *msg);
