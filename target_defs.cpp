@@ -22,7 +22,7 @@ context android(StringRef tgt) {
       .dll_ext = "so",
       .app_exe_path = [](auto exe, auto stem) {},
       .app_res_path = [](auto exe) {},
-      .bundle = [](auto &exe, auto stem) {},
+      .bundle = [](auto exe, auto stem) {},
   };
 }
 static std::string apple_sysroot(StringRef sdk) {
@@ -91,7 +91,7 @@ context macosx() {
             sys::path::remove_filename(exe);
             sys::path::append(exe, "Resources");
           },
-      .bundle = [](auto &exe, auto stem) {},
+      .bundle = [](auto exe, auto stem) {},
       .native_target = true,
   };
 }
@@ -119,11 +119,9 @@ context iphoneos() {
           },
       .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
       .bundle =
-          [](auto &exe, auto stem) {
-            auto b_path = StringRef{exe.begin(), exe.size()};
-            if (!actool(b_path))
-              return;
-            gen_iphone_plists(b_path, stem);
+          [](auto exe, auto stem) {
+            if (actool(exe))
+              gen_iphone_plists(exe, stem);
           },
   };
 }
@@ -145,7 +143,7 @@ context iphonesimulator() {
             sys::path::append(exe, stem);
           },
       .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
-      .bundle = [](auto &exe, auto stem) {},
+      .bundle = [](auto exe, auto stem) {},
   };
 }
 
@@ -164,7 +162,7 @@ context windows() {
             sys::path::replace_extension(exe, "exe");
           },
       .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
-      .bundle = [](auto &exe, auto stem) {},
+      .bundle = [](auto exe, auto stem) {},
       .native_target = true,
   };
 }
@@ -184,7 +182,7 @@ context linux() {
             sys::path::replace_extension(exe, "exe");
           },
       .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
-      .bundle = [](auto &exe, auto stem) {},
+      .bundle = [](auto exe, auto stem) {},
       .native_target = true,
   };
 }

@@ -14,7 +14,7 @@ struct context {
   std::string dll_ext{};
   void (*app_exe_path)(llvm::SmallVectorImpl<char> &exe, llvm::StringRef stem);
   void (*app_res_path)(llvm::SmallVectorImpl<char> &exe);
-  void (*bundle)(llvm::SmallVectorImpl<char> &exe, llvm::StringRef stem);
+  void (*bundle)(const char *exe, llvm::StringRef stem);
   bool native_target{};
 };
 

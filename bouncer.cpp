@@ -62,9 +62,8 @@ static void copy_resources(const dag::node *n, StringRef res_path) {
     sys::fs::copy_file(r.first(), path);
   }
 }
-static void bundle_app(StringRef exe) {
-  SmallString<256> path{exe};
-  cur_ctx().bundle(path, sys::path::stem(exe));
+static void bundle_app(const char *exe) {
+  cur_ctx().bundle(exe, sys::path::stem(exe));
 }
 
 bool bounce(const char *path) {
@@ -137,7 +136,7 @@ bool bounce(const char *path) {
     if (!success)
       return false;
 
-    bundle_app(exe_path);
+    bundle_app(exe_path.c_str());
   }
 
   return true;
