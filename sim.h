@@ -1,4 +1,6 @@
-#pragma once
+#ifndef SIM_H
+#define SIM_H
+
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -38,7 +40,10 @@ struct sim_sbt : sim_sb {
   sim_sbt &operator=(const sim_sbt &) = delete;
   sim_sbt &operator=(sim_sbt &&) = delete;
 };
-#endif
+#endif //__cplusplus
+#endif // SIM_H
+
+#ifdef SIM_IMPLEMENTATION
 
 // TODO: add "SIM_ASSERT"
 #define SIM_MALLOC malloc
@@ -159,3 +164,4 @@ void sim_sb_path_set_extension(sim_sb *dst, const char *ext) {
   dst->len = e - dst->buffer + 1;
   sim_sb_concat(dst, ext);
 }
+#endif // SIM_IMPLEMENTATION

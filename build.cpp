@@ -1,7 +1,9 @@
 #define MTIME_IMPLEMENTATION
 #include "../mtime/mtime.h"
-#include "clang_dir.hpp"
+#define SIM_IMPLEMENTATION
 #include "sim.h"
+
+#include "clang_dir.hpp"
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
