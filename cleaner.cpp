@@ -21,7 +21,7 @@ void clean(const dag::node *n) {
   std::set<std::string> done{};
 
   if (should_clean_all()) {
-    dag::visit(n, [&](auto *n) { remove_parent(done, n->target()); });
+    dag::visit(n, false, [&](auto *n) { remove_parent(done, n->target()); });
   } else if (should_clean_current()) {
     remove_parent(done, n->target());
   }

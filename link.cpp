@@ -58,7 +58,7 @@ std::string link(const dag::node *n, uint64_t mtime) {
   auto main_src = n->source();
 
   things t{};
-  dag::visit(n, [&](auto *n) { visit(t, n); });
+  dag::visit(n, false, [&](auto *n) { visit(t, n); });
 
   SmallString<128> exe{};
   if (n->dll()) {

@@ -90,13 +90,13 @@ bool bounce(const char *path) {
     if (n->tool())
       outs() << " tool";
     outs() << "\n";
-    dag::visit(n, [&](auto *n) {
+    dag::visit(n, false, [&](auto *n) {
       outs() << "  " << n->module_name() << " ==> " << n->module_pcm() << "\n";
     });
     for (auto &d : n->mod_impls()) {
       auto impl = dag::get_node(d.first());
       outs() << "  -- impl: " << impl->source() << "\n";
-      dag::visit(impl, [&](auto *n) {
+      dag::visit(impl, false, [&](auto *n) {
         outs() << "     " << n->module_name() << " ==> " << n->module_pcm()
                << "\n";
       });
@@ -128,7 +128,7 @@ bool bounce(const char *path) {
     sys::fs::create_directories(res_path);
 
     bool success = true;
-    dag::visit(n, [&](auto *n) {
+    dag::visit(n, false, [&](auto *n) {
       success &= compile_shaders(n, res_path);
       copy_exes(n, exe_path);
       copy_resources(n, res_path);

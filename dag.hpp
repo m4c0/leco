@@ -115,7 +115,7 @@ node *get_node(llvm::StringRef source);
 node *process(llvm::StringRef path);
 void clear_cache();
 
-void visit(const node *n, auto &&fn) {
+void visit(const node *n, bool impls, auto &&fn) {
   llvm::StringSet<> visited{};
 
   const auto rec = [&](auto rec, auto *n) {
@@ -127,6 +127,12 @@ void visit(const node *n, auto &&fn) {
     }
 
     fn(n);
+
+    if (impls)
+      for (auto &d : n->mod_impls()) {
+        rec(rec, get_node(d.first()));
+      }
+
     visited.insert(n->source());
   };
   rec(rec, n);
