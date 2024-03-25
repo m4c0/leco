@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #ifdef __cplusplus
@@ -14,6 +15,16 @@ typedef struct sim_sb {
 } sim_sb;
 void sim_sb_new(sim_sb *sb, unsigned size);
 void sim_sb_delete(sim_sb *sb);
+void sim_sb_copy(sim_sb *dst, const char *src);
+void sim_sb_concat(sim_sb *dst, const char *src);
+
+__attribute__((format(printf, 2, 3))) void sim_sb_printf(sim_sb *dst,
+                                                         const char *src, ...);
+
+void sim_sb_path_append(sim_sb *dst, const char *part);
+void sim_sb_path_copy_append(sim_sb *dst, const char *path, const char *part);
+void sim_sb_path_parent(sim_sb *dst);
+void sim_sb_path_copy_parent(sim_sb *dst, const char *path);
 
 #ifdef __cplusplus
 }
@@ -48,7 +59,9 @@ void sim_sb_delete(sim_sb *sb) {
   assert(sb->buffer && "uninitialised buffer");
 
   SIM_FREE(sb->buffer);
-  *sb = {0};
+  sb->buffer = NULL;
+  sb->len = 0;
+  sb->size = 0;
 }
 
 void sim_sb_copy(sim_sb *dst, const char *src) {
@@ -83,7 +96,7 @@ void sim_sb_path_append(sim_sb *dst, const char *part) {
   sim_sb_concat(dst, "/"); // TODO: flip on windows?
   sim_sb_concat(dst, part);
 }
-void sim_sb_path_append(sim_sb *dst, const char *path, const char *part) {
+void sim_sb_path_copy_append(sim_sb *dst, const char *path, const char *part) {
   assert(dst->buffer && "uninitialised buffer");
   assert(path && "invalid source path");
 
@@ -106,7 +119,7 @@ void sim_sb_path_parent(sim_sb *dst) {
   *p = 0;
   dst->len = p - dst->buffer;
 }
-void sim_sb_path_parent(sim_sb *dst, const char *path) {
+void sim_sb_path_copy_parent(sim_sb *dst, const char *path) {
   assert(dst->buffer && "uninitialised buffer");
   assert(path && "invalid source path");
 
