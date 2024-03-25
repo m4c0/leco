@@ -1,5 +1,7 @@
 #include <assert.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
