@@ -8,17 +8,15 @@
 
 using namespace llvm;
 
+static inline bool path_exists(const char *path) { return mtime_of(path) > 0; }
 static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
   sys::fs::real_path(path, buf);
   sys::fs::make_absolute(buf);
 }
-[[nodiscard]] static bool add_real_abs(StringSet<> &set, StringRef path,
-                                       bool is_file = true) {
+[[nodiscard]] static bool add_real_abs(StringSet<> &set, StringRef path) {
   SmallString<256> abs{};
   real_abs(abs, path);
-  if (is_file && !sys::fs::is_regular_file(abs))
-    return false;
-  if (!is_file && !sys::fs::is_directory(abs))
+  if (!path_exists(abs.c_str()))
     return false;
 
   set.insert(abs);
@@ -51,7 +49,7 @@ bool dag::node::add_executable(llvm::StringRef executable) {
   return add_real_abs(m_executables, executable);
 }
 bool dag::node::add_library_dir(llvm::StringRef dir) {
-  return add_real_abs(m_library_dirs, dir, false);
+  return add_real_abs(m_library_dirs, dir);
 }
 bool dag::node::add_mod_dep(llvm::StringRef mod_name) {
   auto dir = sys::path::parent_path(source());
@@ -66,11 +64,11 @@ bool dag::node::add_mod_dep(llvm::StringRef mod_name) {
   } else {
     auto t = mod_name + ".cppm";
     sys::path::append(dep, dir, t);
-    if (!sys::fs::is_regular_file(dep)) {
+    if (!path_exists(dep.c_str())) {
       dep.clear();
       sys::path::append(dep, "..", mod_name, t);
     }
-    if (!sys::fs::is_regular_file(dep)) {
+    if (!path_exists(dep.c_str())) {
       SmallString<64> camel{mod_name};
       size_t p = 0;
       while ((p = camel.find('_', p)) != StringRef::npos) {
@@ -80,7 +78,7 @@ bool dag::node::add_mod_dep(llvm::StringRef mod_name) {
       dep.clear();
       sys::path::append(dep, "..", camel, t);
     }
-    if (!sys::fs::is_regular_file(dep.c_str())) {
+    if (!path_exists(dep.c_str())) {
       return false;
     }
   }
