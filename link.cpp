@@ -31,7 +31,7 @@ static std::string i2o(StringRef src) {
 }
 
 static void visit(things &t, const dag::node *n) {
-  t.args.push_back(i2o(n->source()));
+  t.args.push_back(n->target());
 
   for (auto &i : n->mod_impls()) {
     t.args.push_back(i2o(i.first()));
