@@ -75,6 +75,8 @@ bool compile(const char *stem) {
   if (mtime_of(in.buffer) < mtime_of(out.buffer))
     return true;
 
+  fprintf(stderr, "compiling %s\n", stem);
+
   auto cdir = clang_dir();
   sim_sbt buf{1024};
   sim_sb_copy(&buf, "clang++ -std=c++20 -g ");
