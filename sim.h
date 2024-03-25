@@ -52,3 +52,23 @@ sim_sb_printf(sim_sb *dst, const char *src, ...) {
   va_end(va);
   dst->len = strlen(dst->buffer);
 }
+
+void sim_sb_path_append(sim_sb *dst, const char *part) {
+  assert(sb->buffer && "uninitialised buffer");
+  sim_sb_concat(dst, "/"); // TODO: flip on windows?
+  sim_sb_concat(dst, part);
+}
+void sim_sb_path_parent(sim_sb *dst) {
+  assert(sb->buffer && "uninitialised buffer");
+  char *p = strrchr(dst->buffer, '/');
+  if (p == NULL) {
+    sim_sb_copy(dst, ".");
+    return;
+  }
+  if (p == sb->buffer) {
+    sim_sb_copy(dst, "/");
+    return;
+  }
+  *p = 0;
+  dst->len = p - sb->buffer;
+}
