@@ -33,14 +33,14 @@ void sim_sb_delete(sim_sb *sb) {
 }
 
 void sim_sb_copy(sim_sb *dst, const char *src) {
-  assert(sb->buffer && "uninitialised buffer");
+  assert(dst->buffer && "uninitialised buffer");
   assert(src && "invalid source");
 
   strncpy(dst->buffer, src, dst->size);
   dst->len = strlen(dst->buffer);
 }
 void sim_sb_concat(sim_sb *dst, const char *src) {
-  assert(sb->buffer && "uninitialised buffer");
+  assert(dst->buffer && "uninitialised buffer");
   assert(src && "invalid source");
 
   strncpy(dst->buffer + dst->len, src, dst->size - dst->len);
@@ -49,7 +49,7 @@ void sim_sb_concat(sim_sb *dst, const char *src) {
 
 __attribute__((format(printf, 2, 3))) void
 sim_sb_printf(sim_sb *dst, const char *src, ...) {
-  assert(sb->buffer && "uninitialised buffer");
+  assert(dst->buffer && "uninitialised buffer");
 
   va_list va;
   va_start(va, src);
@@ -59,23 +59,23 @@ sim_sb_printf(sim_sb *dst, const char *src, ...) {
 }
 
 void sim_sb_path_append(sim_sb *dst, const char *part) {
-  assert(sb->buffer && "uninitialised buffer");
+  assert(dst->buffer && "uninitialised buffer");
 
   sim_sb_concat(dst, "/"); // TODO: flip on windows?
   sim_sb_concat(dst, part);
 }
 void sim_sb_path_parent(sim_sb *dst) {
-  assert(sb->buffer && "uninitialised buffer");
+  assert(dst->buffer && "uninitialised buffer");
 
   char *p = strrchr(dst->buffer, '/');
   if (p == NULL) {
     sim_sb_copy(dst, ".");
     return;
   }
-  if (p == sb->buffer) {
+  if (p == dst->buffer) {
     sim_sb_copy(dst, "/");
     return;
   }
   *p = 0;
-  dst->len = p - sb->buffer;
+  dst->len = p - dst->buffer;
 }
