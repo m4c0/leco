@@ -65,18 +65,16 @@ constexpr const char *cmd =
 #endif
 
 bool compile(const char *stem) {
-  sim_sb in, out;
-  sim_sb_new(&in, 32);
+  sim_sbt in{32};
+  sim_sbt out{32};
   sim_sb_printf(&in, "%s.cpp", stem);
-  sim_sb_new(&out, 32);
   sim_sb_printf(&out, "out/%s.o", stem);
 
   if (mtime_of(in.buffer) < mtime_of(out.buffer))
     return true;
 
   auto cdir = clang_dir();
-  sim_sb buf;
-  sim_sb_new(&buf, 1024);
+  sim_sbt buf{1024};
   sim_sb_copy(&buf, "clang++ -std=c++20 ");
 #ifdef _WIN32
   sim_sb_copy(&buf, "-D_CRT_SECURE_NO_WARNINGS -fms-runtime-lib=dll ");
@@ -86,8 +84,7 @@ bool compile(const char *stem) {
 }
 bool link(const char *outf) {
   auto cdir = clang_dir();
-  sim_sb buf;
-  sim_sb_new(&buf, 10240);
+  sim_sbt buf{10240};
   sim_sb_printf(&buf, cmd, cdir, cdir);
   for (auto f : files) {
     sim_sb_printf(&buf, " out/%s.o ", f);
