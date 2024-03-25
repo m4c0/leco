@@ -12,13 +12,13 @@ context android(StringRef tgt) {
   static SmallVector<StringRef, 3> predefs{{
       "LECO_TARGET_ANDROID",
   }};
-  SmallString<256> llvm{};
-  find_android_llvm(llvm);
-  sys::path::append(llvm, "sysroot");
+  sim_sbt llvm{256};
+  find_android_llvm(&llvm);
+  sim_sb_path_append(&llvm, "sysroot");
   return context{
       .predefs = predefs,
       .target = tgt.str(),
-      .sysroot = llvm.str().str(),
+      .sysroot = llvm.buffer,
       .dll_ext = "so",
       .app_exe_path = [](auto exe, auto stem) {},
       .app_res_path = [](auto exe) {},

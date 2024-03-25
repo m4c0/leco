@@ -1,80 +1,59 @@
 #include "droid_path.hpp"
-#include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/Process.h"
+#include "../minirent/minirent.h"
+#include "../mtime/mtime.h"
 
-using namespace llvm;
+static bool error(const char *msg) {
+  fprintf(stderr, "error: %s\n", msg);
+  return false;
+}
+static bool exists(const sim_sb *path) { return mtime_of(path->buffer) > 0; }
 
-enum ndk_error {
-  no_error,
-  undefined_environment,
-  ndk_isnt_directory,
-  prebuilt_isnt_directory,
-  llvm_not_found,
-};
-
-class ndk_category : public std::error_category {
-public:
-  const char *name() const noexcept override { return "ndk-search"; }
-  std::string message(int condition) const override {
-    switch (condition) {
-    case no_error:
-      return "No error";
-    case undefined_environment:
-      return "Undefined ANDROID_SDK_ROOT";
-    case ndk_isnt_directory:
-      return "'ndk' isn't a directory in ANDROID_SDK_ROOT";
-    case prebuilt_isnt_directory:
-      return "prebuilt path isn't a directory";
-    case llvm_not_found:
-      return "no LLVM inside prebuilt dir";
-    default:
-      return "unknown error";
-    }
-  }
-};
-
-static std::error_code find_latest_ndk(SmallVectorImpl<char> &res) {
+static bool find_latest_ndk(sim_sb *res) {
   const auto sdk = getenv("ANDROID_SDK_ROOT");
   if (sdk == nullptr)
-    return {undefined_environment, ndk_category()};
+    return error("undefined ANDROID_SDK_ROOT");
 
-  sys::path::append(res, sdk, "ndk-bundle");
-  if (sys::fs::is_directory(res)) {
-    return {};
-  }
+  sim_sb_path_copy_append(res, sdk, "ndk-bundle");
+  if (exists(res))
+    return true;
 
-  res.clear();
-  sys::path::append(res, sdk, "ndk");
-  if (!sys::fs::is_directory(res)) {
-    return {ndk_isnt_directory, ndk_category()};
-  }
+  sim_sb_path_copy_append(res, sdk, "ndk");
+  if (!exists(res))
+    return error("ANDROID_SDK_ROOT path does not contain a folder named 'sdk'");
 
-  llvm::StringRef max = "";
-  std::error_code ec;
-  for (sys::fs::directory_iterator it{res, ec}, e; it != e; it.increment(ec)) {
-    if (it->path() <= max)
+  sim_sbt max{256};
+  sim_sb_copy(&max, "");
+
+  DIR *dir = opendir(res->buffer);
+  dirent *dp = nullptr;
+  while ((dp = readdir(dir)) != nullptr) {
+    if (strcmp(max.buffer, dp->d_name) > 0)
       continue;
 
-    max = it->path();
-    res.assign(max.begin(), max.end());
+    sim_sb_copy(&max, dp->d_name);
   }
-  return {};
+  sim_sb_path_append(res, max.buffer);
+
+  closedir(dir);
+  return true;
 }
 
-std::error_code find_android_llvm(SmallVectorImpl<char> &res) {
-  std::error_code ec = find_latest_ndk(res);
-  if (ec)
-    return ec;
+bool find_android_llvm(sim_sb *res) {
+  if (!find_latest_ndk(res))
+    return false;
 
-  sys::path::append(res, "toolchains", "llvm", "prebuilt");
-  if (!sys::fs::is_directory(res))
-    return {prebuilt_isnt_directory, ndk_category{}};
+  sim_sb_path_append(res, "toolchains");
+  sim_sb_path_append(res, "llvm");
+  sim_sb_path_append(res, "prebuilt");
+  if (!exists(res))
+    return error("prebuilt path isn't a directory");
 
-  sys::fs::directory_iterator it{res, ec};
-  if (it == sys::fs::directory_iterator{})
-    return {llvm_not_found, ndk_category{}};
+  DIR *dir = opendir(res->buffer);
+  dirent *dp = readdir(dir);
+  if (dp == nullptr)
+    return error("no LLVM inside prebuilt dir");
 
-  res.assign(it->path().begin(), it->path().end());
-  return {};
+  sim_sb_path_append(res, dp->d_name);
+  closedir(dir);
+  return true;
 }

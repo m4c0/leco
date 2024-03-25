@@ -1,5 +1,4 @@
 #pragma once
-#include "llvm/ADT/SmallVector.h"
-#include <system_error>
+#include "sim.h"
 
-std::error_code find_android_llvm(llvm::SmallVectorImpl<char> &path);
+bool find_android_llvm(sim_sb *out);
