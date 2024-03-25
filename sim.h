@@ -80,6 +80,14 @@ void sim_sb_path_append(sim_sb *dst, const char *part) {
   sim_sb_concat(dst, "/"); // TODO: flip on windows?
   sim_sb_concat(dst, part);
 }
+void sim_sb_path_append(sim_sb *dst, const char *path, const char *part) {
+  assert(dst->buffer && "uninitialised buffer");
+  assert(path && "invalid source path");
+
+  sim_sb_copy(dst, path);
+  sim_sb_path_append(dst, part);
+}
+
 void sim_sb_path_parent(sim_sb *dst) {
   assert(dst->buffer && "uninitialised buffer");
 
@@ -94,4 +102,11 @@ void sim_sb_path_parent(sim_sb *dst) {
   }
   *p = 0;
   dst->len = p - dst->buffer;
+}
+void sim_sb_path_parent(sim_sb *dst, const char *path) {
+  assert(dst->buffer && "uninitialised buffer");
+  assert(path && "invalid source path");
+
+  sim_sb_copy(dst, path);
+  sim_sb_path_parent(dst);
 }
