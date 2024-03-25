@@ -15,15 +15,17 @@ struct sim_sb {
 #define SIM_MALLOC malloc
 #define SIM_FREE free
 
-bool sim_sb_new(sim_sb *sb, unsigned size) {
+void sim_sb_new(sim_sb *sb, unsigned size) {
   assert(sb && "invalid string buffer");
   assert(size > 0 && "invalid buffer size");
 
+  // One extra for a mandatory cstr terminator
   sb->buffer = (char *)SIM_MALLOC(size + 1);
+  assert(sb->buffer && "no memory left");
+
   memset(sb->buffer, 0, size + 1);
   sb->size = size;
   sb->len = 0;
-  return sb->buffer != NULL;
 }
 void sim_sb_delete(sim_sb *sb) {
   assert(sb->buffer && "uninitialised buffer");
