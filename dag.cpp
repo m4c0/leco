@@ -14,10 +14,11 @@ static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
   sys::fs::make_absolute(buf);
 }
 [[nodiscard]] static bool add_real_abs(StringSet<> &set, StringRef path) {
+  if (!path_exists(path.str().c_str()))
+    return false;
+
   SmallString<256> abs{};
   real_abs(abs, path);
-  if (!path_exists(abs.c_str()))
-    return false;
 
   set.insert(abs);
   return true;
