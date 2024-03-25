@@ -23,21 +23,29 @@ bool sim_sb_new(sim_sb *sb, unsigned size) {
   return sb->buffer != NULL;
 }
 void sim_sb_delete(sim_sb *sb) {
+  assert(sb->buffer && "uninitialised buffer");
+
   SIM_FREE(sb->buffer);
   *sb = {0};
 }
 
 void sim_sb_copy(sim_sb *dst, const char *src) {
+  assert(sb->buffer && "uninitialised buffer");
+
   strncpy(dst->buffer, src, dst->size);
   dst->len = strlen(dst->buffer);
 }
 void sim_sb_concat(sim_sb *dst, const char *src) {
+  assert(sb->buffer && "uninitialised buffer");
+
   strncpy(dst->buffer + dst->len, src, dst->size - dst->len);
   dst->len = strlen(dst->buffer);
 }
 
 __attribute__((format(printf, 2, 3))) void
 sim_sb_printf(sim_sb *dst, const char *src, ...) {
+  assert(sb->buffer && "uninitialised buffer");
+
   va_list va;
   va_start(va, src);
   vsnprintf(dst->buffer + dst->len, dst->size - dst->len, src, va);
