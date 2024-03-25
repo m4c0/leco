@@ -70,16 +70,16 @@ static void copy_icon(const char *path) {
 
 bool actool(const char *path) {
   sim_sbt app_path{256};
-  sim_sb_path_parent(&app_path, path);
+  sim_sb_path_copy_parent(&app_path, path);
 
   sim_sbt prod{256};
-  sim_sb_path_parent(&prod, app_path.buffer);
+  sim_sb_path_copy_parent(&prod, app_path.buffer);
 
   sim_sbt exca{256};
-  sim_sb_path_parent(&exca, prod.buffer);
+  sim_sb_path_copy_parent(&exca, prod.buffer);
 
   sim_sbt build_path{256};
-  sim_sb_path_parent(&build_path, exca.buffer);
+  sim_sb_path_copy_parent(&build_path, exca.buffer);
 
   sim_sbt plist{256};
   sim_sb_path_copy_append(&plist, build_path.buffer, "icon-partial.plist");
