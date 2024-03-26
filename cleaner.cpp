@@ -2,17 +2,20 @@
 
 #include "cl.hpp"
 #include "dag.hpp"
+#include "sim.h"
 #include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Path.h"
 #include <set>
 
 using namespace llvm;
 
-static void remove_parent(std::set<std::string> &already_done, StringRef tgt) {
-  auto path = sys::path::parent_path(tgt);
-  auto [it, inserted] = already_done.insert(path.str());
+static void remove_parent(std::set<std::string> &already_done,
+                          const dag::node *n) {
+  sim_sbt path{256};
+  sim_sb_path_copy_parent(&path, n->target().str().c_str());
+
+  auto [it, inserted] = already_done.insert(path.buffer);
   if (inserted)
-    sys::fs::remove_directories(path);
+    sys::fs::remove_directories(path.buffer);
 }
 
 void clean(const dag::node *n) {
@@ -21,8 +24,8 @@ void clean(const dag::node *n) {
   std::set<std::string> done{};
 
   if (should_clean_all()) {
-    dag::visit(n, false, [&](auto *n) { remove_parent(done, n->target()); });
+    dag::visit(n, false, [&](auto *n) { remove_parent(done, n); });
   } else if (should_clean_current()) {
-    remove_parent(done, n->target());
+    remove_parent(done, n);
   }
 }
