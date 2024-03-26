@@ -27,7 +27,7 @@ void sim_sb_path_append(sim_sb *dst, const char *part);
 void sim_sb_path_copy_append(sim_sb *dst, const char *path, const char *part);
 void sim_sb_path_parent(sim_sb *dst);
 void sim_sb_path_copy_parent(sim_sb *dst, const char *path);
-const char *sim_sb_path_extension(sim_sb *dst);
+const char *sim_sb_path_extension(const sim_sb *src);
 void sim_sb_path_set_extension(sim_sb *dst, const char *ext);
 
 #ifdef __cplusplus
