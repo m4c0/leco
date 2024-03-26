@@ -1,9 +1,7 @@
 #include "cl.hpp"
+#include "../gopt/gopt.h"
 #include "context.hpp"
 #include "target_defs.hpp"
-
-#define GOPT_IMPLEMENTATION
-#include "../gopt/gopt.h"
 
 #include <stdio.h>
 #include <string.h>

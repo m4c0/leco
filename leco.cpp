@@ -1,9 +1,7 @@
+#include "../minirent/minirent.h"
 #include "bouncer.hpp"
 #include "cl.hpp"
 #include "dag.hpp"
-
-#define MINIRENT_IMPLEMENTATION
-#include "../minirent/minirent.h"
 
 using namespace llvm;
 

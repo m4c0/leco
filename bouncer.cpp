@@ -1,5 +1,6 @@
 #include "bouncer.hpp"
 
+#include "../mtime/mtime.h"
 #include "cl.hpp"
 #include "cleaner.hpp"
 #include "compile.hpp"
@@ -9,9 +10,6 @@
 #include "log.hpp"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
-
-#define MTIME_IMPLEMENTATION
-#include "../mtime/mtime.h"
 
 using namespace llvm;
 

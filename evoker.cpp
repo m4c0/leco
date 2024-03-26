@@ -6,6 +6,7 @@
 
 #include "evoker.hpp"
 
+#include "../tempsie/tempsie.h"
 #include "cl.hpp"
 #include "clang_dir.hpp"
 #include "context.hpp"
@@ -22,10 +23,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Host.h"
 #include <fstream>
-
-#define TEMPSIE_IMPLEMENTATION
-#define TEMPSIE_ERROR(x) fprintf(stderr, "error: %s\n", (x))
-#include "../tempsie/tempsie.h"
+#include <unistd.h>
 
 using namespace clang;
 using namespace clang::driver;

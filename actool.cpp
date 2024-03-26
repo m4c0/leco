@@ -1,7 +1,5 @@
-#define SIM_IMPLEMENTATION
-#include "sim.h"
-
 #include "actool.hpp"
+#include "sim.h"
 #include "llvm/Support/FileSystem.h"
 
 using namespace llvm;
