@@ -19,6 +19,7 @@ class node {
   llvm::SmallString<256> m_module_pcm;
   llvm::StringSet<> m_executables{};
   llvm::StringSet<> m_frameworks{};
+  llvm::StringSet<> m_include_dirs{};
   llvm::StringSet<> m_libraries{};
   llvm::StringSet<> m_library_dirs{};
   llvm::StringSet<> m_mod_deps{};
@@ -36,6 +37,7 @@ public:
   void write_to_cache_file() const;
 
   [[nodiscard]] bool add_executable(llvm::StringRef e);
+  [[nodiscard]] bool add_include_dir(llvm::StringRef dir);
   void add_framework(llvm::StringRef fw) { m_frameworks.insert(fw); }
   void add_library(llvm::StringRef lib) { m_libraries.insert(lib); }
   [[nodiscard]] bool add_library_dir(llvm::StringRef dir);
@@ -56,6 +58,9 @@ public:
   }
   [[nodiscard]] constexpr const auto &frameworks() const noexcept {
     return m_frameworks;
+  }
+  [[nodiscard]] constexpr const auto &include_dirs() const noexcept {
+    return m_include_dirs;
   }
   [[nodiscard]] constexpr const auto &libraries() const noexcept {
     return m_libraries;
