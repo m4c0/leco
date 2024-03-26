@@ -27,6 +27,7 @@ void sim_sb_path_append(sim_sb *dst, const char *part);
 void sim_sb_path_copy_append(sim_sb *dst, const char *path, const char *part);
 void sim_sb_path_parent(sim_sb *dst);
 void sim_sb_path_copy_parent(sim_sb *dst, const char *path);
+const char *sim_sb_path_extension(sim_sb *dst);
 void sim_sb_path_set_extension(sim_sb *dst, const char *ext);
 
 #ifdef __cplusplus
@@ -131,6 +132,24 @@ void sim_sb_path_copy_parent(sim_sb *dst, const char *path) {
 
   sim_sb_copy(dst, path);
   sim_sb_path_parent(dst);
+}
+
+const char *sim_sb_path_extension(const sim_sb *src) {
+  assert(src->buffer && "uninitialised buffer");
+
+  if (src->len == 0)
+    return nullptr;
+
+  char *p = strrchr(src->buffer, '/');
+  char *e = strrchr(src->buffer, '.');
+  // Path ends with '/'
+  if (p == src->buffer + src->len - 1)
+    return nullptr;
+  // No extension or extension isn't in stem
+  if (!e || (p && e && p > e)) {
+    return nullptr;
+  }
+  return e;
 }
 
 //           /tmp/test ===> /tmp/test.uga
