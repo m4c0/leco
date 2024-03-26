@@ -68,6 +68,7 @@ bool compile(const dag::node *n) {
         .push_arg("-fobjc-arc")
         .push_arg(file)
         .set_out(obj)
+        .push_arg("-fplugin=../leco/null_pragma.dll")
         .execute();
   } else {
     fprintf(stderr, "don't know how to build %s\n", file.str().c_str());
