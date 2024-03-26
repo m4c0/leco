@@ -161,6 +161,12 @@ static std::string create_args_file(const auto &args, const dag::node *node) {
 #ifdef _WIN32
 #define unlink _unlink
 #endif
+evoker &evoker::add_predefs() {
+  for (auto def : cur_ctx().predefs) {
+    push_arg(std::string{"-D"} + def.str());
+  }
+  return *this;
+}
 bool evoker::execute() {
   auto argfile = create_args_file(m_args, m_node);
   if (argfile == "")

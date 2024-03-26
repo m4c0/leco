@@ -1,5 +1,4 @@
 #pragma once
-#include "context.hpp"
 #include "llvm/ADT/StringRef.h"
 #include <memory>
 #include <vector>
@@ -35,12 +34,7 @@ public:
   evoker &suppress_pragmas() {
     return push_arg("-fplugin=../leco/null_pragma.dll");
   }
-  evoker &add_predefs() {
-    for (auto def : cur_ctx().predefs) {
-      push_arg(std::string{"-D"} + def.str());
-    }
-    return *this;
-  }
+  evoker &add_predefs();
   evoker &pull_deps_from(const dag::node *n) {
     m_node = n;
     return *this;
