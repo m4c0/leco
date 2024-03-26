@@ -58,12 +58,8 @@ public:
 } // namespace
 
 bool dag::execute(dag::node *n) {
-  auto ci = evoker{}
-                .set_cpp_std()
-                .push_arg("-E")
-                .push_arg(n->source())
-                .add_predefs()
-                .createCI();
+  auto ci =
+      evoker{"-E", n->source(), "dummy"}.set_cpp_std().add_predefs().createCI();
 
   action a{n};
   if (!ci->ExecuteAction(a))

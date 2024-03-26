@@ -27,48 +27,31 @@ bool compile(const dag::node *n) {
   if (strcmp(ext, ".cppm") == 0) {
     auto pcm = n->module_pcm();
 
-    if (!evoker{}
+    if (!evoker{"--precompile", file, pcm}
              .set_cpp_std()
              .add_predefs()
-             .push_arg("--precompile")
-             .push_arg(file)
-             .set_out(pcm)
              .pull_deps_from(n)
              .push_arg("-fplugin=../leco/null_pragma.dll")
              .execute())
       return false;
 
-    return evoker{}
-        .push_arg("-c")
-        .push_arg(pcm)
-        .set_out(n->target())
-        .pull_deps_from(n)
-        .execute();
+    return evoker{"-c", pcm, obj}.pull_deps_from(n).execute();
   } else if (strcmp(ext, ".cpp") == 0) {
-    return evoker{}
+    return evoker{"-c", file, obj}
         .set_cpp_std()
         .add_predefs()
-        .push_arg("-c")
-        .push_arg(file)
-        .set_out(obj)
         .pull_deps_from(n)
         .push_arg("-fplugin=../leco/null_pragma.dll")
         .execute();
   } else if (strcmp(ext, ".c") == 0) {
-    return evoker{}
-        .push_arg("-c")
-        .push_arg(file)
-        .set_out(obj)
+    return evoker{"-c", file, obj}
         .add_predefs()
         .push_arg("-fplugin=../leco/null_pragma.dll")
         .execute();
   } else if (strcmp(ext, ".m") == 0 || strcmp(ext, ".mm") == 0) {
-    return evoker{}
-        .push_arg("-c")
+    return evoker{"-c", file, obj}
         .push_arg("-fmodules")
         .push_arg("-fobjc-arc")
-        .push_arg(file)
-        .set_out(obj)
         .push_arg("-fplugin=../leco/null_pragma.dll")
         .execute();
   } else {

@@ -17,6 +17,11 @@ class evoker {
 
 public:
   evoker();
+  evoker(const char *verb, llvm::StringRef in, llvm::StringRef out) : evoker() {
+    push_arg(verb);
+    push_arg(in);
+    set_out(out);
+  }
   evoker &push_arg(llvm::StringRef mode) {
     m_args.push_back({mode.data(), mode.size()});
     return *this;
