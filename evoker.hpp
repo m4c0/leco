@@ -32,6 +32,9 @@ public:
     return push_arg(out);
   }
 
+  evoker &suppress_pragmas() {
+    return push_arg("-fplugin=../leco/null_pragma.dll");
+  }
   evoker &add_predefs() {
     for (auto def : cur_ctx().predefs) {
       push_arg(std::string{"-D"} + def.str());

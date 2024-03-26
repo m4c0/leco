@@ -31,7 +31,7 @@ bool compile(const dag::node *n) {
              .set_cpp_std()
              .add_predefs()
              .pull_deps_from(n)
-             .push_arg("-fplugin=../leco/null_pragma.dll")
+             .suppress_pragmas()
              .execute())
       return false;
 
@@ -41,18 +41,15 @@ bool compile(const dag::node *n) {
         .set_cpp_std()
         .add_predefs()
         .pull_deps_from(n)
-        .push_arg("-fplugin=../leco/null_pragma.dll")
+        .suppress_pragmas()
         .execute();
   } else if (strcmp(ext, ".c") == 0) {
-    return evoker{"-c", file, obj}
-        .add_predefs()
-        .push_arg("-fplugin=../leco/null_pragma.dll")
-        .execute();
+    return evoker{"-c", file, obj}.add_predefs().suppress_pragmas().execute();
   } else if (strcmp(ext, ".m") == 0 || strcmp(ext, ".mm") == 0) {
     return evoker{"-c", file, obj}
         .push_arg("-fmodules")
         .push_arg("-fobjc-arc")
-        .push_arg("-fplugin=../leco/null_pragma.dll")
+        .suppress_pragmas()
         .execute();
   } else {
     fprintf(stderr, "don't know how to build %s\n", file.str().c_str());
