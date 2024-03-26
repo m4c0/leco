@@ -3,9 +3,8 @@
 #include "dag.hpp"
 #include "evoker.hpp"
 #include "log.hpp"
-#include "llvm/ADT/StringRef.h"
+#include "sim.h"
 #include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Path.h"
 #include <set>
 
 using namespace clang;
@@ -15,16 +14,18 @@ bool compile(const dag::node *n) {
   auto file = n->source();
   auto obj = n->target();
 
-  auto path = sys::path::parent_path(obj);
-  sys::fs::create_directories(path);
+  sim_sbt path{256};
+  sim_sb_path_copy_parent(&path, obj.str().c_str());
+  sys::fs::create_directories(path.buffer);
 
   vlog("compiling", obj.data(), obj.size());
 
-  auto ext = sys::path::extension(file);
-  if (ext == ".cppm") {
-    SmallString<256> pcm{obj};
-    sys::path::replace_extension(pcm, "pcm");
-    pcm.c_str();
+  // TODO: remove extra copy when "obj" becomes a sim_sb
+  sim_sbt f2{256};
+  sim_sb_copy(&f2, file.str().c_str());
+  auto ext = sim_sb_path_extension(&f2);
+  if (strcmp(ext, ".cppm") == 0) {
+    auto pcm = n->module_pcm();
 
     if (!evoker{}
              .set_cpp_std()
@@ -40,10 +41,10 @@ bool compile(const dag::node *n) {
     return evoker{}
         .push_arg("-c")
         .push_arg(pcm)
-        .set_out(obj)
+        .set_out(n->target())
         .pull_deps_from(n)
         .execute();
-  } else if (ext == ".cpp") {
+  } else if (strcmp(ext, ".cpp") == 0) {
     return evoker{}
         .set_cpp_std()
         .add_predefs()
@@ -53,7 +54,7 @@ bool compile(const dag::node *n) {
         .pull_deps_from(n)
         .push_arg("-fplugin=../leco/null_pragma.dll")
         .execute();
-  } else if (ext == ".c") {
+  } else if (strcmp(ext, ".c") == 0) {
     return evoker{}
         .push_arg("-c")
         .push_arg(file)
@@ -61,7 +62,7 @@ bool compile(const dag::node *n) {
         .add_predefs()
         .push_arg("-fplugin=../leco/null_pragma.dll")
         .execute();
-  } else if (ext == ".mm" || ext == ".m") {
+  } else if (strcmp(ext, ".m") == 0 || strcmp(ext, ".mm") == 0) {
     return evoker{}
         .push_arg("-c")
         .push_arg("-fmodules")
