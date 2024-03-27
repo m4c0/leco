@@ -181,6 +181,11 @@ void sim_sb_path_set_extension(sim_sb *dst, const char *ext) {
     sim_sb_concat(dst, ext);
     return;
   }
+  if (*ext == 0) { // remove extension if ext is empty
+    *e = 0;
+    dst->len = e - dst->buffer;
+    return;
+  }
   e[1] = 0;
   dst->len = e - dst->buffer + 1;
   sim_sb_concat(dst, ext);
