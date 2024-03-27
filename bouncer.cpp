@@ -8,26 +8,30 @@
 #include "dag.hpp"
 #include "link.hpp"
 #include "log.hpp"
+#include "sim.h"
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
 
 using namespace llvm;
 
-static bool compile_shaders(const dag::node *n, StringRef res_path) {
+static bool compile_shaders(const dag::node *n, const char *res_path) {
   for (auto &s : n->shaders()) {
-    StringRef in = s.first();
+    sim_sbt in{256};
+    sim_sb_copy(&in, s.first().str().c_str());
 
-    SmallString<256> out{};
-    sys::path::append(out, res_path, sys::path::filename(in));
-    out.append(".spv");
+    sim_sbt out{256};
+    sim_sb_path_copy_append(&out, res_path, sim_sb_path_filename(&in));
+    sim_sb_concat(&out, ".spv");
 
-    if (mtime_of(out.c_str()) > mtime_of(in.str().c_str()))
+    if (mtime_of(out.buffer) > mtime_of(in.buffer))
       continue;
 
-    vlog("compiling shader", out.data(), out.size());
+    vlog("compiling shader", out.buffer, out.len);
 
-    auto cmd = ("glslangValidator --quiet -V -o " + out + " " + in).str();
-    if (0 != system(cmd.c_str()))
+    sim_sbt cmd{1024};
+    sim_sb_printf(&cmd, "glslangValidator --quiet -V -o %s %s", out.buffer,
+                  in.buffer);
+    if (0 != system(cmd.buffer))
       return false;
   }
   return true;
@@ -127,7 +131,7 @@ bool bounce(const char *path) {
 
     bool success = true;
     dag::visit(n, true, [&](auto *n) {
-      success &= compile_shaders(n, res_path);
+      success &= compile_shaders(n, res_path.c_str());
       copy_exes(n, exe_path);
       copy_resources(n, res_path);
     });
