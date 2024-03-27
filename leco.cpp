@@ -19,10 +19,8 @@ bool run_target() {
 
   struct dirent *dp{};
   while ((dp = readdir(dir))) {
-    auto nm = dp->d_name;
-    if (!bounce(nm)) {
+    if (!bounce(dp->d_name))
       return false;
-    }
 
     errno = 0;
   }
