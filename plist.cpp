@@ -1,8 +1,6 @@
 #include "plist.hpp"
 #include "context.hpp"
 #include "sim.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/Support/FileSystem.h"
 #include "llvm/Support/raw_ostream.h"
 
 #include <fstream>
@@ -13,9 +11,9 @@ namespace plist {
 class dict {
   raw_ostream &o;
 
-  void array_element(Twine t) {
+  void array_element(const char *t) {
     o << "<string>";
-    t.print(o);
+    o << t;
     o << "</string>";
   }
   void array_element(int i) { o << "<integer>" << i << "</integer>"; }
@@ -48,11 +46,11 @@ public:
   void integer(StringRef key, int value) {
     o << "<key>" << key << "</key><integer>" << value << "</integer>\n";
   }
-  void string(Twine key, Twine value) {
+  void string(const char *key, const char *value) {
     o << "<key>";
-    key.print(o);
+    o << key;
     o << "</key><string>";
-    value.print(o);
+    o << value;
     o << "</string>\n";
   }
 };
@@ -70,11 +68,14 @@ void gen(raw_ostream &o, function_ref<void(dict &&)> fn) {
 )";
 }
 
-void common_app_plist(dict &d, StringRef name, StringRef sdk) {
+void common_app_plist(dict &d, const char *name, const char *sdk) {
+  sim_sbt id{256};
+  sim_sb_printf(&id, "br.com.tpk.%s", name);
+
   d.string("CFBundleDevelopmentRegion", "en");
   d.string("CFBundleDisplayName", name);
   d.string("CFBundleExecutable", name);
-  d.string("CFBundleIdentifier", "br.com.tpk." + name);
+  d.string("CFBundleIdentifier", id.buffer);
   d.string("CFBundleInfoDictionaryVersion", "6.0");
   d.string("CFBundlePackageType", "APPL");
   d.string("CFBundleShortVersionString", "1.0.0");
@@ -85,11 +86,11 @@ void common_app_plist(dict &d, StringRef name, StringRef sdk) {
 }
 } // namespace plist
 
-[[nodiscard]] static std::string env(const char *key, const char *def = "TBD") {
-  const auto v = std::getenv(key);
-  return (v == nullptr) ? def : std::string{v};
+[[nodiscard]] static const char *env(const char *key, const char *def = "TBD") {
+  const auto v = getenv(key);
+  return (v == nullptr) ? def : v;
 }
-[[nodiscard]] static std::string team_id() { return env("LECO_IOS_TEAM"); }
+[[nodiscard]] static const char *team_id() { return env("LECO_IOS_TEAM"); }
 
 void merge_icon_partial(const char *build_path, raw_ostream &o) {
   sim_sbt plist{256};
@@ -109,7 +110,7 @@ void merge_icon_partial(const char *build_path, raw_ostream &o) {
   }
 }
 
-void gen_info_plist(const char *exe_path, StringRef name,
+void gen_info_plist(const char *exe_path, const char *name,
                     const char *build_path) {
   sim_sbt path{256};
   sim_sb_path_copy_append(&path, exe_path, "Info.plist");
@@ -132,17 +133,23 @@ void gen_info_plist(const char *exe_path, StringRef name,
     merge_icon_partial(build_path, o);
   });
 }
-void gen_archive_plist(const char *xca_path, StringRef name) {
+void gen_archive_plist(const char *xca_path, const char *name) {
   sim_sbt path{256};
   sim_sb_path_copy_append(&path, xca_path, "Info.plist");
+
+  sim_sbt id{256};
+  sim_sb_printf(&id, "br.com.tpk.%s", name);
+
+  sim_sbt app_path{256};
+  sim_sb_printf(&app_path, "Applications/%s.app", name);
 
   std::error_code ec;
   auto o = raw_fd_stream(path.buffer, ec);
   plist::gen(o, [&](auto &&d) {
     d.dictionary("ApplicationProperties", [&](auto &&dd) {
-      dd.string("ApplicationPath", "Applications/" + name + ".app");
+      dd.string("ApplicationPath", app_path.buffer);
       dd.array("Architectures", "arm64");
-      dd.string("CFBundleIdentifier", "br.com.tpk." + name);
+      dd.string("CFBundleIdentifier", id.buffer);
       dd.string("CFBundleShortVersionString", "1.0.0");
       dd.string("CFBundleVersion", "0");
       dd.string("SigningIdentity", env("LECO_IOS_SIGN_ID"));
@@ -154,9 +161,12 @@ void gen_archive_plist(const char *xca_path, StringRef name) {
     d.string("SchemeName", name);
   });
 }
-void gen_export_plist(const char *build_path, StringRef name) {
+void gen_export_plist(const char *build_path, const char *name) {
   sim_sbt path{256};
   sim_sb_path_copy_append(&path, build_path, "export.plist");
+
+  sim_sbt id{256};
+  sim_sb_printf(&id, "br.com.tpk.%s", name);
 
   std::error_code ec;
   auto o = raw_fd_stream(path.buffer, ec);
@@ -165,22 +175,25 @@ void gen_export_plist(const char *build_path, StringRef name) {
     d.string("teamID", team_id());
     d.string("thinning", "&lt;none&gt;");
     d.dictionary("provisioningProfiles", [&](auto &&dd) {
-      dd.string("br.com.tpk." + name, env("LECO_IOS_PROV_PROF"));
+      dd.string(id.buffer, env("LECO_IOS_PROV_PROF"));
     });
   });
 }
 
-static bool compile_launch(StringRef bundle_path) {
-  auto cmd = ("ibtool ../leco/launch.storyboard --compile " + bundle_path +
-              "/Base.lproj/launch.storyboard")
-                 .str();
+static bool compile_launch(const char *bundle_path) {
+  sim_sbt cmd{256};
+  sim_sb_printf(&cmd,
+                "ibtool ../leco/launch.storyboard "
+                "--compile %s/Base.lproj/launch.storyboard",
+                bundle_path);
   // TODO: improve error
-  return 0 == std::system(cmd.c_str());
+  return 0 == std::system(cmd.buffer);
 }
-static bool code_sign(StringRef bundle_path) {
-  auto cmd = ("codesign -f -s " + team_id() + " " + bundle_path).str();
+static bool code_sign(const char *bundle_path) {
+  sim_sbt cmd{256};
+  sim_sb_printf(&cmd, "codesign -f -s %s %s", team_id(), bundle_path);
   // TODO: improve error
-  return 0 == std::system(cmd.c_str());
+  return 0 == std::system(cmd.buffer);
 }
 static bool export_archive(const char *bundle_path, const char *xca_path) {
   sim_sbt cmd{1024};
