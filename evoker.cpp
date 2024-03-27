@@ -1,9 +1,3 @@
-#ifdef _WIN32
-#define EXE_EXT ".exe"
-#else
-#define EXE_EXT ""
-#endif
-
 #include "evoker.hpp"
 
 #include "../tempsie/tempsie.h"
@@ -11,7 +5,7 @@
 #include "clang_dir.hpp"
 #include "context.hpp"
 #include "dag.hpp"
-#include "clang/CodeGen/ObjectFilePCHContainerOperations.h"
+#include "sim.h"
 #include "clang/Driver/Compilation.h"
 #include "clang/Driver/Driver.h"
 #include "clang/Frontend/CompilerInstance.h"
@@ -31,11 +25,18 @@ using namespace llvm;
 
 const char *clang_exe() {
   static const auto exe = [] {
-    SmallString<1024> buf{};
-    sys::path::append(buf, clang_dir(), "bin", "clang++" EXE_EXT);
+    sim_sb buf{};
+    sim_sb_new(&buf, 1024);
+    sim_sb_copy(&buf, clang_dir());
+    sim_sb_path_append(&buf, "bin");
+#ifdef _WIN32
+    sim_sb_path_append(&buf, "clang++.exe");
+#else
+    sim_sb_path_append(&buf, "clang++");
+#endif
     return buf;
   }();
-  return exe.data();
+  return exe.buffer;
 }
 
 static DiagnosticsEngine diags() {
