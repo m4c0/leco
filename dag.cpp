@@ -113,7 +113,7 @@ void dag::xlog(const dag::node *n, const char *msg) {
 }
 
 static bool still_fresh(dag::node *n) {
-  auto dag_mtime = mtime_of(n->dag().str().c_str());
+  auto dag_mtime = mtime_of(n->dag());
   return dag_mtime > mtime_of(n->source().str().c_str()) &&
          dag_mtime > mtime_of("../leco/leco.exe");
 }

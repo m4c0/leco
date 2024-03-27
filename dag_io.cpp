@@ -22,7 +22,7 @@ static void persist(std::ostream &o, const dag::node *n) {
 }
 void dag::node::write_to_cache_file() const {
   // TODO: create a proper file format
-  std::ofstream of{dag().str()};
+  std::ofstream of{dag()};
   persist(of, this);
 }
 
@@ -46,7 +46,7 @@ static bool read(std::istream &f, dag::node *n, llvm::StringSet<> *set) {
   return true;
 }
 bool dag::node::read_from_cache_file() {
-  std::ifstream f{dag().str()};
+  std::ifstream f{dag()};
   if (!f)
     return false;
 

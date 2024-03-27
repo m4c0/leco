@@ -104,7 +104,9 @@ public:
   [[nodiscard]] constexpr llvm::StringRef target() const noexcept {
     return m_target;
   }
-  [[nodiscard]] constexpr llvm::StringRef dag() const noexcept { return m_dag; }
+  [[nodiscard]] constexpr const char *dag() const noexcept {
+    return m_dag.data();
+  }
   [[nodiscard]] constexpr const char *module_name() const noexcept {
     return m_module_name.data();
   }
