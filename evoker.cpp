@@ -118,7 +118,7 @@ std::shared_ptr<CompilerInstance> evoker::createCI() const {
 
   auto &mod_files = ci->getHeaderSearchOpts().PrebuiltModuleFiles;
   dag::visit(m_node, false, [&](auto *n) {
-    mod_files.insert({n->module_name().str(), n->module_pcm().str()});
+    mod_files.insert({n->module_name(), n->module_pcm().str()});
   });
 
   return ci;
@@ -155,7 +155,7 @@ static std::string create_args_file(const auto &args, const dag::node *node) {
 
   if (node != nullptr) {
     dag::visit(node, false, [&](auto *n) {
-      fprintf(f, "-fmodule-file=%s=", n->module_name().str().c_str());
+      fprintf(f, "-fmodule-file=%s=", n->module_name());
       out_file(f, n->module_pcm().str().c_str());
     });
   }
