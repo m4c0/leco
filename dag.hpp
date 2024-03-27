@@ -1,4 +1,5 @@
 #pragma once
+#include "sim.h"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/StringSet.h"
 
@@ -15,7 +16,7 @@ class node {
   llvm::SmallString<256> m_source;
   llvm::SmallString<256> m_target;
   llvm::SmallString<256> m_dag;
-  llvm::SmallString<256> m_module_name;
+  sim_sbt m_module_name{256};
   llvm::SmallString<256> m_module_pcm;
   llvm::StringSet<> m_executables{};
   llvm::StringSet<> m_frameworks{};
@@ -108,7 +109,7 @@ public:
     return m_dag.data();
   }
   [[nodiscard]] constexpr const char *module_name() const noexcept {
-    return m_module_name.data();
+    return m_module_name.buffer;
   }
   [[nodiscard]] constexpr const char *module_pcm() const noexcept {
     return m_module_pcm.data();
