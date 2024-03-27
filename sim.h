@@ -27,8 +27,10 @@ void sim_sb_path_append(sim_sb *dst, const char *part);
 void sim_sb_path_copy_append(sim_sb *dst, const char *path, const char *part);
 void sim_sb_path_parent(sim_sb *dst);
 void sim_sb_path_copy_parent(sim_sb *dst, const char *path);
-const char *sim_sb_path_extension(const sim_sb *src);
 void sim_sb_path_set_extension(sim_sb *dst, const char *ext);
+
+const char *sim_sb_path_extension(const sim_sb *src);
+const char *sim_sb_path_filename(const sim_sb *src);
 
 #ifdef __cplusplus
 }
@@ -182,5 +184,21 @@ void sim_sb_path_set_extension(sim_sb *dst, const char *ext) {
   e[1] = 0;
   dst->len = e - dst->buffer + 1;
   sim_sb_concat(dst, ext);
+}
+
+const char *sim_sb_path_filename(const sim_sb *src) {
+  assert(src->buffer && "uninitialised buffer");
+
+  if (src->len == 0)
+    return nullptr;
+
+  char *p = strrchr(src->buffer, '/');
+  if (p == nullptr)
+    return ".";
+  if (p == src->buffer)
+    return "/";
+
+  // TODO: handle slashes at the end
+  return ++p;
 }
 #endif // SIM_IMPLEMENTATION
