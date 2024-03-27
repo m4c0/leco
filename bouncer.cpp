@@ -73,15 +73,15 @@ static void copy_resources(const dag::node *n, const char *res_path) {
     sys::fs::copy_file(rf.buffer, path.buffer);
   }
 }
-static void bundle_app(const char *exe) {
-  cur_ctx().bundle(exe, sys::path::stem(exe));
-}
 
 bool bounce(const char *path) {
-  auto stem = sys::path::stem(path);
-  auto ext = sys::path::extension(path);
+  sim_sbt pp{256};
+  sim_sb_copy(&pp, path);
 
-  if (ext != ".cppm" && ext != ".cpp")
+  auto ext = sim_sb_path_extension(&pp);
+  auto stem = sys::path::stem(pp.buffer);
+
+  if (strcmp(ext, ".cppm") != 0 && strcmp(ext, ".cpp") != 0)
     return true;
 
   auto n = dag::process(path);
@@ -147,7 +147,7 @@ bool bounce(const char *path) {
     if (!success)
       return false;
 
-    bundle_app(exe_path.c_str());
+    cur_ctx().bundle(exe_path.c_str(), stem.str().c_str());
   }
 
   return true;

@@ -4,7 +4,6 @@
 #include "llvm/ADT/StringSet.h"
 
 struct context {
-  // Defined via CLI
   llvm::ArrayRef<llvm::StringRef> predefs{};
   llvm::ArrayRef<llvm::StringRef> cxx_flags{};
   llvm::ArrayRef<llvm::StringRef> link_flags{};
@@ -14,7 +13,7 @@ struct context {
   std::string dll_ext{};
   void (*app_exe_path)(llvm::SmallVectorImpl<char> &exe, llvm::StringRef stem);
   void (*app_res_path)(llvm::SmallVectorImpl<char> &exe);
-  void (*bundle)(const char *exe, llvm::StringRef stem);
+  void (*bundle)(const char *exe, const char *stem);
   bool native_target{};
 };
 
