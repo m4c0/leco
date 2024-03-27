@@ -16,7 +16,7 @@
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Host.h"
-#include <fstream>
+#include <stdio.h>
 #include <unistd.h>
 
 using namespace clang;
@@ -124,36 +124,42 @@ std::shared_ptr<CompilerInstance> evoker::createCI() const {
   return ci;
 }
 
-static void out_file(auto &f, const auto &a) {
-  for (auto c : a) {
-    if (c == '\\')
-      f << '\\';
-    f << c;
+static void out_file(FILE *f, const char *a) {
+  while (*a != 0) {
+    char c = *a++;
+    if (c == '\\') {
+      fputs("\\\\", f); // escapes backslash
+    } else {
+      fputc(c, f);
+    }
   }
+  fputc('\n', f);
 }
 static std::string create_args_file(const auto &args, const dag::node *node) {
   char file[1024];
   if (0 != tempsie_get_temp_filename("leco", file, sizeof(file)))
     return "";
 
-  std::ofstream f{file};
+  FILE *f = fopen(file, "w");
+  if (f == nullptr)
+    return "";
+
   bool first{true};
   for (const auto &a : args) {
     if (first) {
       first = false;
       continue;
     }
-    out_file(f, a);
-    f << "\n";
+    out_file(f, a.c_str());
   }
 
   if (node != nullptr) {
     dag::visit(node, false, [&](auto *n) {
-      f << "-fmodule-file=" << n->module_name().str() << "=";
-      out_file(f, n->module_pcm().str());
-      f << "\n";
+      fprintf(f, "-fmodule-file=%s=", n->module_name().str().c_str());
+      out_file(f, n->module_pcm().str().c_str());
     });
   }
+  fclose(f);
 
   return file;
 }
