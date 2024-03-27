@@ -36,22 +36,26 @@ static bool compile_shaders(const dag::node *n, const char *res_path) {
   }
   return true;
 }
-static void copy_exes(const dag::node *n, StringRef exe_path) {
+static void copy_exes(const dag::node *n, const char *exe_path) {
   const auto &rpath = cur_ctx().rpath;
 
   for (auto &e : n->executables()) {
-    SmallString<256> path{exe_path};
-    sys::path::remove_filename(path);
+    sim_sbt ef{256};
+    sim_sb_copy(&ef, e.first().str().c_str());
+
+    sim_sbt path{256};
+    sim_sb_path_copy_parent(&path, exe_path);
     if (rpath != "") {
-      sys::path::append(path, rpath);
-      sys::fs::create_directories(path);
+      sim_sb_path_append(&path, rpath.c_str());
+      sys::fs::create_directories(path.buffer);
     }
-    sys::path::append(path, sys::path::filename(e.first()));
-    if (mtime_of(path.c_str()) > mtime_of(e.first().str().c_str()))
+    sim_sb_path_append(&path, sim_sb_path_filename(&ef));
+
+    if (mtime_of(path.buffer) > mtime_of(ef.buffer))
       continue;
 
-    vlog("copying library", path.data(), path.size());
-    sys::fs::copy_file(e.first(), path);
+    vlog("copying library", path.buffer, path.len);
+    sys::fs::copy_file(ef.buffer, path.buffer);
   }
 }
 static void copy_resources(const dag::node *n, StringRef res_path) {
@@ -132,7 +136,7 @@ bool bounce(const char *path) {
     bool success = true;
     dag::visit(n, true, [&](auto *n) {
       success &= compile_shaders(n, res_path.c_str());
-      copy_exes(n, exe_path);
+      copy_exes(n, exe_path.c_str());
       copy_resources(n, res_path);
     });
     if (!success)
