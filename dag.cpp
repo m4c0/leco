@@ -38,12 +38,12 @@ static void infer_module_name(llvm::SmallVectorImpl<char> &module_name,
   }
 }
 
-dag::node::node(StringRef n) : m_source{} {
+dag::node::node(const char *n) : m_source{} {
   real_abs(m_source, n);
   in2out(m_source, m_target, "o");
   in2out(m_source, m_dag, "dag");
   in2out(m_source, m_module_pcm, "pcm");
-  infer_module_name(m_module_name, n.str().c_str());
+  infer_module_name(m_module_name, n);
   m_source.c_str();
   m_target.c_str();
   m_module_pcm.c_str();
@@ -129,10 +129,10 @@ static bool compile(dag::node *n) {
   return n->read_from_cache_file();
 }
 
-static auto find(StringRef path) {
+static auto find(const char *path) {
   dag::node n{path};
 
-  auto [it, inserted] = cache.try_emplace(n.source(), n.source());
+  auto [it, inserted] = cache.try_emplace(n.source(), n.source().str().c_str());
   auto *ptr = &(*it).second;
 
   struct res {
@@ -150,7 +150,7 @@ static bool recurse(dag::node *n) {
       return false;
     }
 
-    auto [d, ins] = find(dep.first());
+    auto [d, ins] = find(dep.first().str().c_str());
 
     if (!d)
       return false;
@@ -164,7 +164,7 @@ static bool recurse(dag::node *n) {
     d->set_recursed();
   }
   for (auto &impl : n->mod_impls()) {
-    auto [d, ins] = find(impl.first());
+    auto [d, ins] = find(impl.first().str().c_str());
 
     if (!d)
       return false;
@@ -186,11 +186,11 @@ static bool recurse(dag::node *n) {
   return true;
 }
 
-dag::node *dag::get_node(StringRef source) {
+dag::node *dag::get_node(const char *source) {
   auto it = cache.find(source);
   return it == cache.end() ? nullptr : &(*it).second;
 }
-dag::node *dag::process(StringRef path) {
+dag::node *dag::process(const char *path) {
   auto [n, ins] = find(path);
   if (!n || !ins)
     return n;
@@ -217,7 +217,7 @@ uint64_t dag::visit_dirty(const node *n, function_ref<void(const node *)> fn) {
     mtime = mtime > pmt ? mtime : pmt;
 
     for (auto &d : n->mod_deps()) {
-      auto dmt = rec(rec, get_node(d.first()), {});
+      auto dmt = rec(rec, get_node(d.first().str().c_str()), {});
       mtime = mtime > dmt ? mtime : dmt;
     }
 
@@ -231,7 +231,7 @@ uint64_t dag::visit_dirty(const node *n, function_ref<void(const node *)> fn) {
     visited[n->source()] = mtime;
 
     for (auto &d : n->mod_impls()) {
-      rec(rec, get_node(d.first()), mtime);
+      rec(rec, get_node(d.first().str().c_str()), mtime);
     }
 
     return mtime;

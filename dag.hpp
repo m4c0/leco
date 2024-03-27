@@ -31,7 +31,7 @@ class node {
   bool m_recursed{};
 
 public:
-  explicit node(llvm::StringRef n);
+  explicit node(const char *n);
 
   bool read_from_cache_file();
   void write_to_cache_file() const;
@@ -117,8 +117,8 @@ public:
 void xlog(const node *n, const char *msg);
 void errlog(const node *n, const char *msg);
 
-node *get_node(llvm::StringRef source);
-node *process(llvm::StringRef path);
+node *get_node(const char *source);
+node *process(const char *path);
 void clear_cache();
 
 void visit(const node *n, bool impls, auto &&fn) {
@@ -129,7 +129,7 @@ void visit(const node *n, bool impls, auto &&fn) {
       return;
 
     for (auto &d : n->mod_deps()) {
-      rec(rec, get_node(d.first()));
+      rec(rec, get_node(d.first().str().c_str()));
     }
 
     fn(n);
@@ -137,7 +137,7 @@ void visit(const node *n, bool impls, auto &&fn) {
 
     if (impls)
       for (auto &d : n->mod_impls()) {
-        rec(rec, get_node(d.first()));
+        rec(rec, get_node(d.first().str().c_str()));
       }
   };
   rec(rec, n);
