@@ -58,14 +58,19 @@ static void copy_exes(const dag::node *n, const char *exe_path) {
     sys::fs::copy_file(ef.buffer, path.buffer);
   }
 }
-static void copy_resources(const dag::node *n, StringRef res_path) {
+static void copy_resources(const dag::node *n, const char *res_path) {
   for (auto &r : n->resources()) {
-    SmallString<256> path{res_path};
-    sys::path::append(path, sys::path::filename(r.first()));
-    if (mtime_of(path.c_str()) > mtime_of(r.first().str().c_str()))
+    sim_sbt rf{256};
+    sim_sb_copy(&rf, r.first().str().c_str());
+
+    sim_sbt path{256};
+    sim_sb_path_copy_append(&path, res_path, sim_sb_path_filename(&rf));
+
+    if (mtime_of(path.buffer) > mtime_of(rf.buffer))
       continue;
-    vlog("copying resource", path.data(), path.size());
-    sys::fs::copy_file(r.first(), path);
+
+    vlog("copying resource", path.buffer, path.len);
+    sys::fs::copy_file(rf.buffer, path.buffer);
   }
 }
 static void bundle_app(const char *exe) {
@@ -137,7 +142,7 @@ bool bounce(const char *path) {
     dag::visit(n, true, [&](auto *n) {
       success &= compile_shaders(n, res_path.c_str());
       copy_exes(n, exe_path.c_str());
-      copy_resources(n, res_path);
+      copy_resources(n, res_path.c_str());
     });
     if (!success)
       return false;
