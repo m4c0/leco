@@ -11,14 +11,13 @@ static const bool is_tty = isatty(fileno(stderr));
 static const bool is_tty = _isatty(_fileno(stderr));
 #endif
 
-static void vlog(const char *verb, const char *msg, int len) {
+static void vlog(const char *verb, const char *msg) {
   if (!is_verbose())
     return;
 
   if (is_tty) {
-    fprintf(stderr, "\e[0;1m%20s\e[0m %.*s\n", verb, len, msg);
+    fprintf(stderr, "\e[0;1m%20s\e[0m %s\n", verb, msg);
   } else {
-    fprintf(stderr, "%20s %.*s\n", verb, len, msg);
+    fprintf(stderr, "%20s %s\n", verb, msg);
   }
 }
-

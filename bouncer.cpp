@@ -25,7 +25,7 @@ static bool compile_shaders(const dag::node *n, const char *res_path) {
     if (mtime_of(out.buffer) > mtime_of(in.buffer))
       continue;
 
-    vlog("compiling shader", out.buffer, out.len);
+    vlog("compiling shader", out.buffer);
 
     sim_sbt cmd{1024};
     sim_sb_printf(&cmd, "glslangValidator --quiet -V -o %s %s", out.buffer,
@@ -53,7 +53,7 @@ static void copy_exes(const dag::node *n, const char *exe_path) {
     if (mtime_of(path.buffer) > mtime_of(ef.buffer))
       continue;
 
-    vlog("copying library", path.buffer, path.len);
+    vlog("copying library", path.buffer);
     sys::fs::copy_file(ef.buffer, path.buffer);
   }
 }
@@ -68,7 +68,7 @@ static void copy_resources(const dag::node *n, const char *res_path) {
     if (mtime_of(path.buffer) > mtime_of(rf.buffer))
       continue;
 
-    vlog("copying resource", path.buffer, path.len);
+    vlog("copying resource", path.buffer);
     sys::fs::copy_file(rf.buffer, path.buffer);
   }
 }

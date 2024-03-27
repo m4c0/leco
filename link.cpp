@@ -23,7 +23,7 @@ struct things {
 } // namespace
 
 static void visit(things &t, const dag::node *n) {
-  t.args.push_back(n->target().str());
+  t.args.push_back(n->target());
 
   for (auto &fw : n->frameworks()) {
     auto [it, added] = t.frameworks.insert(fw.first().str());
@@ -69,8 +69,8 @@ std::string link(const dag::node *n, uint64_t mtime) {
   if (mtime < mtime_of(exe.c_str()))
     return std::string{exe};
 
-  vlog("linking", exe.data(), exe.size());
   exe.c_str();
+  vlog("linking", exe.data());
 
   evoker e{};
   for (auto &p : t.args) {

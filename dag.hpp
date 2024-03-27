@@ -98,11 +98,11 @@ public:
     return m_root == root_t::tool;
   }
 
-  [[nodiscard]] constexpr llvm::StringRef source() const noexcept {
-    return m_source;
+  [[nodiscard]] constexpr const char *source() const noexcept {
+    return m_source.data();
   }
-  [[nodiscard]] constexpr llvm::StringRef target() const noexcept {
-    return m_target;
+  [[nodiscard]] constexpr const char *target() const noexcept {
+    return m_target.data();
   }
   [[nodiscard]] constexpr const char *dag() const noexcept {
     return m_dag.data();

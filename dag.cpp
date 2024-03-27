@@ -114,7 +114,7 @@ void dag::xlog(const dag::node *n, const char *msg) {
 
 static bool still_fresh(dag::node *n) {
   auto dag_mtime = mtime_of(n->dag());
-  return dag_mtime > mtime_of(n->source().str().c_str()) &&
+  return dag_mtime > mtime_of(n->source()) &&
          dag_mtime > mtime_of("../leco/leco.exe");
 }
 
@@ -132,7 +132,7 @@ static bool compile(dag::node *n) {
 static auto find(const char *path) {
   dag::node n{path};
 
-  auto [it, inserted] = cache.try_emplace(n.source(), n.source().str().c_str());
+  auto [it, inserted] = cache.try_emplace(n.source(), n.source());
   auto *ptr = &(*it).second;
 
   struct res {
@@ -213,7 +213,7 @@ uint64_t dag::visit_dirty(const node *n, function_ref<void(const node *)> fn) {
       return it->second;
     }
 
-    auto mtime = mtime_of(n->source().str().c_str());
+    auto mtime = mtime_of(n->source());
     mtime = mtime > pmt ? mtime : pmt;
 
     for (auto &d : n->mod_deps()) {
@@ -221,10 +221,10 @@ uint64_t dag::visit_dirty(const node *n, function_ref<void(const node *)> fn) {
       mtime = mtime > dmt ? mtime : dmt;
     }
 
-    if (mtime > mtime_of(n->target().str().c_str())) {
+    if (mtime > mtime_of(n->target())) {
       fn(n);
       // Get the mtime again after `fn` possibly changed it
-      mtime = mtime_of(n->target().str().c_str());
+      mtime = mtime_of(n->target());
     }
 
     max = max > mtime ? max : mtime;

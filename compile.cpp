@@ -15,14 +15,14 @@ bool compile(const dag::node *n) {
   auto obj = n->target();
 
   sim_sbt path{256};
-  sim_sb_path_copy_parent(&path, obj.str().c_str());
+  sim_sb_path_copy_parent(&path, obj);
   sys::fs::create_directories(path.buffer);
 
-  vlog("compiling", obj.data(), obj.size());
+  vlog("compiling", obj);
 
   // TODO: remove extra copy when "obj" becomes a sim_sb
   sim_sbt f2{256};
-  sim_sb_copy(&f2, file.str().c_str());
+  sim_sb_copy(&f2, file);
   auto ext = sim_sb_path_extension(&f2);
   if (strcmp(ext, ".cppm") == 0) {
     auto pcm = n->module_pcm();
@@ -52,7 +52,7 @@ bool compile(const dag::node *n) {
         .suppress_pragmas()
         .execute();
   } else {
-    fprintf(stderr, "don't know how to build %s\n", file.str().c_str());
+    fprintf(stderr, "don't know how to build %s\n", file);
     return false;
   }
 }
