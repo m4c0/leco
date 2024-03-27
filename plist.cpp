@@ -1,15 +1,12 @@
 #include "plist.hpp"
 #include "context.hpp"
 #include "sim.h"
-#include "llvm/Support/raw_ostream.h"
 
 #include <fstream>
 
-using namespace llvm;
-
 namespace plist {
 class dict {
-  raw_ostream &o;
+  std::ostream &o;
 
   void array_element(const char *t) {
     o << "<string>";
@@ -19,31 +16,31 @@ class dict {
   void array_element(int i) { o << "<integer>" << i << "</integer>"; }
 
 public:
-  explicit constexpr dict(raw_ostream &o) : o{o} {}
+  explicit constexpr dict(std::ostream &o) : o{o} {}
 
-  void array(StringRef key, auto &&...v) {
+  void array(const char *key, auto &&...v) {
     o << "<key>" << key << "</key><array>\n";
     (array_element(v), ...);
     o << "</array>\n";
   }
-  void boolean(StringRef key, bool v) {
+  void boolean(const char *key, bool v) {
     o << "<key>" << key << "</key>";
     o << (v ? "<true/>" : "<false/>");
     o << "\n";
   }
-  void date(StringRef key) {
+  void date(const char *key) {
     time_t now;
     time(&now);
     char buf[128];
     strftime(buf, sizeof(buf), "%FT%TZ", gmtime(&now));
     o << "<key>" << key << "</key><date>" << buf << "</date>\n";
   }
-  void dictionary(StringRef key, function_ref<void(dict &&)> fn) {
+  void dictionary(const char *key, auto &&fn) {
     o << "<key>" << key << "</key><dict>\n";
     fn(dict{o});
     o << "</dict>\n";
   }
-  void integer(StringRef key, int value) {
+  void integer(const char *key, int value) {
     o << "<key>" << key << "</key><integer>" << value << "</integer>\n";
   }
   void string(const char *key, const char *value) {
@@ -55,7 +52,7 @@ public:
   }
 };
 
-void gen(raw_ostream &o, function_ref<void(dict &&)> fn) {
+void gen(std::ostream &o, auto &&fn) {
   // https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html
   o << R"(<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -92,7 +89,7 @@ void common_app_plist(dict &d, const char *name, const char *sdk) {
 }
 [[nodiscard]] static const char *team_id() { return env("LECO_IOS_TEAM"); }
 
-void merge_icon_partial(const char *build_path, raw_ostream &o) {
+void merge_icon_partial(const char *build_path, std::ostream &o) {
   sim_sbt plist{256};
   sim_sb_path_copy_append(&plist, build_path, "icon-partial.plist");
 
@@ -115,8 +112,7 @@ void gen_info_plist(const char *exe_path, const char *name,
   sim_sbt path{256};
   sim_sb_path_copy_append(&path, exe_path, "Info.plist");
 
-  std::error_code ec;
-  auto o = raw_fd_stream(path.buffer, ec);
+  std::ofstream o{path.buffer};
   plist::gen(o, [&](auto &&d) {
     common_app_plist(d, name, "iphoneos");
     d.array("CFBundleSupportedPlatforms", "iPhoneOS");
@@ -143,8 +139,7 @@ void gen_archive_plist(const char *xca_path, const char *name) {
   sim_sbt app_path{256};
   sim_sb_printf(&app_path, "Applications/%s.app", name);
 
-  std::error_code ec;
-  auto o = raw_fd_stream(path.buffer, ec);
+  std::ofstream o{path.buffer};
   plist::gen(o, [&](auto &&d) {
     d.dictionary("ApplicationProperties", [&](auto &&dd) {
       dd.string("ApplicationPath", app_path.buffer);
@@ -168,8 +163,7 @@ void gen_export_plist(const char *build_path, const char *name) {
   sim_sbt id{256};
   sim_sb_printf(&id, "br.com.tpk.%s", name);
 
-  std::error_code ec;
-  auto o = raw_fd_stream(path.buffer, ec);
+  std::ofstream o{path.buffer};
   plist::gen(o, [&](auto &&d) {
     d.string("method", env("LECO_IOS_METHOD", "ad-hoc"));
     d.string("teamID", team_id());
