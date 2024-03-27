@@ -110,8 +110,8 @@ public:
   [[nodiscard]] constexpr const char *module_name() const noexcept {
     return m_module_name.data();
   }
-  [[nodiscard]] constexpr llvm::StringRef module_pcm() const noexcept {
-    return m_module_pcm;
+  [[nodiscard]] constexpr const char *module_pcm() const noexcept {
+    return m_module_pcm.data();
   }
 };
 [[nodiscard]] bool execute(node *n);
