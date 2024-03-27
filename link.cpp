@@ -7,10 +7,8 @@
 #include "evoker.hpp"
 #include "in2out.hpp"
 #include "log.hpp"
-#include "llvm/ADT/StringSet.h"
+#include "sim.h"
 #include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Path.h"
-#include "llvm/Support/raw_ostream.h"
 #include <set>
 
 using namespace llvm;
@@ -56,8 +54,16 @@ std::string link(const dag::node *n, uint64_t mtime) {
   in2out(main_src, exe, ext);
 
   if (n->app()) {
-    cur_ctx().app_exe_path(exe, sys::path::stem(main_src));
-    sys::fs::create_directories(sys::path::parent_path(exe));
+    sim_sbt exe2{256};
+    sim_sb_copy(&exe2, exe.c_str());
+
+    sim_sbt stem{256};
+    sim_sb_path_copy_sb_stem(&stem, &exe2);
+
+    cur_ctx().app_exe_path(exe, stem.buffer);
+
+    sim_sb_path_copy_parent(&exe2, exe.c_str());
+    sys::fs::create_directories(exe2.buffer);
   }
 
   if (mtime < mtime_of(exe.c_str()))

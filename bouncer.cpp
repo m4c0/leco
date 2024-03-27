@@ -148,8 +148,7 @@ bool bounce(const char *path) {
       return false;
 
     sim_sbt stem{256};
-    sim_sb_copy(&stem, sim_sb_path_filename(&pp));
-    sim_sb_path_set_extension(&stem, "");
+    sim_sb_path_copy_sb_stem(&stem, &pp);
     cur_ctx().bundle(exe_path.c_str(), stem.buffer);
   }
 
