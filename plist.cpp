@@ -1,9 +1,8 @@
-#include "context.hpp"
 #include "plist.hpp"
-#include "llvm/ADT/SmallString.h"
+#include "context.hpp"
+#include "sim.h"
 #include "llvm/ADT/Twine.h"
 #include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Path.h"
 #include "llvm/Support/raw_ostream.h"
 
 #include <fstream>
@@ -92,11 +91,11 @@ void common_app_plist(dict &d, StringRef name, StringRef sdk) {
 }
 [[nodiscard]] static std::string team_id() { return env("LECO_IOS_TEAM"); }
 
-void merge_icon_partial(StringRef build_path, raw_ostream &o) {
-  SmallString<256> plist{};
-  sys::path::append(plist, build_path, "icon-partial.plist");
+void merge_icon_partial(const char *build_path, raw_ostream &o) {
+  sim_sbt plist{256};
+  sim_sb_path_copy_append(&plist, build_path, "icon-partial.plist");
 
-  auto i = std::ifstream{plist.c_str()};
+  auto i = std::ifstream{plist.buffer};
   std::string line;
   std::getline(i, line); // xml
   std::getline(i, line); // doctype
@@ -110,11 +109,13 @@ void merge_icon_partial(StringRef build_path, raw_ostream &o) {
   }
 }
 
-void gen_info_plist(StringRef exe_path, StringRef name, StringRef build_path) {
-  SmallString<256> path{exe_path};
-  sys::path::append(path, "Info.plist");
+void gen_info_plist(const char *exe_path, StringRef name,
+                    const char *build_path) {
+  sim_sbt path{256};
+  sim_sb_path_copy_append(&path, exe_path, "Info.plist");
+
   std::error_code ec;
-  auto o = raw_fd_stream(path, ec);
+  auto o = raw_fd_stream(path.buffer, ec);
   plist::gen(o, [&](auto &&d) {
     common_app_plist(d, name, "iphoneos");
     d.array("CFBundleSupportedPlatforms", "iPhoneOS");
@@ -131,11 +132,12 @@ void gen_info_plist(StringRef exe_path, StringRef name, StringRef build_path) {
     merge_icon_partial(build_path, o);
   });
 }
-void gen_archive_plist(StringRef xca_path, StringRef name) {
-  SmallString<256> path{};
-  sys::path::append(path, xca_path, "Info.plist");
+void gen_archive_plist(const char *xca_path, StringRef name) {
+  sim_sbt path{256};
+  sim_sb_path_copy_append(&path, xca_path, "Info.plist");
+
   std::error_code ec;
-  auto o = raw_fd_stream(path, ec);
+  auto o = raw_fd_stream(path.buffer, ec);
   plist::gen(o, [&](auto &&d) {
     d.dictionary("ApplicationProperties", [&](auto &&dd) {
       dd.string("ApplicationPath", "Applications/" + name + ".app");
@@ -152,11 +154,12 @@ void gen_archive_plist(StringRef xca_path, StringRef name) {
     d.string("SchemeName", name);
   });
 }
-void gen_export_plist(StringRef build_path, StringRef name) {
-  SmallString<256> path{};
-  sys::path::append(path, build_path, "export.plist");
+void gen_export_plist(const char *build_path, StringRef name) {
+  sim_sbt path{256};
+  sim_sb_path_copy_append(&path, build_path, "export.plist");
+
   std::error_code ec;
-  auto o = raw_fd_stream(path, ec);
+  auto o = raw_fd_stream(path.buffer, ec);
   plist::gen(o, [&](auto &&d) {
     d.string("method", env("LECO_IOS_METHOD", "ad-hoc"));
     d.string("teamID", team_id());
@@ -179,31 +182,35 @@ static bool code_sign(StringRef bundle_path) {
   // TODO: improve error
   return 0 == std::system(cmd.c_str());
 }
-static bool export_archive(StringRef bundle_path, StringRef xca_path) {
-  SmallString<256> exp_path{};
-  sys::path::append(exp_path, bundle_path, "export");
-  SmallString<256> pl_path{};
-  sys::path::append(pl_path, bundle_path, "export.plist");
-
-  auto cmd = ("xcodebuild -exportArchive -archivePath " + xca_path +
-              " -exportPath " + exp_path + " -exportOptionsPlist " + pl_path)
-                 .str();
-  return 0 == std::system(cmd.c_str());
+static bool export_archive(const char *bundle_path, const char *xca_path) {
+  sim_sbt cmd{1024};
+  sim_sb_printf(&cmd,
+                "xcodebuild -exportArchive"
+                " -archivePath %s"
+                " -exportPath %s/export"
+                " -exportOptionsPlist %s/export.plist",
+                xca_path, bundle_path, bundle_path);
+  return 0 == system(cmd.buffer);
 }
-void gen_iphone_plists(StringRef exe, StringRef name) {
-  auto app_path = sys::path::parent_path(exe);
-  auto apps = sys::path::parent_path(app_path);
-  auto prod = sys::path::parent_path(apps);
-  auto exca = sys::path::parent_path(prod);
-  auto build_path = sys::path::parent_path(exca);
+void gen_iphone_plists(const char *exe, const char *name) {
+  sim_sbt app_path{256};
+  sim_sb_path_copy_parent(&app_path, exe);
 
-  gen_info_plist(app_path, name, build_path);
-  if (!compile_launch(app_path))
+  sim_sbt exca{256};
+  sim_sb_path_copy_parent(&exca, app_path.buffer); // Applications
+  sim_sb_path_parent(&exca);                       // Products
+  sim_sb_path_parent(&exca);                       // exports.xcarchive
+
+  sim_sbt build_path{256};
+  sim_sb_path_copy_parent(&build_path, exca.buffer);
+
+  gen_info_plist(app_path.buffer, name, build_path.buffer);
+  if (!compile_launch(app_path.buffer))
     return;
-  if (!code_sign(app_path))
+  if (!code_sign(app_path.buffer))
     return;
 
-  gen_archive_plist(exca, name);
-  gen_export_plist(build_path, name);
-  export_archive(build_path, exca);
+  gen_archive_plist(exca.buffer, name);
+  gen_export_plist(build_path.buffer, name);
+  export_archive(build_path.buffer, exca.buffer);
 }
