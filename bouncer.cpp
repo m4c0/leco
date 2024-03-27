@@ -10,7 +10,6 @@
 #include "log.hpp"
 #include "sim.h"
 #include "llvm/Support/FileSystem.h"
-#include "llvm/Support/Path.h"
 
 using namespace llvm;
 
@@ -79,7 +78,8 @@ bool bounce(const char *path) {
   sim_sb_copy(&pp, path);
 
   auto ext = sim_sb_path_extension(&pp);
-  auto stem = sys::path::stem(pp.buffer);
+  if (ext == nullptr)
+    return true;
 
   if (strcmp(ext, ".cppm") != 0 && strcmp(ext, ".cpp") != 0)
     return true;
@@ -147,7 +147,10 @@ bool bounce(const char *path) {
     if (!success)
       return false;
 
-    cur_ctx().bundle(exe_path.c_str(), stem.str().c_str());
+    sim_sbt stem{256};
+    sim_sb_copy(&stem, sim_sb_path_filename(&pp));
+    sim_sb_path_set_extension(&stem, "");
+    cur_ctx().bundle(exe_path.c_str(), stem.buffer);
   }
 
   return true;
