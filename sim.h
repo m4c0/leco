@@ -53,6 +53,12 @@ struct sim_sbt : sim_sb {
 #define SIM_MALLOC malloc
 #define SIM_FREE free
 
+#ifdef _WIN32
+#define SIM_STRNCPY(Dst, Src, Sz) strcpy_s(Dst, Sz, Src)
+#else
+#define SIM_STRNCPY strncpy
+#endif
+
 void sim_sb_new(sim_sb *sb, unsigned size) {
   assert(sb && "invalid string buffer");
   assert(size > 0 && "invalid buffer size");
@@ -78,14 +84,14 @@ void sim_sb_copy(sim_sb *dst, const char *src) {
   assert(dst->buffer && "uninitialised buffer");
   assert(src && "invalid source");
 
-  strncpy(dst->buffer, src, dst->size);
+  SIM_STRNCPY(dst->buffer, src, dst->size);
   dst->len = strlen(dst->buffer);
 }
 void sim_sb_concat(sim_sb *dst, const char *src) {
   assert(dst->buffer && "uninitialised buffer");
   assert(src && "invalid source");
 
-  strncpy(dst->buffer + dst->len, src, dst->size - dst->len);
+  SIM_STRNCPY(dst->buffer + dst->len, src, dst->size - dst->len);
   dst->len = strlen(dst->buffer);
 }
 
