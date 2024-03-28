@@ -134,15 +134,16 @@ bool bounce(const char *path) {
 
   auto exe_path = link(n, mtime);
   if (exe_path != "" && n->app()) {
-    SmallString<256> res_path{exe_path};
-    cur_ctx().app_res_path(res_path);
-    sys::fs::create_directories(res_path);
+    sim_sbt res_path{256};
+    sim_sb_copy(&res_path, exe_path.c_str());
+    cur_ctx().app_res_path(&res_path);
+    sys::fs::create_directories(res_path.buffer);
 
     bool success = true;
     dag::visit(n, true, [&](auto *n) {
-      success &= compile_shaders(n, res_path.c_str());
+      success &= compile_shaders(n, res_path.buffer);
       copy_exes(n, exe_path.c_str());
-      copy_resources(n, res_path.c_str());
+      copy_resources(n, res_path.buffer);
     });
     if (!success)
       return false;

@@ -3,7 +3,6 @@
 #include "droid_path.hpp"
 #include "plist.hpp"
 #include "llvm/ADT/SmallString.h"
-#include "llvm/Support/Path.h"
 
 using namespace llvm;
 
@@ -82,10 +81,10 @@ context macosx() {
             sim_sb_path_set_extension(exe, "exe");
           },
       .app_res_path =
-          [](auto exe) {
-            sys::path::remove_filename(exe);
-            sys::path::remove_filename(exe);
-            sys::path::append(exe, "Resources");
+          [](sim_sb *exe) {
+            sim_sb_path_parent(exe);
+            sim_sb_path_parent(exe);
+            sim_sb_path_append(exe, "Resources");
           },
       .bundle = [](auto exe, auto stem) {},
       .native_target = true,
@@ -114,7 +113,7 @@ context iphoneos() {
             sim_sb_path_set_extension(exe, "app");
             sim_sb_path_append(exe, stem);
           },
-      .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
+      .app_res_path = sim_sb_path_parent,
       .bundle =
           [](auto exe, auto stem) {
             if (actool(exe))
@@ -139,7 +138,7 @@ context iphonesimulator() {
             sim_sb_path_set_extension(exe, "app");
             sim_sb_path_append(exe, stem);
           },
-      .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
+      .app_res_path = sim_sb_path_parent,
       .bundle = [](auto exe, auto stem) {},
   };
 }
@@ -158,7 +157,7 @@ context windows() {
             sim_sb_path_append(exe, stem);
             sim_sb_path_set_extension(exe, "exe");
           },
-      .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
+      .app_res_path = sim_sb_path_parent,
       .bundle = [](auto exe, auto stem) {},
       .native_target = true,
   };
@@ -178,7 +177,7 @@ context linux() {
             sim_sb_path_append(exe, stem);
             sim_sb_path_set_extension(exe, "exe");
           },
-      .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
+      .app_res_path = sim_sb_path_parent,
       .bundle = [](auto exe, auto stem) {},
       .native_target = true,
   };

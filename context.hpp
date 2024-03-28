@@ -2,7 +2,6 @@
 #include "sim.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/StringRef.h"
-#include "llvm/ADT/StringSet.h"
 
 struct context {
   llvm::ArrayRef<llvm::StringRef> predefs{};
@@ -13,7 +12,7 @@ struct context {
   std::string rpath{};
   std::string dll_ext{};
   void (*app_exe_path)(sim_sb *exe, const char *stem);
-  void (*app_res_path)(llvm::SmallVectorImpl<char> &exe);
+  void (*app_res_path)(sim_sb *exe);
   void (*bundle)(const char *exe, const char *stem);
   bool native_target{};
 };
