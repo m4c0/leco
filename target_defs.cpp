@@ -60,11 +60,6 @@ llvm::ArrayRef<llvm::StringRef> ios_link_flags() {
   }};
   return flags;
 }
-void apple_bundle_path(SmallVectorImpl<char> &exe, StringRef stem) {
-  sys::path::remove_filename(exe);
-  sys::path::append(exe, stem);
-  sys::path::replace_extension(exe, "app");
-}
 } // namespace t::impl
 namespace t {
 context macosx() {
@@ -79,11 +74,12 @@ context macosx() {
       .sysroot = impl::apple_sysroot("macosx"),
       .dll_ext = "dylib",
       .app_exe_path =
-          [](auto &exe, auto stem) {
-            impl::apple_bundle_path(exe, stem);
-            sys::path::append(exe, "Contents", "MacOS");
-            sys::path::append(exe, stem);
-            sys::path::replace_extension(exe, "exe");
+          [](sim_sb *exe, const char *stem) {
+            sim_sb_path_set_extension(exe, "app");
+            sim_sb_path_append(exe, "Contents");
+            sim_sb_path_append(exe, "MacOS");
+            sim_sb_path_append(exe, stem);
+            sim_sb_path_set_extension(exe, "exe");
           },
       .app_res_path =
           [](auto exe) {
@@ -109,13 +105,14 @@ context iphoneos() {
       .rpath = "Frameworks",
       .dll_ext = "dylib",
       .app_exe_path =
-          [](auto &exe, auto stem) {
-            sys::path::remove_filename(exe);
-            sys::path::append(exe, "export.xcarchive", "Products",
-                              "Applications", stem);
-            sys::path::replace_extension(exe, "app");
-
-            sys::path::append(exe, stem);
+          [](sim_sb *exe, const char *stem) {
+            sim_sb_path_parent(exe);
+            sim_sb_path_append(exe, "export.xcarchive");
+            sim_sb_path_append(exe, "Products");
+            sim_sb_path_append(exe, "Applications");
+            sim_sb_path_append(exe, stem);
+            sim_sb_path_set_extension(exe, "app");
+            sim_sb_path_append(exe, stem);
           },
       .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
       .bundle =
@@ -138,9 +135,9 @@ context iphonesimulator() {
       .sysroot = impl::apple_sysroot("iphonesimulator"),
       .dll_ext = "dylib",
       .app_exe_path =
-          [](auto &exe, auto stem) {
-            impl::apple_bundle_path(exe, stem);
-            sys::path::append(exe, stem);
+          [](sim_sb *exe, const char *stem) {
+            sim_sb_path_set_extension(exe, "app");
+            sim_sb_path_append(exe, stem);
           },
       .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
       .bundle = [](auto exe, auto stem) {},
@@ -156,10 +153,10 @@ context windows() {
       .target = "x86_64-pc-windows-msvc",
       .dll_ext = "dll",
       .app_exe_path =
-          [](auto exe, auto stem) {
-            impl::apple_bundle_path(exe, stem);
-            sys::path::append(exe, stem);
-            sys::path::replace_extension(exe, "exe");
+          [](sim_sb *exe, const char *stem) {
+            sim_sb_path_set_extension(exe, "app");
+            sim_sb_path_append(exe, stem);
+            sim_sb_path_set_extension(exe, "exe");
           },
       .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
       .bundle = [](auto exe, auto stem) {},
@@ -176,10 +173,10 @@ context linux() {
       .target = "x86_64-pc-linux-gnu",
       .dll_ext = "so",
       .app_exe_path =
-          [](auto exe, auto stem) {
-            impl::apple_bundle_path(exe, stem);
-            sys::path::append(exe, stem);
-            sys::path::replace_extension(exe, "exe");
+          [](sim_sb *exe, const char *stem) {
+            sim_sb_path_set_extension(exe, "app");
+            sim_sb_path_append(exe, stem);
+            sim_sb_path_set_extension(exe, "exe");
           },
       .app_res_path = [](auto exe) { sys::path::remove_filename(exe); },
       .bundle = [](auto exe, auto stem) {},

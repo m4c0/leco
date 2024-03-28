@@ -60,9 +60,10 @@ std::string link(const dag::node *n, uint64_t mtime) {
     sim_sbt stem{256};
     sim_sb_path_copy_sb_stem(&stem, &exe2);
 
-    cur_ctx().app_exe_path(exe, stem.buffer);
+    cur_ctx().app_exe_path(&exe2, stem.buffer);
+    exe = exe2.buffer;
 
-    sim_sb_path_copy_parent(&exe2, exe.c_str());
+    sim_sb_path_parent(&exe2);
     sys::fs::create_directories(exe2.buffer);
   }
 
