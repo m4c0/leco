@@ -2,7 +2,6 @@
 #include "context.hpp"
 #include "droid_path.hpp"
 #include "plist.hpp"
-#include "llvm/ADT/SmallString.h"
 
 using namespace llvm;
 
@@ -24,16 +23,15 @@ context android(StringRef tgt) {
       .bundle = [](auto exe, auto stem) {},
   };
 }
-static std::string apple_sysroot(StringRef sdk) {
+static std::string apple_sysroot(const char *sdk) {
 #ifdef __APPLE__
-  constexpr const auto limit = 256;
-  SmallString<limit> buf{};
+  sim_sbt cmd{256};
+  sim_sb_printf(&cmd, "xcrun --show-sdk-path --sdk %s", sdk);
 
-  buf.assign("xcrun --show-sdk-path --sdk ");
-  buf.append(sdk);
+  char buf[256];
 
-  auto f = popen(buf.c_str(), "r");
-  auto path = fgets(buf.data(), limit, f);
+  auto f = popen(cmd.buffer, "r");
+  auto path = fgets(buf, sizeof(buf), f);
   pclose(f);
 
   if (path == nullptr)
