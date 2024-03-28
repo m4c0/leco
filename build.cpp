@@ -81,7 +81,7 @@ bool compile(const char *stem) {
   sim_sbt buf{1024};
   sim_sb_copy(&buf, "clang++ -std=c++20 -g ");
 #ifdef _WIN32
-  sim_sb_copy(&buf, "-D_CRT_SECURE_NO_WARNINGS -fms-runtime-lib=dll ");
+  sim_sb_concat(&buf, "-D_CRT_SECURE_NO_WARNINGS -fms-runtime-lib=dll ");
 #endif
   sim_sb_printf(&buf, "-I%s/include -c %s -o %s", cdir, in.buffer, out.buffer);
   return 0 == system(buf.buffer);
