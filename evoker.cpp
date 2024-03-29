@@ -17,7 +17,10 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Host.h"
 #include <stdio.h>
+
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 using namespace clang;
 using namespace clang::driver;
