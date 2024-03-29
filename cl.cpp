@@ -6,6 +6,13 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef _WIN32
+#include <direct.h>
+#define chdir _chdir
+#else
+#include <unistd.h>
+#endif
+
 static int clean_level{};
 bool should_clean_current() { return clean_level > 0; }
 bool should_clean_all() { return clean_level > 1; }
@@ -95,10 +102,12 @@ bool for_each_target(bool (*fn)()) {
 
 bool usage() {
   fprintf(stderr, R"(
-  Usage: ../leco/leco.exe [-c|-C] [-D] [-g] [-O] [-t <target>] [-v]
+  Usage: ../leco/leco.exe [-c] [-C <dir>] [-D] [-g] [-O] [-t <target>] [-v]
 
   Where:
     -c -- clean current module before build (if repeated, clean all modules)
+
+    -C -- change to this directory before build
 
     -D -- dump DAG (useful for troubleshooting LECO itself or module dependencies)
 
@@ -121,7 +130,7 @@ bool usage() {
 
 bool parse_args(int argc, char **argv) {
   struct gopt opts {};
-  GOPT(opts, argc, argv, "cDgOt:v");
+  GOPT(opts, argc, argv, "C:cDgOt:v");
 
   char *val{};
   char ch;
@@ -129,6 +138,9 @@ bool parse_args(int argc, char **argv) {
     switch (ch) {
     case 'c':
       clean_level++;
+      break;
+    case 'C':
+      chdir(val);
       break;
     case 'D':
       dump_dag = true;
