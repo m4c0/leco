@@ -6,10 +6,9 @@
 #include <stdio.h>
 #include <string.h>
 
-enum clean_levels { cup_none = 0, cup_cur, cup_all };
-static clean_levels clean_level{};
-bool should_clean_current() { return clean_level >= cup_cur; }
-bool should_clean_all() { return clean_level >= cup_all; }
+static int clean_level{};
+bool should_clean_current() { return clean_level > 0; }
+bool should_clean_all() { return clean_level > 1; }
 
 static int verbose{};
 bool is_verbose() { return verbose > 0; }
@@ -99,9 +98,7 @@ bool usage() {
   Usage: ../leco/leco.exe [-c|-C] [-D] [-g] [-O] [-t <target>] [-v]
 
   Where:
-    -c -- clean current module before build (mutually exclusive with -C)
-
-    -C -- clean all modules before build (mutually exclusive with -c)
+    -c -- clean current module before build (if repeated, clean all modules)
 
     -D -- dump DAG (useful for troubleshooting LECO itself or module dependencies)
 
@@ -124,17 +121,14 @@ bool usage() {
 
 bool parse_args(int argc, char **argv) {
   struct gopt opts {};
-  GOPT(opts, argc, argv, "cCDgOt:v");
+  GOPT(opts, argc, argv, "cDgOt:v");
 
   char *val{};
   char ch;
   while ((ch = gopt_parse(&opts, &val)) != 0) {
     switch (ch) {
     case 'c':
-      clean_level = cup_cur;
-      break;
-    case 'C':
-      clean_level = cup_all;
+      clean_level++;
       break;
     case 'D':
       dump_dag = true;
