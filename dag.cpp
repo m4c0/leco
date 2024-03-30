@@ -92,7 +92,7 @@ bool dag::node::add_mod_dep(const char *mod_name) {
   }
   sim_sb_path_parent(&dep);
   sim_sb_path_parent(&dep);
-  sim_sb_path_append(&dep, mod_name);
+  sim_sb_path_append(&dep, pp.buffer);
   sim_sb_path_append(&dep, mod_name);
   sim_sb_concat(&dep, ".cppm");
   return add_real_abs(m_mod_deps, dep.buffer);
