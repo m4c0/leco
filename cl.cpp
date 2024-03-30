@@ -140,7 +140,10 @@ bool parse_args(int argc, char **argv) {
       clean_level++;
       break;
     case 'C':
-      chdir(val);
+      if (0 != chdir(val)) {
+        fprintf(stderr, "Directory not found: [%s]\n", val);
+        return false;
+      }
       break;
     case 'D':
       dump_dag = true;
