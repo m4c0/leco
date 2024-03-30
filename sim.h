@@ -28,7 +28,7 @@ void sim_sb_path_copy_append(sim_sb *dst, const char *path, const char *part);
 void sim_sb_path_parent(sim_sb *dst);
 void sim_sb_path_copy_parent(sim_sb *dst, const char *path);
 void sim_sb_path_set_extension(sim_sb *dst, const char *ext);
-void sim_sb_path_copy_sb_stem(sim_sb *dst, sim_sb *src);
+void sim_sb_path_copy_sb_stem(sim_sb *dst, const sim_sb *src);
 
 void sim_sb_path_copy_real(sim_sb *dst, const char *path);
 
@@ -225,7 +225,7 @@ const char *sim_sb_path_filename(const sim_sb *src) {
   return ++p;
 }
 
-void sim_sb_path_copy_sb_stem(sim_sb *dst, sim_sb *src) {
+void sim_sb_path_copy_sb_stem(sim_sb *dst, const sim_sb *src) {
   sim_sb_copy(dst, sim_sb_path_filename(src));
   sim_sb_path_set_extension(dst, "");
 }
