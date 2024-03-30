@@ -52,39 +52,52 @@ bool dag::node::add_executable(llvm::StringRef executable) {
 bool dag::node::add_library_dir(llvm::StringRef dir) {
   return add_real_abs(m_library_dirs, dir);
 }
-bool dag::node::add_mod_dep(llvm::StringRef mod_name) {
-  auto dir = sys::path::parent_path(source());
+bool dag::node::add_mod_dep(const char *mod_name) {
+  sim_sbt pp{256};
+  sim_sb_copy(&pp, mod_name);
 
-  auto p = mod_name.find(":");
-  SmallString<128> dep{};
-  if (p != StringRef::npos) {
-    auto me = mod_name.substr(0, p);
-    auto part = mod_name.substr(p + 1);
+  // Module parts
+  auto p = strchr(pp.buffer, ':');
+  if (p != nullptr) {
+    *p = '-';
 
-    sys::path::append(dep, dir, me + "-" + part + ".cppm");
-  } else {
-    auto t = mod_name + ".cppm";
-    sys::path::append(dep, dir, t);
-    if (!path_exists(dep.c_str())) {
-      dep.clear();
-      sys::path::append(dep, "..", mod_name, t);
-    }
-    if (!path_exists(dep.c_str())) {
-      SmallString<64> camel{mod_name};
-      size_t p = 0;
-      while ((p = camel.find('_', p)) != StringRef::npos) {
-        camel[p] = '-';
-      }
-
-      dep.clear();
-      sys::path::append(dep, "..", camel, t);
-    }
-    if (!path_exists(dep.c_str())) {
-      return false;
-    }
+    sim_sbt dep{256};
+    sim_sb_path_copy_parent(&dep, source());
+    sim_sb_path_append(&dep, pp.buffer);
+    sim_sb_concat(&dep, ".cppm");
+    return add_real_abs(m_mod_deps, dep.buffer);
   }
 
-  return add_real_abs(m_mod_deps, dep);
+  // Module in the same folder
+  sim_sbt dep{256};
+  sim_sb_path_copy_parent(&dep, source());
+  sim_sb_path_append(&dep, mod_name);
+  sim_sb_concat(&dep, ".cppm");
+  if (path_exists(dep.buffer))
+    return add_real_abs(m_mod_deps, dep.buffer);
+
+  // Module in sibling folder
+  sim_sb_path_parent(&dep);
+  sim_sb_path_parent(&dep);
+  sim_sb_path_append(&dep, mod_name);
+  sim_sb_path_append(&dep, mod_name);
+  sim_sb_concat(&dep, ".cppm");
+  if (path_exists(dep.buffer))
+    return add_real_abs(m_mod_deps, dep.buffer);
+
+  // Module in sibling folder with "-" instead of "_"
+  while ((p = strchr(pp.buffer, '_')) != nullptr) {
+    *p = '-';
+  }
+  sim_sb_path_parent(&dep);
+  sim_sb_path_parent(&dep);
+  sim_sb_path_append(&dep, mod_name);
+  sim_sb_path_append(&dep, mod_name);
+  sim_sb_concat(&dep, ".cppm");
+  if (path_exists(dep.buffer))
+    return add_real_abs(m_mod_deps, dep.buffer);
+
+  return false;
 }
 bool dag::node::add_mod_impl(llvm::StringRef mod_impl) {
   return add_real_abs(m_mod_impls, mod_impl);

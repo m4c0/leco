@@ -24,7 +24,7 @@ public:
                     const Module *imp) override {
     assert(path.size() == 1 && "path isn't atomic");
     auto &[id, _] = path[0];
-    if (!m_dag->add_mod_dep(id->getName())) {
+    if (!m_dag->add_mod_dep(id->getName().str().c_str())) {
       diag_error(*m_diag, loc, "module not found");
     }
   }

@@ -42,7 +42,7 @@ public:
   void add_framework(llvm::StringRef fw) { m_frameworks.insert(fw); }
   void add_library(llvm::StringRef lib) { m_libraries.insert(lib); }
   [[nodiscard]] bool add_library_dir(llvm::StringRef dir);
-  [[nodiscard]] bool add_mod_dep(llvm::StringRef mod_name);
+  [[nodiscard]] bool add_mod_dep(const char * mod_name);
   [[nodiscard]] bool add_mod_impl(llvm::StringRef mod_impl);
   [[nodiscard]] bool add_resource(llvm::StringRef res);
   [[nodiscard]] bool add_shader(llvm::StringRef shd);
