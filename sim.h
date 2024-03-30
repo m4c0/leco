@@ -125,6 +125,7 @@ void sim_sb_path_parent(sim_sb *dst) {
 
   char *p = strrchr(dst->buffer, '/');
   if (p == NULL) {
+    // TODO: decide how to deal with parent of "."
     sim_sb_copy(dst, ".");
     return;
   }
