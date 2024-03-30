@@ -55,8 +55,12 @@ struct sim_sbt : sim_sb {
 
 #ifdef _WIN32
 #define SIM_STRNCPY(Dst, Src, Sz) strcpy_s(Dst, Sz, Src)
+#define SIM_PATHSEP '\\'
+#define SIM_PATHSEP_S "\\"
 #else
 #define SIM_STRNCPY strncpy
+#define SIM_PATHSEP '/'
+#define SIM_PATHSEP_S "/"
 #endif
 
 void sim_sb_new(sim_sb *sb, unsigned size) {
@@ -109,7 +113,7 @@ sim_sb_printf(sim_sb *dst, const char *src, ...) {
 void sim_sb_path_append(sim_sb *dst, const char *part) {
   assert(dst->buffer && "uninitialised buffer");
 
-  sim_sb_concat(dst, "/"); // TODO: flip on windows?
+  sim_sb_concat(dst, SIM_PATHSEP_S);
   sim_sb_concat(dst, part);
 }
 void sim_sb_path_copy_append(sim_sb *dst, const char *path, const char *part) {
@@ -123,14 +127,14 @@ void sim_sb_path_copy_append(sim_sb *dst, const char *path, const char *part) {
 void sim_sb_path_parent(sim_sb *dst) {
   assert(dst->buffer && "uninitialised buffer");
 
-  char *p = strrchr(dst->buffer, '/');
+  char *p = strrchr(dst->buffer, SIM_PATHSEP);
   if (p == NULL) {
     // TODO: decide how to deal with parent of "."
     sim_sb_copy(dst, ".");
     return;
   }
   if (p == dst->buffer) {
-    sim_sb_copy(dst, "/");
+    sim_sb_copy(dst, SIM_PATHSEP_S);
     return;
   }
   *p = 0;
@@ -150,9 +154,9 @@ const char *sim_sb_path_extension(const sim_sb *src) {
   if (src->len == 0)
     return nullptr;
 
-  char *p = strrchr(src->buffer, '/');
+  char *p = strrchr(src->buffer, SIM_PATHSEP);
   char *e = strrchr(src->buffer, '.');
-  // Path ends with '/'
+  // Path ends with SIM_PATHSEP
   if (p == src->buffer + src->len - 1)
     return nullptr;
   // No extension or extension isn't in stem
@@ -178,9 +182,9 @@ void sim_sb_path_set_extension(sim_sb *dst, const char *ext) {
   if (dst->len == 0)
     return;
 
-  char *p = strrchr(dst->buffer, '/');
+  char *p = strrchr(dst->buffer, SIM_PATHSEP);
   char *e = strrchr(dst->buffer, '.');
-  // Path ends with '/'
+  // Path ends with SIM_PATHSEP
   if (p == dst->buffer + dst->len - 1)
     return;
   // No extension or extension isn't in stem
@@ -205,11 +209,11 @@ const char *sim_sb_path_filename(const sim_sb *src) {
   if (src->len == 0)
     return nullptr;
 
-  char *p = strrchr(src->buffer, '/');
+  char *p = strrchr(src->buffer, SIM_PATHSEP);
   if (p == nullptr)
     return ".";
   if (p == src->buffer)
-    return "/";
+    return SIM_PATHSEP_S;
 
   // TODO: handle slashes at the end
   return ++p;
