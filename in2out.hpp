@@ -7,7 +7,7 @@
 
 static void in2out(const sim_sb *in, sim_sb *out, const char *ext) {
   sim_sb_copy(out, in->buffer);
-  if (strcmp(in->buffer, "/out/") == 0) { // TODO: backslash on windows?
+  if (strcmp(in->buffer, SIM_PATHSEP_S "out" SIM_PATHSEP_S) == 0) {
     sim_sb_path_parent(out);
     sim_sb_path_append(out, "out");
     sim_sb_path_append(out, cur_ctx().target.c_str());
