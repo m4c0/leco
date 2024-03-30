@@ -171,14 +171,18 @@ static bool recurse(dag::node *n) {
     d->set_recursed();
   }
   for (auto &impl : n->mod_impls()) {
-    auto [d, ins] = find(impl.first().str().c_str());
+    // TODO: remove once mod_impls is sim
+    sim_sbt imp{256};
+    sim_sb_copy(&imp, impl.first().str().c_str());
+
+    auto [d, ins] = find(imp.buffer);
 
     if (!d)
       return false;
     if (d->recursed())
       continue;
 
-    if (sys::path::extension(impl.first()) == ".cpp") {
+    if (strcmp(sim_sb_path_extension(&imp), ".cpp") == 0) {
       if (!compile(d))
         return false;
       if (!recurse(d))
