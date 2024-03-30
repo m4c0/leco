@@ -117,6 +117,11 @@ struct add_include_dir_pragma : public id_list_pragma, node_holder {
       , node_holder{n} {}
 
   void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
+    // We use this to modify the compilation of the current translation unit. It
+    // doesn't make much sense to "export" this if we are compiling a module.
+    // TODO: rename this pragma to something reflecting this behaviour
+    //       ex: "inject_include_dir"
+    //       "inheritance" of includes might be useful outside modules
     notify(pp, t, "added include directory");
 
     SmallString<256> in{fname};
@@ -132,10 +137,6 @@ struct add_include_dir_pragma : public id_list_pragma, node_holder {
     DirectoryLookup dl{*de, SrcMgr::C_User, false};
     pp.getHeaderSearchInfo().AddSearchPath(dl, false);
     pp.getHeaderSearchInfo().AddSearchPath(dl, true);
-
-    if (m_node != nullptr && !m_node->add_include_dir(in)) {
-      report(pp, t, "error adding include directory");
-    }
   }
 };
 
