@@ -24,26 +24,21 @@ static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
   return true;
 }
 
-static void infer_module_name(sim_sb *module_name, const char *n) {
-  // TODO: remove copy after "source" becomes a sim-sb
-  sim_sbt nn{256};
-  sim_sb_copy(&nn, n);
-  sim_sb_path_copy_sb_stem(module_name, &nn);
+static void infer_module_name(sim_sb *module_name, const sim_sb *src) {
+  sim_sb_path_copy_sb_stem(module_name, src);
 
   auto p = strchr(module_name->buffer, '-');
   if (p != nullptr)
     *p = ':';
 }
 
-dag::node::node(const char *n) : m_source{} {
-  real_abs(m_source, n);
-  sim_sbt s{256};
-  sim_sb_copy(&s, m_source.c_str()); // TODO: remove once "source" is sb
+dag::node::node(const char *n) {
+  sim_sb_path_copy_real(&m_source, n);
 
-  in2out(&s, &m_target, "o");
-  in2out(&s, &m_dag, "dag");
-  in2out(&s, &m_module_pcm, "pcm");
-  infer_module_name(&m_module_name, n);
+  in2out(&m_source, &m_target, "o");
+  in2out(&m_source, &m_dag, "dag");
+  in2out(&m_source, &m_module_pcm, "pcm");
+  infer_module_name(&m_module_name, &m_source);
 }
 
 bool dag::node::add_executable(llvm::StringRef executable) {

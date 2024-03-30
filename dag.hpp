@@ -1,6 +1,5 @@
 #pragma once
 #include "sim.h"
-#include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/StringSet.h"
 
 namespace dag {
@@ -13,7 +12,7 @@ enum class root_t {
 };
 
 class node {
-  llvm::SmallString<256> m_source;
+  sim_sbt m_source{256};
   sim_sbt m_target{256};
   sim_sbt m_dag{256};
   sim_sbt m_module_name{256};
@@ -100,7 +99,7 @@ public:
   }
 
   [[nodiscard]] constexpr const char *source() const noexcept {
-    return m_source.data();
+    return m_source.buffer;
   }
   [[nodiscard]] constexpr const char *target() const noexcept {
     return m_target.buffer;
