@@ -14,10 +14,10 @@ enum class root_t {
 
 class node {
   llvm::SmallString<256> m_source;
-  llvm::SmallString<256> m_target;
-  llvm::SmallString<256> m_dag;
+  sim_sbt m_target{256};
+  sim_sbt m_dag{256};
   sim_sbt m_module_name{256};
-  llvm::SmallString<256> m_module_pcm;
+  sim_sbt m_module_pcm{256};
   llvm::StringSet<> m_executables{};
   llvm::StringSet<> m_frameworks{};
   llvm::StringSet<> m_include_dirs{};
@@ -103,16 +103,16 @@ public:
     return m_source.data();
   }
   [[nodiscard]] constexpr const char *target() const noexcept {
-    return m_target.data();
+    return m_target.buffer;
   }
   [[nodiscard]] constexpr const char *dag() const noexcept {
-    return m_dag.data();
+    return m_dag.buffer;
   }
   [[nodiscard]] constexpr const char *module_name() const noexcept {
     return m_module_name.buffer;
   }
   [[nodiscard]] constexpr const char *module_pcm() const noexcept {
-    return m_module_pcm.data();
+    return m_module_pcm.buffer;
   }
 };
 [[nodiscard]] bool execute(node *n);

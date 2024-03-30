@@ -37,13 +37,13 @@ static void infer_module_name(sim_sb *module_name, const char *n) {
 
 dag::node::node(const char *n) : m_source{} {
   real_abs(m_source, n);
-  in2out(m_source, m_target, "o");
-  in2out(m_source, m_dag, "dag");
-  in2out(m_source, m_module_pcm, "pcm");
+  sim_sbt s{256};
+  sim_sb_copy(&s, m_source.c_str()); // TODO: remove once "source" is sb
+
+  in2out(&s, &m_target, "o");
+  in2out(&s, &m_dag, "dag");
+  in2out(&s, &m_module_pcm, "pcm");
   infer_module_name(&m_module_name, n);
-  m_source.c_str();
-  m_target.c_str();
-  m_module_pcm.c_str();
 }
 
 bool dag::node::add_executable(llvm::StringRef executable) {
