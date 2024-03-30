@@ -30,6 +30,8 @@ void sim_sb_path_copy_parent(sim_sb *dst, const char *path);
 void sim_sb_path_set_extension(sim_sb *dst, const char *ext);
 void sim_sb_path_copy_sb_stem(sim_sb *dst, sim_sb *src);
 
+void sim_sb_path_copy_real(sim_sb *dst, const char *path);
+
 const char *sim_sb_path_extension(const sim_sb *src);
 const char *sim_sb_path_filename(const sim_sb *src);
 
@@ -222,5 +224,17 @@ const char *sim_sb_path_filename(const sim_sb *src) {
 void sim_sb_path_copy_sb_stem(sim_sb *dst, sim_sb *src) {
   sim_sb_copy(dst, sim_sb_path_filename(src));
   sim_sb_path_set_extension(dst, "");
+}
+
+void sim_sb_path_copy_real(sim_sb *dst, const char *path) {
+  assert(dst->buffer && "uninitialised buffer");
+#ifdef _WIN32
+  _fullpath(dst->buffer, path, dst->size);
+#else
+  assert(dst->size >= PATH_MAX &&
+         "destination buffer should have PATH_MAX in size");
+  realpath(path, dst->buffer);
+#endif
+  dst->len = strlen(dst->buffer);
 }
 #endif // SIM_IMPLEMENTATION
