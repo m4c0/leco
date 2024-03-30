@@ -65,7 +65,8 @@ bool dag::node::add_mod_dep(const char *mod_name) {
     sim_sb_path_copy_parent(&dep, source());
     sim_sb_path_append(&dep, pp.buffer);
     sim_sb_concat(&dep, ".cppm");
-    return add_real_abs(m_mod_deps, dep.buffer);
+    if (add_real_abs(m_mod_deps, dep.buffer))
+      return true;
   }
 
   // Module in the same folder
@@ -73,8 +74,8 @@ bool dag::node::add_mod_dep(const char *mod_name) {
   sim_sb_path_copy_parent(&dep, source());
   sim_sb_path_append(&dep, mod_name);
   sim_sb_concat(&dep, ".cppm");
-  if (path_exists(dep.buffer))
-    return add_real_abs(m_mod_deps, dep.buffer);
+  if (add_real_abs(m_mod_deps, dep.buffer))
+    return true;
 
   // Module in sibling folder
   sim_sb_path_parent(&dep);
@@ -82,8 +83,8 @@ bool dag::node::add_mod_dep(const char *mod_name) {
   sim_sb_path_append(&dep, mod_name);
   sim_sb_path_append(&dep, mod_name);
   sim_sb_concat(&dep, ".cppm");
-  if (path_exists(dep.buffer))
-    return add_real_abs(m_mod_deps, dep.buffer);
+  if (add_real_abs(m_mod_deps, dep.buffer))
+    return true;
 
   // Module in sibling folder with "-" instead of "_"
   while ((p = strchr(pp.buffer, '_')) != nullptr) {
@@ -94,10 +95,7 @@ bool dag::node::add_mod_dep(const char *mod_name) {
   sim_sb_path_append(&dep, mod_name);
   sim_sb_path_append(&dep, mod_name);
   sim_sb_concat(&dep, ".cppm");
-  if (path_exists(dep.buffer))
-    return add_real_abs(m_mod_deps, dep.buffer);
-
-  return false;
+  return add_real_abs(m_mod_deps, dep.buffer);
 }
 bool dag::node::add_mod_impl(llvm::StringRef mod_impl) {
   return add_real_abs(m_mod_impls, mod_impl);
