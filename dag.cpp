@@ -49,6 +49,9 @@ dag::node::node(const char *n) : m_source{} {
 bool dag::node::add_executable(llvm::StringRef executable) {
   return add_real_abs(m_executables, executable);
 }
+bool dag::node::add_include_dir(llvm::StringRef dir) {
+  return add_real_abs(m_include_dirs, dir);
+}
 bool dag::node::add_library_dir(llvm::StringRef dir) {
   return add_real_abs(m_library_dirs, dir);
 }
