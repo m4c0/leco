@@ -35,6 +35,14 @@ void sim_sb_path_copy_real(sim_sb *dst, const char *path);
 const char *sim_sb_path_extension(const sim_sb *src);
 const char *sim_sb_path_filename(const sim_sb *src);
 
+#ifdef _WIN32
+#define SIM_PATHSEP '\\'
+#define SIM_PATHSEP_S "\\"
+#else
+#define SIM_PATHSEP '/'
+#define SIM_PATHSEP_S "/"
+#endif
+
 #ifdef __cplusplus
 }
 struct sim_sbt : sim_sb {
@@ -57,12 +65,8 @@ struct sim_sbt : sim_sb {
 
 #ifdef _WIN32
 #define SIM_STRNCPY(Dst, Src, Sz) strcpy_s(Dst, Sz, Src)
-#define SIM_PATHSEP '\\'
-#define SIM_PATHSEP_S "\\"
 #else
 #define SIM_STRNCPY strncpy
-#define SIM_PATHSEP '/'
-#define SIM_PATHSEP_S "/"
 #endif
 
 void sim_sb_new(sim_sb *sb, unsigned size) {
