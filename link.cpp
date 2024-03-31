@@ -44,34 +44,28 @@ static void visit(things &t, const dag::node *n) {
   }
 }
 std::string link(const dag::node *n, uint64_t mtime) {
-  auto main_src = n->source();
-
   things t{};
   dag::visit(n, true, [&](auto *n) { visit(t, n); });
 
   std::string ext = n->dll() ? cur_ctx().dll_ext : "exe";
-  SmallString<128> exe{};
-  in2out(main_src, exe, ext);
+  sim_sbt exe{256};
+  in2out(n->source_sb(), &exe, ext.c_str());
 
   if (n->app()) {
-    sim_sbt exe2{256};
-    sim_sb_copy(&exe2, exe.c_str());
-
     sim_sbt stem{256};
-    sim_sb_path_copy_sb_stem(&stem, &exe2);
+    sim_sb_path_copy_sb_stem(&stem, &exe);
 
-    cur_ctx().app_exe_path(&exe2, stem.buffer);
-    exe = exe2.buffer;
+    cur_ctx().app_exe_path(&exe, stem.buffer);
 
-    sim_sb_path_parent(&exe2);
-    sys::fs::create_directories(exe2.buffer);
+    sim_sbt path{256};
+    sim_sb_path_copy_parent(&path, exe.buffer);
+    sys::fs::create_directories(path.buffer);
   }
 
-  if (mtime < mtime_of(exe.c_str()))
-    return std::string{exe};
+  if (mtime < mtime_of(exe.buffer))
+    return std::string{exe.buffer};
 
-  exe.c_str();
-  vlog("linking", exe.data());
+  vlog("linking", exe.buffer);
 
   evoker e{};
   for (auto &p : t.args) {
@@ -83,6 +77,6 @@ std::string link(const dag::node *n, uint64_t mtime) {
   for (auto l : cur_ctx().link_flags) {
     e.push_arg(l);
   }
-  e.set_out(exe);
-  return e.execute() ? std::string{exe} : std::string{};
+  e.set_out(exe.buffer);
+  return e.execute() ? std::string{exe.buffer} : std::string{};
 }

@@ -98,6 +98,9 @@ public:
     return m_root == root_t::tool;
   }
 
+  [[nodiscard]] constexpr const sim_sb *source_sb() const noexcept {
+    return &m_source;
+  }
   [[nodiscard]] constexpr const char *source() const noexcept {
     return m_source.buffer;
   }
