@@ -1,6 +1,11 @@
 #include "droid_path.hpp"
+
 #include "../minirent/minirent.h"
 #include "../mtime/mtime.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 static bool error(const char *msg) {
   fprintf(stderr, "error: %s\n", msg);
