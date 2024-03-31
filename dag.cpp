@@ -18,7 +18,8 @@ static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
     return false;
 
   SmallString<256> abs{};
-  real_abs(abs, path);
+  sys::fs::real_path(path, abs);
+  sys::fs::make_absolute(abs);
 
   set.insert(abs);
   return true;
