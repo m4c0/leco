@@ -1,12 +1,6 @@
 #ifndef SIM_H
 #define SIM_H
 
-#include <assert.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -58,6 +52,15 @@ struct sim_sbt : sim_sb {
 #endif // SIM_H
 
 #ifdef SIM_IMPLEMENTATION
+#ifdef __linux__
+#include <linux/limits.h>
+#endif
+
+#include <assert.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 // TODO: add "SIM_ASSERT"
 #define SIM_MALLOC malloc
@@ -237,7 +240,7 @@ void sim_sb_path_copy_real(sim_sb *dst, const char *path) {
 #else
   assert(dst->size >= PATH_MAX &&
          "destination buffer should have PATH_MAX in size");
-  realpath(path, dst->buffer);
+  auto _ = realpath(path, dst->buffer);
 #endif
   dst->len = strlen(dst->buffer);
 }
