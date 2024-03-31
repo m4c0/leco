@@ -1,10 +1,10 @@
 #include "dag.hpp"
 #include <fstream>
 
-static void persist(std::ostream &o, const llvm::StringSet<> &items) {
+static void persist(std::ostream &o, const std::set<std::string> &items) {
   o << items.size() << "\n";
   for (const auto &s : items) {
-    o << s.first().str() << "\n";
+    o << s << "\n";
   }
 }
 static void persist(std::ostream &o, const dag::node *n) {
@@ -26,7 +26,7 @@ void dag::node::write_to_cache_file() const {
   persist(of, this);
 }
 
-static bool read(std::istream &f, dag::node *n, llvm::StringSet<> *set) {
+static bool read(std::istream &f, dag::node *n, std::set<std::string> *set) {
   int size{};
   f >> size;
   char c = f.get();

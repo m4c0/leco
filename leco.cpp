@@ -4,7 +4,7 @@
 
 #include "../minirent/minirent.h"
 
-using namespace llvm;
+#include <string.h>
 
 static bool error() {
   fprintf(stderr, "Could not list current directory: %s\n", strerror(errno));

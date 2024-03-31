@@ -5,6 +5,7 @@
 #include "in2out.hpp"
 #include "llvm/Support/FileSystem.h"
 #include <fstream>
+#include <map>
 
 using namespace llvm;
 
@@ -13,15 +14,13 @@ static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
   sys::fs::real_path(path, buf);
   sys::fs::make_absolute(buf);
 }
-[[nodiscard]] static bool add_real_abs(StringSet<> &set, StringRef path) {
+[[nodiscard]] static bool add_real_abs(std::set<std::string> &set, StringRef path) {
   if (!path_exists(path.str().c_str()))
     return false;
 
-  SmallString<256> abs{};
-  sys::fs::real_path(path, abs);
-  sys::fs::make_absolute(abs);
-
-  set.insert(abs);
+  sim_sbt abs{};
+  sim_sb_path_copy_real(&abs, path.str().c_str());
+  set.insert(abs.buffer);
   return true;
 }
 
@@ -106,7 +105,7 @@ bool dag::node::add_shader(const char *shader) {
   return add_real_abs(m_shaders, shader);
 }
 
-static StringMap<dag::node> cache{};
+static std::map<std::string, dag::node> cache{};
 void dag::clear_cache() { cache.clear(); }
 
 void dag::errlog(const dag::node *n, const char *msg) {
@@ -150,13 +149,13 @@ static auto find(const char *path) {
 
 static bool recurse(dag::node *n) {
   for (auto &dep : n->mod_deps()) {
-    if (dep.first() == n->source()) {
+    if (dep == n->source()) {
       errs() << "Self-referencing detected - are you using `import "
                 "<mod>:<part>` instead of `import :<part>`?\n";
       return false;
     }
 
-    auto [d, ins] = find(dep.first().str().c_str());
+    auto [d, ins] = find(dep.c_str());
 
     if (!d)
       return false;
@@ -172,7 +171,7 @@ static bool recurse(dag::node *n) {
   for (auto &impl : n->mod_impls()) {
     // TODO: remove once mod_impls is sim
     sim_sbt imp{};
-    sim_sb_copy(&imp, impl.first().str().c_str());
+    sim_sb_copy(&imp, impl.c_str());
 
     auto [d, ins] = find(imp.buffer);
 
@@ -221,7 +220,7 @@ void dag::visit(const dag::node *n, bool impls, void *ptr,
       return;
 
     for (auto &d : n->mod_deps()) {
-      rec(rec, get_node(d.first().str().c_str()));
+      rec(rec, get_node(d.c_str()));
     }
 
     fn(ptr, n);
@@ -229,14 +228,14 @@ void dag::visit(const dag::node *n, bool impls, void *ptr,
 
     if (impls)
       for (auto &d : n->mod_impls()) {
-        rec(rec, get_node(d.first().str().c_str()));
+        rec(rec, get_node(d.c_str()));
       }
   };
   rec(rec, n);
 }
 uint64_t dag::visit_dirty(const dag::node *n, void *ptr,
                           void (*fn)(void *, const dag::node *)) {
-  StringMap<uint64_t> visited{};
+  std::map<std::string, uint64_t> visited{};
 
   uint64_t max{};
   const auto rec = [&](auto rec, auto *n, uint64_t pmt) -> uint64_t {
@@ -250,7 +249,7 @@ uint64_t dag::visit_dirty(const dag::node *n, void *ptr,
     mtime = mtime > pmt ? mtime : pmt;
 
     for (auto &d : n->mod_deps()) {
-      auto dmt = rec(rec, get_node(d.first().str().c_str()), {});
+      auto dmt = rec(rec, get_node(d.c_str()), {});
       mtime = mtime > dmt ? mtime : dmt;
     }
 
@@ -264,7 +263,7 @@ uint64_t dag::visit_dirty(const dag::node *n, void *ptr,
     visited[n->source()] = mtime;
 
     for (auto &d : n->mod_impls()) {
-      rec(rec, get_node(d.first().str().c_str()), mtime);
+      rec(rec, get_node(d.c_str()), mtime);
     }
 
     return mtime;

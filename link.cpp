@@ -26,21 +26,21 @@ static void visit(things &t, const dag::node *n) {
   t.args.push_back(n->target());
 
   for (auto &fw : n->frameworks()) {
-    auto [it, added] = t.frameworks.insert(fw.first().str());
+    auto [it, added] = t.frameworks.insert(fw);
     if (added) {
       t.args.push_back("-framework");
-      t.args.push_back(fw.first().str());
+      t.args.push_back(fw);
     }
   }
   for (auto &lib : n->libraries()) {
-    auto [it, added] = t.libraries.insert(lib.first().str());
+    auto [it, added] = t.libraries.insert(lib);
     if (added)
-      t.args.push_back("-l" + lib.first().str());
+      t.args.push_back("-l" + lib);
   }
   for (auto &lib : n->library_dirs()) {
-    auto [id, added] = t.library_dirs.insert(lib.first().str());
+    auto [id, added] = t.library_dirs.insert(lib);
     if (added)
-      t.args.push_back("-L" + lib.first().str());
+      t.args.push_back("-L" + lib);
   }
 }
 std::string link(const dag::node *n, uint64_t mtime) {

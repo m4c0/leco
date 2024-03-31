@@ -1,6 +1,7 @@
 #pragma once
 #include "context.hpp"
 #include "sim.hpp"
+#include <string.h>
 
 static void in2out(const sim_sb *in, sim_sb *out, const char *ext) {
   sim_sb_copy(out, in->buffer);

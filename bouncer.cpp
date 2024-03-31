@@ -15,8 +15,9 @@ using namespace llvm;
 
 static bool compile_shaders(const dag::node *n, const char *res_path) {
   for (auto &s : n->shaders()) {
+    // TODO: remove when set is sim
     sim_sbt in{};
-    sim_sb_copy(&in, s.first().str().c_str());
+    sim_sb_copy(&in, s.c_str());
 
     sim_sbt out{};
     sim_sb_path_copy_append(&out, res_path, sim_sb_path_filename(&in));
@@ -39,8 +40,9 @@ static void copy_exes(const dag::node *n, const char *exe_path) {
   const auto &rpath = cur_ctx().rpath;
 
   for (auto &e : n->executables()) {
+    // TODO: remove when set is sim
     sim_sbt ef{};
-    sim_sb_copy(&ef, e.first().str().c_str());
+    sim_sb_copy(&ef, e.c_str());
 
     sim_sbt path{};
     sim_sb_path_copy_parent(&path, exe_path);
@@ -59,8 +61,9 @@ static void copy_exes(const dag::node *n, const char *exe_path) {
 }
 static void copy_resources(const dag::node *n, const char *res_path) {
   for (auto &r : n->resources()) {
+    // TODO: remove when set is sim
     sim_sbt rf{};
-    sim_sb_copy(&rf, r.first().str().c_str());
+    sim_sb_copy(&rf, r.c_str());
 
     sim_sbt path{};
     sim_sb_path_copy_append(&path, res_path, sim_sb_path_filename(&rf));
@@ -105,7 +108,7 @@ bool bounce(const char *path) {
       outs() << "  " << n->module_name() << " ==> " << n->module_pcm() << "\n";
     });
     for (auto &d : n->mod_impls()) {
-      auto impl = dag::get_node(d.first().str().c_str());
+      auto impl = dag::get_node(d.c_str());
       outs() << "  -- impl: " << impl->source() << "\n";
       dag::visit(impl, false, [&](auto *n) {
         outs() << "     " << n->module_name() << " ==> " << n->module_pcm()

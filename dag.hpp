@@ -1,6 +1,5 @@
 #pragma once
 #include "sim.hpp"
-#include "llvm/ADT/StringSet.h"
 #include <set>
 #include <string>
 
@@ -19,15 +18,15 @@ class node {
   sim_sbt m_dag{};
   sim_sbt m_module_name{};
   sim_sbt m_module_pcm{};
-  llvm::StringSet<> m_executables{};
-  llvm::StringSet<> m_frameworks{};
-  llvm::StringSet<> m_include_dirs{};
-  llvm::StringSet<> m_libraries{};
-  llvm::StringSet<> m_library_dirs{};
-  llvm::StringSet<> m_mod_deps{};
-  llvm::StringSet<> m_mod_impls{};
-  llvm::StringSet<> m_resources{};
-  llvm::StringSet<> m_shaders{};
+  std::set<std::string> m_executables{};
+  std::set<std::string> m_frameworks{};
+  std::set<std::string> m_include_dirs{};
+  std::set<std::string> m_libraries{};
+  std::set<std::string> m_library_dirs{};
+  std::set<std::string> m_mod_deps{};
+  std::set<std::string> m_mod_impls{};
+  std::set<std::string> m_resources{};
+  std::set<std::string> m_shaders{};
   bool m_compiled{};
   root_t m_root{};
   bool m_recursed{};
