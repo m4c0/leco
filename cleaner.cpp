@@ -3,10 +3,12 @@
 #include "cl.hpp"
 #include "dag.hpp"
 #include "sim.hpp"
-#include "llvm/Support/FileSystem.h"
-#include <set>
 
-using namespace llvm;
+#include "../minirent/minirent.h"
+
+#include <assert.h>
+#include <unistd.h>
+#include <set>
 
 static void remove_parent(std::set<std::string> &already_done,
                           const dag::node *n) {
@@ -15,8 +17,18 @@ static void remove_parent(std::set<std::string> &already_done,
   sim_sb_path_copy_parent(&path, n->target());
 
   auto [it, inserted] = already_done.insert(path.buffer);
-  if (inserted)
-    sys::fs::remove_directories(path.buffer);
+  if (!inserted)
+    return;
+
+  DIR * dir = opendir(path.buffer);
+  dirent *ds;
+  while ((ds = readdir(dir)) != nullptr) {
+    if (ds->d_name[0] == '.') continue;
+    sim_sb_path_append(&path, ds->d_name);
+    unlink(path.buffer);
+    sim_sb_path_parent(&path);
+  }
+  closedir(dir);
 }
 
 void clean(const dag::node *n) {
