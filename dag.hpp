@@ -128,26 +128,13 @@ node *get_node(const char *source);
 node *process(const char *path);
 void clear_cache();
 
+void visit(const node *n, bool impls, void *ptr,
+           void (*fn)(void *, const node *));
 void visit(const node *n, bool impls, auto &&fn) {
-  std::set<std::string> visited{};
-
-  const auto rec = [&](auto rec, auto *n) {
-    if (visited.contains(n->source()))
-      return;
-
-    for (auto &d : n->mod_deps()) {
-      rec(rec, get_node(d.first().str().c_str()));
-    }
-
-    fn(n);
-    visited.insert(n->source());
-
-    if (impls)
-      for (auto &d : n->mod_impls()) {
-        rec(rec, get_node(d.first().str().c_str()));
-      }
-  };
-  rec(rec, n);
+  visit(n, impls, &fn, [](void *p, const node *nn) {
+    auto pfn = static_cast<decltype(&fn)>(p);
+    pfn(nn);
+  });
 }
 uint64_t visit_dirty(const node *n, llvm::function_ref<void(const node *)> fn);
 } // namespace dag

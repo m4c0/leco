@@ -212,6 +212,28 @@ dag::node *dag::process(const char *path) {
   return recurse(n) ? n : nullptr;
 }
 
+void dag::visit(const dag::node *n, bool impls, void *ptr,
+                void (*fn)(void *, const dag::node *)) {
+  std::set<std::string> visited{};
+
+  const auto rec = [&](auto rec, auto *n) {
+    if (visited.contains(n->source()))
+      return;
+
+    for (auto &d : n->mod_deps()) {
+      rec(rec, get_node(d.first().str().c_str()));
+    }
+
+    fn(ptr, n);
+    visited.insert(n->source());
+
+    if (impls)
+      for (auto &d : n->mod_impls()) {
+        rec(rec, get_node(d.first().str().c_str()));
+      }
+  };
+  rec(rec, n);
+}
 uint64_t dag::visit_dirty(const node *n, function_ref<void(const node *)> fn) {
   StringMap<uint64_t> visited{};
 
