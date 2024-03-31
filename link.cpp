@@ -48,16 +48,16 @@ std::string link(const dag::node *n, uint64_t mtime) {
   dag::visit(n, true, [&](auto *n) { visit(t, n); });
 
   std::string ext = n->dll() ? cur_ctx().dll_ext : "exe";
-  sim_sbt exe{256};
+  sim_sbt exe{};
   in2out(n->source_sb(), &exe, ext.c_str());
 
   if (n->app()) {
-    sim_sbt stem{256};
+    sim_sbt stem{};
     sim_sb_path_copy_sb_stem(&stem, &exe);
 
     cur_ctx().app_exe_path(&exe, stem.buffer);
 
-    sim_sbt path{256};
+    sim_sbt path{};
     sim_sb_path_copy_parent(&path, exe.buffer);
     sys::fs::create_directories(path.buffer);
   }

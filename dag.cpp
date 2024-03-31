@@ -52,7 +52,7 @@ bool dag::node::add_library_dir(const char *dir) {
   return add_real_abs(m_library_dirs, dir);
 }
 bool dag::node::add_mod_dep(const char *mod_name) {
-  sim_sbt pp{256};
+  sim_sbt pp{};
   sim_sb_copy(&pp, mod_name);
 
   // Module parts
@@ -60,7 +60,7 @@ bool dag::node::add_mod_dep(const char *mod_name) {
   if (p != nullptr) {
     *p = '-';
 
-    sim_sbt dep{256};
+    sim_sbt dep{};
     sim_sb_path_copy_parent(&dep, source());
     sim_sb_path_append(&dep, pp.buffer);
     sim_sb_concat(&dep, ".cppm");
@@ -69,7 +69,7 @@ bool dag::node::add_mod_dep(const char *mod_name) {
   }
 
   // Module in the same folder
-  sim_sbt dep{256};
+  sim_sbt dep{};
   sim_sb_path_copy_parent(&dep, source());
   sim_sb_path_append(&dep, mod_name);
   sim_sb_concat(&dep, ".cppm");
@@ -171,7 +171,7 @@ static bool recurse(dag::node *n) {
   }
   for (auto &impl : n->mod_impls()) {
     // TODO: remove once mod_impls is sim
-    sim_sbt imp{256};
+    sim_sbt imp{};
     sim_sb_copy(&imp, impl.first().str().c_str());
 
     auto [d, ins] = find(imp.buffer);

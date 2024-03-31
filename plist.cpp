@@ -66,7 +66,7 @@ void gen(std::ostream &o, auto &&fn) {
 }
 
 void common_app_plist(dict &d, const char *name, const char *sdk) {
-  sim_sbt id{256};
+  sim_sbt id{};
   sim_sb_printf(&id, "br.com.tpk.%s", name);
 
   d.string("CFBundleDevelopmentRegion", "en");
@@ -90,7 +90,7 @@ void common_app_plist(dict &d, const char *name, const char *sdk) {
 [[nodiscard]] static const char *team_id() { return env("LECO_IOS_TEAM"); }
 
 void merge_icon_partial(const char *build_path, std::ostream &o) {
-  sim_sbt plist{256};
+  sim_sbt plist{};
   sim_sb_path_copy_append(&plist, build_path, "icon-partial.plist");
 
   auto i = std::ifstream{plist.buffer};
@@ -109,7 +109,7 @@ void merge_icon_partial(const char *build_path, std::ostream &o) {
 
 void gen_info_plist(const char *exe_path, const char *name,
                     const char *build_path) {
-  sim_sbt path{256};
+  sim_sbt path{};
   sim_sb_path_copy_append(&path, exe_path, "Info.plist");
 
   std::ofstream o{path.buffer};
@@ -130,13 +130,13 @@ void gen_info_plist(const char *exe_path, const char *name,
   });
 }
 void gen_archive_plist(const char *xca_path, const char *name) {
-  sim_sbt path{256};
+  sim_sbt path{};
   sim_sb_path_copy_append(&path, xca_path, "Info.plist");
 
-  sim_sbt id{256};
+  sim_sbt id{};
   sim_sb_printf(&id, "br.com.tpk.%s", name);
 
-  sim_sbt app_path{256};
+  sim_sbt app_path{};
   sim_sb_printf(&app_path, "Applications/%s.app", name);
 
   std::ofstream o{path.buffer};
@@ -157,10 +157,10 @@ void gen_archive_plist(const char *xca_path, const char *name) {
   });
 }
 void gen_export_plist(const char *build_path, const char *name) {
-  sim_sbt path{256};
+  sim_sbt path{};
   sim_sb_path_copy_append(&path, build_path, "export.plist");
 
-  sim_sbt id{256};
+  sim_sbt id{};
   sim_sb_printf(&id, "br.com.tpk.%s", name);
 
   std::ofstream o{path.buffer};
@@ -175,7 +175,7 @@ void gen_export_plist(const char *build_path, const char *name) {
 }
 
 static bool compile_launch(const char *bundle_path) {
-  sim_sbt cmd{256};
+  sim_sbt cmd{};
   sim_sb_printf(&cmd,
                 "ibtool ../leco/launch.storyboard "
                 "--compile %s/Base.lproj/launch.storyboard",
@@ -184,7 +184,7 @@ static bool compile_launch(const char *bundle_path) {
   return 0 == std::system(cmd.buffer);
 }
 static bool code_sign(const char *bundle_path) {
-  sim_sbt cmd{256};
+  sim_sbt cmd{};
   sim_sb_printf(&cmd, "codesign -f -s %s %s", team_id(), bundle_path);
   // TODO: improve error
   return 0 == std::system(cmd.buffer);
@@ -200,15 +200,15 @@ static bool export_archive(const char *bundle_path, const char *xca_path) {
   return 0 == system(cmd.buffer);
 }
 void gen_iphone_plists(const char *exe, const char *name) {
-  sim_sbt app_path{256};
+  sim_sbt app_path{};
   sim_sb_path_copy_parent(&app_path, exe);
 
-  sim_sbt exca{256};
+  sim_sbt exca{};
   sim_sb_path_copy_parent(&exca, app_path.buffer); // Applications
   sim_sb_path_parent(&exca);                       // Products
   sim_sb_path_parent(&exca);                       // exports.xcarchive
 
-  sim_sbt build_path{256};
+  sim_sbt build_path{};
   sim_sb_path_copy_parent(&build_path, exca.buffer);
 
   gen_info_plist(app_path.buffer, name, build_path.buffer);

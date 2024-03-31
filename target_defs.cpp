@@ -8,7 +8,7 @@ context android(const char *tgt) {
   std::vector<std::string> predefs{};
   predefs.push_back("LECO_TARGET_ANDROID");
 
-  sim_sbt llvm{256};
+  sim_sbt llvm{};
   find_android_llvm(&llvm);
   sim_sb_path_append(&llvm, "sysroot");
   return context{
@@ -23,7 +23,7 @@ context android(const char *tgt) {
 }
 static std::string apple_sysroot(const char *sdk) {
 #ifdef __APPLE__
-  sim_sbt cmd{256};
+  sim_sbt cmd{};
   sim_sb_printf(&cmd, "xcrun --show-sdk-path --sdk %s", sdk);
 
   char buf[256];

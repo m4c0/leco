@@ -14,14 +14,14 @@ bool compile(const dag::node *n) {
   auto file = n->source();
   auto obj = n->target();
 
-  sim_sbt path{256};
+  sim_sbt path{};
   sim_sb_path_copy_parent(&path, obj);
   sys::fs::create_directories(path.buffer);
 
   vlog("compiling", obj);
 
   // TODO: remove extra copy when "obj" becomes a sim_sb
-  sim_sbt f2{256};
+  sim_sbt f2{};
   sim_sb_copy(&f2, file);
   auto ext = sim_sb_path_extension(&f2);
   if (strcmp(ext, ".cppm") == 0) {

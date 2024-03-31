@@ -14,11 +14,11 @@ enum class root_t {
 };
 
 class node {
-  sim_sbt m_source{256};
-  sim_sbt m_target{256};
-  sim_sbt m_dag{256};
-  sim_sbt m_module_name{256};
-  sim_sbt m_module_pcm{256};
+  sim_sbt m_source{};
+  sim_sbt m_target{};
+  sim_sbt m_dag{};
+  sim_sbt m_module_name{};
+  sim_sbt m_module_pcm{};
   llvm::StringSet<> m_executables{};
   llvm::StringSet<> m_frameworks{};
   llvm::StringSet<> m_include_dirs{};

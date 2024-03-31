@@ -26,7 +26,7 @@ static bool find_latest_ndk(sim_sb *res) {
   if (!exists(res))
     return error("ANDROID_SDK_ROOT path does not contain a folder named 'sdk'");
 
-  sim_sbt max{256};
+  sim_sbt max{};
   sim_sb_copy(&max, "");
 
   DIR *dir = opendir(res->buffer);

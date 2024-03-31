@@ -36,7 +36,7 @@ public:
   }
 };
 void gen(const char *path, function_ref<void(dict &&)> fn) {
-  sim_sbt file{256};
+  sim_sbt file{};
   sim_sb_path_copy_append(&file, path, "Contents.json");
 
   FILE *f = fopen(file.buffer, "w");
@@ -63,31 +63,31 @@ static void create_icon_contents(const char *path) {
 }
 
 static void copy_icon(const char *path) {
-  sim_sbt file{256};
+  sim_sbt file{};
   sim_sb_path_copy_append(&file, path, "icon.png");
   sys::fs::copy_file("icon.png", file.buffer);
 }
 
 bool actool(const char *path) {
-  sim_sbt app_path{256};
+  sim_sbt app_path{};
   sim_sb_path_copy_parent(&app_path, path);
 
-  sim_sbt prod{256};
+  sim_sbt prod{};
   sim_sb_path_copy_parent(&prod, app_path.buffer);
 
-  sim_sbt exca{256};
+  sim_sbt exca{};
   sim_sb_path_copy_parent(&exca, prod.buffer);
 
-  sim_sbt build_path{256};
+  sim_sbt build_path{};
   sim_sb_path_copy_parent(&build_path, exca.buffer);
 
-  sim_sbt plist{256};
+  sim_sbt plist{};
   sim_sb_path_copy_append(&plist, build_path.buffer, "icon-partial.plist");
 
-  sim_sbt xcassets{256};
+  sim_sbt xcassets{};
   sim_sb_path_copy_append(&xcassets, build_path.buffer, "Assets.xcassets");
 
-  sim_sbt appiconset{256};
+  sim_sbt appiconset{};
   sim_sb_path_copy_append(&appiconset, xcassets.buffer, "AppIcon.appiconset");
 
   sys::fs::create_directories(xcassets.buffer);

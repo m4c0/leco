@@ -15,10 +15,10 @@ using namespace llvm;
 
 static bool compile_shaders(const dag::node *n, const char *res_path) {
   for (auto &s : n->shaders()) {
-    sim_sbt in{256};
+    sim_sbt in{};
     sim_sb_copy(&in, s.first().str().c_str());
 
-    sim_sbt out{256};
+    sim_sbt out{};
     sim_sb_path_copy_append(&out, res_path, sim_sb_path_filename(&in));
     sim_sb_concat(&out, ".spv");
 
@@ -39,10 +39,10 @@ static void copy_exes(const dag::node *n, const char *exe_path) {
   const auto &rpath = cur_ctx().rpath;
 
   for (auto &e : n->executables()) {
-    sim_sbt ef{256};
+    sim_sbt ef{};
     sim_sb_copy(&ef, e.first().str().c_str());
 
-    sim_sbt path{256};
+    sim_sbt path{};
     sim_sb_path_copy_parent(&path, exe_path);
     if (rpath != "") {
       sim_sb_path_append(&path, rpath.c_str());
@@ -59,10 +59,10 @@ static void copy_exes(const dag::node *n, const char *exe_path) {
 }
 static void copy_resources(const dag::node *n, const char *res_path) {
   for (auto &r : n->resources()) {
-    sim_sbt rf{256};
+    sim_sbt rf{};
     sim_sb_copy(&rf, r.first().str().c_str());
 
-    sim_sbt path{256};
+    sim_sbt path{};
     sim_sb_path_copy_append(&path, res_path, sim_sb_path_filename(&rf));
 
     if (mtime_of(path.buffer) > mtime_of(rf.buffer))
@@ -74,7 +74,7 @@ static void copy_resources(const dag::node *n, const char *res_path) {
 }
 
 bool bounce(const char *path) {
-  sim_sbt pp{256};
+  sim_sbt pp{};
   sim_sb_copy(&pp, path);
 
   auto ext = sim_sb_path_extension(&pp);
@@ -134,7 +134,7 @@ bool bounce(const char *path) {
 
   auto exe_path = link(n, mtime);
   if (exe_path != "" && n->app()) {
-    sim_sbt res_path{256};
+    sim_sbt res_path{};
     sim_sb_copy(&res_path, exe_path.c_str());
     cur_ctx().app_res_path(&res_path);
     sys::fs::create_directories(res_path.buffer);
@@ -148,7 +148,7 @@ bool bounce(const char *path) {
     if (!success)
       return false;
 
-    sim_sbt stem{256};
+    sim_sbt stem{};
     sim_sb_path_copy_sb_stem(&stem, &pp);
     cur_ctx().bundle(exe_path.c_str(), stem.buffer);
   }

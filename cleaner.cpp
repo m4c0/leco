@@ -11,7 +11,7 @@ using namespace llvm;
 static void remove_parent(std::set<std::string> &already_done,
                           const dag::node *n) {
   // TODO: move "parent path" to dag, since it has multiple uses
-  sim_sbt path{256};
+  sim_sbt path{};
   sim_sb_path_copy_parent(&path, n->target());
 
   auto [it, inserted] = already_done.insert(path.buffer);

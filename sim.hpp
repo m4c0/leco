@@ -1,7 +1,13 @@
 #pragma once
-#include "sim.hpp"
+#include "sim.h"
+#ifdef __linux__
+#include <linux/limits.h>
+#else
+#include <limits.h>
+#endif
 
 struct sim_sbt : sim_sb {
+  sim_sbt() { sim_sb_new(this, PATH_MAX); }
   sim_sbt(unsigned sz) { sim_sb_new(this, sz); }
   ~sim_sbt() { sim_sb_delete(this); }
 
