@@ -1,6 +1,8 @@
 #pragma once
 #include "sim.h"
 #include "llvm/ADT/StringSet.h"
+#include <set>
+#include <string>
 
 namespace dag {
 enum class root_t {
@@ -127,7 +129,7 @@ node *process(const char *path);
 void clear_cache();
 
 void visit(const node *n, bool impls, auto &&fn) {
-  llvm::StringSet<> visited{};
+  std::set<std::string> visited{};
 
   const auto rec = [&](auto rec, auto *n) {
     if (visited.contains(n->source()))
