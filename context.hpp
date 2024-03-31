@@ -1,12 +1,12 @@
 #pragma once
 #include "sim.h"
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/StringRef.h"
+#include <string>
+#include <vector>
 
 struct context {
-  llvm::ArrayRef<llvm::StringRef> predefs{};
-  llvm::ArrayRef<llvm::StringRef> cxx_flags{};
-  llvm::ArrayRef<llvm::StringRef> link_flags{};
+  std::vector<std::string> predefs{};
+  std::vector<std::string> cxx_flags{};
+  std::vector<std::string> link_flags{};
   std::string target{};
   std::string sysroot{};
   std::string rpath{};

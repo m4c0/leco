@@ -3,19 +3,17 @@
 #include "droid_path.hpp"
 #include "plist.hpp"
 
-using namespace llvm;
-
 namespace t::impl {
-context android(StringRef tgt) {
-  static SmallVector<StringRef, 3> predefs{{
-      "LECO_TARGET_ANDROID",
-  }};
+context android(const char *tgt) {
+  std::vector<std::string> predefs{};
+  predefs.push_back("LECO_TARGET_ANDROID");
+
   sim_sbt llvm{256};
   find_android_llvm(&llvm);
   sim_sb_path_append(&llvm, "sysroot");
   return context{
       .predefs = predefs,
-      .target = tgt.str(),
+      .target = tgt,
       .sysroot = llvm.buffer,
       .dll_ext = "so",
       .app_exe_path = [](auto exe, auto stem) {},
@@ -43,27 +41,24 @@ static std::string apple_sysroot(const char *sdk) {
   return "";
 #endif
 }
-llvm::ArrayRef<llvm::StringRef> macos_link_flags() {
-  static SmallVector<StringRef, 3> flags{{
-      "-rpath",
-      "@executable_path",
-  }};
+std::vector<std::string> macos_link_flags() {
+  std::vector<std::string> flags{};
+  flags.push_back("-rpath");
+  flags.push_back("@executable_path");
   return flags;
 }
-llvm::ArrayRef<llvm::StringRef> ios_link_flags() {
-  static SmallVector<StringRef, 3> flags{{
-      "-rpath",
-      "@executable_path/Frameworks",
-  }};
+std::vector<std::string> ios_link_flags() {
+  std::vector<std::string> flags{};
+  flags.push_back("-rpath");
+  flags.push_back("@executable_path/Frameworks");
   return flags;
 }
 } // namespace t::impl
 namespace t {
 context macosx() {
-  static SmallVector<StringRef, 2> predefs{{
-      "LECO_TARGET_MACOSX",
-      "LECO_TARGET_APPLE",
-  }};
+  std::vector<std::string> predefs{};
+  predefs.push_back("LECO_TARGET_MACOSX");
+  predefs.push_back("LECO_TARGET_APPLE");
   return context{
       .predefs = predefs,
       .link_flags = impl::macos_link_flags(),
@@ -89,11 +84,10 @@ context macosx() {
   };
 }
 context iphoneos() {
-  static SmallVector<StringRef, 3> predefs{{
-      "LECO_TARGET_IPHONEOS",
-      "LECO_TARGET_IOS",
-      "LECO_TARGET_APPLE",
-  }};
+  std::vector<std::string> predefs{};
+  predefs.push_back("LECO_TARGET_IPHONEOS");
+  predefs.push_back("LECO_TARGET_IOS");
+  predefs.push_back("LECO_TARGET_APPLE");
   return context{
       .predefs = predefs,
       .link_flags = impl::ios_link_flags(),
@@ -120,11 +114,10 @@ context iphoneos() {
   };
 }
 context iphonesimulator() {
-  static SmallVector<StringRef, 3> predefs{{
-      "LECO_TARGET_IPHONESIMULATOR",
-      "LECO_TARGET_IOS",
-      "LECO_TARGET_APPLE",
-  }};
+  std::vector<std::string> predefs{};
+  predefs.push_back("LECO_TARGET_IPHONESIMULATOR");
+  predefs.push_back("LECO_TARGET_IOS");
+  predefs.push_back("LECO_TARGET_APPLE");
   return context{
       .predefs = predefs,
       .link_flags = impl::ios_link_flags(),
@@ -142,9 +135,8 @@ context iphonesimulator() {
 }
 
 context windows() {
-  static SmallVector<StringRef, 3> predefs{{
-      "LECO_TARGET_WINDOWS",
-  }};
+  std::vector<std::string> predefs{};
+  predefs.push_back("LECO_TARGET_WINDOWS");
   return context{
       .predefs = predefs,
       .target = "x86_64-pc-windows-msvc",
@@ -162,9 +154,8 @@ context windows() {
 }
 
 context linux() {
-  static SmallVector<StringRef, 3> predefs{{
-      "LECO_TARGET_LINUX",
-  }};
+  std::vector<std::string> predefs{};
+  predefs.push_back("LECO_TARGET_LINUX");
   return context{
       .predefs = predefs,
       .target = "x86_64-pc-linux-gnu",

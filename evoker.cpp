@@ -109,7 +109,7 @@ evoker::evoker() {
   }
 
   for (auto f : cur_ctx().cxx_flags) {
-    m_args.push_back(f.str());
+    m_args.push_back(f);
   }
 }
 
@@ -171,7 +171,7 @@ static std::string create_args_file(const auto &args, const dag::node *node) {
 #endif
 evoker &evoker::add_predefs() {
   for (auto def : cur_ctx().predefs) {
-    push_arg(std::string{"-D"} + def.str());
+    push_arg(std::string{"-D"} + def);
   }
   return *this;
 }
