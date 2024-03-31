@@ -36,15 +36,15 @@ public:
   bool read_from_cache_file();
   void write_to_cache_file() const;
 
-  [[nodiscard]] bool add_executable(llvm::StringRef e);
-  [[nodiscard]] bool add_include_dir(llvm::StringRef dir);
-  void add_framework(llvm::StringRef fw) { m_frameworks.insert(fw); }
-  void add_library(llvm::StringRef lib) { m_libraries.insert(lib); }
-  [[nodiscard]] bool add_library_dir(llvm::StringRef dir);
+  [[nodiscard]] bool add_executable(const char * e);
+  [[nodiscard]] bool add_include_dir(const char * dir);
+  void add_framework(const char * fw) { m_frameworks.insert(fw); }
+  void add_library(const char * lib) { m_libraries.insert(lib); }
+  [[nodiscard]] bool add_library_dir(const char * dir);
   [[nodiscard]] bool add_mod_dep(const char * mod_name);
-  [[nodiscard]] bool add_mod_impl(llvm::StringRef mod_impl);
-  [[nodiscard]] bool add_resource(llvm::StringRef res);
-  [[nodiscard]] bool add_shader(llvm::StringRef shd);
+  [[nodiscard]] bool add_mod_impl(const char * mod_impl);
+  [[nodiscard]] bool add_resource(const char * res);
+  [[nodiscard]] bool add_shader(const char * shd);
 
   void set_app() { m_root = root_t::app; }
   void set_compiled() { m_compiled = true; }

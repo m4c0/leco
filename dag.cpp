@@ -42,13 +42,13 @@ dag::node::node(const char *n) {
   infer_module_name(&m_module_name, &m_source);
 }
 
-bool dag::node::add_executable(llvm::StringRef executable) {
+bool dag::node::add_executable(const char * executable) {
   return add_real_abs(m_executables, executable);
 }
-bool dag::node::add_include_dir(llvm::StringRef dir) {
+bool dag::node::add_include_dir(const char * dir) {
   return add_real_abs(m_include_dirs, dir);
 }
-bool dag::node::add_library_dir(llvm::StringRef dir) {
+bool dag::node::add_library_dir(const char * dir) {
   return add_real_abs(m_library_dirs, dir);
 }
 bool dag::node::add_mod_dep(const char *mod_name) {
@@ -96,13 +96,13 @@ bool dag::node::add_mod_dep(const char *mod_name) {
   sim_sb_concat(&dep, ".cppm");
   return add_real_abs(m_mod_deps, dep.buffer);
 }
-bool dag::node::add_mod_impl(llvm::StringRef mod_impl) {
+bool dag::node::add_mod_impl(const char * mod_impl) {
   return add_real_abs(m_mod_impls, mod_impl);
 }
-bool dag::node::add_resource(llvm::StringRef resource) {
+bool dag::node::add_resource(const char * resource) {
   return add_real_abs(m_resources, resource);
 }
-bool dag::node::add_shader(llvm::StringRef shader) {
+bool dag::node::add_shader(const char * shader) {
   return add_real_abs(m_shaders, shader);
 }
 

@@ -68,12 +68,12 @@ class file_list_pragma : public id_list_pragma {
 protected:
   using id_list_pragma::id_list_pragma;
 
-  virtual bool process_file(StringRef f) = 0;
+  virtual bool process_file(const char * f) = 0;
 
   void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
     SmallString<256> in{fname};
     to_file(in, t);
-    if (!process_file(in))
+    if (!process_file(in.c_str()))
       report(pp, t, "file not found");
   }
 };
@@ -81,7 +81,7 @@ protected:
 struct add_dll_pragma : public file_list_pragma, node_holder {
   add_dll_pragma(node *n) : file_list_pragma{"add_dll"}, node_holder{n} {}
 
-  bool process_file(StringRef in) override {
+  bool process_file(const char * in) override {
     return m_node->add_executable(in);
   }
 };
@@ -92,10 +92,10 @@ struct add_impl_pragma : public file_list_pragma, node_holder {
 
   bool check_ext(auto &f, StringRef ext) {
     sys::path::replace_extension(f, ext);
-    return m_node->add_mod_impl(f);
+    return m_node->add_mod_impl(f.c_str());
   }
 
-  bool process_file(StringRef in) override {
+  bool process_file(const char * in) override {
     SmallString<128> f{in};
     return check_ext(f, "cpp") || check_ext(f, "mm") || check_ext(f, "m");
   }
@@ -107,7 +107,7 @@ struct add_framework_pragma : public id_list_pragma, node_holder {
 
   void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
     notify(pp, t, "added framework");
-    m_node->add_framework(to_str(t));
+    m_node->add_framework(to_str(t).str().c_str());
   }
 };
 
@@ -145,7 +145,7 @@ struct add_library_pragma : public id_list_pragma, node_holder {
 
   void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
     notify(pp, t, "added library");
-    m_node->add_library(to_str(t));
+    m_node->add_library(to_str(t).str().c_str());
   }
 };
 
@@ -153,7 +153,7 @@ struct add_library_dir_pragma : public file_list_pragma, node_holder {
   add_library_dir_pragma(node *n)
       : file_list_pragma{"add_library_dir"}, node_holder{n} {}
 
-  bool process_file(StringRef in) override {
+  bool process_file(const char * in) override {
     return m_node->add_library_dir(in);
   }
 };
@@ -162,13 +162,13 @@ struct add_resource_pragma : public file_list_pragma, node_holder {
   add_resource_pragma(node *n)
       : file_list_pragma{"add_resource"}, node_holder{n} {}
 
-  bool process_file(StringRef in) override { return m_node->add_resource(in); }
+  bool process_file(const char * in) override { return m_node->add_resource(in); }
 };
 
 struct add_shader_pragma : public file_list_pragma, node_holder {
   add_shader_pragma(node *n) : file_list_pragma{"add_shader"}, node_holder{n} {}
 
-  bool process_file(StringRef in) override { return m_node->add_shader(in); }
+  bool process_file(const char * in) override { return m_node->add_shader(in); }
 };
 
 struct app_pragma : public PragmaHandler, node_holder {
