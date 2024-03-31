@@ -3,23 +3,16 @@
 #include "../mtime/mtime.h"
 #include "cl.hpp"
 #include "in2out.hpp"
-#include "llvm/Support/FileSystem.h"
-#include <fstream>
 #include <map>
 
-using namespace llvm;
-
 static inline bool path_exists(const char *path) { return mtime_of(path) > 0; }
-static void real_abs(SmallVectorImpl<char> &buf, StringRef path) {
-  sys::fs::real_path(path, buf);
-  sys::fs::make_absolute(buf);
-}
-[[nodiscard]] static bool add_real_abs(std::set<std::string> &set, StringRef path) {
-  if (!path_exists(path.str().c_str()))
+[[nodiscard]] static bool add_real_abs(std::set<std::string> &set,
+                                       const char *path) {
+  if (!path_exists(path))
     return false;
 
   sim_sbt abs{};
-  sim_sb_path_copy_real(&abs, path.str().c_str());
+  sim_sb_path_copy_real(&abs, path);
   set.insert(abs.buffer);
   return true;
 }
@@ -109,7 +102,7 @@ static std::map<std::string, dag::node> cache{};
 void dag::clear_cache() { cache.clear(); }
 
 void dag::errlog(const dag::node *n, const char *msg) {
-  errs() << msg << " " << n->source() << "\n";
+  fprintf(stderr, "%s %s\n", msg, n->source());
 }
 void dag::xlog(const dag::node *n, const char *msg) {
   if (!is_extra_verbose())
@@ -150,8 +143,8 @@ static auto find(const char *path) {
 static bool recurse(dag::node *n) {
   for (auto &dep : n->mod_deps()) {
     if (dep == n->source()) {
-      errs() << "Self-referencing detected - are you using `import "
-                "<mod>:<part>` instead of `import :<part>`?\n";
+      fprintf(stderr, "Self-referencing detected - are you using `import "
+                      "<mod>:<part>` instead of `import :<part>`?\n");
       return false;
     }
 
