@@ -5,7 +5,7 @@
 #include "clang_dir.hpp"
 #include "context.hpp"
 #include "dag.hpp"
-#include "sim.h"
+#include "sim.hpp"
 #include "clang/Driver/Compilation.h"
 #include "clang/Driver/Driver.h"
 #include "clang/Frontend/CompilerInstance.h"

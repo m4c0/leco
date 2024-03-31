@@ -2,7 +2,7 @@
 
 #include "cl.hpp"
 #include "dag.hpp"
-#include "sim.h"
+#include "sim.hpp"
 #include "llvm/Support/FileSystem.h"
 #include <set>
 

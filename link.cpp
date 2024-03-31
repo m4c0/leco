@@ -7,7 +7,7 @@
 #include "evoker.hpp"
 #include "in2out.hpp"
 #include "log.hpp"
-#include "sim.h"
+#include "sim.hpp"
 #include "llvm/Support/FileSystem.h"
 #include <set>
 

@@ -3,7 +3,7 @@
 #include "dag.hpp"
 #include "evoker.hpp"
 #include "log.hpp"
-#include "sim.h"
+#include "sim.hpp"
 #include "llvm/Support/FileSystem.h"
 #include <set>
 

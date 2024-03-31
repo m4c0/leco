@@ -8,7 +8,7 @@
 #include "dag.hpp"
 #include "link.hpp"
 #include "log.hpp"
-#include "sim.h"
+#include "sim.hpp"
 #include "llvm/Support/FileSystem.h"
 
 using namespace llvm;

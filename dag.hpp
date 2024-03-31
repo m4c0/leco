@@ -1,5 +1,5 @@
 #pragma once
-#include "sim.h"
+#include "sim.hpp"
 #include "llvm/ADT/StringSet.h"
 #include <set>
 #include <string>

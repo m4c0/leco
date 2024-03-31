@@ -1,6 +1,6 @@
 #include "plist.hpp"
 #include "context.hpp"
-#include "sim.h"
+#include "sim.hpp"
 
 #include <fstream>
 

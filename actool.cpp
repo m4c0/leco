@@ -1,5 +1,5 @@
 #include "actool.hpp"
-#include "sim.h"
+#include "sim.hpp"
 #include "llvm/Support/FileSystem.h"
 
 using namespace llvm;
