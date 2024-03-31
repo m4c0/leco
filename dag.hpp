@@ -133,8 +133,14 @@ void visit(const node *n, bool impls, void *ptr,
 void visit(const node *n, bool impls, auto &&fn) {
   visit(n, impls, &fn, [](void *p, const node *nn) {
     auto pfn = static_cast<decltype(&fn)>(p);
-    pfn(nn);
+    (*pfn)(nn);
   });
 }
-uint64_t visit_dirty(const node *n, llvm::function_ref<void(const node *)> fn);
+uint64_t visit_dirty(const node *n, void *ptr, void (*fn)(void *, const node *));
+uint64_t visit_dirty(const node *n, auto &&fn) {
+  return visit_dirty(n, &fn, [](void *p, const node *nn) {
+    auto pfn = static_cast<decltype(&fn)>(p);
+    (*pfn)(nn);
+  });
+}
 } // namespace dag

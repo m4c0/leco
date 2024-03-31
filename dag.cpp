@@ -234,7 +234,8 @@ void dag::visit(const dag::node *n, bool impls, void *ptr,
   };
   rec(rec, n);
 }
-uint64_t dag::visit_dirty(const node *n, function_ref<void(const node *)> fn) {
+uint64_t dag::visit_dirty(const dag::node *n, void *ptr,
+                          void (*fn)(void *, const dag::node *)) {
   StringMap<uint64_t> visited{};
 
   uint64_t max{};
@@ -254,7 +255,7 @@ uint64_t dag::visit_dirty(const node *n, function_ref<void(const node *)> fn) {
     }
 
     if (mtime > mtime_of(n->target())) {
-      fn(n);
+      fn(ptr, n);
       // Get the mtime again after `fn` possibly changed it
       mtime = mtime_of(n->target());
     }
