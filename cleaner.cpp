@@ -12,7 +12,6 @@
 
 static void remove_parent(std::set<std::string> &already_done,
                           const dag::node *n) {
-  // TODO: move "parent path" to dag, since it has multiple uses
   sim_sbt path{};
   sim_sb_path_copy_parent(&path, n->target());
 
