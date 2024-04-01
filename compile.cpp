@@ -3,12 +3,9 @@
 #include "dag.hpp"
 #include "evoker.hpp"
 #include "log.hpp"
+#include "mkdir.hpp"
 #include "sim.hpp"
-#include "llvm/Support/FileSystem.h"
 #include <set>
-
-using namespace clang;
-using namespace llvm;
 
 bool compile(const dag::node *n) {
   auto file = n->source();
@@ -16,7 +13,7 @@ bool compile(const dag::node *n) {
 
   sim_sbt path{};
   sim_sb_path_copy_parent(&path, obj);
-  sys::fs::create_directories(path.buffer);
+  mkdirs(path.buffer);
 
   vlog("compiling", obj);
 

@@ -8,10 +8,9 @@
 #include "dag.hpp"
 #include "link.hpp"
 #include "log.hpp"
+#include "mkdir.hpp"
 #include "sim.hpp"
 #include "llvm/Support/FileSystem.h"
-
-using namespace llvm;
 
 static bool compile_shaders(const dag::node *n, const char *res_path) {
   for (auto &s : n->shaders()) {
@@ -48,7 +47,7 @@ static void copy_exes(const dag::node *n, const char *exe_path) {
     sim_sb_path_copy_parent(&path, exe_path);
     if (rpath != "") {
       sim_sb_path_append(&path, rpath.c_str());
-      sys::fs::create_directories(path.buffer);
+      mkdirs(path.buffer);
     }
     sim_sb_path_append(&path, sim_sb_path_filename(&ef));
 
@@ -56,7 +55,7 @@ static void copy_exes(const dag::node *n, const char *exe_path) {
       continue;
 
     vlog("copying library", path.buffer);
-    sys::fs::copy_file(ef.buffer, path.buffer);
+    llvm::sys::fs::copy_file(ef.buffer, path.buffer);
   }
 }
 static void copy_resources(const dag::node *n, const char *res_path) {
@@ -72,7 +71,7 @@ static void copy_resources(const dag::node *n, const char *res_path) {
       continue;
 
     vlog("copying resource", path.buffer);
-    sys::fs::copy_file(rf.buffer, path.buffer);
+    llvm::sys::fs::copy_file(rf.buffer, path.buffer);
   }
 }
 
@@ -115,7 +114,7 @@ bool bounce(const char *path) {
     sim_sbt res_path{};
     sim_sb_copy(&res_path, exe_path.c_str());
     cur_ctx().app_res_path(&res_path);
-    sys::fs::create_directories(res_path.buffer);
+    mkdirs(res_path.buffer);
 
     bool success = true;
     dag::visit(n, true, [&](auto *n) {

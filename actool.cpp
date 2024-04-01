@@ -1,8 +1,9 @@
 #include "actool.hpp"
+#include "mkdir.hpp"
 #include "sim.hpp"
-#include "llvm/Support/FileSystem.h"
+#include <stdio.h>
 
-using namespace llvm;
+#include "llvm/Support/FileSystem.h"
 
 namespace json {
 class dict {
@@ -35,7 +36,7 @@ public:
       fprintf(f, ",");
   }
 };
-void gen(const char *path, function_ref<void(dict &&)> fn) {
+void gen(const char *path, auto &&fn) {
   sim_sbt file{};
   sim_sb_path_copy_append(&file, path, "Contents.json");
 
@@ -65,7 +66,7 @@ static void create_icon_contents(const char *path) {
 static void copy_icon(const char *path) {
   sim_sbt file{};
   sim_sb_path_copy_append(&file, path, "icon.png");
-  sys::fs::copy_file("icon.png", file.buffer);
+  llvm::sys::fs::copy_file("icon.png", file.buffer);
 }
 
 bool actool(const char *path) {
@@ -90,8 +91,8 @@ bool actool(const char *path) {
   sim_sbt appiconset{};
   sim_sb_path_copy_append(&appiconset, xcassets.buffer, "AppIcon.appiconset");
 
-  sys::fs::create_directories(xcassets.buffer);
-  sys::fs::create_directories(appiconset.buffer);
+  mkdirs(xcassets.buffer);
+  mkdirs(appiconset.buffer);
 
   create_xca_contents(xcassets.buffer);
   create_icon_contents(appiconset.buffer);

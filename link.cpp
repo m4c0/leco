@@ -7,11 +7,9 @@
 #include "evoker.hpp"
 #include "in2out.hpp"
 #include "log.hpp"
+#include "mkdir.hpp"
 #include "sim.hpp"
-#include "llvm/Support/FileSystem.h"
 #include <set>
-
-using namespace llvm;
 
 namespace {
 struct things {
@@ -59,7 +57,7 @@ std::string link(const dag::node *n, uint64_t mtime) {
 
     sim_sbt path{};
     sim_sb_path_copy_parent(&path, exe.buffer);
-    sys::fs::create_directories(path.buffer);
+    mkdirs(path.buffer);
   }
 
   if (mtime < mtime_of(exe.buffer))
