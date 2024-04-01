@@ -7,8 +7,13 @@
 #include "../minirent/minirent.h"
 
 #include <assert.h>
-#include <unistd.h>
 #include <set>
+
+#ifdef _WIN32
+#define unlink _unlink
+#else
+#include <unistd.h>
+#endif
 
 static void remove_parent(std::set<std::string> &already_done,
                           const dag::node *n) {
