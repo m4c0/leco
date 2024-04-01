@@ -25,6 +25,9 @@ static void remove_parent(std::set<std::string> &already_done,
     return;
 
   DIR * dir = opendir(path.buffer);
+  if (dir == nullptr)
+    return;
+
   dirent *ds;
   while ((ds = readdir(dir)) != nullptr) {
     if (ds->d_name[0] == '.') continue;
