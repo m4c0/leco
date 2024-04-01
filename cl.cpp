@@ -27,9 +27,6 @@ bool enable_debug_syms() { return debug; }
 static bool optimise{};
 bool is_optimised() { return optimise; }
 
-static bool dump_dag{};
-bool is_dumping_dag() { return dump_dag; }
-
 enum targets {
   host = 0,
   apple,
@@ -109,8 +106,6 @@ bool usage() {
 
     -C -- change to this directory before build
 
-    -D -- dump DAG (useful for troubleshooting LECO itself or module dependencies)
-
     -g -- enable debug symbols
 
     -O -- enable optimisations
@@ -130,7 +125,7 @@ bool usage() {
 
 bool parse_args(int argc, char **argv) {
   struct gopt opts {};
-  GOPT(opts, argc, argv, "C:cDgOt:v");
+  GOPT(opts, argc, argv, "C:cgOt:v");
 
   char *val{};
   char ch;
@@ -144,9 +139,6 @@ bool parse_args(int argc, char **argv) {
         fprintf(stderr, "Directory not found: [%s]\n", val);
         return false;
       }
-      break;
-    case 'D':
-      dump_dag = true;
       break;
     case 'g':
       debug = true;

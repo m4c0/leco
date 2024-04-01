@@ -93,31 +93,6 @@ bool bounce(const char *path) {
   if (!n->root())
     return true;
 
-  if (is_dumping_dag()) {
-    outs() << "-=-=-=-=- " << path;
-    if (n->root())
-      outs() << " root";
-    if (n->app())
-      outs() << " app";
-    if (n->dll())
-      outs() << " dll";
-    if (n->tool())
-      outs() << " tool";
-    outs() << "\n";
-    dag::visit(n, false, [&](auto *n) {
-      outs() << "  " << n->module_name() << " ==> " << n->module_pcm() << "\n";
-    });
-    for (auto &d : n->mod_impls()) {
-      auto impl = dag::get_node(d.c_str());
-      outs() << "  -- impl: " << impl->source() << "\n";
-      dag::visit(impl, false, [&](auto *n) {
-        outs() << "     " << n->module_name() << " ==> " << n->module_pcm()
-               << "\n";
-      });
-    }
-    return true;
-  }
-
   clean(n);
 
   if (n->tool() && !cur_ctx().native_target)
