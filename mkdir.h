@@ -39,6 +39,8 @@ void mkdirs(const char *path) {
   sim_sb_path_copy_parent(&p, path);
   mkdirs(p.buffer);
   sim_sb_delete(&p);
+
+  _mkdir(path);
 }
 
 #endif // MKDIR_IMPLEMENTATION
