@@ -1,24 +1,16 @@
 #define MTIME_IMPLEMENTATION
 #include "../mtime/mtime.h"
+#define MKDIR_IMPLEMENTATION
+#include "mkdir.h"
 #define SIM_IMPLEMENTATION
 #include "sim.hpp"
 
 #include "clang_dir.hpp"
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-
-#ifdef _WIN32
-#include <direct.h>
-#define mkdir(x, _) _mkdir(x)
-#endif
 
 static constexpr const char *files[]{
-    "actool", "bouncer", "cl",         "cleaner",    "compile",     "context",
-    "dag",    "dag_io",  "dag_plugin", "droid_path", "evoker",      "impls",
-    "link",   "mkdir",   "plist",      "pragma",     "target_defs",
+    "actool", "bouncer", "cl",         "cleaner",     "compile", "context",
+    "dag",    "dag_io",  "dag_plugin", "droid_path",  "evoker",  "impls",
+    "link",   "plist",   "pragma",     "target_defs",
 };
 
 constexpr const char *cmd =
@@ -98,7 +90,7 @@ bool link(const char *outf) {
 }
 
 int main(int argc, char **argv) {
-  mkdir("out", 0777);
+  mkdirs("out");
   for (auto f : files) {
     if (!compile(f))
       return 1;

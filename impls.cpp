@@ -2,6 +2,8 @@
 #include "../gopt/gopt.h"
 #define MINIRENT_IMPLEMENTATION
 #include "../minirent/minirent.h"
+#define MKDIR_IMPLEMENTATION
+#include "mkdir.h"
 #define MTIME_IMPLEMENTATION
 #include "../mtime/mtime.h"
 #define SIM_IMPLEMENTATION

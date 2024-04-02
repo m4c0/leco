@@ -7,7 +7,7 @@
 #include "evoker.hpp"
 #include "in2out.hpp"
 #include "log.hpp"
-#include "mkdir.hpp"
+#include "mkdir.h"
 #include "sim.hpp"
 #include <set>
 
