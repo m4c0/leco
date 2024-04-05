@@ -171,7 +171,7 @@ static std::string create_args_file(const auto &args, const dag::node *node) {
 #endif
 evoker &evoker::add_predefs() {
   for (auto def : cur_ctx().predefs) {
-    push_arg(std::string{"-D"} + def);
+    m_args.push_back(std::string{"-D"} + def);
   }
   return *this;
 }

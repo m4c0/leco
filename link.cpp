@@ -67,13 +67,13 @@ std::string link(const dag::node *n, uint64_t mtime) {
 
   evoker e{};
   for (auto &p : t.args) {
-    e.push_arg(p);
+    e.push_arg(p.c_str());
   }
   if (n->dll()) {
     e.push_arg("-shared");
   }
   for (auto l : cur_ctx().link_flags) {
-    e.push_arg(l);
+    e.push_arg(l.c_str());
   }
   e.set_out(exe.buffer);
   return e.execute() ? std::string{exe.buffer} : std::string{};

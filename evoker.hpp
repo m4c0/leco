@@ -1,5 +1,4 @@
 #pragma once
-#include "llvm/ADT/StringRef.h"
 #include <memory>
 #include <vector>
 
@@ -16,17 +15,17 @@ class evoker {
 
 public:
   evoker();
-  evoker(const char *verb, llvm::StringRef in, llvm::StringRef out) : evoker() {
+  evoker(const char *verb, const char *in, const char *out) : evoker() {
     push_arg(verb);
     push_arg(in);
     set_out(out);
   }
-  evoker &push_arg(llvm::StringRef mode) {
-    m_args.push_back({mode.data(), mode.size()});
+  evoker &push_arg(const char *mode) {
+    m_args.push_back(mode);
     return *this;
   }
   evoker &set_cpp_std() { return push_arg("-std=c++2b"); }
-  evoker &set_out(llvm::StringRef out) {
+  evoker &set_out(const char *out) {
     push_arg("-o");
     return push_arg(out);
   }
