@@ -106,7 +106,6 @@ struct add_framework_pragma : public id_list_pragma, node_holder {
       : id_list_pragma{"add_framework"}, node_holder{n} {}
 
   void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
-    notify(pp, t, "added framework");
     m_node->add_framework(to_str(t).str().c_str());
   }
 };
@@ -115,7 +114,6 @@ struct add_library_pragma : public id_list_pragma, node_holder {
   add_library_pragma(node *n) : id_list_pragma{"add_library"}, node_holder{n} {}
 
   void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
-    notify(pp, t, "added library");
     m_node->add_library(to_str(t).str().c_str());
   }
 };
@@ -178,8 +176,4 @@ ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
   AddPragma(new app_pragma(n));
   AddPragma(new dll_pragma(n));
   AddPragma(new tool_pragma(n));
-}
-
-ns_pragma::ns_pragma() : PragmaNamespace{"leco"} {
-  AddPragma(new EmptyPragmaHandler());
 }

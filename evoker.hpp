@@ -30,9 +30,7 @@ public:
     return push_arg(out);
   }
 
-  evoker &suppress_pragmas() {
-    return push_arg("-fplugin=../leco/null_pragma.dll");
-  }
+  evoker &suppress_pragmas() { return push_arg("-Wno-unknown-pragmas"); }
   evoker &add_predefs();
   evoker &pull_deps_from(const dag::node *n) {
     m_node = n;

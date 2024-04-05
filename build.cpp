@@ -99,9 +99,5 @@ int main(int argc, char **argv) {
     return 1;
   if (!link("out/leco.o -o leco.exe"))
     return 1;
-  if (!compile("null_pragma"))
-    return 1;
-  if (!link("out/null_pragma.o -o null_pragma.dll -shared"))
-    return 1;
   return 0;
 }
