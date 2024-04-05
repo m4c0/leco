@@ -20,7 +20,6 @@ class node {
   sim_sbt m_module_pcm{};
   std::set<std::string> m_executables{};
   std::set<std::string> m_frameworks{};
-  std::set<std::string> m_include_dirs{};
   std::set<std::string> m_libraries{};
   std::set<std::string> m_library_dirs{};
   std::set<std::string> m_mod_deps{};
@@ -38,7 +37,6 @@ public:
   void write_to_cache_file() const;
 
   [[nodiscard]] bool add_executable(const char *e);
-  [[nodiscard]] bool add_include_dir(const char *dir);
   void add_framework(const char *fw) { m_frameworks.insert(fw); }
   void add_library(const char *lib) { m_libraries.insert(lib); }
   [[nodiscard]] bool add_library_dir(const char *dir);
@@ -59,9 +57,6 @@ public:
   }
   [[nodiscard]] constexpr const auto &frameworks() const noexcept {
     return m_frameworks;
-  }
-  [[nodiscard]] constexpr const auto &include_dirs() const noexcept {
-    return m_include_dirs;
   }
   [[nodiscard]] constexpr const auto &libraries() const noexcept {
     return m_libraries;

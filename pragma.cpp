@@ -111,35 +111,6 @@ struct add_framework_pragma : public id_list_pragma, node_holder {
   }
 };
 
-struct add_include_dir_pragma : public id_list_pragma, node_holder {
-  add_include_dir_pragma(node *n)
-      : id_list_pragma{"add_include_dir"}
-      , node_holder{n} {}
-
-  void process_id(Preprocessor &pp, Token &t, StringRef fname) override {
-    // We use this to modify the compilation of the current translation unit. It
-    // doesn't make much sense to "export" this if we are compiling a module.
-    // TODO: rename this pragma to something reflecting this behaviour
-    //       ex: "inject_include_dir"
-    //       "inheritance" of includes might be useful outside modules
-    notify(pp, t, "added include directory");
-
-    SmallString<256> in{fname};
-    llvm::sys::path::remove_filename(in);
-    llvm::sys::path::append(in, to_str(t));
-
-    auto de = pp.getFileManager().getDirectoryRef(in);
-    if (auto err = de.takeError()) {
-      report(pp, t, "error adding include directory: %0")
-          << toString(std::move(err));
-      return;
-    }
-    DirectoryLookup dl{*de, SrcMgr::C_User, false};
-    pp.getHeaderSearchInfo().AddSearchPath(dl, false);
-    pp.getHeaderSearchInfo().AddSearchPath(dl, true);
-  }
-};
-
 struct add_library_pragma : public id_list_pragma, node_holder {
   add_library_pragma(node *n) : id_list_pragma{"add_library"}, node_holder{n} {}
 
@@ -200,7 +171,6 @@ ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
   AddPragma(new add_dll_pragma(n));
   AddPragma(new add_framework_pragma(n));
   AddPragma(new add_impl_pragma(n));
-  AddPragma(new add_include_dir_pragma(n));
   AddPragma(new add_library_pragma(n));
   AddPragma(new add_library_dir_pragma(n));
   AddPragma(new add_resource_pragma(n));
@@ -211,6 +181,5 @@ ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
 }
 
 ns_pragma::ns_pragma() : PragmaNamespace{"leco"} {
-  AddPragma(new add_include_dir_pragma(nullptr));
   AddPragma(new EmptyPragmaHandler());
 }

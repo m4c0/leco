@@ -12,7 +12,6 @@ static void persist(std::ostream &o, const dag::node *n) {
   o << static_cast<int>(n->root_type()) << "\n";
   persist(o, n->executables());
   persist(o, n->frameworks());
-  persist(o, n->include_dirs());
   persist(o, n->libraries());
   persist(o, n->library_dirs());
   persist(o, n->mod_deps());
@@ -71,8 +70,7 @@ bool dag::node::read_from_cache_file() {
   m_root = static_cast<root_t>(r);
 
   return read(f, this, &m_executables) && read(f, this, &m_frameworks) &&
-         read(f, this, &m_include_dirs) && read(f, this, &m_libraries) &&
-         read(f, this, &m_library_dirs) && read(f, this, &m_mod_deps) &&
-         read(f, this, &m_mod_impls) && read(f, this, &m_resources) &&
-         read(f, this, &m_shaders);
+         read(f, this, &m_libraries) && read(f, this, &m_library_dirs) &&
+         read(f, this, &m_mod_deps) && read(f, this, &m_mod_impls) &&
+         read(f, this, &m_resources) && read(f, this, &m_shaders);
 }
