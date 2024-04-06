@@ -24,7 +24,7 @@ public:
 
   [[nodiscard]] operator bool() const;
 
-  [[nodiscard]] std::string command_line() const;
+  [[nodiscard]] const char * argument_file() const { return m_argfile.c_str(); }
 };
 
 class evoker {

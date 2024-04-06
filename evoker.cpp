@@ -162,7 +162,15 @@ bool evoker::execute() {
   if (!v)
     return false;
 
-  return 0 == system(v.command_line().c_str());
+  if (is_extra_verbose()) {
+    fprintf(stderr, "executing with argument file [%s]\n", v.argument_file());
+  }
+
+  sim_sbt cmd{};
+  sim_sb_copy(&cmd, clang_exe());
+  sim_sb_concat(&cmd, " @");
+  sim_sb_concat(&cmd, v.argument_file());
+  return 0 == system(cmd.buffer);
 }
 
 #ifdef _WIN32
@@ -170,13 +178,6 @@ bool evoker::execute() {
 #endif
 vex::~vex() { unlink(m_argfile.c_str()); }
 vex::operator bool() const { return m_argfile != ""; }
-std::string vex::command_line() const {
-  auto cmd = std::string{clang_exe()} + " @" + m_argfile;
-  if (is_extra_verbose()) {
-    errs() << "executing [" << cmd << "]\n";
-  }
-  return cmd;
-}
 
 struct init_llvm {
   llvm_shutdown_obj sdo{};

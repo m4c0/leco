@@ -1,10 +1,9 @@
 #include "dag.hpp"
 
-#define POPEN_IMPLEMENTATION
-#include "popen.h"
-
+#include "clang_dir.hpp"
 #include "diags.hpp"
 #include "evoker.hpp"
+#include "popen.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendActions.h"
 
@@ -113,9 +112,6 @@ static bool read_file_list(const char *str, dag::node *n,
   return *str == 0 || *str == '\n';
 }
 
-#if _WIN32
-#define popen _popen
-#endif
 bool dag::execute(dag::node *n) {
   auto args = evoker{}
                   .push_arg("-E")
@@ -127,7 +123,19 @@ bool dag::execute(dag::node *n) {
   if (!args)
     return false;
 
-  auto f = popen(args.command_line().c_str(), "r");
+  sim_sbt clang{};
+  sim_sb_copy(&clang, clang_exe());
+
+  sim_sbt argfile{};
+  sim_sb_copy(&argfile, "@");
+  sim_sb_concat(&argfile, args.argument_file());
+
+  FILE *f;
+  FILE *ferr;
+  char *argv[]{clang.buffer, argfile.buffer};
+  if (0 != proc_open(argv, &f, &ferr))
+    return false;
+
   char buf[1024];
   while (!feof(f) && fgets(buf, 1024, f) != nullptr) {
     char *p = buf;
@@ -176,6 +184,7 @@ bool dag::execute(dag::node *n) {
     }
   }
   fclose(f);
+  fclose(ferr);
 
   auto ci =
       evoker{"-E", n->source(), "dummy"}.set_cpp_std().add_predefs().createCI();
