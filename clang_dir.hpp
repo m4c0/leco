@@ -1,10 +1,12 @@
 #pragma once
+#include "sim.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #if _WIN32
-const char *clang_dir() {
+static const char *clang_dir() {
   static char buf[1024];
   auto f = _popen("where clang++", "r");
   if (fgets(buf, 1024, f) == nullptr)
@@ -15,7 +17,7 @@ const char *clang_dir() {
   return buf;
 }
 #elif __APPLE__
-const char *clang_dir() {
+static const char *clang_dir() {
   static char buf[1024];
   auto f = popen("brew --prefix llvm@16", "r");
   if (fgets(buf, 1024, f) == nullptr)
@@ -25,7 +27,7 @@ const char *clang_dir() {
   return buf;
 }
 #else
-const char *clang_dir() {
+static const char *clang_dir() {
   static char buf[1024];
   auto f = popen("which clang++", "r");
   if (fgets(buf, 1024, f) == nullptr)
@@ -36,3 +38,19 @@ const char *clang_dir() {
   return buf;
 }
 #endif
+
+static const char *clang_exe() {
+  static const auto exe = [] {
+    sim_sb buf{};
+    sim_sb_new(&buf, 1024);
+    sim_sb_copy(&buf, clang_dir());
+    sim_sb_path_append(&buf, "bin");
+#ifdef _WIN32
+    sim_sb_path_append(&buf, "clang++.exe");
+#else
+    sim_sb_path_append(&buf, "clang++");
+#endif
+    return buf;
+  }();
+  return exe.buffer;
+}

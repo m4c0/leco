@@ -26,22 +26,6 @@ using namespace clang;
 using namespace clang::driver;
 using namespace llvm;
 
-const char *clang_exe() {
-  static const auto exe = [] {
-    sim_sb buf{};
-    sim_sb_new(&buf, 1024);
-    sim_sb_copy(&buf, clang_dir());
-    sim_sb_path_append(&buf, "bin");
-#ifdef _WIN32
-    sim_sb_path_append(&buf, "clang++.exe");
-#else
-    sim_sb_path_append(&buf, "clang++");
-#endif
-    return buf;
-  }();
-  return exe.buffer;
-}
-
 static DiagnosticsEngine diags() {
   IntrusiveRefCntPtr<DiagnosticOptions> diag_opts{new DiagnosticOptions()};
   IntrusiveRefCntPtr<DiagnosticIDs> diag_ids{new DiagnosticIDs()};
