@@ -62,6 +62,9 @@ public:
 #if _WIN32
 #define popen _popen
 #endif
+static bool cmp(const char *str, const char *prefix) {
+  return strncmp(str, prefix, strlen(prefix)) == 0;
+}
 bool dag::execute(dag::node *n) {
   auto args = evoker{}
                   .push_arg("-E")
@@ -75,7 +78,19 @@ bool dag::execute(dag::node *n) {
   auto f = popen(args.command_line().c_str(), "r");
   char buf[1024];
   while (!feof(f) && fgets(buf, 1024, f) != nullptr) {
-    // printf("%s", buf);
+    char *p = buf;
+    while (*p == ' ') {
+      p++;
+    }
+    if (cmp(p, "#pragma leco ")) {
+      // printf("%s", buf);
+    } else if (cmp(p, "export module ")) {
+      // printf("%s", buf);
+    } else if (cmp(p, "export import ")) {
+      // printf("%s", buf);
+    } else if (cmp(p, "import ")) {
+      // printf("%s", buf);
+    }
   }
   fclose(f);
 
