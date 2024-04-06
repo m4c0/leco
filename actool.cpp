@@ -2,8 +2,7 @@
 #include "mkdir.h"
 #include "sim.hpp"
 #include <stdio.h>
-
-#include "llvm/Support/FileSystem.h"
+#include <filesystem>
 
 namespace json {
 class dict {
@@ -66,7 +65,7 @@ static void create_icon_contents(const char *path) {
 static void copy_icon(const char *path) {
   sim_sbt file{};
   sim_sb_path_copy_append(&file, path, "icon.png");
-  llvm::sys::fs::copy_file("icon.png", file.buffer);
+  std::filesystem::copy_file("icon.png", file.buffer);
 }
 
 bool actool(const char *path) {

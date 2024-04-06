@@ -10,7 +10,9 @@
 #include "log.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
-#include "llvm/Support/FileSystem.h"
+
+#include <filesystem>
+#include <string.h>
 
 static bool compile_shaders(const dag::node *n, const char *res_path) {
   for (auto &s : n->shaders()) {
@@ -54,7 +56,7 @@ static void copy_exes(const dag::node *n, const char *exe_path) {
       continue;
 
     vlog("copying library", path.buffer);
-    llvm::sys::fs::copy_file(ef.buffer, path.buffer);
+    std::filesystem::copy_file(ef.buffer, path.buffer);
   }
 }
 static void copy_resources(const dag::node *n, const char *res_path) {
@@ -70,7 +72,7 @@ static void copy_resources(const dag::node *n, const char *res_path) {
       continue;
 
     vlog("copying resource", path.buffer);
-    llvm::sys::fs::copy_file(rf.buffer, path.buffer);
+    std::filesystem::copy_file(rf.buffer, path.buffer);
   }
 }
 
