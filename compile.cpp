@@ -5,7 +5,9 @@
 #include "log.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
+
 #include <set>
+#include <string.h>
 
 bool compile(const dag::node *n) {
   auto file = n->source();

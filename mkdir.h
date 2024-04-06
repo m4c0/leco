@@ -21,9 +21,6 @@ void mkdirs(const char *path);
 #ifdef _WIN32
 #include <direct.h>
 #elif __linux__
-#include <stdlib.h>
-#define _mkdir(x) mkdir((x), 0777)
-#else
 #include <sys/stat.h>
 #define _mkdir(x) mkdir((x), 0777)
 #endif
