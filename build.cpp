@@ -1,11 +1,11 @@
+#include "clang_dir.hpp"
+
 #define MTIME_IMPLEMENTATION
 #include "../mtime/mtime.h"
 #define MKDIR_IMPLEMENTATION
 #include "mkdir.h"
 #define SIM_IMPLEMENTATION
 #include "sim.hpp"
-
-#include "clang_dir.hpp"
 
 static constexpr const char *files[]{
     "actool",  "bouncer", "cl",     "cleaner",    "compile",
