@@ -28,10 +28,11 @@ int proc_open(char *const *cmd_line, FILE **out, FILE **err) {
     return -1;
 
   int pid = fork();
-  if (pid == -1) {
+  if (pid < 0) {
     return -1;
   }
   if (pid == 0) {
+    close(0);
     close(pout[0]);
     close(perr[0]);
     dup2(pout[1], 1);
@@ -39,6 +40,9 @@ int proc_open(char *const *cmd_line, FILE **out, FILE **err) {
     execv(cmd_line[0], cmd_line + 1);
     return -1;
   }
+
+  close(pout[1]);
+  close(perr[1]);
 
   *out = fdopen(pout[0], "r");
   *err = fdopen(perr[0], "r");
