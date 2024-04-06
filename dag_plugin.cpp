@@ -59,12 +59,53 @@ public:
 };
 } // namespace
 
+static const char *cmp(const char *str, const char *prefix) {
+  auto len = strlen(prefix);
+  if (strncmp(str, prefix, len) != 0)
+    return nullptr;
+  return str + len;
+}
+
+static void log_found(const char *desc, const char *what) {
+  if (is_extra_verbose()) {
+    fprintf(stderr, "found %s for processing: [%s]\n", desc, what);
+  }
+}
+static bool read_file_list(const char *str, dag::node *n,
+                           bool (dag::node::*fn)(const char *),
+                           const char *desc) {
+  while (*str && *str != '\n') {
+    while (*str == ' ') {
+      str++;
+    }
+    const char *e{};
+    if (*str == '"') {
+      str++;
+      e = strchr(str, '"');
+    } else if (*str && *str != '\n') {
+      e = strchr(str, ' ');
+      if (e == nullptr) {
+        e = strchr(str, '\n');
+      }
+      if (e == nullptr) {
+        e = str + strlen(str);
+      }
+    }
+    if (e == nullptr)
+      return false;
+    char buf[1024]{};
+    strncpy(buf, str, e - str);
+    buf[e - str] = 0;
+    log_found(desc, buf);
+    (n->*fn)(buf);
+    str = e + 1;
+  }
+  return *str == 0 || *str == '\n';
+}
+
 #if _WIN32
 #define popen _popen
 #endif
-static bool cmp(const char *str, const char *prefix) {
-  return strncmp(str, prefix, strlen(prefix)) == 0;
-}
 bool dag::execute(dag::node *n) {
   auto args = evoker{}
                   .push_arg("-E")
@@ -84,11 +125,17 @@ bool dag::execute(dag::node *n) {
       p++;
     }
     if (0 == strcmp(p, "#pragma leco tool\n")) {
+      log_found("tool", n->source());
       n->set_tool();
     } else if (cmp(p, "#pragma leco app\n")) {
+      log_found("app", n->source());
       n->set_app();
     } else if (cmp(p, "#pragma leco dll\n")) {
+      log_found("dll", n->source());
       n->set_dll();
+    } else if (auto pp = cmp(p, "#pragma leco add_shader ")) {
+      if (!read_file_list(pp, n, &dag::node::add_shader, "shader"))
+        return false;
     } else if (cmp(p, "#pragma leco ")) {
       // printf("%s", buf);
     } else if (cmp(p, "export module ")) {

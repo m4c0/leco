@@ -147,5 +147,4 @@ ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
   AddPragma(new add_library_pragma(n));
   AddPragma(new add_library_dir_pragma(n));
   AddPragma(new add_resource_pragma(n));
-  AddPragma(new add_shader_pragma(n));
 }
