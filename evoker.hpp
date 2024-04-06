@@ -10,6 +10,18 @@ namespace dag {
 class node;
 }
 
+class vex {
+  std::string m_argfile;
+
+public:
+  explicit vex(std::string a) : m_argfile{a} {}
+  ~vex();
+
+  [[nodiscard]] operator bool() const;
+
+  [[nodiscard]] std::string command_line() const;
+};
+
 class evoker {
   std::vector<std::string> m_args{};
   const dag::node *m_node{};
@@ -38,6 +50,7 @@ public:
     return *this;
   }
 
+  [[nodiscard]] vex prepare_args();
   [[nodiscard]] bool execute();
   [[nodiscard]] std::shared_ptr<clang::CompilerInstance> createCI() const;
 };

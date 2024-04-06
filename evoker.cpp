@@ -166,28 +166,32 @@ static std::string create_args_file(const auto &args, const dag::node *node) {
 
   return file;
 }
-#ifdef _WIN32
-#define unlink _unlink
-#endif
 evoker &evoker::add_predefs() {
   for (auto def : cur_ctx().predefs) {
     m_args.push_back(std::string{"-D"} + def);
   }
   return *this;
 }
+vex evoker::prepare_args() { return vex{create_args_file(m_args, m_node)}; }
 bool evoker::execute() {
-  auto argfile = create_args_file(m_args, m_node);
-  if (argfile == "")
+  vex v = prepare_args();
+  if (!v)
     return false;
-  std::string cmd = std::string{clang_exe()} + " @" + argfile;
+
+  return 0 == system(v.command_line().c_str());
+}
+
+#ifdef _WIN32
+#define unlink _unlink
+#endif
+vex::~vex() { unlink(m_argfile.c_str()); }
+vex::operator bool() const { return m_argfile != ""; }
+std::string vex::command_line() const {
+  auto cmd = std::string{clang_exe()} + " @" + m_argfile;
   if (is_extra_verbose()) {
     errs() << "executing [" << cmd << "]\n";
   }
-  if (system(cmd.c_str()) != 0) {
-    return false;
-  }
-  unlink(argfile.c_str());
-  return true;
+  return cmd;
 }
 
 struct init_llvm {
