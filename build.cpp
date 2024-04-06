@@ -2,6 +2,8 @@
 #include "../mtime/mtime.h"
 #define MKDIR_IMPLEMENTATION
 #include "mkdir.h"
+#define POPEN_IMPLEMENTATION
+#include "popen.h"
 #define SIM_IMPLEMENTATION
 #include "sim.hpp"
 
