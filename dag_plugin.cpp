@@ -1,5 +1,8 @@
 #include "dag.hpp"
 
+#define POPEN_IMPLEMENTATION
+#include "popen.h"
+
 #include "diags.hpp"
 #include "evoker.hpp"
 #include "clang/Frontend/CompilerInstance.h"
