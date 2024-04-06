@@ -17,6 +17,11 @@ public:
   explicit vex(std::string a) : m_argfile{a} {}
   ~vex();
 
+  vex(const vex &) = delete;
+  vex(vex &&) = delete;
+  vex &operator=(const vex &) = delete;
+  vex &operator=(vex &&) = delete;
+
   [[nodiscard]] operator bool() const;
 
   [[nodiscard]] std::string command_line() const;
