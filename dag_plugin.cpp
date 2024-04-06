@@ -69,6 +69,15 @@ static void log_found(const char *desc, const char *what) {
     fprintf(stderr, "found %s for processing: [%s]\n", desc, what);
   }
 }
+static bool add_found(const char *desc, const char *what, dag::node *n,
+                      bool (dag::node::*fn)(const char *)) {
+  log_found(desc, what);
+  if (!(n->*fn)(what)) {
+    fprintf(stderr, "%s: could not find %s [%s]\n", n->source(), desc, what);
+    return false;
+  }
+  return true;
+}
 static bool read_file_list(const char *str, dag::node *n,
                            bool (dag::node::*fn)(const char *),
                            const char *desc) {
@@ -94,11 +103,8 @@ static bool read_file_list(const char *str, dag::node *n,
     char buf[1024]{};
     strncpy(buf, str, e - str);
     buf[e - str] = 0;
-    log_found(desc, buf);
-    if (!(n->*fn)(buf)) {
-      fprintf(stderr, "%s: could not find %s [%s]\n", n->source(), desc, buf);
+    if (!add_found(desc, buf, n, fn))
       return false;
-    }
     str = e + 1;
   }
   return *str == 0 || *str == '\n';
