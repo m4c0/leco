@@ -2,7 +2,6 @@
 
 #include "diags.hpp"
 #include "evoker.hpp"
-#include "pragma.hpp"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendActions.h"
 
@@ -41,7 +40,6 @@ public:
   bool BeginSourceFileAction(CompilerInstance &ci) override {
     auto *diag = &ci.getDiagnostics();
     ci.getPreprocessor().addPPCallbacks(std::make_unique<ppc>(diag, m_dag));
-    ci.getPreprocessor().AddPragmaHandler(new ns_pragma(m_dag));
     return true;
   }
   void EndSourceFileAction() override {
@@ -97,7 +95,10 @@ static bool read_file_list(const char *str, dag::node *n,
     strncpy(buf, str, e - str);
     buf[e - str] = 0;
     log_found(desc, buf);
-    (n->*fn)(buf);
+    if (!(n->*fn)(buf)) {
+      fprintf(stderr, "%s: could not find %s [%s]\n", n->source(), desc, buf);
+      return false;
+    }
     str = e + 1;
   }
   return *str == 0 || *str == '\n';
@@ -133,11 +134,30 @@ bool dag::execute(dag::node *n) {
     } else if (cmp(p, "#pragma leco dll\n")) {
       log_found("dll", n->source());
       n->set_dll();
+    } else if (auto pp = cmp(p, "#pragma leco add_dll ")) {
+      if (!read_file_list(pp, n, &dag::node::add_executable, "dll"))
+        return false;
+    } else if (auto pp = cmp(p, "#pragma leco add_framework ")) {
+      if (!read_file_list(pp, n, &dag::node::add_framework, "framework"))
+        return false;
+    } else if (auto pp = cmp(p, "#pragma leco add_impl ")) {
+      if (!read_file_list(pp, n, &dag::node::add_mod_impl, "impl"))
+        return false;
+    } else if (auto pp = cmp(p, "#pragma leco add_library ")) {
+      if (!read_file_list(pp, n, &dag::node::add_library, "library"))
+        return false;
+    } else if (auto pp = cmp(p, "#pragma leco add_library_dir ")) {
+      if (!read_file_list(pp, n, &dag::node::add_library_dir, "library_dir"))
+        return false;
+    } else if (auto pp = cmp(p, "#pragma leco add_resource ")) {
+      if (!read_file_list(pp, n, &dag::node::add_resource, "resource"))
+        return false;
     } else if (auto pp = cmp(p, "#pragma leco add_shader ")) {
       if (!read_file_list(pp, n, &dag::node::add_shader, "shader"))
         return false;
     } else if (cmp(p, "#pragma leco ")) {
-      // printf("%s", buf);
+      fprintf(stderr, "unknown pragma: %s", p);
+      return false;
     } else if (cmp(p, "export module ")) {
       // printf("%s", buf);
     } else if (cmp(p, "export import ")) {

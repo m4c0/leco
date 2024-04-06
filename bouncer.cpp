@@ -28,8 +28,7 @@ static bool compile_shaders(const dag::node *n, const char *res_path) {
     vlog("compiling shader", out.buffer);
 
     sim_sbt cmd{1024};
-    sim_sb_printf(&cmd, "glslangValidator --quiet -V -o %s %s", out.buffer,
-                  in.buffer);
+    sim_sb_printf(&cmd, "glslangValidator -V -o %s %s", out.buffer, in.buffer);
     if (0 != system(cmd.buffer))
       return false;
   }

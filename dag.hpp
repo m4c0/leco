@@ -37,8 +37,14 @@ public:
   void write_to_cache_file() const;
 
   [[nodiscard]] bool add_executable(const char *e);
-  void add_framework(const char *fw) { m_frameworks.insert(fw); }
-  void add_library(const char *lib) { m_libraries.insert(lib); }
+  bool add_framework(const char *fw) {
+    m_frameworks.insert(fw);
+    return true;
+  }
+  bool add_library(const char *lib) {
+    m_libraries.insert(lib);
+    return true;
+  }
   [[nodiscard]] bool add_library_dir(const char *dir);
   [[nodiscard]] bool add_mod_dep(const char *mod_name);
   [[nodiscard]] bool add_mod_impl(const char *mod_impl);

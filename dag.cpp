@@ -86,7 +86,20 @@ bool dag::node::add_mod_dep(const char *mod_name) {
   return add_real_abs(m_mod_deps, dep.buffer);
 }
 bool dag::node::add_mod_impl(const char *mod_impl) {
-  return add_real_abs(m_mod_impls, mod_impl);
+  sim_sbt mi{};
+  sim_sb_path_copy_parent(&mi, m_source.buffer);
+  sim_sb_path_append(&mi, mod_impl);
+
+  sim_sb_path_set_extension(&mi, "cpp");
+  if (add_real_abs(m_mod_impls, mi.buffer))
+    return true;
+
+  sim_sb_path_set_extension(&mi, "mm");
+  if (add_real_abs(m_mod_impls, mi.buffer))
+    return true;
+
+  sim_sb_path_set_extension(&mi, "m");
+  return add_real_abs(m_mod_impls, mi.buffer);
 }
 bool dag::node::add_resource(const char *resource) {
   return add_real_abs(m_resources, resource);
