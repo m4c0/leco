@@ -6,6 +6,8 @@
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendActions.h"
 
+#include <stdlib.h>
+
 using namespace clang;
 using namespace llvm;
 
@@ -57,7 +59,26 @@ public:
 };
 } // namespace
 
+#if _WIN32
+#define popen _popen
+#endif
 bool dag::execute(dag::node *n) {
+  auto args = evoker{}
+                  .push_arg("-E")
+                  .push_arg(n->source())
+                  .set_cpp_std()
+                  .add_predefs()
+                  .prepare_args();
+  if (!args)
+    return false;
+
+  auto f = popen(args.command_line().c_str(), "r");
+  char buf[1024];
+  while (!feof(f) && fgets(buf, 1024, f) != nullptr) {
+    // printf("%s", buf);
+  }
+  fclose(f);
+
   auto ci =
       evoker{"-E", n->source(), "dummy"}.set_cpp_std().add_predefs().createCI();
 
