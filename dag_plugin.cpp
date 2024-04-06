@@ -71,6 +71,7 @@ bool dag::execute(dag::node *n) {
                   .push_arg(n->source())
                   .set_cpp_std()
                   .add_predefs()
+                  .suppress_pragmas()
                   .prepare_args();
   if (!args)
     return false;
@@ -82,7 +83,13 @@ bool dag::execute(dag::node *n) {
     while (*p == ' ') {
       p++;
     }
-    if (cmp(p, "#pragma leco ")) {
+    if (0 == strcmp(p, "#pragma leco tool\n")) {
+      n->set_tool();
+    } else if (cmp(p, "#pragma leco app\n")) {
+      n->set_app();
+    } else if (cmp(p, "#pragma leco dll\n")) {
+      n->set_dll();
+    } else if (cmp(p, "#pragma leco ")) {
       // printf("%s", buf);
     } else if (cmp(p, "export module ")) {
       // printf("%s", buf);

@@ -140,31 +140,6 @@ struct add_shader_pragma : public file_list_pragma, node_holder {
   bool process_file(const char * in) override { return m_node->add_shader(in); }
 };
 
-struct app_pragma : public PragmaHandler, node_holder {
-  app_pragma(node *n) : PragmaHandler{"app"}, node_holder{n} {}
-
-  void HandlePragma(Preprocessor &PP, PragmaIntroducer Introducer,
-                    Token &PragmaTok) {
-    m_node->set_app();
-  }
-};
-struct dll_pragma : public PragmaHandler, node_holder {
-  dll_pragma(node *n) : PragmaHandler{"dll"}, node_holder{n} {}
-
-  void HandlePragma(Preprocessor &PP, PragmaIntroducer Introducer,
-                    Token &PragmaTok) {
-    m_node->set_dll();
-  }
-};
-struct tool_pragma : public PragmaHandler, node_holder {
-  tool_pragma(node *n) : PragmaHandler{"tool"}, node_holder{n} {}
-
-  void HandlePragma(Preprocessor &PP, PragmaIntroducer Introducer,
-                    Token &PragmaTok) {
-    m_node->set_tool();
-  }
-};
-
 ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
   AddPragma(new add_dll_pragma(n));
   AddPragma(new add_framework_pragma(n));
@@ -173,7 +148,4 @@ ns_pragma::ns_pragma(dag::node *n) : PragmaNamespace{"leco"} {
   AddPragma(new add_library_dir_pragma(n));
   AddPragma(new add_resource_pragma(n));
   AddPragma(new add_shader_pragma(n));
-  AddPragma(new app_pragma(n));
-  AddPragma(new dll_pragma(n));
-  AddPragma(new tool_pragma(n));
 }
