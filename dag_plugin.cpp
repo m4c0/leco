@@ -75,7 +75,6 @@ static bool add_mod_dep(char *pp, const char *mod, dag::node *n) {
     sim_sb_copy(&mm, pp);
   }
 
-  printf(">> %20s %20s %20s\n", mod, pp, mm.buffer);
   return read_file_list(mm.buffer, n, &dag::node::add_mod_dep, "dependency");
 }
 
