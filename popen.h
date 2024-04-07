@@ -14,7 +14,9 @@ int proc_open(char *const *cmd_line, FILE **out, FILE **err);
 #endif // POPEN_H
 
 #ifdef POPEN_IMPLEMENTATION
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 int proc_open(char *const *cmd_line, FILE **out, FILE **err) {
 #ifdef _WIN32
