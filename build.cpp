@@ -13,50 +13,7 @@ static constexpr const char *files[]{
     "evoker",  "impls",   "link",   "plist",      "target_defs",
 };
 
-constexpr const char *cmd =
-    "clang++ -std=c++20 -I%s/include -L%s/lib "
-#if _WIN32
-    "-fms-runtime-lib=dll -nostdlib -nostdlib++ -lVersion "
-    "-lclangAnalysis -lclangAnalysisFlowSensitive "
-    "-lclangAnalysisFlowSensitiveModels -lclangAPINotes -lclangARCMigrate "
-    "-lclangAST -lclangASTMatchers -lclangBasic -lclangCodeGen -lclangCrossTU "
-    "-lclangDependencyScanning -lclangDirectoryWatcher -lclangDriver "
-    "-lclangDynamicASTMatchers -lclangEdit -lclangExtractAPI -lclangFormat "
-    "-lclangFrontend -lclangFrontendTool -lclangHandleCXX -lclangHandleLLVM "
-    "-lclangIndex -lclangIndexSerialization -lclangInterpreter -lclangLex "
-    "-lclangParse -lclangRewrite -lclangRewriteFrontend -lclangSema "
-    "-lclangSerialization -lclangStaticAnalyzerCheckers "
-    "-lclangStaticAnalyzerCore -lclangStaticAnalyzerFrontend -lclangSupport "
-    "-lclangTooling -lclangToolingASTDiff -lclangToolingCore "
-    "-lclangToolingInclusions -lclangToolingInclusionsStdlib "
-    "-lclangToolingRefactoring -lclangToolingSyntax -lclangTransformer "
-    "-lLLVMAggressiveInstCombine -lLLVMAnalysis -lLLVMAsmParser "
-    "-lLLVMAsmPrinter -lLLVMBinaryFormat -lLLVMBitReader -lLLVMBitstreamReader "
-    "-lLLVMBitWriter -lLLVMCFGuard -lLLVMCFIVerify -lLLVMCodeGen "
-    "-lLLVMCodeGenTypes -lLLVMCore -lLLVMCoroutines -lLLVMCoverage "
-    "-lLLVMDebugInfoCodeView -lLLVMDebuginfod -lLLVMDebugInfoDWARF "
-    "-lLLVMDebugInfoGSYM -lLLVMDebugInfoLogicalView -lLLVMDebugInfoMSF "
-    "-lLLVMDebugInfoPDB -lLLVMDemangle -lLLVMDiff -lLLVMDlltoolDriver "
-    "-lLLVMDWARFLinker -lLLVMDWARFLinkerParallel -lLLVMDWP "
-    "-lLLVMExecutionEngine -lLLVMExegesis -lLLVMExegesisX86 -lLLVMExtensions "
-    "-lLLVMFileCheck -lLLVMFrontendHLSL -lLLVMFrontendOpenACC "
-    "-lLLVMFrontendOpenMP -lLLVMFuzzerCLI -lLLVMFuzzMutate -lLLVMGlobalISel "
-    "-lLLVMInstCombine -lLLVMInstrumentation -lLLVMInterfaceStub "
-    "-lLLVMInterpreter -lLLVMipo -lLLVMIRPrinter -lLLVMIRReader -lLLVMJITLink "
-    "-lLLVMLibDriver -lLLVMLineEditor -lLLVMLinker -lLLVMLTO -lLLVMMC "
-    "-lLLVMMCA -lLLVMMCDisassembler -lLLVMMCJIT -lLLVMMCParser -lLLVMMIRParser "
-    "-lLLVMObjCARCOpts -lLLVMObjCopy -lLLVMObject -lLLVMObjectYAML "
-    "-lLLVMOption -lLLVMOrcJIT -lLLVMOrcShared -lLLVMOrcTargetProcess "
-    "-lLLVMPasses -lLLVMProfileData -lLLVMRemarks -lLLVMRuntimeDyld "
-    "-lLLVMScalarOpts -lLLVMSelectionDAG -lLLVMSupport -lLLVMSymbolize "
-    "-lLLVMTableGen -lLLVMTableGenCommon -lLLVMTableGenGlobalISel -lLLVMTarget "
-    "-lLLVMTargetParser -lLLVMTextAPI -lLLVMTransformUtils -lLLVMVectorize "
-    "-lLLVMWindowsDriver -lLLVMWindowsManifest -lLLVMX86AsmParser "
-    "-lLLVMX86CodeGen -lLLVMX86Desc -lLLVMX86Disassembler -lLLVMX86Info "
-    "-lLLVMX86TargetMCA -lLLVMXRay";
-#else
-    "-lclang -lclang-cpp -lLLVM";
-#endif
+constexpr const char *cmd = "clang++ -std=c++20 -I%s/include -L%s/lib ";
 
 bool compile(const char *stem) {
   sim_sbt in{32};
