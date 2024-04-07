@@ -13,8 +13,6 @@ static constexpr const char *files[]{
     "evoker",  "impls",   "link",   "plist",      "target_defs",
 };
 
-constexpr const char *cmd = "clang++ -std=c++20 -I%s/include -L%s/lib ";
-
 bool compile(const char *stem) {
   sim_sbt in{32};
   sim_sbt out{32};
@@ -28,17 +26,14 @@ bool compile(const char *stem) {
 
   auto cdir = clang_dir();
   sim_sbt buf{1024};
-  sim_sb_copy(&buf, "clang++ -std=c++20 -g ");
-#ifdef _WIN32
-  sim_sb_concat(&buf, "-D_CRT_SECURE_NO_WARNINGS -fms-runtime-lib=dll ");
-#endif
-  sim_sb_printf(&buf, "-I%s/include -c %s -o %s", cdir, in.buffer, out.buffer);
+  sim_sb_copy(&buf, "clang++ -std=c++20 -g -I%s/include -c %s -o %s", cdir,
+              in.buffer, out.buffer);
   return 0 == system(buf.buffer);
 }
 bool link(const char *outf) {
   auto cdir = clang_dir();
   sim_sbt buf{10240};
-  sim_sb_printf(&buf, cmd, cdir, cdir);
+  sim_sb_printf(&buf, "clang++ -L%s/lib ", cdir, cdir);
   for (auto f : files) {
     sim_sb_printf(&buf, " out/%s.o ", f);
   }
