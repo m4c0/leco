@@ -1,65 +1,13 @@
 #include "dag.hpp"
 
 #include "../popen/popen.h"
+#include "cl.hpp"
 #include "clang_dir.hpp"
-#include "diags.hpp"
 #include "evoker.hpp"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/Frontend/FrontendActions.h"
 
 #include <stdlib.h>
 
-using namespace clang;
-using namespace llvm;
-
-namespace {
-class ppc : public PPCallbacks {
-  DiagnosticsEngine *m_diag;
-  dag::node *m_dag;
-
-public:
-  explicit ppc(DiagnosticsEngine *diag, dag::node *d)
-      : m_diag{diag}
-      , m_dag{d} {}
-
-  bool FileNotFound(StringRef filename) override { return true; }
-  void moduleImport(SourceLocation loc, ModuleIdPath path,
-                    const Module *imp) override {
-    assert(path.size() == 1 && "path isn't atomic");
-    auto &[id, _] = path[0];
-    if (!m_dag->add_mod_dep(id->getName().str().c_str())) {
-      diag_error(*m_diag, loc, "module not found");
-    }
-  }
-};
-
-class action : public PreprocessOnlyAction {
-  dag::node *m_dag;
-
-public:
-  explicit action(dag::node *d) : m_dag{d} {}
-
-  bool BeginSourceFileAction(CompilerInstance &ci) override {
-    auto *diag = &ci.getDiagnostics();
-    ci.getPreprocessor().addPPCallbacks(std::make_unique<ppc>(diag, m_dag));
-    return true;
-  }
-  void EndSourceFileAction() override {
-    SmallString<128> pwd;
-    sys::fs::current_path(pwd); // TODO: check errors
-    auto pwd_stem = sys::path::stem(pwd);
-    auto file_stem = sys::path::stem(getCurrentFile());
-    auto file_ext = sys::path::extension(getCurrentFile());
-    auto &pp = getCompilerInstance().getPreprocessor();
-    bool root = pp.isInNamedModule() && pp.getNamedModuleName() == pwd_stem &&
-                file_ext == ".cppm";
-    if (root && !m_dag->root())
-      m_dag->set_main_mod();
-  }
-};
-} // namespace
-
-static const char *cmp(const char *str, const char *prefix) {
+static char *cmp(char *str, const char *prefix) {
   auto len = strlen(prefix);
   if (strncmp(str, prefix, len) != 0)
     return nullptr;
@@ -112,6 +60,25 @@ static bool read_file_list(const char *str, dag::node *n,
   return *str == 0 || *str == '\n';
 }
 
+static bool add_mod_dep(char *pp, const char *mod, dag::node *n) {
+  strchr(pp, ';')[0] = 0;
+
+  sim_sbt mm{};
+  if (*pp == ':') {
+    sim_sb_copy(&mm, mod);
+    if (auto mc = strchr(mm.buffer, ':')) {
+      *mc = 0;
+      mm.len = strlen(mm.buffer);
+    }
+    sim_sb_concat(&mm, pp);
+  } else {
+    sim_sb_copy(&mm, pp);
+  }
+
+  printf(">> %20s %20s %20s\n", mod, pp, mm.buffer);
+  return read_file_list(mm.buffer, n, &dag::node::add_mod_dep, "dependency");
+}
+
 bool dag::execute(dag::node *n) {
   auto args = evoker{}
                   .push_arg("-E")
@@ -135,6 +102,8 @@ bool dag::execute(dag::node *n) {
   char *argv[]{clang.buffer, argfile.buffer};
   if (0 != proc_open(argv, &f, &ferr))
     return false;
+
+  sim_sbt mod_name{};
 
   char buf[1024];
   while (!feof(f) && fgets(buf, 1024, f) != nullptr) {
@@ -175,24 +144,24 @@ bool dag::execute(dag::node *n) {
     } else if (cmp(p, "#pragma leco ")) {
       fprintf(stderr, "unknown pragma: %s", p);
       return false;
-    } else if (cmp(p, "export module ")) {
-      // printf("%s", buf);
-    } else if (cmp(p, "export import ")) {
-      // printf("%s", buf);
-    } else if (cmp(p, "import ")) {
-      // printf("%s", buf);
+    } else if (auto pp = cmp(p, "module ")) {
+      strchr(pp, ';')[0] = 0;
+      sim_sb_copy(&mod_name, pp);
+    } else if (auto pp = cmp(p, "export module ")) {
+      strchr(pp, ';')[0] = 0;
+      sim_sb_copy(&mod_name, pp);
+      // TODO: do we need to test and call n->set_main_mod?
+    } else if (auto pp = cmp(p, "export import ")) {
+      if (!add_mod_dep(pp, mod_name.buffer, n))
+        return false;
+    } else if (auto pp = cmp(p, "import ")) {
+      if (!add_mod_dep(pp, mod_name.buffer, n))
+        return false;
     }
   }
   fclose(f);
   fclose(ferr);
 
-  auto ci =
-      evoker{"-E", n->source(), "dummy"}.set_cpp_std().add_predefs().createCI();
-
-  action a{n};
-  if (!ci->ExecuteAction(a))
-    return false;
-
-  n->write_to_cache_file();
+  // n->write_to_cache_file();
   return true;
 }
