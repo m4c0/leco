@@ -6,71 +6,12 @@
 #include "context.hpp"
 #include "dag.hpp"
 #include "sim.hpp"
-#include "clang/Driver/Compilation.h"
-#include "clang/Driver/Driver.h"
-#include "clang/Frontend/CompilerInstance.h"
-#include "clang/Frontend/TextDiagnosticPrinter.h"
-#include "clang/Lex/PreprocessorOptions.h"
-#include "llvm/Support/CrashRecoveryContext.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/Support/TargetSelect.h"
-#include "llvm/Support/raw_ostream.h"
-#include "llvm/TargetParser/Host.h"
+
 #include <stdio.h>
 
 #ifndef _WIN32
 #include <unistd.h>
 #endif
-
-using namespace clang;
-using namespace clang::driver;
-using namespace llvm;
-
-static DiagnosticsEngine diags() {
-  IntrusiveRefCntPtr<DiagnosticOptions> diag_opts{new DiagnosticOptions()};
-  IntrusiveRefCntPtr<DiagnosticIDs> diag_ids{new DiagnosticIDs()};
-  auto diag_cli = new TextDiagnosticPrinter(errs(), &*diag_opts);
-
-  return DiagnosticsEngine{diag_ids, diag_opts, diag_cli};
-}
-
-static std::vector<const char *> prepare_args(const auto &margs,
-                                              const char *verb) {
-  std::vector<const char *> args{};
-  for (const auto &s : margs) {
-    args.push_back(s.c_str());
-  }
-  if (is_extra_verbose()) {
-    auto tgt = cur_ctx().target;
-    errs() << verb << " compiler instance for args (target = [" << tgt
-           << "]):\n";
-    for (auto a : args)
-      errs() << a << " ";
-    errs() << "\n";
-  }
-  return args;
-}
-
-static std::shared_ptr<CompilerInstance> createCI(const auto &margs) {
-  auto clang = std::make_shared<CompilerInstance>();
-
-  auto args = prepare_args(margs, "preparing");
-  auto diags = ::diags();
-  Driver drv{clang_exe(), cur_ctx().target, diags};
-  std::unique_ptr<Compilation> c{drv.BuildCompilation(args)};
-  if (!c || c->containsError() || c->getJobs().size() == 0)
-    // We did a mistake in clang args. Bail out and let the diagnostics
-    // client do its job informing the user
-    return {};
-
-  auto cc1args = c->getJobs().begin()->getArguments();
-  if (!CompilerInvocation::CreateFromArgs(clang->getInvocation(), cc1args,
-                                          diags))
-    return {};
-
-  clang->createDiagnostics();
-  return clang;
-}
 
 evoker::evoker() {
   m_args.push_back(clang_exe());
@@ -95,20 +36,6 @@ evoker::evoker() {
   for (auto f : cur_ctx().cxx_flags) {
     m_args.push_back(f);
   }
-}
-
-std::shared_ptr<CompilerInstance> evoker::createCI() const {
-  auto ci = ::createCI(m_args);
-
-  if (m_node == nullptr)
-    return ci;
-
-  auto &mod_files = ci->getHeaderSearchOpts().PrebuiltModuleFiles;
-  dag::visit(m_node, false, [&](auto *n) {
-    mod_files.insert({n->module_name(), n->module_pcm()});
-  });
-
-  return ci;
 }
 
 static void out_file(FILE *f, const char *a) {
@@ -178,15 +105,3 @@ bool evoker::execute() {
 #endif
 vex::~vex() { unlink(m_argfile.c_str()); }
 vex::operator bool() const { return m_argfile != ""; }
-
-struct init_llvm {
-  llvm_shutdown_obj sdo{};
-
-  init_llvm() {
-    InitializeAllTargets();
-    InitializeAllTargetMCs();
-    InitializeAllAsmPrinters();
-    InitializeAllAsmParsers();
-    CrashRecoveryContext::Enable();
-  }
-} i{};
