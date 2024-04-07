@@ -7,7 +7,7 @@
 #define MTIME_IMPLEMENTATION
 #include "../mtime/mtime.h"
 #define POPEN_IMPLEMENTATION
-#include "popen.h"
+#include "../popen/popen.h"
 #define SIM_IMPLEMENTATION
 #include "sim.h"
 #define TEMPSIE_IMPLEMENTATION

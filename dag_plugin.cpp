@@ -1,9 +1,9 @@
 #include "dag.hpp"
 
+#include "../popen/popen.h"
 #include "clang_dir.hpp"
 #include "diags.hpp"
 #include "evoker.hpp"
-#include "popen.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/Frontend/FrontendActions.h"
 
