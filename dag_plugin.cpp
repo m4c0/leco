@@ -99,7 +99,7 @@ bool dag::execute(dag::node *n) {
 
   FILE *f;
   FILE *ferr;
-  char *argv[]{clang.buffer, argfile.buffer};
+  char *argv[]{clang.buffer, argfile.buffer, 0};
   if (0 != proc_open(argv, &f, &ferr))
     return false;
 
