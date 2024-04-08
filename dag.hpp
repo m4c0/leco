@@ -1,6 +1,8 @@
 #pragma once
 #include "sim.hpp"
+
 #include <set>
+#include <stdint.h>
 #include <string>
 
 namespace dag {
