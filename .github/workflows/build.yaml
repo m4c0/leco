@@ -1,0 +1,52 @@
+name: build
+on:
+  pull_request:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: 🗒️ Checkout GOPT
+        uses: actions/checkout@v3
+        with:
+          repository: m4c0/gopt
+          path: gopt
+      - name: ⚙️  Checkout LECO
+        uses: actions/checkout@v3
+        with:
+          repository: m4c0/leco
+          path: leco
+      - name: 📂 Checkout MINIRENT
+        uses: actions/checkout@v3
+        with:
+          repository: m4c0/minirent
+          path: minirent
+      - name: ⏰ Checkout MTIME
+        uses: actions/checkout@v3
+        with:
+          repository: m4c0/mtime
+          path: mtime
+      - name: 📦 Checkout POPEN
+        uses: actions/checkout@v3
+        with:
+          repository: m4c0/popen
+          path: popen
+      - name: 🐞 Show Clang version
+        run: clang++ -v
+      - name: 🛠️ Build the builder
+        run: clang++ -std=c++2b -o build.exe build.cpp
+        working-directory: leco
+      - name: 🧩 Build LECO
+        run: ./build.exe
+        working-directory: leco
+      - name: 😰 Running LECO
+        run: ./leco.exe
+        working-directory: leco
