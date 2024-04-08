@@ -39,6 +39,11 @@ jobs:
         with:
           repository: m4c0/popen
           path: popen
+      - name: 🗑️ Checkout TEMPSIE
+        uses: actions/checkout@v3
+        with:
+          repository: m4c0/tempsie
+          path: tempsie
       - name: 🐞 Show Clang version
         run: clang++ -v
       - name: 🛠️ Build the builder
