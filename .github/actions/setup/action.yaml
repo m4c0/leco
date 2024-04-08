@@ -5,32 +5,23 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: 🗒️ Checkout gopt
+    - run: git clone --depth=1 https://github.com/m4c0/gopt.git gopt
       shell: bash
-      run: git clone --depth=1 https://github.com/m4c0/gopt.git gopt
-    - name: ⚙️  Checkout leco
+    - run: git clone --depth=1 https://github.com/m4c0/leco.git leco
       shell: bash
-      run: git clone --depth=1 https://github.com/m4c0/leco.git leco
-    - name: 📂 Checkout minirent
+    - run: git clone --depth=1 https://github.com/m4c0/minirent.git minirent
       shell: bash
-      run: git clone --depth=1 https://github.com/m4c0/minirent.git minirent
-    - name: ⏰ Checkout mtime
+    - run: git clone --depth=1 https://github.com/m4c0/mtime.git mtime
       shell: bash
-      run: git clone --depth=1 https://github.com/m4c0/mtime.git mtime
-    - name: 📦 Checkout popen
+    - run: git clone --depth=1 https://github.com/m4c0/popen.git popen
       shell: bash
-      run: git clone --depth=1 https://github.com/m4c0/popen.git popen
-    - name: 🗑️ Checkout tempsie
+    - run: git clone --depth=1 https://github.com/m4c0/tempsie.git tempsie
       shell: bash
-      run: git clone --depth=1 https://github.com/m4c0/tempsie.git tempsie
-    - name: 🐞 Show Clang version
+    - run: clang++ -v
       shell: bash
-      run: clang++ -v
-    - name: 🛠️ Build the builder
+    - run: clang++ -std=c++2b -o build.exe build.cpp
       shell: bash
-      run: clang++ -std=c++2b -o build.exe build.cpp
       working-directory: leco
-    - name: 🧩 Build LECO
+    - run: ./build.exe
       shell: bash
-      run: ./build.exe
       working-directory: leco
