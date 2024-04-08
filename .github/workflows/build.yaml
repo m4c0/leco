@@ -14,26 +14,8 @@ jobs:
           - windows-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - name: 🗒️ Checkout gopt
-        run: git clone --depth=1 https://github.com/m4c0/gopt.git gopt
-      - name: ⚙️  Checkout leco
-        run: git clone --depth=1 https://github.com/m4c0/leco.git leco
-      - name: 📂 Checkout minirent
-        run: git clone --depth=1 https://github.com/m4c0/minirent.git minirent
-      - name: ⏰ Checkout mtime
-        run: git clone --depth=1 https://github.com/m4c0/mtime.git mtime
-      - name: 📦 Checkout popen
-        run: git clone --depth=1 https://github.com/m4c0/popen.git popen
-      - name: 🗑️ Checkout tempsie
-        run: git clone --depth=1 https://github.com/m4c0/tempsie.git tempsie
-      - name: 🐞 Show Clang version
-        run: clang++ -v
-      - name: 🛠️ Build the builder
-        run: clang++ -std=c++2b -o build.exe build.cpp
-        working-directory: leco
-      - name: 🧩 Build LECO
-        run: ./build.exe
-        working-directory: leco
-      - name: 😰 Running LECO
+      - name: 🧰 Setup
+        uses: m4c0/leco/.github/actions/setup@main
+      - name: 😰 Run LECO
         run: ./leco.exe
         working-directory: leco

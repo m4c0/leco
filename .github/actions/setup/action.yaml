@@ -1,0 +1,36 @@
+name: 🧰 Setup LECO Enviroment
+inputs:
+  cwd:
+    default: .
+runs:
+  using: composite
+  steps:
+    - name: 🗒️ Checkout gopt
+      shell: bash
+      run: git clone --depth=1 https://github.com/m4c0/gopt.git gopt
+    - name: ⚙️  Checkout leco
+      shell: bash
+      run: git clone --depth=1 https://github.com/m4c0/leco.git leco
+    - name: 📂 Checkout minirent
+      shell: bash
+      run: git clone --depth=1 https://github.com/m4c0/minirent.git minirent
+    - name: ⏰ Checkout mtime
+      shell: bash
+      run: git clone --depth=1 https://github.com/m4c0/mtime.git mtime
+    - name: 📦 Checkout popen
+      shell: bash
+      run: git clone --depth=1 https://github.com/m4c0/popen.git popen
+    - name: 🗑️ Checkout tempsie
+      shell: bash
+      run: git clone --depth=1 https://github.com/m4c0/tempsie.git tempsie
+    - name: 🐞 Show Clang version
+      shell: bash
+      run: clang++ -v
+    - name: 🛠️ Build the builder
+      shell: bash
+      run: clang++ -std=c++2b -o build.exe build.cpp
+      working-directory: leco
+    - name: 🧩 Build LECO
+      shell: bash
+      run: ./build.exe
+      working-directory: leco
