@@ -149,7 +149,13 @@ bool dag::execute(dag::node *n) {
     } else if (auto pp = cmp(p, "export module ")) {
       strchr(pp, ';')[0] = 0;
       sim_sb_copy(&mod_name, pp);
-      // TODO: do we need to test and call n->set_main_mod?
+      if (strchr(mod_name.buffer, ':') == nullptr) {
+        sim_sbt fn{};
+        sim_sb_path_copy_parent(&fn, n->source());
+        auto dir = sim_sb_path_filename(&fn);
+        if (0 == strcmp(dir, mod_name.buffer))
+          n->set_main_mod();
+      }
     } else if (auto pp = cmp(p, "export import ")) {
       if (!add_mod_dep(pp, mod_name.buffer, n))
         return false;
