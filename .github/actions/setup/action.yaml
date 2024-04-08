@@ -5,23 +5,18 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: git clone --depth=1 https://github.com/m4c0/gopt.git gopt
-      shell: bash
-    - run: git clone --depth=1 https://github.com/m4c0/leco.git leco
-      shell: bash
-    - run: git clone --depth=1 https://github.com/m4c0/minirent.git minirent
-      shell: bash
-    - run: git clone --depth=1 https://github.com/m4c0/mtime.git mtime
-      shell: bash
-    - run: git clone --depth=1 https://github.com/m4c0/popen.git popen
-      shell: bash
-    - run: git clone --depth=1 https://github.com/m4c0/tempsie.git tempsie
-      shell: bash
     - run: clang++ -v
       shell: bash
-    - run: clang++ -std=c++2b -o build.exe build.cpp
+    - run: |
+        git clone --depth=1 https://github.com/m4c0/gopt.git
+        git clone --depth=1 https://github.com/m4c0/leco.git
+        git clone --depth=1 https://github.com/m4c0/minirent.git
+        git clone --depth=1 https://github.com/m4c0/mtime.git
+        git clone --depth=1 https://github.com/m4c0/popen.git
+        git clone --depth=1 https://github.com/m4c0/tempsie.git
       shell: bash
-      working-directory: leco
-    - run: ./build.exe
+    - run: |
+        clang++ -std=c++2b -o build.exe build.cpp
+        ./build.exe
       shell: bash
       working-directory: leco
