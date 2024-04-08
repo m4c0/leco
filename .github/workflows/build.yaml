@@ -15,35 +15,17 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: 🗒️ Checkout gopt
-        uses: actions/checkout@v4
-        with:
-          repository: m4c0/gopt
-          path: gopt
+        run: git clone --depth=1 https://github.com/m4c0/gopt.git gopt
       - name: ⚙️  Checkout leco
-        uses: actions/checkout@v4
-        with:
-          repository: m4c0/leco
-          path: leco
+        run: git clone --depth=1 https://github.com/m4c0/leco.git leco
       - name: 📂 Checkout minirent
-        uses: actions/checkout@v4
-        with:
-          repository: m4c0/minirent
-          path: minirent
+        run: git clone --depth=1 https://github.com/m4c0/minirent.git minirent
       - name: ⏰ Checkout mtime
-        uses: actions/checkout@v4
-        with:
-          repository: m4c0/mtime
-          path: mtime
+        run: git clone --depth=1 https://github.com/m4c0/mtime.git mtime
       - name: 📦 Checkout popen
-        uses: actions/checkout@v4
-        with:
-          repository: m4c0/popen
-          path: popen
+        run: git clone --depth=1 https://github.com/m4c0/popen.git popen
       - name: 🗑️ Checkout tempsie
-        uses: actions/checkout@v4
-        with:
-          repository: m4c0/tempsie
-          path: tempsie
+        run: git clone --depth=1 https://github.com/m4c0/tempsie.git tempsie
       - name: 🐞 Show Clang version
         run: clang++ -v
       - name: 🛠️ Build the builder
