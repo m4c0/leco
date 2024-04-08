@@ -14,33 +14,33 @@ jobs:
           - windows-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - name: 🗒️ Checkout GOPT
-        uses: actions/checkout@v3
+      - name: 🗒️ Checkout gopt
+        uses: actions/checkout@v4
         with:
           repository: m4c0/gopt
           path: gopt
-      - name: ⚙️  Checkout LECO
-        uses: actions/checkout@v3
+      - name: ⚙️  Checkout leco
+        uses: actions/checkout@v4
         with:
           repository: m4c0/leco
           path: leco
-      - name: 📂 Checkout MINIRENT
-        uses: actions/checkout@v3
+      - name: 📂 Checkout minirent
+        uses: actions/checkout@v4
         with:
           repository: m4c0/minirent
           path: minirent
-      - name: ⏰ Checkout MTIME
-        uses: actions/checkout@v3
+      - name: ⏰ Checkout mtime
+        uses: actions/checkout@v4
         with:
           repository: m4c0/mtime
           path: mtime
-      - name: 📦 Checkout POPEN
-        uses: actions/checkout@v3
+      - name: 📦 Checkout popen
+        uses: actions/checkout@v4
         with:
           repository: m4c0/popen
           path: popen
-      - name: 🗑️ Checkout TEMPSIE
-        uses: actions/checkout@v3
+      - name: 🗑️ Checkout tempsie
+        uses: actions/checkout@v4
         with:
           repository: m4c0/tempsie
           path: tempsie
