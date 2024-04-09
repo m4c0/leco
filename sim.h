@@ -29,6 +29,8 @@ void sim_sb_path_copy_real(sim_sb *dst, const char *path);
 const char *sim_sb_path_extension(const sim_sb *src);
 const char *sim_sb_path_filename(const sim_sb *src);
 
+const char *sim_path_extension(const char *src);
+
 #ifdef _WIN32
 #define SIM_PATHSEP '\\'
 #define SIM_PATHSEP_S "\\"
@@ -148,22 +150,19 @@ void sim_sb_path_copy_parent(sim_sb *dst, const char *path) {
   sim_sb_path_parent(dst);
 }
 
-const char *sim_sb_path_extension(const sim_sb *src) {
-  assert(src->buffer && "uninitialised buffer");
+const char *sim_path_extension(const char *src) {
+  assert(src && "null path");
 
-  if (src->len == 0)
-    return nullptr;
-
-  char *p = strrchr(src->buffer, SIM_PATHSEP);
-  char *e = strrchr(src->buffer, '.');
-  // Path ends with SIM_PATHSEP
-  if (p == src->buffer + src->len - 1)
-    return nullptr;
-  // No extension or extension isn't in stem
+  const char *p = strrchr(src, SIM_PATHSEP);
+  const char *e = strrchr(src, '.');
   if (!e || (p && e && p > e)) {
     return nullptr;
   }
   return e;
+}
+
+const char *sim_sb_path_extension(const sim_sb *src) {
+  return sim_path_extension(src->buffer);
 }
 
 //           /tmp/test ===> /tmp/test.uga
