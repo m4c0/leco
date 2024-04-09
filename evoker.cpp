@@ -13,8 +13,8 @@
 #include <unistd.h>
 #endif
 
-static void construct_args(bool cpp, std::vector<std::string> &args) {
-  args.push_back(clang_exe());
+static void construct_args(const char *in, std::vector<std::string> &args) {
+  args.push_back(clang_exe(in));
   args.push_back("-Wall");
   args.push_back("-target");
   args.push_back(cur_ctx().target.c_str());
@@ -38,9 +38,9 @@ static void construct_args(bool cpp, std::vector<std::string> &args) {
   }
 }
 
-evoker::evoker() { construct_args(true, m_args); }
+evoker::evoker() { construct_args("null.cpp", m_args); }
 evoker::evoker(const char *verb, const char *in, const char *out) {
-  construct_args(true, m_args);
+  construct_args(in, m_args);
   push_arg(verb);
   push_arg(in);
   set_out(out);
@@ -102,7 +102,7 @@ bool evoker::execute() {
   }
 
   sim_sbt cmd{};
-  sim_sb_copy(&cmd, clang_exe());
+  sim_sb_copy(&cmd, m_args[0].c_str());
   sim_sb_concat(&cmd, " @");
   sim_sb_concat(&cmd, v.argument_file());
   return 0 == system(cmd.buffer);

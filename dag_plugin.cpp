@@ -90,7 +90,7 @@ bool dag::execute(dag::node *n) {
     return false;
 
   sim_sbt clang{};
-  sim_sb_copy(&clang, clang_exe());
+  sim_sb_copy(&clang, clang_exe(n->source()));
 
   sim_sbt argfile{};
   sim_sb_copy(&argfile, "@");
