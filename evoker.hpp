@@ -33,11 +33,8 @@ class evoker {
 
 public:
   evoker();
-  evoker(const char *verb, const char *in, const char *out) : evoker() {
-    push_arg(verb);
-    push_arg(in);
-    set_out(out);
-  }
+  evoker(const char *verb, const char *in, const char *out);
+
   evoker &push_arg(const char *mode) {
     m_args.push_back(mode);
     return *this;

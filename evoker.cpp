@@ -37,6 +37,11 @@ evoker::evoker() {
     m_args.push_back(f);
   }
 }
+evoker::evoker(const char *verb, const char *in, const char *out) : evoker() {
+  push_arg(verb);
+  push_arg(in);
+  set_out(out);
+}
 
 static void out_file(FILE *f, const char *a) {
   while (*a != 0) {
