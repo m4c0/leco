@@ -13,31 +13,34 @@
 #include <unistd.h>
 #endif
 
-evoker::evoker() {
-  m_args.push_back(clang_exe());
-  m_args.push_back("-Wall");
-  m_args.push_back("-target");
-  m_args.push_back(cur_ctx().target.c_str());
+static void construct_args(bool cpp, std::vector<std::string> &args) {
+  args.push_back(clang_exe());
+  args.push_back("-Wall");
+  args.push_back("-target");
+  args.push_back(cur_ctx().target.c_str());
 
   if (is_optimised()) {
-    m_args.push_back("-O3");
-    m_args.push_back("-flto");
-    m_args.push_back("-fvisibility=hidden");
+    args.push_back("-O3");
+    args.push_back("-flto");
+    args.push_back("-fvisibility=hidden");
   }
   if (enable_debug_syms()) {
-    m_args.push_back("-g");
+    args.push_back("-g");
   }
 
   if (cur_ctx().sysroot != "") {
-    m_args.push_back("--sysroot");
-    m_args.push_back(cur_ctx().sysroot.c_str());
+    args.push_back("--sysroot");
+    args.push_back(cur_ctx().sysroot.c_str());
   }
 
   for (auto f : cur_ctx().cxx_flags) {
-    m_args.push_back(f);
+    args.push_back(f);
   }
 }
-evoker::evoker(const char *verb, const char *in, const char *out) : evoker() {
+
+evoker::evoker() { construct_args(true, m_args); }
+evoker::evoker(const char *verb, const char *in, const char *out) {
+  construct_args(true, m_args);
   push_arg(verb);
   push_arg(in);
   set_out(out);
