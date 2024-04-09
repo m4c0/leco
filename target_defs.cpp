@@ -59,6 +59,7 @@ context macosx() {
   std::vector<std::string> predefs{};
   predefs.push_back("LECO_TARGET_MACOSX");
   predefs.push_back("LECO_TARGET_APPLE");
+  predefs.push_back("_C99_SOURCE");
   return context{
       .predefs = predefs,
       .link_flags = impl::macos_link_flags(),
@@ -88,6 +89,7 @@ context iphoneos() {
   predefs.push_back("LECO_TARGET_IPHONEOS");
   predefs.push_back("LECO_TARGET_IOS");
   predefs.push_back("LECO_TARGET_APPLE");
+  predefs.push_back("_C99_SOURCE");
   return context{
       .predefs = predefs,
       .link_flags = impl::ios_link_flags(),
@@ -118,6 +120,7 @@ context iphonesimulator() {
   predefs.push_back("LECO_TARGET_IPHONESIMULATOR");
   predefs.push_back("LECO_TARGET_IOS");
   predefs.push_back("LECO_TARGET_APPLE");
+  predefs.push_back("_C99_SOURCE");
   return context{
       .predefs = predefs,
       .link_flags = impl::ios_link_flags(),

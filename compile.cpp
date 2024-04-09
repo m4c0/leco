@@ -43,7 +43,11 @@ bool compile(const dag::node *n) {
         .suppress_pragmas()
         .execute();
   } else if (strcmp(ext, ".c") == 0) {
-    return evoker{"-c", file, obj}.add_predefs().suppress_pragmas().execute();
+    return evoker{"-c", file, obj}
+        .push_arg("-std=c99")
+        .add_predefs()
+        .suppress_pragmas()
+        .execute();
   } else if (strcmp(ext, ".m") == 0 || strcmp(ext, ".mm") == 0) {
     return evoker{"-c", file, obj}
         .push_arg("-fmodules")
