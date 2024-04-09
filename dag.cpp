@@ -94,6 +94,10 @@ bool dag::node::add_mod_impl(const char *mod_impl) {
   if (add_real_abs(m_mod_impls, mi.buffer))
     return true;
 
+  sim_sb_path_set_extension(&mi, "c");
+  if (add_real_abs(m_mod_impls, mi.buffer))
+    return true;
+
   sim_sb_path_set_extension(&mi, "mm");
   if (add_real_abs(m_mod_impls, mi.buffer))
     return true;
