@@ -164,6 +164,13 @@ bool dag::execute(dag::node *n) {
         return false;
     }
   }
+
+  if (is_extra_verbose()) {
+    while (!feof(ferr) && fgets(buf, 1024, ferr) != nullptr) {
+      fputs(buf, stderr);
+    }
+  }
+
   fclose(f);
   fclose(ferr);
 
