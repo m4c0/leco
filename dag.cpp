@@ -16,6 +16,14 @@ static inline bool path_exists(const char *path) { return mtime_of(path) > 0; }
   set.insert(abs.buffer);
   return true;
 }
+[[nodiscard]] static bool add_real_abs(const dag::node *n,
+                                       std::set<std::string> &set,
+                                       const char *rel_path) {
+  sim_sbt path{};
+  sim_sb_path_copy_parent(&path, n->source());
+  sim_sb_path_append(&path, rel_path);
+  return add_real_abs(set, path.buffer);
+}
 
 static void infer_module_name(sim_sb *module_name, const sim_sb *src) {
   sim_sb_path_copy_sb_stem(module_name, src);
@@ -35,10 +43,10 @@ dag::node::node(const char *n) {
 }
 
 bool dag::node::add_executable(const char *executable) {
-  return add_real_abs(m_executables, executable);
+  return add_real_abs(this, m_executables, executable);
 }
 bool dag::node::add_library_dir(const char *dir) {
-  return add_real_abs(m_library_dirs, dir);
+  return add_real_abs(this, m_library_dirs, dir);
 }
 bool dag::node::add_mod_dep(const char *mod_name) {
   sim_sbt pp{};
@@ -106,10 +114,10 @@ bool dag::node::add_mod_impl(const char *mod_impl) {
   return add_real_abs(m_mod_impls, mi.buffer);
 }
 bool dag::node::add_resource(const char *resource) {
-  return add_real_abs(m_resources, resource);
+  return add_real_abs(this, m_resources, resource);
 }
 bool dag::node::add_shader(const char *shader) {
-  return add_real_abs(m_shaders, shader);
+  return add_real_abs(this, m_shaders, shader);
 }
 
 static std::map<std::string, dag::node> cache{};
