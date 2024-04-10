@@ -174,6 +174,6 @@ bool dag::execute(dag::node *n) {
   fclose(f);
   fclose(ferr);
 
-  // n->write_to_cache_file();
+  n->write_to_cache_file();
   return true;
 }
