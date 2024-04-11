@@ -56,7 +56,10 @@ public:
   void set_app() { m_root = root_t::app; }
   void set_compiled() { m_compiled = true; }
   void set_dll() { m_root = root_t::dll; }
-  void set_main_mod() { m_root = root_t::main_mod; }
+  void set_main_mod() {
+    if (m_root == root_t::none)
+      m_root = root_t::main_mod;
+  }
   void set_recursed() { m_recursed = true; }
   void set_tool() { m_root = root_t::tool; }
 
