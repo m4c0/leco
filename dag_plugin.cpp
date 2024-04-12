@@ -55,7 +55,7 @@ static bool read_file_list(const char *str, dag::node *n,
     buf[e - str] = 0;
     if (!add_found(desc, buf, n, fn))
       return false;
-    str = e + 1;
+    str = *e ? e + 1 : e;
   }
   return *str == 0 || *str == '\n';
 }
