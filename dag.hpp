@@ -148,4 +148,11 @@ uint64_t visit_dirty(const node *n, auto &&fn) {
     (*pfn)(nn);
   });
 }
+void visit_all(void *ptr, void (*fn)(void *, const node *));
+void visit_all(auto &&fn) {
+  visit_all(&fn, [](void *p, const node *nn) {
+    auto pfn = static_cast<decltype(&fn)>(p);
+    (*pfn)(nn);
+  });
+}
 } // namespace dag

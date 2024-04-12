@@ -286,3 +286,9 @@ uint64_t dag::visit_dirty(const dag::node *n, void *ptr,
   rec(rec, n, {});
   return max;
 }
+
+void dag::visit_all(void *ptr, void (*fn)(void *, const dag::node *)) {
+  for (const auto &[k, v] : cache) {
+    fn(ptr, &v);
+  }
+}

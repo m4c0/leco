@@ -31,13 +31,34 @@ bool run_target() {
   closedir(dir);
   return true;
 }
+static void dump_deps() {
+  std::set<std::string> all_parents{};
+
+  dag::visit_all([&](auto *n) {
+    sim_sbt parent{};
+    sim_sb_path_copy_parent(&parent, n->source());
+    all_parents.insert(sim_sb_path_filename(&parent));
+  });
+
+  FILE *f = fopen("out/requirements.txt", "w");
+  if (!f)
+    return;
+  for (const auto &s : all_parents) {
+    fprintf(f, "%s\n", s.c_str());
+  }
+  fclose(f);
+}
 
 extern "C" int main(int argc, char **argv) {
   if (!parse_args(argc, argv))
     return 1;
 
   try {
-    return for_each_target(run_target) ? 0 : 1;
+    if (!for_each_target(run_target))
+      return 1;
+
+    dump_deps();
+    return 0;
   } catch (const std::exception &e) {
     fprintf(stderr, "exception: %s\n", e.what());
     return 1;
