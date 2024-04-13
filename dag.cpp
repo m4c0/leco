@@ -216,10 +216,7 @@ static bool recurse(dag::node *n) {
   return true;
 }
 
-dag::node *dag::get_node(const char *source) {
-  auto it = cache.find(source);
-  return it == cache.end() ? nullptr : &(*it).second;
-}
+dag::node *dag::get_node(const char *source) { return &cache.at(source); }
 dag::node *dag::process(const char *path) {
   auto [n, ins] = find(path);
   if (!n || !ins)
