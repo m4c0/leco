@@ -1,6 +1,7 @@
 #include "cleaner.hpp"
 
 #include "cl.hpp"
+#include "context.hpp"
 #include "dag.hpp"
 #include "log.hpp"
 #include "sim.hpp"
@@ -32,26 +33,28 @@ static void remove_recursive(sim_sb *path) {
   vlog("removing", path->buffer);
   unlink(path->buffer);
 }
-static void remove_parent(std::set<std::string> &already_done,
-                          const dag::node *n) {
+
+static std::set<std::string> done{};
+
+void clean(const dag::node *n) {
+  if (!should_clean_current())
+    return;
+
   sim_sbt path{};
   sim_sb_path_copy_parent(&path, n->target());
 
-  auto [it, inserted] = already_done.insert(path.buffer);
+  auto [it, inserted] = done.insert(path.buffer);
   if (!inserted)
     return;
 
-  return remove_recursive(&path);
-}
-
-void clean(const dag::node *n) {
-  assert(n->root() && "only roots should be cleaned up");
-
-  std::set<std::string> done{};
-
   if (should_clean_all()) {
-    dag::visit(n, false, [&](auto *n) { remove_parent(done, n); });
-  } else if (should_clean_current()) {
-    remove_parent(done, n);
+    remove_recursive(&path);
+    return;
   }
+
+  sim_sbt cwd{};
+  sim_sb_path_copy_real(&cwd, "out");
+  sim_sb_path_append(&cwd, cur_ctx().target.c_str());
+  if (0 == strcmp(cwd.buffer, path.buffer))
+    remove_recursive(&path);
 }

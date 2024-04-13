@@ -2,7 +2,6 @@
 
 #include "../mtime/mtime.h"
 #include "cl.hpp"
-#include "cleaner.hpp"
 #include "compile.hpp"
 #include "context.hpp"
 #include "dag.hpp"
@@ -92,8 +91,6 @@ bool bounce(const char *path) {
     return false;
   if (!n->root())
     return true;
-
-  clean(n);
 
   if (n->tool() && !cur_ctx().native_target)
     return true;

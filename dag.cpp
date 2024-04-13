@@ -2,6 +2,7 @@
 
 #include "../mtime/mtime.h"
 #include "cl.hpp"
+#include "cleaner.hpp"
 #include "in2out.hpp"
 #include <map>
 
@@ -142,6 +143,8 @@ static bool still_fresh(dag::node *n) {
 }
 
 static bool compile(dag::node *n) {
+  clean(n);
+
   if (!still_fresh(n)) {
     dag::xlog(n, "dag compilation");
     return dag::execute(n);
