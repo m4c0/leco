@@ -2,6 +2,7 @@
 
 #include "cl.hpp"
 #include "dag.hpp"
+#include "log.hpp"
 #include "sim.hpp"
 
 #include "../minirent/minirent.h"
@@ -15,6 +16,22 @@
 #include <unistd.h>
 #endif
 
+static void remove_recursive(sim_sb *path) {
+  DIR *dir = opendir(path->buffer);
+  if (dir != nullptr) {
+    dirent *ds;
+    while ((ds = readdir(dir)) != nullptr) {
+      if (ds->d_name[0] == '.')
+        continue;
+      sim_sb_path_append(path, ds->d_name);
+      remove_recursive(path);
+      sim_sb_path_parent(path);
+    }
+    closedir(dir);
+  }
+  vlog("removing", path->buffer);
+  unlink(path->buffer);
+}
 static void remove_parent(std::set<std::string> &already_done,
                           const dag::node *n) {
   sim_sbt path{};
@@ -24,18 +41,7 @@ static void remove_parent(std::set<std::string> &already_done,
   if (!inserted)
     return;
 
-  DIR * dir = opendir(path.buffer);
-  if (dir == nullptr)
-    return;
-
-  dirent *ds;
-  while ((ds = readdir(dir)) != nullptr) {
-    if (ds->d_name[0] == '.') continue;
-    sim_sb_path_append(&path, ds->d_name);
-    unlink(path.buffer);
-    sim_sb_path_parent(&path);
-  }
-  closedir(dir);
+  return remove_recursive(&path);
 }
 
 void clean(const dag::node *n) {
