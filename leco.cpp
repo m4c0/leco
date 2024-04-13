@@ -50,6 +50,10 @@ static void dump_deps() {
 }
 
 extern "C" int main(int argc, char **argv) {
+#ifdef _WIN32
+  system(""); // enable ANSI colours
+#endif
+
   if (!parse_args(argc, argv))
     return 1;
 
