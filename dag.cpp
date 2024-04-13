@@ -169,6 +169,20 @@ static auto find(const char *path) {
 }
 
 static bool recurse(dag::node *n) {
+  for (auto &dep : n->build_deps()) {
+    auto [d, ins] = find(dep.c_str());
+
+    if (!d)
+      return false;
+    if (d->recursed())
+      continue;
+    if (!compile(d))
+      return false;
+    if (!recurse(d))
+      return false;
+
+    d->set_recursed();
+  }
   for (auto &dep : n->mod_deps()) {
     if (dep == n->source()) {
       fprintf(stderr, "Self-referencing detected - are you using `import "
@@ -237,6 +251,9 @@ void dag::visit(const dag::node *n, bool impls, void *ptr,
     if (visited.contains(n->source()))
       return;
 
+    for (auto &d : n->build_deps()) {
+      rec(rec, get_node(d.c_str()));
+    }
     for (auto &d : n->mod_deps()) {
       rec(rec, get_node(d.c_str()));
     }
@@ -266,6 +283,10 @@ uint64_t dag::visit_dirty(const dag::node *n, void *ptr,
     auto mtime = mtime_of(n->source());
     mtime = mtime > pmt ? mtime : pmt;
 
+    for (auto &d : n->build_deps()) {
+      auto dmt = rec(rec, get_node(d.c_str()), {});
+      mtime = mtime > dmt ? mtime : dmt;
+    }
     for (auto &d : n->mod_deps()) {
       auto dmt = rec(rec, get_node(d.c_str()), {});
       mtime = mtime > dmt ? mtime : dmt;
