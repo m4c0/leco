@@ -95,6 +95,11 @@ bool bounce(const char *path) {
   if (n->tool() && !cur_ctx().native_target)
     return true;
 
+  for (const auto &d : n->build_deps()) {
+    if (!bounce(d.c_str()))
+      return false;
+  }
+
   bool failed = false;
   auto mtime = dag::visit_dirty(n, [&](auto *n) {
     if (failed)
