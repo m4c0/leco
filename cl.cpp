@@ -17,7 +17,7 @@ static int clean_level{};
 bool should_clean_current() { return clean_level > 0; }
 bool should_clean_all() { return clean_level > 1; }
 
-static int verbose{};
+static int verbose{1};
 bool is_verbose() { return verbose > 0; }
 bool is_extra_verbose() { return verbose > 1; }
 
@@ -110,6 +110,8 @@ bool usage() {
 
     -O -- enable optimisations
 
+    -q -- make build quieter
+
     -t <target> -- one of:
       iphoneos, iphonesimulator: for its referring platform (requires Apple SDKs)
       ios: for both iPhoneOS and iPhoneSimulator
@@ -117,7 +119,7 @@ bool usage() {
       apple, linux, macosx, windows: for their respective platforms (requires their SDKs)
       host: for the same platform as the host (default)
 
-    -v -- enable verboseness (repeat for extra verbosiness)
+    -v -- enable extra verboseness
 
 )");
   return false;
@@ -125,7 +127,7 @@ bool usage() {
 
 bool parse_args(int argc, char **argv) {
   struct gopt opts {};
-  GOPT(opts, argc, argv, "C:cgOt:v");
+  GOPT(opts, argc, argv, "C:cgqOt:v");
 
   char *val{};
   char ch;
@@ -146,12 +148,15 @@ bool parse_args(int argc, char **argv) {
     case 'O':
       optimise = true;
       break;
+    case 'q':
+      verbose = 0;
+      break;
     case 't':
       if (!parse_target(val))
         return false;
       break;
     case 'v':
-      verbose++;
+      verbose = 2;
       break;
     default:
       return usage();
