@@ -16,7 +16,7 @@ static void vlog(const char *verb, const char *msg) {
     return;
 
   if (is_tty) {
-    fprintf(stderr, "\e[0;1m%20s\e[0m %s\n", verb, msg);
+    fprintf(stderr, "\e[1;34m%20s\e[0m %s\n", verb, msg);
   } else {
     fprintf(stderr, "%20s %s\n", verb, msg);
   }
