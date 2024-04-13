@@ -21,3 +21,6 @@ static void vlog(const char *verb, const char *msg) {
     fprintf(stderr, "%20s %s\n", verb, msg);
   }
 }
+static void dlog(const char *verb, const char *msg) {
+  fprintf(stderr, "\e[1;31m%20s\e[0m %s\n", verb, msg);
+}
