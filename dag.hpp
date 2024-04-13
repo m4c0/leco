@@ -20,6 +20,7 @@ class node {
   sim_sbt m_dag{};
   sim_sbt m_module_name{};
   sim_sbt m_module_pcm{};
+  std::set<std::string> m_build_deps{};
   std::set<std::string> m_executables{};
   std::set<std::string> m_frameworks{};
   std::set<std::string> m_libraries{};
@@ -38,6 +39,7 @@ public:
   bool read_from_cache_file();
   void write_to_cache_file() const;
 
+  [[nodiscard]] bool add_build_dep(const char *src);
   [[nodiscard]] bool add_executable(const char *e);
   bool add_framework(const char *fw) {
     m_frameworks.insert(fw);
@@ -63,6 +65,9 @@ public:
   void set_recursed() { m_recursed = true; }
   void set_tool() { m_root = root_t::tool; }
 
+  [[nodiscard]] constexpr const auto &build_deps() const noexcept {
+    return m_build_deps;
+  }
   [[nodiscard]] constexpr const auto &executables() const noexcept {
     return m_executables;
   }

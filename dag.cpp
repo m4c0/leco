@@ -42,6 +42,9 @@ dag::node::node(const char *n) {
   infer_module_name(&m_module_name, &m_source);
 }
 
+bool dag::node::add_build_dep(const char *dep) {
+  return add_real_abs(this, m_build_deps, dep);
+}
 bool dag::node::add_executable(const char *executable) {
   return add_real_abs(this, m_executables, executable);
 }
