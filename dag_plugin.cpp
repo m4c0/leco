@@ -132,7 +132,7 @@ bool dag::execute(dag::node *n) {
       if (!read_file_list(pp, n, &dag::node::add_library, "library"))
         return false;
     } else if (auto pp = cmp(p, "#pragma leco add_library_dir ")) {
-      if (!read_file_list(pp, n, &dag::node::add_library_dir, "library_dir"))
+      if (!read_file_list(pp, n, &dag::node::add_library_dir, "library dir"))
         return false;
     } else if (auto pp = cmp(p, "#pragma leco add_resource ")) {
       if (!read_file_list(pp, n, &dag::node::add_resource, "resource"))
