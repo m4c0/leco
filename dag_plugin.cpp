@@ -119,6 +119,9 @@ bool dag::execute(dag::node *n) {
     } else if (cmp(p, "#pragma leco dll\n")) {
       log_found("dll", n->source());
       n->set_dll();
+    } else if (auto pp = cmp(p, "#pragma leco add_build_dep ")) {
+      if (!read_file_list(pp, n, &dag::node::add_build_dep, "build dependency"))
+        return false;
     } else if (auto pp = cmp(p, "#pragma leco add_dll ")) {
       if (!read_file_list(pp, n, &dag::node::add_executable, "dll"))
         return false;
