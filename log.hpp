@@ -11,6 +11,7 @@ static const bool is_tty = isatty(fileno(stderr));
 static const bool is_tty = _isatty(_fileno(stderr));
 #endif
 
+// NOTE: always log to stderr to avoid order issues
 static void vlog(const char *verb, const char *msg) {
   if (!is_verbose())
     return;
