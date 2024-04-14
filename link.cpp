@@ -45,9 +45,8 @@ std::string link(const dag::node *n, uint64_t mtime) {
   things t{};
   dag::visit(n, true, [&](auto *n) { visit(t, n); });
 
-  std::string ext = n->dll() ? cur_ctx().dll_ext : "exe";
   sim_sbt exe{};
-  in2out(n->source_sb(), &exe, ext.c_str());
+  in2exe(n->source_sb(), &exe, n->dll());
 
   if (n->app()) {
     sim_sbt stem{};

@@ -13,3 +13,7 @@ static void in2out(const sim_sb *in, sim_sb *out, const char *ext) {
   }
   sim_sb_path_set_extension(out, ext);
 }
+static void in2exe(const sim_sb *in, sim_sb *out, bool dll) {
+  std::string ext = dll ? cur_ctx().dll_ext : "exe";
+  in2out(in, out, ext.c_str());
+}

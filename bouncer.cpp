@@ -5,6 +5,7 @@
 #include "compile.hpp"
 #include "context.hpp"
 #include "dag.hpp"
+#include "in2out.hpp"
 #include "link.hpp"
 #include "log.hpp"
 #include "mkdir.h"
@@ -35,27 +36,40 @@ static bool compile_shaders(const dag::node *n, const char *res_path) {
   }
   return true;
 }
-static void copy_exes(const dag::node *n, const char *exe_path) {
+static void copy_exe(const char *log, const sim_sb *ef, const char *exe_path) {
   const auto &rpath = cur_ctx().rpath;
 
+  sim_sbt path{};
+  sim_sb_path_copy_parent(&path, exe_path);
+  if (rpath != "") {
+    sim_sb_path_append(&path, rpath.c_str());
+    mkdirs(path.buffer);
+  }
+  sim_sb_path_append(&path, sim_sb_path_filename(ef));
+
+  if (mtime_of(path.buffer) > mtime_of(ef->buffer))
+    return;
+
+  vlog(log, path.buffer);
+  std::filesystem::copy_file(ef->buffer, path.buffer);
+}
+static void copy_exes(const dag::node *n, const char *exe_path) {
   for (auto &e : n->executables()) {
     // TODO: remove when set is sim
     sim_sbt ef{};
     sim_sb_copy(&ef, e.c_str());
 
-    sim_sbt path{};
-    sim_sb_path_copy_parent(&path, exe_path);
-    if (rpath != "") {
-      sim_sb_path_append(&path, rpath.c_str());
-      mkdirs(path.buffer);
-    }
-    sim_sb_path_append(&path, sim_sb_path_filename(&ef));
+    copy_exe("copying library", &ef, exe_path);
+  }
+}
+static void copy_build_deps(const dag::node *n, const char *exe_path) {
+  for (const auto &d : n->build_deps()) {
+    auto dn = dag::get_node(d.c_str());
 
-    if (mtime_of(path.buffer) > mtime_of(ef.buffer))
-      continue;
+    sim_sbt exe{};
+    in2exe(dn->source_sb(), &exe, dn->dll());
 
-    vlog("copying library", path.buffer);
-    std::filesystem::copy_file(ef.buffer, path.buffer);
+    copy_exe("copying dependency", &exe, exe_path);
   }
 }
 static void copy_resources(const dag::node *n, const char *res_path) {
@@ -118,6 +132,8 @@ bool bounce(const char *path) {
     sim_sb_copy(&res_path, exe_path.c_str());
     cur_ctx().app_res_path(&res_path);
     mkdirs(res_path.buffer);
+
+    copy_build_deps(n, exe_path.c_str());
 
     bool success = true;
     dag::visit(n, true, [&](auto *n) {
