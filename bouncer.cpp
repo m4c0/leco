@@ -51,7 +51,16 @@ static void copy_exe(const char *log, const sim_sb *ef, const char *exe_path) {
     return;
 
   vlog(log, path.buffer);
-  _unlink(path.buffer);
+
+  if (0 != remove(path.buffer)) {
+    // Rename original file. This is a "Windows-approved" way of modifying an
+    // open executable.
+    sim_sbt bkp{};
+    sim_sb_copy(&bkp, path.buffer);
+    sim_sb_concat(&bkp, ".bkp");
+    remove(bkp.buffer);
+    rename(path.buffer, bkp.buffer);
+  }
   std::filesystem::copy_file(ef->buffer, path.buffer);
 }
 static void copy_exes(const dag::node *n, const char *exe_path) {
