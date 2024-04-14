@@ -68,7 +68,7 @@ static void copy_build_deps(const dag::node *n, const char *exe_path) {
     auto dn = dag::get_node(d.c_str());
 
     sim_sbt exe{};
-    in2exe(dn->source_sb(), &exe, dn->dll());
+    in2exe(dn, &exe);
 
     copy_exe("copying dependency", &exe, exe_path);
   }

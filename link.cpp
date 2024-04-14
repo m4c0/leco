@@ -46,18 +46,7 @@ std::string link(const dag::node *n, uint64_t mtime) {
   dag::visit(n, true, [&](auto *n) { visit(t, n); });
 
   sim_sbt exe{};
-  in2exe(n->source_sb(), &exe, n->dll());
-
-  if (n->app()) {
-    sim_sbt stem{};
-    sim_sb_path_copy_sb_stem(&stem, &exe);
-
-    cur_ctx().app_exe_path(&exe, stem.buffer);
-
-    sim_sbt path{};
-    sim_sb_path_copy_parent(&path, exe.buffer);
-    mkdirs(path.buffer);
-  }
+  in2exe(n, &exe);
 
   if (mtime < mtime_of(exe.buffer))
     return std::string{exe.buffer};
