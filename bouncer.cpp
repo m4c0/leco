@@ -51,6 +51,7 @@ static void copy_exe(const char *log, const sim_sb *ef, const char *exe_path) {
     return;
 
   vlog(log, path.buffer);
+  _unlink(path.buffer);
   std::filesystem::copy_file(ef->buffer, path.buffer);
 }
 static void copy_exes(const dag::node *n, const char *exe_path) {
