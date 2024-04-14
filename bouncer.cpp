@@ -63,14 +63,17 @@ static void copy_exes(const dag::node *n, const char *exe_path) {
     copy_exe("copying library", &ef, exe_path);
   }
 }
-static void copy_build_deps(const dag::node *n, const char *exe_path) {
+static void copy_build_deps(const dag::node *n) {
+  sim_sbt exe_path{};
+  in2exe(n, &exe_path);
+
   for (const auto &d : n->build_deps()) {
     auto dn = dag::get_node(d.c_str());
 
     sim_sbt exe{};
     in2exe(dn, &exe);
 
-    copy_exe("copying dependency", &exe, exe_path);
+    copy_exe("copying dependency", &exe, exe_path.buffer);
   }
 }
 static void copy_resources(const dag::node *n, const char *res_path) {
@@ -113,6 +116,8 @@ bool bounce(const char *path) {
   for (const auto &d : n->build_deps()) {
     if (!bounce(d.c_str()))
       return false;
+
+    copy_build_deps(n);
   }
 
   bool failed = false;
@@ -133,8 +138,6 @@ bool bounce(const char *path) {
     sim_sb_copy(&res_path, exe_path.c_str());
     cur_ctx().app_res_path(&res_path);
     mkdirs(res_path.buffer);
-
-    copy_build_deps(n, exe_path.c_str());
 
     bool success = true;
     dag::visit(n, true, [&](auto *n) {
