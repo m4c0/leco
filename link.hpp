@@ -4,4 +4,4 @@
 namespace dag {
 class node;
 }
-[[nodiscard]] bool link(const dag::node *n, uint64_t mtime);
+[[nodiscard]] bool link(const dag::node *n, const char *exe);

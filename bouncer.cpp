@@ -141,10 +141,13 @@ bool bounce(const char *path) {
   if (!n->app() && !n->tool() && !n->dll())
     return true;
 
-  if (link(n, mtime) && n->app()) {
-    sim_sbt exe_path{};
-    in2exe(n, &exe_path);
+  sim_sbt exe_path{};
+  in2exe(n, &exe_path);
 
+  if (mtime < mtime_of(exe_path.buffer))
+    return true;
+
+  if (link(n, exe_path.buffer) && n->app()) {
     sim_sbt res_path{};
     sim_sb_copy(&res_path, exe_path.buffer);
     cur_ctx().app_res_path(&res_path);

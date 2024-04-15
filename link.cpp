@@ -41,17 +41,11 @@ static void visit(things &t, const dag::node *n) {
       t.args.push_back("-L" + lib);
   }
 }
-bool link(const dag::node *n, uint64_t mtime) {
+bool link(const dag::node *n, const char *exe) {
   things t{};
   dag::visit(n, true, [&](auto *n) { visit(t, n); });
 
-  sim_sbt exe{};
-  in2exe(n, &exe);
-
-  if (mtime < mtime_of(exe.buffer))
-    return true;
-
-  vlog("linking", exe.buffer);
+  vlog("linking", exe);
 
   evoker e{};
   for (auto &p : t.args) {
@@ -63,6 +57,6 @@ bool link(const dag::node *n, uint64_t mtime) {
   for (auto l : cur_ctx().link_flags) {
     e.push_arg(l.c_str());
   }
-  e.set_out(exe.buffer);
+  e.set_out(exe);
   return e.execute();
 }
