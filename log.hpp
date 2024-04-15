@@ -19,12 +19,18 @@ static void log(unsigned colour, const char *verb, const char *msg) {
     fprintf(stderr, "%20s %s\n", verb, msg);
   }
 }
-static void vlog(const char *verb, const char *msg) {
+static inline void vlog(const char *verb, const char *msg) {
   if (!is_verbose())
     return;
 
   log(34, verb, msg);
 }
-static void elog(const char *verb, const char *msg) { log(31, verb, msg); }
-static void wlog(const char *verb, const char *msg) { log(33, verb, msg); }
-static void dlog(const char *verb, const char *msg) { log(35, verb, msg); }
+static inline void elog(const char *verb, const char *msg) {
+  log(31, verb, msg);
+}
+static inline void wlog(const char *verb, const char *msg) {
+  log(33, verb, msg);
+}
+static inline void dlog(const char *verb, const char *msg) {
+  log(35, verb, msg);
+}
