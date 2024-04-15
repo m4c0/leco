@@ -5,14 +5,29 @@
 #include "compile.hpp"
 #include "context.hpp"
 #include "dag.hpp"
+#include "evoker.hpp"
 #include "in2out.hpp"
-#include "link.hpp"
 #include "log.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
 
 #include <filesystem>
-#include <string.h>
+
+static void in2exe(const dag::node *n, sim_sb *out) {
+  std::string ext = n->dll() ? cur_ctx().dll_ext : "exe";
+  in2out(n->source_sb(), out, ext.c_str());
+
+  if (n->app()) {
+    sim_sbt stem{};
+    sim_sb_path_copy_sb_stem(&stem, out);
+
+    cur_ctx().app_exe_path(out, stem.buffer);
+
+    sim_sbt path{};
+    sim_sb_path_copy_parent(&path, out->buffer);
+    mkdirs(path.buffer);
+  }
+}
 
 static bool compile_shaders(const dag::node *n, const char *res_path) {
   for (auto &s : n->shaders()) {
@@ -100,6 +115,46 @@ static void copy_resources(const dag::node *n, const char *res_path) {
     vlog("copying resource", path.buffer);
     std::filesystem::copy_file(rf.buffer, path.buffer);
   }
+}
+
+static bool link(const dag::node *n, const char *exe) {
+  struct things {
+    std::set<std::string> frameworks{};
+    std::set<std::string> libraries{};
+    std::set<std::string> library_dirs{};
+  } t{};
+
+  evoker e{};
+  e.set_out(exe);
+  if (n->dll()) {
+    e.push_arg("-shared");
+  }
+  for (auto l : cur_ctx().link_flags) {
+    e.push_arg(l.c_str());
+  }
+
+  dag::visit(n, true, [&](auto *n) {
+    e.push_arg(n->target());
+
+    for (auto &fw : n->frameworks()) {
+      auto [it, added] = t.frameworks.insert(fw);
+      if (added) {
+        e.push_arg("-framework").push_arg(fw.c_str());
+      }
+    }
+    for (auto &lib : n->libraries()) {
+      auto [it, added] = t.libraries.insert(lib);
+      if (added)
+        e.push_arg("-l").push_arg(lib.c_str());
+    }
+    for (auto &lib : n->library_dirs()) {
+      auto [id, added] = t.library_dirs.insert(lib);
+      if (added)
+        e.push_arg("-L").push_arg(lib.c_str());
+    }
+  });
+
+  return e.execute();
 }
 
 bool bounce(const char *path) {

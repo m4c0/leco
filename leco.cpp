@@ -10,7 +10,6 @@
 #pragma leco add_impl droid_path
 #pragma leco add_impl evoker
 #pragma leco add_impl impls
-#pragma leco add_impl link
 #pragma leco add_impl plist
 #pragma leco add_impl target_defs
 
