@@ -1,4 +1,19 @@
 #pragma leco tool
+#pragma leco add_impl actool
+#pragma leco add_impl bouncer
+#pragma leco add_impl cl
+#pragma leco add_impl cleaner
+#pragma leco add_impl compile
+#pragma leco add_impl context
+#pragma leco add_impl dag
+#pragma leco add_impl dag_io
+#pragma leco add_impl dag_plugin
+#pragma leco add_impl droid_path
+#pragma leco add_impl evoker
+#pragma leco add_impl impls
+#pragma leco add_impl link
+#pragma leco add_impl plist
+#pragma leco add_impl target_defs
 
 #include "bouncer.hpp"
 #include "cl.hpp"
