@@ -147,6 +147,7 @@ bool bounce(const char *path) {
   if (mtime < mtime_of(exe_path.buffer))
     return true;
 
+  vlog("linking", exe_path.buffer);
   if (link(n, exe_path.buffer) && n->app()) {
     sim_sbt res_path{};
     sim_sb_copy(&res_path, exe_path.buffer);
