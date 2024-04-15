@@ -1,9 +1,12 @@
+#pragma leco tool
+
 #include "bouncer.hpp"
 #include "cl.hpp"
 #include "dag.hpp"
 
 #include "../minirent/minirent.h"
 
+#include <errno.h>
 #include <string.h>
 
 static bool error() {
