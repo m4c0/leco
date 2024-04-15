@@ -12,16 +12,19 @@ static const bool is_tty = _isatty(_fileno(stderr));
 #endif
 
 // NOTE: always log to stderr to avoid order issues
-static void vlog(const char *verb, const char *msg) {
-  if (!is_verbose())
-    return;
-
+static void log(unsigned colour, const char *verb, const char *msg) {
   if (is_tty) {
-    fprintf(stderr, "\e[1;34m%20s\e[0m %s\n", verb, msg);
+    fprintf(stderr, "\e[1;%dm%20s\e[0m %s\n", colour, verb, msg);
   } else {
     fprintf(stderr, "%20s %s\n", verb, msg);
   }
 }
-static void dlog(const char *verb, const char *msg) {
-  fprintf(stderr, "\e[1;31m%20s\e[0m %s\n", verb, msg);
+static void vlog(const char *verb, const char *msg) {
+  if (!is_verbose())
+    return;
+
+  log(34, verb, msg);
 }
+static void elog(const char *verb, const char *msg) { log(31, verb, msg); }
+static void wlog(const char *verb, const char *msg) { log(33, verb, msg); }
+static void dlog(const char *verb, const char *msg) { log(35, verb, msg); }
