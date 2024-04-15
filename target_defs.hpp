@@ -1,5 +1,5 @@
 #pragma once
-class context;
+struct context;
 
 namespace t {
 context android_aarch64();
