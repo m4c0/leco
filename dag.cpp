@@ -4,6 +4,8 @@
 #include "cl.hpp"
 #include "cleaner.hpp"
 #include "in2out.hpp"
+#include "log.hpp"
+
 #include <map>
 
 static inline bool path_exists(const char *path) { return mtime_of(path) > 0; }
@@ -220,9 +222,10 @@ static bool recurse(dag::node *n) {
         return false;
       if (!recurse(d))
         return false;
-      // TODO: do we care if we have a CPP file which isn't a C++20 impl unit?
-      if (!d->add_mod_dep(n->module_name()))
-        return false;
+      if (!d->add_mod_dep(n->module_name())) {
+        wlog("not a module", n->module_name());
+        wlog("with a impl", d->module_name());
+      }
     }
 
     d->set_recursed();
