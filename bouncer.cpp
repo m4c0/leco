@@ -141,17 +141,19 @@ bool bounce(const char *path) {
   if (!n->app() && !n->tool() && !n->dll())
     return true;
 
-  auto exe_path = link(n, mtime);
-  if (exe_path != "" && n->app()) {
+  if (link(n, mtime) && n->app()) {
+    sim_sbt exe_path{};
+    in2exe(n, &exe_path);
+
     sim_sbt res_path{};
-    sim_sb_copy(&res_path, exe_path.c_str());
+    sim_sb_copy(&res_path, exe_path.buffer);
     cur_ctx().app_res_path(&res_path);
     mkdirs(res_path.buffer);
 
     bool success = true;
     dag::visit(n, true, [&](auto *n) {
       success &= compile_shaders(n, res_path.buffer);
-      copy_exes(n, exe_path.c_str());
+      copy_exes(n, exe_path.buffer);
       copy_resources(n, res_path.buffer);
     });
     if (!success)
@@ -159,7 +161,7 @@ bool bounce(const char *path) {
 
     sim_sbt stem{};
     sim_sb_path_copy_sb_stem(&stem, &pp);
-    cur_ctx().bundle(exe_path.c_str(), stem.buffer);
+    cur_ctx().bundle(exe_path.buffer, stem.buffer);
   }
 
   return true;

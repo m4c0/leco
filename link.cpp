@@ -41,7 +41,7 @@ static void visit(things &t, const dag::node *n) {
       t.args.push_back("-L" + lib);
   }
 }
-std::string link(const dag::node *n, uint64_t mtime) {
+bool link(const dag::node *n, uint64_t mtime) {
   things t{};
   dag::visit(n, true, [&](auto *n) { visit(t, n); });
 
@@ -49,7 +49,7 @@ std::string link(const dag::node *n, uint64_t mtime) {
   in2exe(n, &exe);
 
   if (mtime < mtime_of(exe.buffer))
-    return std::string{exe.buffer};
+    return true;
 
   vlog("linking", exe.buffer);
 
@@ -64,5 +64,5 @@ std::string link(const dag::node *n, uint64_t mtime) {
     e.push_arg(l.c_str());
   }
   e.set_out(exe.buffer);
-  return e.execute() ? std::string{exe.buffer} : std::string{};
+  return e.execute();
 }
