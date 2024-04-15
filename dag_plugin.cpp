@@ -23,7 +23,9 @@ static bool add_found(const char *desc, const char *what, dag::node *n,
                       bool (dag::node::*fn)(const char *)) {
   log_found(desc, what);
   if (!(n->*fn)(what)) {
-    fprintf(stderr, "%s: could not find %s [%s]\n", n->source(), desc, what);
+    // Hacking a line number to allow editors automatically jumping to file.
+    // TODO: use precompiled definitions to find line numbers
+    fprintf(stderr, "%s:1: could not find %s [%s]\n", n->source(), desc, what);
     return false;
   }
   return true;
