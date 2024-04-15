@@ -7,7 +7,7 @@ int main(int argc, char **argv) {
   // TODO: make phase1 leaner
   puts("Building Phase 1");
   if (0 != system("clang++ -std=c++2b "
-                  "bouncer.cpp cl.cpp compile.cpp context.cpp "
+                  "bouncer.cpp cl.cpp compile.cpp "
                   "dag.cpp dag_plugin.cpp evoker.cpp "
                   "leco.cpp link.cpp impls.cpp target_defs.cpp "
                   "phase1.cpp -o phase1.exe"))

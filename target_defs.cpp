@@ -186,3 +186,8 @@ context android_x86_64() {
   return impl::android("x86_64-none-linux-android26");
 }
 } // namespace t
+
+context &cur_ctx() {
+  static context i{};
+  return i;
+}

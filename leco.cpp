@@ -4,7 +4,6 @@
 #pragma leco add_impl cl
 #pragma leco add_impl cleaner
 #pragma leco add_impl compile
-#pragma leco add_impl context
 #pragma leco add_impl dag
 #pragma leco add_impl dag_io
 #pragma leco add_impl dag_plugin
