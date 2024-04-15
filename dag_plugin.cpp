@@ -81,13 +81,8 @@ static bool add_mod_dep(char *pp, const char *mod, dag::node *n) {
 }
 
 bool dag::execute(dag::node *n) {
-  auto args = evoker{}
-                  .push_arg("-E")
-                  .push_arg(n->source())
-                  .set_cpp_std()
-                  .add_predefs()
-                  .suppress_pragmas()
-                  .prepare_args();
+  auto args =
+      evoker{}.push_arg("-E").push_arg(n->source()).set_cpp().prepare_args();
   if (!args)
     return false;
 

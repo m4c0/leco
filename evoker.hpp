@@ -39,13 +39,13 @@ public:
     m_args.push_back(mode);
     return *this;
   }
-  evoker &set_cpp_std() { return push_arg("-std=c++2b"); }
+  evoker &set_cpp();
   evoker &set_out(const char *out) {
     push_arg("-o");
     return push_arg(out);
   }
 
-  evoker &suppress_pragmas() { return push_arg("-Wno-unknown-pragmas"); }
+  evoker &suppress_pragmas();
   evoker &add_predefs();
   evoker &pull_deps_from(const dag::node *n) {
     m_node = n;

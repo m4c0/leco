@@ -108,6 +108,12 @@ bool evoker::execute() {
   return 0 == system(cmd.buffer);
 }
 
+evoker &evoker::suppress_pragmas() { return push_arg("-Wno-unknown-pragmas"); }
+
+evoker &evoker::set_cpp() {
+  return push_arg("-std=c++2b").add_predefs().suppress_pragmas();
+}
+
 #ifdef _WIN32
 #define unlink _unlink
 #endif

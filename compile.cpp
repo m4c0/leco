@@ -27,21 +27,14 @@ bool compile(const dag::node *n) {
     auto pcm = n->module_pcm();
 
     if (!evoker{"--precompile", file, pcm}
-             .set_cpp_std()
-             .add_predefs()
+             .set_cpp()
              .pull_deps_from(n)
-             .suppress_pragmas()
              .execute())
       return false;
 
     return evoker{"-c", pcm, obj}.pull_deps_from(n).execute();
   } else if (strcmp(ext, ".cpp") == 0) {
-    return evoker{"-c", file, obj}
-        .set_cpp_std()
-        .add_predefs()
-        .pull_deps_from(n)
-        .suppress_pragmas()
-        .execute();
+    return evoker{"-c", file, obj}.set_cpp().pull_deps_from(n).execute();
   } else if (strcmp(ext, ".c") == 0) {
     return evoker{"-c", file, obj}
         .push_arg("-std=c99")
@@ -52,6 +45,7 @@ bool compile(const dag::node *n) {
     return evoker{"-c", file, obj}
         .push_arg("-fmodules")
         .push_arg("-fobjc-arc")
+        .add_predefs()
         .suppress_pragmas()
         .execute();
   } else {
