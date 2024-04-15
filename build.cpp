@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
   if (0 != system("clang++ -std=c++2b "
                   "bouncer.cpp compile.cpp "
                   "dag.cpp dag_plugin.cpp evoker.cpp "
-                  "leco.cpp impls.cpp "
+                  "impls.cpp leco.cpp "
                   "phase1.cpp -o phase1.exe"))
     return 1;
 
