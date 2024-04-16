@@ -34,3 +34,6 @@ context &cur_ctx() {
 bool for_each_target(bool (*fn)()) {
   return fn();
 }
+
+bool bundle(const dag::node *n, const char *exe_path) {}
+void copy_build_deps(const dag::node *n) {}
