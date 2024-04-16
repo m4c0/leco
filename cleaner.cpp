@@ -9,6 +9,7 @@
 #include "../minirent/minirent.h"
 
 #include <assert.h>
+#include <string.h>
 #include <set>
 
 #ifdef _WIN32
