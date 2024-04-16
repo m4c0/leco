@@ -14,6 +14,7 @@
 
 #include <filesystem>
 
+// TODO: create header (maybe with all "apis", since we don't do -MD)
 bool bundle(const dag::node *n, const char *exe_path);
 void copy_build_deps(const dag::node *n);
 
