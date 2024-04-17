@@ -1,9 +1,8 @@
-#include "cleaner.hpp"
-
 #include "cl.hpp"
 #include "context.hpp"
 #include "dag.hpp"
 #include "log.hpp"
+#include "phase2.hpp"
 #include "sim.hpp"
 
 #include "../minirent/minirent.h"

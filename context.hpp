@@ -1,7 +1,8 @@
 #pragma once
-#include "sim.hpp"
 #include <string>
 #include <vector>
+
+struct sim_sb;
 
 struct context {
   std::vector<std::string> predefs{};

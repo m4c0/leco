@@ -230,7 +230,7 @@ void sim_sb_path_copy_real(sim_sb *dst, const char *path) {
 #else
   assert(dst->size >= PATH_MAX &&
          "destination buffer should have PATH_MAX in size");
-  auto _ = realpath(path, dst->buffer);
+  [[maybe_unused]] auto _ = realpath(path, dst->buffer);
 #endif
   dst->len = strlen(dst->buffer);
 }
