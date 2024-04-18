@@ -146,7 +146,7 @@ bool dag::execute(dag::node *n) {
       if (!read_file_list(pp, n, &dag::node::add_shader, "shader"))
         return false;
     } else if (cmp(p, "#pragma leco ")) {
-      fprintf(stderr, "unknown pragma: %s", p);
+      fprintf(stderr, "%s:%d: unknown pragma\n", n->source(), line);
       return false;
     } else if (auto pp = cmp(p, "# ")) {
       auto l = atoi(pp);
