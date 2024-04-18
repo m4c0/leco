@@ -1,4 +1,3 @@
-#include "cleaner.hpp"
 #include "context.hpp"
 #include "dag.hpp"
 #include "sim.h"
@@ -35,5 +34,5 @@ bool for_each_target(bool (*fn)()) {
   return fn();
 }
 
-bool bundle(const dag::node *n, const char *exe_path) {}
+bool bundle(const dag::node *n, const char *exe_path) { return true; }
 void copy_build_deps(const dag::node *n) {}
