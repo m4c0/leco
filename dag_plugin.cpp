@@ -7,6 +7,8 @@
 
 #include <stdlib.h>
 
+static unsigned line{};
+
 static char *cmp(char *str, const char *prefix) {
   auto len = strlen(prefix);
   if (strncmp(str, prefix, len) != 0)
@@ -25,7 +27,8 @@ static bool add_found(const char *desc, const char *what, dag::node *n,
   if (!(n->*fn)(what)) {
     // Hacking a line number to allow editors automatically jumping to file.
     // TODO: use precompiled definitions to find line numbers
-    fprintf(stderr, "%s:1: could not find %s [%s]\n", n->source(), desc, what);
+    fprintf(stderr, "%s:%d: could not find %s [%s]\n", n->source(), line, desc,
+            what);
     return false;
   }
   return true;
@@ -99,6 +102,7 @@ bool dag::execute(dag::node *n) {
   if (0 != proc_open(argv, &f, &ferr))
     return false;
 
+  line = 0;
   sim_sbt mod_name{};
 
   char buf[1024];
@@ -107,6 +111,7 @@ bool dag::execute(dag::node *n) {
     while (*p == ' ') {
       p++;
     }
+    line++;
     if (0 == strcmp(p, "#pragma leco tool\n")) {
       log_found("tool", n->source());
       n->set_tool();
@@ -143,6 +148,10 @@ bool dag::execute(dag::node *n) {
     } else if (cmp(p, "#pragma leco ")) {
       fprintf(stderr, "unknown pragma: %s", p);
       return false;
+    } else if (auto pp = cmp(p, "# ")) {
+      auto l = atoi(pp);
+      if (l != 0)
+        line = l - 1;
     } else if (auto pp = cmp(p, "module ")) {
       strchr(pp, ';')[0] = 0;
       sim_sb_copy(&mod_name, pp);
