@@ -25,8 +25,9 @@ static inline void vlog(const char *verb, const char *msg) {
 
   log(34, verb, msg);
 }
-static inline void elog(const char *verb, const char *msg) {
+static inline bool elog(const char *verb, const char *msg) {
   log(31, verb, msg);
+  return false;
 }
 static inline void wlog(const char *verb, const char *msg) {
   log(33, verb, msg);
