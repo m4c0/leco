@@ -20,9 +20,7 @@ bool compile(const dag::node *n) {
   vlog("compiling", obj);
 
   // TODO: remove extra copy when "obj" becomes a sim_sb
-  sim_sbt f2{};
-  sim_sb_copy(&f2, file);
-  auto ext = sim_sb_path_extension(&f2);
+  auto ext = sim_path_extension(file);
   if (strcmp(ext, ".cppm") == 0) {
     auto pcm = n->module_pcm();
 
