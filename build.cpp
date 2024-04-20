@@ -13,8 +13,14 @@ int main(int argc, char **argv) {
                   "phase1.cpp -o phase1.exe"))
     return 1;
 
+#if _WIN32
+#define SEP "\\"
+#else
+#define SEP "/"
+#endif
+
   puts("Using Phase 1 to build final stage");
-  if (0 != system("./phase1.exe")) {
+  if (0 != system("." SEP "phase1.exe")) {
     return 1;
   }
 
