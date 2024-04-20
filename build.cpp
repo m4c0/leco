@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
 
   puts("Moving final stage to root folder");
   if (0 != rename(OUT, "leco.exe")) {
-    fprintf(stderr, "could not rename: %s\n", strerror(errno));
+    perror("failed to rename");
     return 1;
   }
 
