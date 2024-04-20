@@ -131,6 +131,7 @@ bool dag::execute(dag::node *n) {
       if (!read_file_list(pp, n, &dag::node::add_framework, "framework"))
         return false;
     } else if (auto pp = cmp(p, "#pragma leco add_impl ")) {
+      // TODO: fix add_impl inside parts
       if (!read_file_list(pp, n, &dag::node::add_mod_impl, "impl"))
         return false;
     } else if (auto pp = cmp(p, "#pragma leco add_library ")) {
