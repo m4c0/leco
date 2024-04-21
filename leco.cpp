@@ -24,7 +24,7 @@
 #include <string.h>
 
 static bool error() {
-  fprintf(stderr, "Could not list current directory: %s\n", strerror(errno));
+  perror("could not list current directory");
   return false;
 }
 
