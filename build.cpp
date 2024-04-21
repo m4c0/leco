@@ -30,6 +30,7 @@ int main(int argc, char **argv) {
   }
 
   puts("Moving final stage to root folder");
+  remove("leco.exe");
   if (0 != rename(OUT, "leco.exe")) {
     perror("failed to rename");
     return 1;
