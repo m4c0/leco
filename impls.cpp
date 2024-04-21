@@ -1,7 +1,7 @@
 #define GOPT_IMPLEMENTATION
 #include "../gopt/gopt.h"
-#define MINIRENT_IMPLEMENTATION
-#include "../minirent/minirent.h"
+#define PPRENT_IMPLEMENTATION
+#include "../pprent/pprent.hpp"
 #define MKDIR_IMPLEMENTATION
 #include "mkdir.h"
 #define MTIME_IMPLEMENTATION

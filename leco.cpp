@@ -18,7 +18,7 @@
 #include "cl.hpp"
 #include "dag.hpp"
 
-#include "../minirent/minirent.h"
+#include "../pprent/pprent.hpp"
 
 #include <errno.h>
 #include <string.h>
@@ -31,22 +31,13 @@ static bool error() {
 bool run_target() {
   dag::clear_cache();
 
-  DIR *dir = opendir(".");
-  if (dir == nullptr)
-    return error();
-
-  struct dirent *dp{};
-  while ((dp = readdir(dir))) {
-    if (!bounce(dp->d_name))
+  for (auto file : pprent::list(".")) {
+    if (!bounce(file))
       return false;
 
     errno = 0;
   }
-  if (errno)
-    return error();
-
-  closedir(dir);
-  return true;
+  return errno ? error() : true;
 }
 static void dump_deps() {
   std::set<std::string> all_parents{};
