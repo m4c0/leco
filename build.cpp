@@ -3,6 +3,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if _WIN32
+#define SEP "\\"
+#define OUT "out/x86_64-pc-windows-msvc/leco.exe"
+#elif __APPLE__
+#define SEP "/"
+#define OUT "out/x86_64-apple-macosx11.6.0/leco.exe"
+#elif __linux__
+#define SEP "/"
+#define OUT "out/x86_64-pc-linux-gnu/leco.exe"
+#endif
+
 int main(int argc, char **argv) {
   // TODO: make phase1 leaner
   puts("Building Phase 1");
@@ -13,24 +24,10 @@ int main(int argc, char **argv) {
                   "phase1.cpp -o phase1.exe"))
     return 1;
 
-#if _WIN32
-#define SEP "\\"
-#else
-#define SEP "/"
-#endif
-
   puts("Using Phase 1 to build final stage");
   if (0 != system("." SEP "phase1.exe")) {
     return 1;
   }
-
-#if _WIN32
-#define OUT "out/x86_64-pc-windows-msvc/leco.exe"
-#elif __APPLE__
-#define OUT "out/x86_64-apple-macosx11.6.0/leco.exe"
-#else
-#define OUT "out/x86_64-pc-linux-gnu/leco.exe"
-#endif
 
   puts("Moving final stage to root folder");
   if (0 != rename(OUT, "leco.exe")) {
