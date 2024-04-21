@@ -138,10 +138,10 @@ void dag::xlog(const dag::node *n, const char *msg) {
   dag::errlog(n, msg);
 }
 
+extern const char *leco_argv0;
 static bool still_fresh(dag::node *n) {
   auto dag_mtime = mtime_of(n->dag());
-  return dag_mtime > mtime_of(n->source()) &&
-         dag_mtime > mtime_of("../leco/leco.exe");
+  return dag_mtime > mtime_of(n->source()) && dag_mtime > mtime_of(leco_argv0);
 }
 
 static bool compile(dag::node *n) {

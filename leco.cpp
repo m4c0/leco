@@ -57,7 +57,9 @@ static void dump_deps() {
   fclose(f);
 }
 
+const char *leco_argv0;
 extern "C" int main(int argc, char **argv) {
+  leco_argv0 = argv[0];
 #ifdef _WIN32
   system(""); // enable ANSI colours
 #endif
