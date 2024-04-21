@@ -91,6 +91,7 @@ static void copy_resources(const dag::node *n, const char *res_path) {
       continue;
 
     vlog("copying resource", path.buffer);
+    remove(path.buffer);
     std::filesystem::copy_file(rf.buffer, path.buffer);
   }
 }
