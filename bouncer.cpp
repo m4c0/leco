@@ -24,6 +24,9 @@ static bool link(const dag::node *n, const char *exe) {
 
   evoker e{};
   e.set_out(exe);
+#ifdef _WIN32 // otherwise, face LNK1107 errors from MSVC
+  e.push_arg("-fuse-ld=lld");
+#endif
   if (n->dll()) {
     e.push_arg("-shared");
   }
