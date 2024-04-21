@@ -9,7 +9,10 @@ bool find_android_llvm(sim_sb *out) { return false; }
 void clean(const dag::node *) {}
 
 void dag::node::write_to_cache_file() const {}
-bool dag::node::read_from_cache_file() { return false; }
+bool dag::node::read_from_cache_file() {
+  fprintf(stderr, "Error: attempt of reading cache file in Phase 1\n");
+  return false;
+}
 
 bool is_verbose() { return true; }
 bool is_extra_verbose() { return false; }
