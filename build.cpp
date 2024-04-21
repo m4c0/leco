@@ -15,6 +15,7 @@
 #endif
 
 int main(int argc, char **argv) {
+  // TODO: self-rebuild "phase 0" (aka "this cpp")
   // TODO: make phase1 leaner
   puts("Building Phase 1");
   if (0 != system("clang++ -std=c++2b "
