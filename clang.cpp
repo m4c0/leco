@@ -13,21 +13,34 @@ int main(int argc, char **argv) {
   struct gopt opts;
   GOPT(opts, argc, argv, "c");
 
-  const char * exe = clang_cpp_exe();
+  bool cpp = true;
   char *val{};
   char ch;
   while ((ch = gopt_parse(&opts, &val)) != 0) {
     switch (ch) {
     case 'c':
-      exe = clang_c_exe();
+      cpp = false;
       break;
     default:
       return usage();
     }
   }
 
-  if (opts.argc == 0)
-    return usage();
+  sim_sb args{};
+  sim_sb_new(&args, 10240);
+  if (cpp) {
+    sim_sb_copy(&args, clang_cpp_exe());
+    sim_sb_concat(&args, " -std=c++2b");
+  } else {
+    sim_sb_copy(&args, clang_c_exe());
+    sim_sb_concat(&args, " -std=c11");
+  }
 
-  return system(exe);
+  for (auto i = 0; i < opts.argc; i++) {
+    // TODO: escape argv
+    sim_sb_concat(&args, " ");
+    sim_sb_concat(&args, opts.argv[i]);
+  }
+
+  return system(args.buffer);
 }

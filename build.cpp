@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
 
   // TODO: make phase1 leaner
   puts("Building Phase 1");
-  if (0 != system("clang++ -std=c++2b "
+  if (0 != system("." SEP "leco-clang.exe -- "
                   "bouncer.cpp compile.cpp "
                   "dag.cpp dag_plugin.cpp evoker.cpp "
                   "impls.cpp leco.cpp "
