@@ -4,67 +4,21 @@
 #define SIM_IMPLEMENTATION
 #include "sim.h"
 
-#if _WIN32
-static const char *clang_dir() {
-  static char buf[1024];
-  auto f = _popen("where clang++", "r");
-  if (fgets(buf, 1024, f) == nullptr)
-    throw 0;
-
-  *strrchr(buf, '\\') = 0;
-  *strrchr(buf, '\\') = 0;
-  return buf;
-}
-#elif __APPLE__
-static const char *clang_dir() {
-  static char buf[1024];
+static void clang_cmd(sim_sb *buf, const char *exe) {
+#if __APPLE__
   auto f = popen("brew --prefix llvm@16", "r");
-  if (fgets(buf, 1024, f) == nullptr)
+  if (fgets(buf->buffer, PATH_MAX, f) == nullptr)
     throw 0;
 
-  buf[strlen(buf) - 1] = 0;
-  return buf;
-}
+  buf->len = strlen(buf->buffer) - 1;
+  sim_sb_path_append(buf, "bin");
+  sim_sb_path_append(buf, exe);
+#elif _WIN32
+  sim_sb_path_copy(buf, exe);
+  sim_sb_concat(&buf, ".exe");
 #else
-static const char *clang_dir() {
-  static char buf[1024];
-  auto f = popen("which clang++", "r");
-  if (fgets(buf, 1024, f) == nullptr)
-    throw 0;
-
-  *strrchr(buf, '/') = 0;
-  *strrchr(buf, '/') = 0;
-  return buf;
-}
+  sim_sb_path_copy(buf, exe);
 #endif
-
-static const char *clang_c_exe() {
-  static const auto exe = [] {
-    sim_sb buf{};
-    sim_sb_new(&buf, 1024);
-    sim_sb_copy(&buf, clang_dir());
-    sim_sb_path_append(&buf, "bin");
-    sim_sb_path_append(&buf, "clang");
-#ifdef _WIN32
-    sim_sb_concat(&buf, ".exe");
-#endif
-    return buf;
-  }();
-  return exe.buffer;
-}
-static const char *clang_cpp_exe() {
-  static const auto exe = [] {
-    sim_sb buf{};
-    sim_sb_new(&buf, 1024);
-    sim_sb_copy(&buf, clang_dir());
-    sim_sb_path_append(&buf, "bin");
-    sim_sb_path_append(&buf, "clang++");
-#ifdef _WIN32
-    sim_sb_concat(&buf, ".exe");
-#endif
-    return buf;
-  }();
-  return exe.buffer;
 }
 
 int usage() {
@@ -92,10 +46,10 @@ int main(int argc, char **argv) {
   sim_sb args{};
   sim_sb_new(&args, 10240);
   if (cpp) {
-    sim_sb_copy(&args, clang_cpp_exe());
+    clang_cmd(&args, "clang++");
     sim_sb_concat(&args, " -std=c++2b");
   } else {
-    sim_sb_copy(&args, clang_c_exe());
+    clang_cmd(&args, "clang");
     sim_sb_concat(&args, " -std=c11");
   }
 
