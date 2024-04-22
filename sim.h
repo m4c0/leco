@@ -45,9 +45,7 @@ const char *sim_path_extension(const char *src);
 #endif // SIM_H
 
 #ifdef SIM_IMPLEMENTATION
-#ifdef __linux__
-#include <linux/limits.h>
-#endif
+#include "pathmax.h"
 
 #include <assert.h>
 #include <stdarg.h>
