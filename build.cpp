@@ -16,6 +16,11 @@
 
 int main(int argc, char **argv) {
   // TODO: self-rebuild "phase 0" (aka "this cpp")
+
+  puts("Building clang runner");
+  if (0 != system("clang++ -std=c++20 clang.cpp -o leco-clang.exe"))
+    return 1;
+
   // TODO: make phase1 leaner
   puts("Building Phase 1");
   if (0 != system("clang++ -std=c++2b "
