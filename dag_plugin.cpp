@@ -2,7 +2,6 @@
 
 #include "../popen/popen.h"
 #include "cl.hpp"
-#include "clang_dir.hpp"
 #include "evoker.hpp"
 
 #include <stdlib.h>
@@ -83,6 +82,7 @@ static bool add_mod_dep(char *pp, const char *mod, dag::node *n) {
   return read_file_list(mm.buffer, n, &dag::node::add_mod_dep, "dependency");
 }
 
+extern const char *leco_argv0;
 bool dag::execute(dag::node *n) {
   auto args =
       evoker{}.push_arg("-E").push_arg(n->source()).set_cpp().prepare_args();
@@ -90,15 +90,19 @@ bool dag::execute(dag::node *n) {
     return false;
 
   sim_sbt clang{};
-  sim_sb_copy(&clang, clang_exe(n->source()));
+  sim_sb_path_copy_parent(&clang, leco_argv0);
+  sim_sb_path_append(&clang, "leco-clang.exe");
 
   sim_sbt argfile{};
   sim_sb_copy(&argfile, "@");
   sim_sb_concat(&argfile, args.argument_file());
 
+  sim_sbt delim{};
+  sim_sb_copy(&delim, "--");
+
   FILE *f;
   FILE *ferr;
-  char *argv[]{clang.buffer, argfile.buffer, 0};
+  char *argv[]{clang.buffer, delim.buffer, argfile.buffer, 0};
   if (0 != proc_open(argv, &f, &ferr))
     return false;
 
