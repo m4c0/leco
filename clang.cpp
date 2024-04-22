@@ -28,7 +28,7 @@ int usage() {
 
 int main(int argc, char **argv) {
   struct gopt opts;
-  GOPT(opts, argc, argv, "c");
+  GOPT(opts, argc, argv, "cC");
 
   bool cpp = true;
   char *val{};
@@ -37,6 +37,9 @@ int main(int argc, char **argv) {
     switch (ch) {
     case 'c':
       cpp = false;
+      break;
+    case 'C':
+      cpp = true;
       break;
     default:
       return usage();
