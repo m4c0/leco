@@ -154,6 +154,7 @@ bool dag::execute(dag::node *n) {
       fprintf(stderr, "%s:%d: unknown pragma\n", n->source(), line);
       return false;
     } else if (auto pp = cmp(p, "# ")) {
+      // TODO: leverage this block to parse header dependencies
       auto l = atoi(pp);
       if (l != 0)
         line = l - 1;
