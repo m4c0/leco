@@ -57,5 +57,6 @@ int main(int argc, char **argv) {
     sim_sb_concat(&args, opts.argv[i]);
   }
 
-  return system(args.buffer);
+  // Somehow, `system` might return 256 and our own return do a mod 256
+  return 0 == system(args.buffer) ? 0 : 1;
 }
