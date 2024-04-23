@@ -6,12 +6,7 @@
 
 static void clang_cmd(sim_sb *buf, const char *exe) {
 #if __APPLE__
-  auto f = popen("brew --prefix llvm@16", "r");
-  if (fgets(buf->buffer, PATH_MAX, f) == nullptr)
-    throw 0;
-
-  buf->len = strlen(buf->buffer) - 1;
-  sim_sb_path_append(buf, "bin");
+  sim_sb_copy(buf, "/usr/local/opt/llvm@16/bin");
   sim_sb_path_append(buf, exe);
 #elif _WIN32
   sim_sb_path_copy(buf, exe);
