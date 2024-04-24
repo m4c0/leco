@@ -50,6 +50,7 @@ int main(int argc, char **argv) {
     clang_cmd(&args, "clang");
     sim_sb_concat(&args, " -std=c11");
   }
+  sim_sb_concat(&args, " -Wall");
 
   for (auto i = 0; i < opts.argc; i++) {
     // TODO: escape argv
