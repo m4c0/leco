@@ -5,6 +5,7 @@
 #include "evoker.hpp"
 
 #include <stdlib.h>
+#include <string.h>
 
 static unsigned line{};
 
