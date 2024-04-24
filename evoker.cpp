@@ -14,7 +14,13 @@
 #endif
 
 static void construct_args(const char *in, std::vector<std::string> &args) {
-  args.push_back(clang_exe(in));
+  auto ext = sim_path_extension(in);
+  if (0 == strcmp(ext, ".c")) {
+    args.push_back(clang_c_exe());
+  } else {
+    args.push_back(clang_cpp_exe());
+  }
+
   args.push_back("-Wall");
   args.push_back("-target");
   args.push_back(cur_ctx().target.c_str());

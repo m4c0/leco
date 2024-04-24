@@ -66,11 +66,3 @@ static const char *clang_cpp_exe() {
   }();
   return exe.buffer;
 }
-static const char *clang_exe(const char *in) {
-  auto e = sim_path_extension(in);
-  if (0 == strcmp(e, ".c")) {
-    return clang_c_exe();
-  } else {
-    return clang_cpp_exe();
-  }
-}
