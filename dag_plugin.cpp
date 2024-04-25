@@ -83,6 +83,26 @@ static bool add_mod_dep(char *pp, const char *mod, dag::node *n) {
   return read_file_list(mm.buffer, n, &dag::node::add_mod_dep, "dependency");
 }
 
+static void find_header(const char *l) {
+  auto s = strchr(l, '"');
+  if (!l)
+    return;
+
+  s++;
+
+  sim_sbt hdr{};
+  sim_sb_copy(&hdr, s);
+
+  auto e = strchr(hdr.buffer, '"');
+  if (!e)
+    return;
+
+  *e = 0;
+
+  // TODO: add as a header dependency (and dedup it, of course)
+  // puts(hdr.buffer);
+}
+
 extern const char *leco_argv0;
 bool dag::execute(dag::node *n) {
   auto args = evoker{}
@@ -158,7 +178,7 @@ bool dag::execute(dag::node *n) {
       fprintf(stderr, "%s:%d: unknown pragma\n", n->source(), line);
       return false;
     } else if (auto pp = cmp(p, "# ")) {
-      // TODO: leverage this block to parse header dependencies
+      find_header(pp);
       auto l = atoi(pp);
       if (l != 0)
         line = l - 1;
