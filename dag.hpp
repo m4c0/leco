@@ -23,6 +23,7 @@ class node {
   std::set<std::string> m_build_deps{};
   std::set<std::string> m_executables{};
   std::set<std::string> m_frameworks{};
+  std::set<std::string> m_headers{};
   std::set<std::string> m_libraries{};
   std::set<std::string> m_library_dirs{};
   std::set<std::string> m_mod_deps{};
@@ -45,6 +46,7 @@ public:
     m_frameworks.insert(fw);
     return true;
   }
+  [[nodiscard]] bool add_header(const char *fname);
   bool add_library(const char *lib) {
     m_libraries.insert(lib);
     return true;

@@ -83,41 +83,38 @@ static bool add_mod_dep(char *pp, const char *mod, dag::node *n) {
   return read_file_list(mm.buffer, n, &dag::node::add_mod_dep, "dependency");
 }
 
-static void find_header(const char *l) {
+[[nodiscard]] static bool find_header(dag::node *n, const char *l) {
   auto s = strchr(l, '"');
   if (!l)
-    return;
+    return true;
 
   s++;
 
   // <build-in> and <command-line>
   if (*s == '<')
-    return;
+    return true;
 
   sim_sbt hdr{};
   sim_sb_copy(&hdr, s);
 
   auto e = strchr(hdr.buffer, '"');
   if (!e)
-    return;
+    return true;
 
   *e = 0;
 
   // Flag == 3 means "system header". We don't track them.
   if (strchr(e + 1, '3'))
-    return;
+    return true;
 
   // Flag == 1 means "entering file".
   if (!strchr(e + 1, '1'))
-    return;
+    return true;
 
   // Other flags would be "2" meaning "leaving file" and "4" meaning "extern C"
   // block.
 
-  sim_sbt real{};
-  sim_sb_path_copy_real(&real, hdr.buffer);
-  // TODO: add as a header dependency (and dedup it, of course)
-  // puts(real.buffer);
+  return add_found("header", hdr.buffer, n, &dag::node::add_header);
 }
 
 extern const char *leco_argv0;
@@ -196,7 +193,9 @@ bool dag::execute(dag::node *n) {
       return false;
     } else if (auto pp = cmp(p, "# ")) {
       // # <line> "<file>" <flags>...
-      find_header(pp);
+      if (!find_header(n, pp))
+        return false;
+
       auto l = atoi(pp);
       if (l != 0)
         line = l - 1;

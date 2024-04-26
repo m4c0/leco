@@ -51,6 +51,9 @@ bool dag::node::add_build_dep(const char *dep) {
 bool dag::node::add_executable(const char *executable) {
   return add_real_abs(this, m_executables, executable);
 }
+bool dag::node::add_header(const char *fname) {
+  return add_real_abs(this, m_headers, fname);
+}
 bool dag::node::add_library_dir(const char *dir) {
   return add_real_abs(this, m_library_dirs, dir);
 }
