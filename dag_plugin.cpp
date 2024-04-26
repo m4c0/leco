@@ -113,8 +113,11 @@ static void find_header(const char *l) {
 
   // Other flags would be "2" meaning "leaving file" and "4" meaning "extern C"
   // block.
+
+  sim_sbt real{};
+  sim_sb_path_copy_real(&real, hdr.buffer);
   // TODO: add as a header dependency (and dedup it, of course)
-  // puts(hdr.buffer);
+  // puts(real.buffer);
 }
 
 extern const char *leco_argv0;
