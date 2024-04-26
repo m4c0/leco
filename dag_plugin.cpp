@@ -103,6 +103,16 @@ static void find_header(const char *l) {
 
   *e = 0;
 
+  // Flag == 3 means "system header". We don't track them.
+  if (strchr(e + 1, '3'))
+    return;
+
+  // Flag == 1 means "entering file".
+  if (!strchr(e + 1, '1'))
+    return;
+
+  // Other flags would be "2" meaning "leaving file" and "4" meaning "extern C"
+  // block.
   // TODO: add as a header dependency (and dedup it, of course)
   // puts(hdr.buffer);
 }
@@ -182,6 +192,7 @@ bool dag::execute(dag::node *n) {
       fprintf(stderr, "%s:%d: unknown pragma\n", n->source(), line);
       return false;
     } else if (auto pp = cmp(p, "# ")) {
+      // # <line> "<file>" <flags>...
       find_header(pp);
       auto l = atoi(pp);
       if (l != 0)
