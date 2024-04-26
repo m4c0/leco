@@ -8,11 +8,12 @@ static void persist(std::ostream &o, const std::set<std::string> &items) {
   }
 }
 static void persist(std::ostream &o, const dag::node *n) {
-  o << "LECO 1\n"; // fourcc-ish+version
+  o << "LECO 2\n"; // fourcc-ish+version
   o << static_cast<int>(n->root_type()) << "\n";
   persist(o, n->build_deps());
   persist(o, n->executables());
   persist(o, n->frameworks());
+  persist(o, n->headers());
   persist(o, n->libraries());
   persist(o, n->library_dirs());
   persist(o, n->mod_deps());
@@ -59,7 +60,7 @@ bool dag::node::read_from_cache_file() {
 
   int ver{};
   f >> ver;
-  if (ver != 1) {
+  if (ver != 2) {
     dag::errlog(this, "invalid dag cache version");
     return false;
   }
@@ -71,8 +72,8 @@ bool dag::node::read_from_cache_file() {
   m_root = static_cast<root_t>(r);
 
   return read(f, this, &m_build_deps) && read(f, this, &m_executables) &&
-         read(f, this, &m_frameworks) && read(f, this, &m_libraries) &&
-         read(f, this, &m_library_dirs) && read(f, this, &m_mod_deps) &&
-         read(f, this, &m_mod_impls) && read(f, this, &m_resources) &&
-         read(f, this, &m_shaders);
+         read(f, this, &m_frameworks) && read(f, this, &m_headers) &&
+         read(f, this, &m_libraries) && read(f, this, &m_library_dirs) &&
+         read(f, this, &m_mod_deps) && read(f, this, &m_mod_impls) &&
+         read(f, this, &m_resources) && read(f, this, &m_shaders);
 }

@@ -76,6 +76,9 @@ public:
   [[nodiscard]] constexpr const auto &frameworks() const noexcept {
     return m_frameworks;
   }
+  [[nodiscard]] constexpr const auto &headers() const noexcept {
+    return m_headers;
+  }
   [[nodiscard]] constexpr const auto &libraries() const noexcept {
     return m_libraries;
   }
