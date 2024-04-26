@@ -90,6 +90,10 @@ static void find_header(const char *l) {
 
   s++;
 
+  // <build-in> and <command-line>
+  if (*s == '<')
+    return;
+
   sim_sbt hdr{};
   sim_sb_copy(&hdr, s);
 
