@@ -43,6 +43,7 @@ static void dump_deps() {
   std::set<std::string> all_parents{};
 
   dag::visit_all([&](auto *n) {
+    // TODO: maybe consider headers, too
     sim_sbt parent{};
     sim_sb_path_copy_parent(&parent, n->source());
     all_parents.insert(sim_sb_path_filename(&parent));
