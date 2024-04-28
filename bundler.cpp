@@ -87,7 +87,7 @@ static void copy_resources(const dag::node *n, const char *res_path) {
     sim_sbt path{};
     sim_sb_path_copy_append(&path, res_path, sim_sb_path_filename(&rf));
 
-    if (mtime_of(path.buffer) > mtime_of(rf.buffer))
+    if (mtime_of(path.buffer) >= mtime_of(rf.buffer))
       continue;
 
     vlog("copying resource", path.buffer);
