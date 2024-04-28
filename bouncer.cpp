@@ -97,11 +97,13 @@ bool bounce(const char *path) {
   sim_sbt exe_path{};
   in2exe(n, &exe_path);
 
-  if (mtime < mtime_of(exe_path.buffer))
+  if (mtime > mtime_of(exe_path.buffer)) {
+    vlog("linking", exe_path.buffer);
+    link(n, exe_path.buffer);
     return true;
+  }
 
-  vlog("linking", exe_path.buffer);
-  if (link(n, exe_path.buffer) && n->app()) {
+  if (n->app()) {
     bundle(n, exe_path.buffer);
   }
 
