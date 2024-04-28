@@ -100,7 +100,6 @@ bool bounce(const char *path) {
   if (mtime > mtime_of(exe_path.buffer)) {
     vlog("linking", exe_path.buffer);
     link(n, exe_path.buffer);
-    return true;
   }
 
   if (n->app()) {
