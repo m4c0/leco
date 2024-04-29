@@ -1,5 +1,10 @@
+#include "../mtime/mtime.h"
 #include "dag.hpp"
 #include <fstream>
+
+bool dag::node::is_cache_file_fresh() const {
+  return mtime_of(dag()) >= mtime_of(source());
+}
 
 static void persist(std::ostream &o, const std::set<std::string> &items) {
   o << items.size() << "\n";
