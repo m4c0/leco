@@ -173,7 +173,7 @@ static bool recurse(dag::node *n) {
     auto [d, ins] = find(dep.c_str());
 
     if (!d)
-      return elog(n->source(), "interal failure");
+      return elog(n->source(), "internal failure");
     if (d->recursed())
       continue;
     if (!compile(d))
