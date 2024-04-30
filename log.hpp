@@ -20,10 +20,8 @@ static void log(unsigned colour, const char *verb, const char *msg) {
   }
 }
 static inline void vlog(const char *verb, const char *msg) {
-  if (!is_verbose())
-    return;
-
-  log(34, verb, msg);
+  if (is_verbose())
+    log(34, verb, msg);
 }
 static inline bool elog(const char *verb, const char *msg) {
   log(31, verb, msg);
@@ -34,4 +32,8 @@ static inline void wlog(const char *verb, const char *msg) {
 }
 static inline void dlog(const char *verb, const char *msg) {
   log(35, verb, msg);
+}
+static inline void xlog(const char *verb, const char *msg) {
+  if (is_extra_verbose())
+    dlog(verb, msg);
 }

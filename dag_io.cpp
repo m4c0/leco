@@ -1,5 +1,7 @@
 #include "../mtime/mtime.h"
 #include "dag.hpp"
+#include "log.hpp"
+
 #include <fstream>
 
 bool dag::node::is_cache_file_fresh() const {
@@ -32,21 +34,24 @@ void dag::node::write_to_cache_file() const {
   persist(of, this);
 }
 
+static bool failed(const dag::node *n, const char *msg) {
+  elog("failed", n->source());
+  elog("", msg);
+  return false;
+}
+
 static bool read(std::istream &f, dag::node *n, std::set<std::string> *set) {
   int size{};
   f >> size;
   char c = f.get();
-  if (c != '\n') {
-    dag::errlog(n, "invalid char after dag list size");
-    return false;
-  }
+  if (c != '\n')
+    return failed(n, "invalid char after dag list size");
 
   for (auto i = 0; i < size; i++) {
     std::string line{};
-    if (!std::getline(f, line)) {
-      dag::errlog(n, "error in dag entry");
-      return false;
-    }
+    if (!std::getline(f, line))
+      return failed(n, "error in dag entry");
+
     set->insert(line);
   }
   return true;
@@ -58,17 +63,13 @@ bool dag::node::read_from_cache_file() {
 
   std::string magic{};
   f >> magic;
-  if (magic != "LECO") {
-    dag::errlog(this, "invalid dag cache");
-    return false;
-  }
+  if (magic != "LECO")
+    return failed(this, "invalid dag cache");
 
   int ver{};
   f >> ver;
-  if (ver != 2) {
-    dag::errlog(this, "invalid dag cache version");
-    return false;
-  }
+  if (ver != 2)
+    return failed(this, "invalid dag cache version");
 
   // TODO: validate CRC or something
 

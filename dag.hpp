@@ -137,9 +137,6 @@ public:
 };
 [[nodiscard]] bool execute(node *n);
 
-void xlog(const node *n, const char *msg);
-void errlog(const node *n, const char *msg);
-
 node *get_node(const char *source);
 node *process(const char *path);
 void clear_cache();

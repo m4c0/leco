@@ -132,21 +132,11 @@ bool dag::node::add_shader(const char *shader) {
 static std::map<std::string, dag::node> cache{};
 void dag::clear_cache() { cache.clear(); }
 
-// TODO: replace with elog
-void dag::errlog(const dag::node *n, const char *msg) {
-  fprintf(stderr, "%s %s\n", msg, n->source());
-}
-void dag::xlog(const dag::node *n, const char *msg) {
-  if (!is_extra_verbose())
-    return;
-  dag::errlog(n, msg);
-}
-
 static bool compile(dag::node *n) {
   clean(n);
 
   if (!n->is_cache_file_fresh()) {
-    dag::xlog(n, "dag compilation");
+    xlog("processing", n->source());
     return dag::execute(n);
   }
 
