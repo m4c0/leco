@@ -2,7 +2,7 @@
 
 #include "../popen/popen.h"
 #include "cl.hpp"
-#include "evoker.hpp"
+#include "context.hpp"
 #include "log.hpp"
 
 #include <stdlib.h>
@@ -115,27 +115,38 @@ static bool add_mod_dep(char *pp, const char *mod, dag::node *n) {
 
 extern const char *leco_argv0;
 bool dag::execute(dag::node *n) {
-  auto args = evoker{}
-                  .push_arg("-E")
-                  .push_arg(n->source())
-                  .prepare_args();
-  if (!args)
-    return false;
+  char *argv[100]{};
+  char **argp = argv;
 
-  sim_sbt clang{};
-  sim_sb_path_copy_parent(&clang, leco_argv0);
-  sim_sb_path_append(&clang, "leco-clang.exe");
+  sim_sbt args{};
+  *argp++ = args.buffer;
 
-  sim_sbt argfile{};
-  sim_sb_copy(&argfile, "@");
-  sim_sb_concat(&argfile, args.argument_file());
+  sim_sb_path_copy_parent(&args, leco_argv0);
+  sim_sb_path_append(&args, "leco-clang.exe");
+  sim_sb_concat(&args, " ");
 
-  sim_sbt delim{};
-  sim_sb_copy(&delim, "--");
+  *argp++ = args.buffer + args.len;
+  sim_sb_concat(&args, "-t ");
+
+  *argp++ = args.buffer + args.len;
+  sim_sb_concat(&args, cur_ctx().target.c_str());
+  sim_sb_concat(&args, " ");
+
+  *argp++ = args.buffer + args.len;
+  sim_sb_concat(&args, "-- ");
+
+  *argp++ = args.buffer + args.len;
+  sim_sb_concat(&args, "-E ");
+
+  *argp++ = args.buffer + args.len;
+  sim_sb_concat(&args, n->source());
+
+  for (auto p = argv + 1; *p && p != argp; p++) {
+    (*p)[-1] = 0;
+  }
 
   FILE *f;
   FILE *ferr;
-  char *argv[]{clang.buffer, delim.buffer, argfile.buffer, 0};
   if (0 != proc_open(argv, &f, &ferr))
     return false;
 
