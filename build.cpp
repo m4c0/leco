@@ -1,3 +1,5 @@
+#include "host_target.hpp"
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -5,13 +7,8 @@
 
 #if _WIN32
 #define SEP "\\"
-#define OUT "out/x86_64-pc-windows-msvc/leco.exe"
-#elif __APPLE__
+#else
 #define SEP "/"
-#define OUT "out/x86_64-apple-macosx11.6.0/leco.exe"
-#elif __linux__
-#define SEP "/"
-#define OUT "out/x86_64-pc-linux-gnu/leco.exe"
 #endif
 
 int main(int argc, char **argv) {
@@ -39,7 +36,7 @@ int main(int argc, char **argv) {
 
   puts("Moving final stage to root folder");
   remove("leco.exe");
-  if (0 != rename(OUT, "leco.exe")) {
+  if (0 != rename("out/" HOST_TARGET "/leco.exe", "leco.exe")) {
     perror("failed to rename");
     return 1;
   }

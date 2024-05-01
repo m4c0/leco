@@ -1,5 +1,6 @@
 #include "context.hpp"
 #include "dag.hpp"
+#include "host_target.hpp"
 #include "sim.h"
 
 bool actool(const char *path) { return false; }
@@ -22,15 +23,9 @@ bool enable_debug_syms() { return false; }
 bool parse_args(int argc, char **argv) { return true; }
 
 context &cur_ctx() {
-  static context i {
-#if _WIN32
-    .target = "x86_64-pc-windows-msvc",
-#elif __APPLE__
-    .target = "x86_64-apple-macosx11.6.0",
-#else
-    .target = "x86_64-pc-linux-gnu",
-#endif
-    .native_target = true,
+  static context i{
+      .target = HOST_TARGET,
+      .native_target = true,
   };
   return i;
 }
