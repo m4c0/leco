@@ -59,7 +59,7 @@ bool add_target_defs(sim_sb *buf, const char *tgt) {
 
 int main(int argc, char **argv) {
   struct gopt opts;
-  GOPT(opts, argc, argv, "cCgOt");
+  GOPT(opts, argc, argv, "cCgOt:");
 
   bool debug{};
   bool opt{};
