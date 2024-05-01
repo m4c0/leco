@@ -3,6 +3,7 @@
 #include "../popen/popen.h"
 #include "cl.hpp"
 #include "evoker.hpp"
+#include "log.hpp"
 
 #include <stdlib.h>
 #include <string.h>
@@ -16,14 +17,9 @@ static char *cmp(char *str, const char *prefix) {
   return str + len;
 }
 
-static void log_found(const char *desc, const char *what) {
-  if (is_extra_verbose()) {
-    fprintf(stderr, "found %s for processing: [%s]\n", desc, what);
-  }
-}
 static bool add_found(const char *desc, const char *what, dag::node *n,
                       bool (dag::node::*fn)(const char *)) {
-  log_found(desc, what);
+  xlog(desc, what);
   if (!(n->*fn)(what)) {
     // Hacking a line number to allow editors automatically jumping to file.
     // TODO: use precompiled definitions to find line numbers
@@ -154,13 +150,13 @@ bool dag::execute(dag::node *n) {
     }
     line++;
     if (0 == strcmp(p, "#pragma leco tool\n")) {
-      log_found("tool", n->source());
+      xlog("tool", n->source());
       n->set_tool();
     } else if (cmp(p, "#pragma leco app\n")) {
-      log_found("app", n->source());
+      xlog("app", n->source());
       n->set_app();
     } else if (cmp(p, "#pragma leco dll\n")) {
-      log_found("dll", n->source());
+      xlog("dll", n->source());
       n->set_dll();
     } else if (auto pp = cmp(p, "#pragma leco add_build_dep ")) {
       if (!read_file_list(pp, n, &dag::node::add_build_dep, "build dependency"))
