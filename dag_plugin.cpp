@@ -122,7 +122,6 @@ bool dag::execute(dag::node *n) {
   auto args = evoker{}
                   .push_arg("-E")
                   .push_arg(n->source())
-                  .add_predefs()
                   .prepare_args();
   if (!args)
     return false;
