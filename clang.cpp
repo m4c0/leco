@@ -23,8 +23,10 @@ int usage() {
 
 int main(int argc, char **argv) {
   struct gopt opts;
-  GOPT(opts, argc, argv, "cC");
+  GOPT(opts, argc, argv, "cCgO");
 
+  bool debug{};
+  bool opt{};
   bool cpp = true;
   char *val{};
   char ch;
@@ -35,6 +37,12 @@ int main(int argc, char **argv) {
       break;
     case 'C':
       cpp = true;
+      break;
+    case 'g':
+      debug = true;
+      break;
+    case 'O':
+      opt = true;
       break;
     default:
       return usage();
@@ -51,6 +59,13 @@ int main(int argc, char **argv) {
     sim_sb_concat(&args, " -std=c11");
   }
   sim_sb_concat(&args, " -Wall -Wno-unknown-pragmas");
+
+  if (debug) {
+    sim_sb_concat(&args, " -g");
+  }
+  if (opt) {
+    sim_sb_concat(&args, " -O3 -flto -fvisibility=hidden");
+  }
 
   for (auto i = 0; i < opts.argc; i++) {
     // TODO: escape argv
