@@ -113,6 +113,11 @@ static bool add_mod_dep(char *pp, const char *mod, dag::node *n) {
   return add_found("header", hdr.buffer, n, &dag::node::add_header);
 }
 
+static void stamp(sim_sb *args, char **&argp) {
+  sim_sb_concat(args, " ");
+  *argp++ = args->buffer + args->len;
+}
+
 extern const char *leco_argv0;
 bool dag::execute(dag::node *n) {
   char *argv[100]{};
@@ -123,22 +128,15 @@ bool dag::execute(dag::node *n) {
 
   sim_sb_path_copy_parent(&args, leco_argv0);
   sim_sb_path_append(&args, "leco-clang.exe");
-  sim_sb_concat(&args, " ");
-
-  *argp++ = args.buffer + args.len;
-  sim_sb_concat(&args, "-t ");
-
-  *argp++ = args.buffer + args.len;
+  stamp(&args, argp);
+  sim_sb_concat(&args, "-t");
+  stamp(&args, argp);
   sim_sb_concat(&args, cur_ctx().target.c_str());
-  sim_sb_concat(&args, " ");
-
-  *argp++ = args.buffer + args.len;
-  sim_sb_concat(&args, "-- ");
-
-  *argp++ = args.buffer + args.len;
-  sim_sb_concat(&args, "-E ");
-
-  *argp++ = args.buffer + args.len;
+  stamp(&args, argp);
+  sim_sb_concat(&args, "--");
+  stamp(&args, argp);
+  sim_sb_concat(&args, "-E");
+  stamp(&args, argp);
   sim_sb_concat(&args, n->source());
 
   for (auto p = argv + 1; *p && p != argp; p++) {
