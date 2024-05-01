@@ -20,6 +20,7 @@ static void clang_cmd(sim_sb *buf, const char *exe) {
 
 int usage() {
   // TODO: print usage
+  fprintf(stderr, "invalid usage\n");
   return 1;
 }
 
