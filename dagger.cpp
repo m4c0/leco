@@ -19,6 +19,7 @@ enum class exe_t {
 static char *source{};
 static unsigned line{};
 static exe_t exe_type{};
+static sim_sbt mod_name{};
 
 static int usage() {
   fprintf(stderr, "invalid usage\n");
@@ -144,6 +145,66 @@ static void find_header(const char *l) {
 
   print_found(hdr.buffer, "header", "head");
 }
+static void add_mod_dep(char *p, const char *desc, const char *code) {
+  strchr(p, ';')[0] = 0;
+
+  sim_sbt mm{};
+  if (*p == ':') {
+    sim_sb_copy(&mm, mod_name.buffer);
+    if (auto mc = strchr(mm.buffer, ':')) {
+      *mc = 0;
+      mm.len = strlen(mm.buffer);
+    }
+    sim_sb_concat(&mm, p);
+  } else {
+    sim_sb_copy(&mm, p);
+  }
+
+  sim_sbt pp{};
+  sim_sb_copy(&pp, mm.buffer);
+
+  // Module parts
+  auto sc = strchr(pp.buffer, ':');
+  if (sc != nullptr) {
+    *sc = '-';
+
+    sim_sbt dep{};
+    sim_sb_path_copy_parent(&dep, source);
+    sim_sb_path_append(&dep, pp.buffer);
+    sim_sb_concat(&dep, ".cppm");
+    if (print_if_found(dep.buffer, desc, code))
+      return;
+  }
+
+  // Module in the same folder
+  sim_sbt dep{};
+  sim_sb_path_copy_parent(&dep, source);
+  sim_sb_path_append(&dep, mm.buffer);
+  sim_sb_concat(&dep, ".cppm");
+  if (print_if_found(dep.buffer, desc, code))
+    return;
+
+  // Module in sibling folder
+  sim_sb_path_parent(&dep);
+  sim_sb_path_parent(&dep);
+  sim_sb_path_append(&dep, mm.buffer);
+  sim_sb_path_append(&dep, mm.buffer);
+  sim_sb_concat(&dep, ".cppm");
+  if (print_if_found(dep.buffer, desc, code))
+    return;
+
+  // Module in sibling folder with "-" instead of "_"
+  while ((p = strchr(pp.buffer, '_')) != nullptr) {
+    *p = '-';
+  }
+  sim_sb_path_parent(&dep);
+  sim_sb_path_parent(&dep);
+  sim_sb_path_append(&dep, pp.buffer);
+  sim_sb_path_append(&dep, mm.buffer);
+  sim_sb_concat(&dep, ".cppm");
+  print_found(dep.buffer, desc, code);
+}
+
 static void add_impl(const char *mod_impl, const char *desc, const char *code) {
   sim_sbt mi{};
   sim_sb_path_copy_parent(&mi, source);
@@ -219,7 +280,6 @@ void run(int argc, char **argv) {
     throw 1;
 
   line = 0;
-  sim_sbt mod_name{};
 
   char buf[1024];
   while (!feof(f) && fgets(buf, 1024, f) != nullptr) {
@@ -273,7 +333,9 @@ void run(int argc, char **argv) {
           exe_type = exe_t::main_mod;
       }
     } else if (auto pp = cmp(p, "export import ")) {
+      add_mod_dep(pp, "exported dependency", "mdep");
     } else if (auto pp = cmp(p, "import ")) {
+      add_mod_dep(pp, "dependency", "mdep");
     }
   }
 
