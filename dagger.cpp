@@ -1,8 +1,10 @@
 #define GOPT_IMPLEMENTATION
 #define POPEN_IMPLEMENTATION
+#define MTIME_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
 #include "../gopt/gopt.h"
+#include "../mtime/mtime.h"
 #include "../popen/popen.h"
 #include "sim.hpp"
 
@@ -46,13 +48,56 @@ static void set_exe_type(exe_t t) {
   exe_type = t;
 }
 
+static void read_file_list(const char *str, const char *desc,
+                           const char *code) {
+  while (*str && *str != '\n') {
+    while (*str == ' ') {
+      str++;
+    }
+    const char *e{};
+    if (*str == '"') {
+      str++;
+      e = strchr(str, '"');
+    } else if (*str && *str != '\n') {
+      e = strchr(str, ' ');
+      if (e == nullptr) {
+        e = strchr(str, '\n');
+      }
+      if (e == nullptr) {
+        e = str + strlen(str);
+      }
+    }
+    if (e == nullptr)
+      throw 1;
+    char buf[1024]{};
+    strncpy(buf, str, e - str);
+    buf[e - str] = 0;
+
+    sim_sbt path{};
+    sim_sb_path_copy_parent(&path, source);
+    sim_sb_path_append(&path, buf);
+    if (mtime_of(path.buffer) == 0) {
+      fprintf(stderr, "%s:%d: could not find %s [%s]\n", source, line, desc,
+              buf);
+      throw 1;
+    }
+
+    sim_sbt abs{};
+    sim_sb_path_copy_real(&abs, path.buffer);
+    fprintf(stdout, "%s%s\n", code, abs.buffer);
+
+    str = *e ? e + 1 : e;
+  }
+  if (*str != 0 && *str != '\n')
+    throw 1;
+}
+
 void run(int argc, char **argv) {
   struct gopt opts;
   GOPT(opts, argc, argv, "t:i:d");
 
   bool dump_errors{};
   char *target{};
-  // FILE *out = stdout;
 
   char *val{};
   char ch;
@@ -129,13 +174,13 @@ void run(int argc, char **argv) {
   case exe_t::none:
     break;
   case exe_t::app:
-    puts("typeapp_");
+    fprintf(stdout, "app_\n");
     break;
   case exe_t::dll:
-    puts("typedll_");
+    fprintf(stdout, "dll_\n");
     break;
   case exe_t::tool:
-    puts("typetool");
+    fprintf(stdout, "tool\n");
     break;
   }
 
