@@ -49,26 +49,36 @@ static void set_exe_type(exe_t t) {
   exe_type = t;
 }
 
-static void print_found(const char *rel_path, const char *desc,
-                        const char *code) {
+static bool print_if_found(const char *rel_path, const char *desc,
+                           const char *code) {
   sim_sbt path{};
   sim_sb_path_copy_parent(&path, source);
   sim_sb_path_append(&path, rel_path);
   if (mtime_of(path.buffer) == 0) {
-    fprintf(stderr, "%s:%d: could not find %s\n", source, line, desc);
-    throw 1;
+    return false;
   }
 
   sim_sbt abs{};
   sim_sb_path_copy_real(&abs, path.buffer);
   fprintf(stdout, "%s%s\n", code, abs.buffer);
+  return true;
 }
-static void print_asis(const char *rel_path, const char *code) {
+static void print_found(const char *rel_path, const char *desc,
+                        const char *code) {
+  if (print_if_found(rel_path, desc, code))
+    return;
+
+  fprintf(stderr, "%s:%d: could not find %s\n", source, line, desc);
+  throw 1;
+}
+static void print_asis(const char *rel_path, const char *desc,
+                       const char *code) {
   fprintf(stdout, "%s%s\n", code, rel_path);
 }
 
+using printer_t = void (*)(const char *, const char *, const char *);
 static void read_file_list(const char *str, const char *desc, const char *code,
-                           bool asis = false) {
+                           printer_t prfn = print_found) {
   while (*str && *str != '\n') {
     while (*str == ' ') {
       str++;
@@ -92,11 +102,7 @@ static void read_file_list(const char *str, const char *desc, const char *code,
     strncpy(buf, str, e - str);
     buf[e - str] = 0;
 
-    if (asis) {
-      print_asis(buf, code);
-    } else {
-      print_found(buf, desc, code);
-    }
+    prfn(buf, desc, code);
 
     str = *e ? e + 1 : e;
   }
@@ -138,6 +144,27 @@ static void find_header(const char *l) {
 
   print_found(hdr.buffer, "header", "head");
 }
+static void add_impl(const char *mod_impl, const char *desc, const char *code) {
+  sim_sbt mi{};
+  sim_sb_path_copy_parent(&mi, source);
+  sim_sb_path_append(&mi, mod_impl);
+
+  sim_sb_path_set_extension(&mi, "cpp");
+  if (print_if_found(mi.buffer, desc, code))
+    return;
+
+  sim_sb_path_set_extension(&mi, "c");
+  if (print_if_found(mi.buffer, desc, code))
+    return;
+
+  sim_sb_path_set_extension(&mi, "mm");
+  if (print_if_found(mi.buffer, desc, code))
+    return;
+
+  sim_sb_path_set_extension(&mi, "m");
+  print_found(mi.buffer, desc, code);
+}
+
 void run(int argc, char **argv) {
   struct gopt opts;
   GOPT(opts, argc, argv, "t:i:d");
@@ -212,10 +239,11 @@ void run(int argc, char **argv) {
     } else if (auto pp = cmp(p, "#pragma leco add_dll ")) {
       read_file_list(pp, "dll", "dlls");
     } else if (auto pp = cmp(p, "#pragma leco add_framework ")) {
-      read_file_list(pp, "framework", "frwk", true);
+      read_file_list(pp, "framework", "frwk", print_asis);
     } else if (auto pp = cmp(p, "#pragma leco add_impl ")) {
+      read_file_list(pp, "implementation", "impl", add_impl);
     } else if (auto pp = cmp(p, "#pragma leco add_library ")) {
-      read_file_list(pp, "library", "libr", true);
+      read_file_list(pp, "library", "libr", print_asis);
     } else if (auto pp = cmp(p, "#pragma leco add_library_dir ")) {
       read_file_list(pp, "library dir", "ldir");
     } else if (auto pp = cmp(p, "#pragma leco add_resource ")) {
