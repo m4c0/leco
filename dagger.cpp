@@ -10,6 +10,7 @@
 
 enum class exe_t {
   none,
+  main_mod,
   dll,
   tool,
   app,
@@ -48,8 +49,26 @@ static void set_exe_type(exe_t t) {
   exe_type = t;
 }
 
-static void read_file_list(const char *str, const char *desc,
-                           const char *code) {
+static void print_found(const char *rel_path, const char *desc,
+                        const char *code) {
+  sim_sbt path{};
+  sim_sb_path_copy_parent(&path, source);
+  sim_sb_path_append(&path, rel_path);
+  if (mtime_of(path.buffer) == 0) {
+    fprintf(stderr, "%s:%d: could not find %s\n", source, line, desc);
+    throw 1;
+  }
+
+  sim_sbt abs{};
+  sim_sb_path_copy_real(&abs, path.buffer);
+  fprintf(stdout, "%s%s\n", code, abs.buffer);
+}
+static void print_asis(const char *rel_path, const char *code) {
+  fprintf(stdout, "%s%s\n", code, rel_path);
+}
+
+static void read_file_list(const char *str, const char *desc, const char *code,
+                           bool asis = false) {
   while (*str && *str != '\n') {
     while (*str == ' ') {
       str++;
@@ -73,18 +92,11 @@ static void read_file_list(const char *str, const char *desc,
     strncpy(buf, str, e - str);
     buf[e - str] = 0;
 
-    sim_sbt path{};
-    sim_sb_path_copy_parent(&path, source);
-    sim_sb_path_append(&path, buf);
-    if (mtime_of(path.buffer) == 0) {
-      fprintf(stderr, "%s:%d: could not find %s [%s]\n", source, line, desc,
-              buf);
-      throw 1;
+    if (asis) {
+      print_asis(buf, code);
+    } else {
+      print_found(buf, desc, code);
     }
-
-    sim_sbt abs{};
-    sim_sb_path_copy_real(&abs, path.buffer);
-    fprintf(stdout, "%s%s\n", code, abs.buffer);
 
     str = *e ? e + 1 : e;
   }
@@ -92,6 +104,40 @@ static void read_file_list(const char *str, const char *desc,
     throw 1;
 }
 
+static void find_header(const char *l) {
+  auto s = strchr(l, '"');
+  if (!s)
+    error("mismatching quote");
+
+  s++;
+
+  // <build-in> and <command-line>
+  if (*s == '<')
+    return;
+
+  sim_sbt hdr{};
+  sim_sb_copy(&hdr, s);
+
+  // Ignore system headers
+  auto e = strchr(hdr.buffer, '"');
+  if (!e)
+    return;
+
+  *e = 0;
+
+  // Flag == 3 means "system header". We don't track them.
+  if (strchr(e + 1, '3'))
+    return;
+
+  // Flag == 1 means "entering file".
+  if (!strchr(e + 1, '1'))
+    return;
+
+  // Other flags would be "2" meaning "leaving file" and "4" meaning "extern C"
+  // block.
+
+  print_found(hdr.buffer, "header", "head");
+}
 void run(int argc, char **argv) {
   struct gopt opts;
   GOPT(opts, argc, argv, "t:i:d");
@@ -161,6 +207,45 @@ void run(int argc, char **argv) {
       set_exe_type(exe_t::app);
     } else if (cmp(p, "#pragma leco dll\n")) {
       set_exe_type(exe_t::dll);
+    } else if (auto pp = cmp(p, "#pragma leco add_build_dep ")) {
+      read_file_list(pp, "build dependency", "bdep");
+    } else if (auto pp = cmp(p, "#pragma leco add_dll ")) {
+      read_file_list(pp, "dll", "dlls");
+    } else if (auto pp = cmp(p, "#pragma leco add_framework ")) {
+      read_file_list(pp, "framework", "frwk", true);
+    } else if (auto pp = cmp(p, "#pragma leco add_impl ")) {
+    } else if (auto pp = cmp(p, "#pragma leco add_library ")) {
+      read_file_list(pp, "library", "libr", true);
+    } else if (auto pp = cmp(p, "#pragma leco add_library_dir ")) {
+      read_file_list(pp, "library dir", "ldir");
+    } else if (auto pp = cmp(p, "#pragma leco add_resource ")) {
+      read_file_list(pp, "resource", "rsrc");
+    } else if (auto pp = cmp(p, "#pragma leco add_shader ")) {
+      read_file_list(pp, "shader", "shdr");
+    } else if (cmp(p, "#pragma leco ")) {
+      error("unknown pragma");
+    } else if (auto pp = cmp(p, "# ")) {
+      // # <line> "<file>" <flags>...
+      find_header(pp);
+
+      auto l = atoi(pp);
+      if (l != 0)
+        line = l - 1;
+    } else if (auto pp = cmp(p, "module ")) {
+      strchr(pp, ';')[0] = 0;
+      sim_sb_copy(&mod_name, pp);
+    } else if (auto pp = cmp(p, "export module ")) {
+      strchr(pp, ';')[0] = 0;
+      sim_sb_copy(&mod_name, pp);
+      if (strchr(mod_name.buffer, ':') == nullptr) {
+        sim_sbt fn{};
+        sim_sb_path_copy_parent(&fn, source);
+        auto dir = sim_sb_path_filename(&fn);
+        if (0 == strcmp(dir, mod_name.buffer) && exe_type == exe_t::none)
+          exe_type = exe_t::main_mod;
+      }
+    } else if (auto pp = cmp(p, "export import ")) {
+    } else if (auto pp = cmp(p, "import ")) {
     }
   }
 
@@ -173,11 +258,14 @@ void run(int argc, char **argv) {
   switch (exe_type) {
   case exe_t::none:
     break;
+  case exe_t::main_mod:
+    fprintf(stdout, "tmmd\n");
+    break;
   case exe_t::app:
-    fprintf(stdout, "app_\n");
+    fprintf(stdout, "tapp\n");
     break;
   case exe_t::dll:
-    fprintf(stdout, "dll_\n");
+    fprintf(stdout, "tdll\n");
     break;
   case exe_t::tool:
     fprintf(stdout, "tool\n");
