@@ -31,6 +31,11 @@ static void error(const char *msg) {
   throw 1;
 }
 
+static void output(uint32_t code, const char * msg) {
+  fwrite(&code, sizeof(uint32_t), 1, stdout);
+  fputs(msg, stdout);
+}
+
 static char *cmp(char *str, const char *prefix) {
   auto len = strlen(prefix);
   if (strncmp(str, prefix, len) != 0)
@@ -51,7 +56,7 @@ static void set_exe_type(exe_t t) {
 }
 
 static bool print_if_found(const char *rel_path, const char *desc,
-                           const char *code) {
+                           uint32_t code) {
   sim_sbt path{};
   sim_sb_path_copy_parent(&path, source.buffer);
   sim_sb_path_append(&path, rel_path);
@@ -66,11 +71,11 @@ static bool print_if_found(const char *rel_path, const char *desc,
     sim_sb_path_copy_real(&abs, path.buffer);
   }
 
-  fprintf(stdout, "%s%s\n", code, abs.buffer);
+  output(code, abs.buffer);
   return true;
 }
 static void print_found(const char *rel_path, const char *desc,
-                        const char *code) {
+                        uint32_t code) {
   if (print_if_found(rel_path, desc, code))
     return;
 
@@ -78,12 +83,12 @@ static void print_found(const char *rel_path, const char *desc,
   throw 1;
 }
 static void print_asis(const char *rel_path, const char *desc,
-                       const char *code) {
-  fprintf(stdout, "%s%s\n", code, rel_path);
+                       uint32_t code) {
+  output(code, rel_path);
 }
 
-using printer_t = void (*)(const char *, const char *, const char *);
-static void read_file_list(const char *str, const char *desc, const char *code,
+using printer_t = void (*)(const char *, const char *, uint32_t);
+static void read_file_list(const char *str, const char *desc, uint32_t code,
                            printer_t prfn = print_found) {
   while (*str && *str != '\n') {
     while (*str == ' ') {
@@ -148,9 +153,9 @@ static void find_header(const char *l) {
   // Other flags would be "2" meaning "leaving file" and "4" meaning "extern C"
   // block.
 
-  print_found(hdr.buffer, "header", "head");
+  print_found(hdr.buffer, "header", 'head');
 }
-static void add_mod_dep(char *p, const char *desc, const char *code) {
+static void add_mod_dep(char *p, const char *desc, uint32_t code) {
   strchr(p, ';')[0] = 0;
 
   sim_sbt mm{};
@@ -210,7 +215,7 @@ static void add_mod_dep(char *p, const char *desc, const char *code) {
   print_found(dep.buffer, desc, code);
 }
 
-static void add_impl(const char *mod_impl, const char *desc, const char *code) {
+static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
   sim_sbt mi{};
   sim_sb_path_copy_parent(&mi, source.buffer);
   sim_sb_path_append(&mi, mod_impl);
@@ -300,21 +305,21 @@ void run(int argc, char **argv) {
     } else if (cmp(p, "#pragma leco dll\n")) {
       set_exe_type(exe_t::dll);
     } else if (auto pp = cmp(p, "#pragma leco add_build_dep ")) {
-      read_file_list(pp, "build dependency", "bdep");
+      read_file_list(pp, "build dependency", 'bdep');
     } else if (auto pp = cmp(p, "#pragma leco add_dll ")) {
-      read_file_list(pp, "dll", "dlls");
+      read_file_list(pp, "dll", 'dlls');
     } else if (auto pp = cmp(p, "#pragma leco add_framework ")) {
-      read_file_list(pp, "framework", "frwk", print_asis);
+      read_file_list(pp, "framework", 'frwk', print_asis);
     } else if (auto pp = cmp(p, "#pragma leco add_impl ")) {
-      read_file_list(pp, "implementation", "impl", add_impl);
+      read_file_list(pp, "implementation", 'impl', add_impl);
     } else if (auto pp = cmp(p, "#pragma leco add_library ")) {
-      read_file_list(pp, "library", "libr", print_asis);
+      read_file_list(pp, "library", 'libr', print_asis);
     } else if (auto pp = cmp(p, "#pragma leco add_library_dir ")) {
-      read_file_list(pp, "library dir", "ldir");
+      read_file_list(pp, "library dir", 'ldir');
     } else if (auto pp = cmp(p, "#pragma leco add_resource ")) {
-      read_file_list(pp, "resource", "rsrc");
+      read_file_list(pp, "resource", 'rsrc');
     } else if (auto pp = cmp(p, "#pragma leco add_shader ")) {
-      read_file_list(pp, "shader", "shdr");
+      read_file_list(pp, "shader", 'shdr');
     } else if (cmp(p, "#pragma leco ")) {
       error("unknown pragma");
     } else if (auto pp = cmp(p, "# ")) {
@@ -338,9 +343,9 @@ void run(int argc, char **argv) {
           exe_type = exe_t::main_mod;
       }
     } else if (auto pp = cmp(p, "export import ")) {
-      add_mod_dep(pp, "exported dependency", "mdep");
+      add_mod_dep(pp, "exported dependency", 'mdep');
     } else if (auto pp = cmp(p, "import ")) {
-      add_mod_dep(pp, "dependency", "mdep");
+      add_mod_dep(pp, "dependency", 'mdep');
     }
   }
 
