@@ -19,12 +19,12 @@ static exe_t exe_type{};
 
 static int usage() {
   fprintf(stderr, "invalid usage\n");
-  return 1;
+  throw 1;
 }
 
 static void error(const char *msg) {
   fprintf(stderr, "%s:%d: %s\n", source, line, msg);
-  throw 0;
+  throw 1;
 }
 
 static char *cmp(char *str, const char *prefix) {
@@ -46,7 +46,7 @@ static void set_exe_type(exe_t t) {
   exe_type = t;
 }
 
-int main(int argc, char **argv) {
+void run(int argc, char **argv) {
   struct gopt opts;
   GOPT(opts, argc, argv, "t:i:d");
 
@@ -68,12 +68,12 @@ int main(int argc, char **argv) {
       target = val;
       break;
     default:
-      return usage();
+      usage();
     }
   }
 
   if (source == nullptr)
-    return usage();
+    usage();
 
   char *clang_argv[100]{};
   char **argp = clang_argv;
@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
   FILE *f;
   FILE *ferr;
   if (0 != proc_open(clang_argv, &f, &ferr))
-    return 1;
+    throw 1;
 
   line = 0;
   sim_sbt mod_name{};
@@ -141,4 +141,13 @@ int main(int argc, char **argv) {
 
   fclose(f);
   fclose(ferr);
+}
+
+int main(int argc, char **argv) {
+  try {
+    run(argc, argv);
+    return 0;
+  } catch (int n) {
+    return n;
+  }
 }
