@@ -34,6 +34,7 @@ static void error(const char *msg) {
 static void output(uint32_t code, const char * msg) {
   fwrite(&code, sizeof(uint32_t), 1, stdout);
   fputs(msg, stdout);
+  fputc('\n', stdout);
 }
 
 static char *cmp(char *str, const char *prefix) {
