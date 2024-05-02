@@ -18,6 +18,11 @@ int main(int argc, char **argv) {
   if (0 != system("clang++ -std=c++20 clang.cpp -o leco-clang.exe"))
     return 1;
 
+  puts("Building dagger");
+  if (0 != system("." SEP "leco-clang.exe -- "
+                  "dagger.cpp -o dagger.exe"))
+    return 1;
+
   // TODO: move "evoker.cpp" bits to "clang.cpp"
   // TODO: make "compile.cpp" a top-level unit
   // TODO: make phase1 leaner
