@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
 
   puts("Building dagger");
   if (0 != system("." SEP "leco-clang.exe -- "
-                  "dagger.cpp -o dagger.exe"))
+                  "dagger.cpp -o leco-dagger.exe"))
     return 1;
 
   // TODO: move "evoker.cpp" bits to "clang.cpp"
