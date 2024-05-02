@@ -125,6 +125,20 @@ int main(int argc, char **argv) {
     }
   }
 
+  switch (exe_type) {
+  case exe_t::none:
+    break;
+  case exe_t::app:
+    puts("typeapp_");
+    break;
+  case exe_t::dll:
+    puts("typedll_");
+    break;
+  case exe_t::tool:
+    puts("typetool");
+    break;
+  }
+
   fclose(f);
   fclose(ferr);
 }
