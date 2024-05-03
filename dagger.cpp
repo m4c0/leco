@@ -344,8 +344,10 @@ void run(int argc, char **argv) {
         line = l - 1;
     } else if (auto pp = cmp(p, "module ")) {
       strchr(pp, ';')[0] = 0;
-      sim_sb_copy(&mod_name, pp);
-      add_mod_dep(pp, "main module dependency", 'mdep');
+      if (0 != strcmp(pp, ":private")) {
+        sim_sb_copy(&mod_name, pp);
+        add_mod_dep(pp, "main module dependency", 'mdep');
+      }
     } else if (auto pp = cmp(p, "export module ")) {
       strchr(pp, ';')[0] = 0;
       sim_sb_copy(&mod_name, pp);
