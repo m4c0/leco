@@ -66,13 +66,11 @@ void dag::clear_cache() { cache.clear(); }
 static bool compile(dag::node *n) {
   clean(n);
 
-  if (!n->is_cache_file_fresh()) {
+  if (mtime_of(n->source()) > mtime_of(n->dag())) {
     xlog("processing", n->source());
     return dag::execute(n);
   }
 
-  // Capture both success and failures. Failures might leave inconsistencies
-  // in the node, which would be worse if we read and store it again
   return n->read_from_cache_file();
 }
 

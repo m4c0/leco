@@ -37,9 +37,7 @@ class node {
 public:
   explicit node(const char *n);
 
-  bool is_cache_file_fresh() const;
   bool read_from_cache_file();
-  void write_to_cache_file() const;
 
   [[nodiscard]] bool add_build_dep(const char *src);
   [[nodiscard]] bool add_executable(const char *e);
