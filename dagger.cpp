@@ -1,11 +1,14 @@
 #define GOPT_IMPLEMENTATION
 #define POPEN_IMPLEMENTATION
+#define MKDIR_IMPLEMENTATION
 #define MTIME_IMPLEMENTATION
-#define SIM_IMPLEMENTATION
 
 #include "../gopt/gopt.h"
 #include "../mtime/mtime.h"
 #include "../popen/popen.h"
+#include "mkdir.h"
+
+#define SIM_IMPLEMENTATION
 #include "sim.hpp"
 
 enum class exe_t {
@@ -253,13 +256,18 @@ void run(int argc, char **argv) {
     case 'i':
       sim_sb_path_copy_real(&source, val);
       break;
-    case 'o':
+    case 'o': {
+      sim_sbt parent{};
+      sim_sb_path_copy_parent(&parent, val);
+      mkdirs(parent.buffer);
+
       out = fopen(val, "wb");
       if (!out) {
         perror("failed to open output file");
         throw 1;
       }
       break;
+    }
     case 't':
       target = val;
       break;
