@@ -159,8 +159,6 @@ static void find_header(const char *l) {
   print_found(hdr.buffer, "header", 'head');
 }
 static void add_mod_dep(char *p, const char *desc, uint32_t code) {
-  strchr(p, ';')[0] = 0;
-
   sim_sbt mm{};
   if (*p == ':') {
     sim_sb_copy(&mm, mod_name.buffer);
@@ -347,6 +345,7 @@ void run(int argc, char **argv) {
     } else if (auto pp = cmp(p, "module ")) {
       strchr(pp, ';')[0] = 0;
       sim_sb_copy(&mod_name, pp);
+      add_mod_dep(pp, "main module dependency", 'mdep');
     } else if (auto pp = cmp(p, "export module ")) {
       strchr(pp, ';')[0] = 0;
       sim_sb_copy(&mod_name, pp);
@@ -358,8 +357,10 @@ void run(int argc, char **argv) {
           exe_type = exe_t::main_mod;
       }
     } else if (auto pp = cmp(p, "export import ")) {
+      strchr(p, ';')[0] = 0;
       add_mod_dep(pp, "exported dependency", 'mdep');
     } else if (auto pp = cmp(p, "import ")) {
+      strchr(p, ';')[0] = 0;
       add_mod_dep(pp, "dependency", 'mdep');
     }
   }

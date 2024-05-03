@@ -87,7 +87,6 @@ static auto find(const char *path) {
   return res{ptr, inserted};
 }
 
-static std::set<std::string> reported_nmwi{};
 static bool recurse(dag::node *n) {
   for (auto &dep : n->build_deps()) {
     auto [d, ins] = find(dep.c_str());
@@ -140,11 +139,6 @@ static bool recurse(dag::node *n) {
         return false;
       if (!recurse(d))
         return false;
-      if (!d->add_mod_dep(n->module_name())) {
-        auto [_, ins] = reported_nmwi.insert(n->module_name());
-        if (ins)
-          wlog("!module w/ impl", n->module_name());
-      }
     }
 
     d->set_recursed();
