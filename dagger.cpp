@@ -20,6 +20,7 @@ static sim_sbt source{};
 static unsigned line{};
 static exe_t exe_type{};
 static sim_sbt mod_name{};
+static FILE *out{stdout};
 
 static int usage() {
   fprintf(stderr, "invalid usage\n");
@@ -32,9 +33,9 @@ static void error(const char *msg) {
 }
 
 static void output(uint32_t code, const char * msg) {
-  fwrite(&code, sizeof(uint32_t), 1, stdout);
-  fputs(msg, stdout);
-  fputc('\n', stdout);
+  fwrite(&code, sizeof(uint32_t), 1, out);
+  fputs(msg, out);
+  fputc('\n', out);
 }
 
 static char *cmp(char *str, const char *prefix) {
@@ -239,7 +240,7 @@ static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
 
 void run(int argc, char **argv) {
   struct gopt opts;
-  GOPT(opts, argc, argv, "t:i:d");
+  GOPT(opts, argc, argv, "do:i:t:");
 
   bool dump_errors{};
   char *target{};
@@ -253,6 +254,13 @@ void run(int argc, char **argv) {
       break;
     case 'i':
       sim_sb_path_copy_real(&source, val);
+      break;
+    case 'o':
+      out = fopen(val, "wb");
+      if (!out) {
+        perror("failed to open output file");
+        throw 1;
+      }
       break;
     case 't':
       target = val;
@@ -360,21 +368,22 @@ void run(int argc, char **argv) {
   case exe_t::none:
     break;
   case exe_t::main_mod:
-    fprintf(stdout, "tmmd\n");
+    fprintf(out, "tmmd\n");
     break;
   case exe_t::app:
-    fprintf(stdout, "tapp\n");
+    fprintf(out, "tapp\n");
     break;
   case exe_t::dll:
-    fprintf(stdout, "tdll\n");
+    fprintf(out, "tdll\n");
     break;
   case exe_t::tool:
-    fprintf(stdout, "tool\n");
+    fprintf(out, "tool\n");
     break;
   }
 
   fclose(f);
   fclose(ferr);
+  fclose(out);
 }
 
 int main(int argc, char **argv) {
