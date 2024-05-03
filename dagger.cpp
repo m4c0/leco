@@ -374,16 +374,16 @@ void run(int argc, char **argv) {
   case exe_t::none:
     break;
   case exe_t::main_mod:
-    fprintf(out, "tmmd\n");
+    output('tmmd', "");
     break;
   case exe_t::app:
-    fprintf(out, "tapp\n");
+    output('tapp', "");
     break;
   case exe_t::dll:
-    fprintf(out, "tdll\n");
+    output('tdll', "");
     break;
   case exe_t::tool:
-    fprintf(out, "tool\n");
+    output('tool', "");
     break;
   }
 
