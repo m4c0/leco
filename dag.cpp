@@ -14,18 +14,8 @@ static inline bool path_exists(const char *path) { return mtime_of(path) > 0; }
   if (!path_exists(path))
     return false;
 
-  sim_sbt abs{};
-  sim_sb_path_copy_real(&abs, path);
-  set.insert(abs.buffer);
+  set.insert(path);
   return true;
-}
-[[nodiscard]] static bool add_real_abs(const dag::node *n,
-                                       std::set<std::string> &set,
-                                       const char *rel_path) {
-  sim_sbt path{};
-  sim_sb_path_copy_parent(&path, n->source());
-  sim_sb_path_append(&path, rel_path);
-  return add_real_abs(set, path.buffer);
 }
 
 static void infer_module_name(sim_sb *module_name, const sim_sb *src) {
@@ -46,87 +36,28 @@ dag::node::node(const char *n) {
 }
 
 bool dag::node::add_build_dep(const char *dep) {
-  return add_real_abs(this, m_build_deps, dep);
+  return add_real_abs(m_build_deps, dep);
 }
 bool dag::node::add_executable(const char *executable) {
-  return add_real_abs(this, m_executables, executable);
+  return add_real_abs(m_executables, executable);
 }
 bool dag::node::add_header(const char *fname) {
   return add_real_abs(m_headers, fname);
 }
 bool dag::node::add_library_dir(const char *dir) {
-  return add_real_abs(this, m_library_dirs, dir);
+  return add_real_abs(m_library_dirs, dir);
 }
 bool dag::node::add_mod_dep(const char *mod_name) {
-  sim_sbt pp{};
-  sim_sb_copy(&pp, mod_name);
-
-  // Module parts
-  auto p = strchr(pp.buffer, ':');
-  if (p != nullptr) {
-    *p = '-';
-
-    sim_sbt dep{};
-    sim_sb_path_copy_parent(&dep, source());
-    sim_sb_path_append(&dep, pp.buffer);
-    sim_sb_concat(&dep, ".cppm");
-    if (add_real_abs(m_mod_deps, dep.buffer))
-      return true;
-  }
-
-  // Module in the same folder
-  sim_sbt dep{};
-  sim_sb_path_copy_parent(&dep, source());
-  sim_sb_path_append(&dep, mod_name);
-  sim_sb_concat(&dep, ".cppm");
-  if (add_real_abs(m_mod_deps, dep.buffer))
-    return true;
-
-  // Module in sibling folder
-  sim_sb_path_parent(&dep);
-  sim_sb_path_parent(&dep);
-  sim_sb_path_append(&dep, mod_name);
-  sim_sb_path_append(&dep, mod_name);
-  sim_sb_concat(&dep, ".cppm");
-  if (add_real_abs(m_mod_deps, dep.buffer))
-    return true;
-
-  // Module in sibling folder with "-" instead of "_"
-  while ((p = strchr(pp.buffer, '_')) != nullptr) {
-    *p = '-';
-  }
-  sim_sb_path_parent(&dep);
-  sim_sb_path_parent(&dep);
-  sim_sb_path_append(&dep, pp.buffer);
-  sim_sb_path_append(&dep, mod_name);
-  sim_sb_concat(&dep, ".cppm");
-  return add_real_abs(m_mod_deps, dep.buffer);
+  return add_real_abs(m_mod_deps, mod_name);
 }
 bool dag::node::add_mod_impl(const char *mod_impl) {
-  sim_sbt mi{};
-  sim_sb_path_copy_parent(&mi, m_source.buffer);
-  sim_sb_path_append(&mi, mod_impl);
-
-  sim_sb_path_set_extension(&mi, "cpp");
-  if (add_real_abs(m_mod_impls, mi.buffer))
-    return true;
-
-  sim_sb_path_set_extension(&mi, "c");
-  if (add_real_abs(m_mod_impls, mi.buffer))
-    return true;
-
-  sim_sb_path_set_extension(&mi, "mm");
-  if (add_real_abs(m_mod_impls, mi.buffer))
-    return true;
-
-  sim_sb_path_set_extension(&mi, "m");
-  return add_real_abs(m_mod_impls, mi.buffer);
+  return add_real_abs(m_mod_impls, mod_impl);
 }
 bool dag::node::add_resource(const char *resource) {
-  return add_real_abs(this, m_resources, resource);
+  return add_real_abs(m_resources, resource);
 }
 bool dag::node::add_shader(const char *shader) {
-  return add_real_abs(this, m_shaders, shader);
+  return add_real_abs(m_shaders, shader);
 }
 
 static std::map<std::string, dag::node> cache{};

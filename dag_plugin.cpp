@@ -112,6 +112,7 @@ bool dag::execute(dag::node *n) {
     try {
       process_line(n, *id, file);
     } catch (...) {
+      fprintf(stderr, "file not found: [%s]\n", file);
       return false;
     }
   }
