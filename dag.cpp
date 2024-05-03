@@ -99,8 +99,6 @@ static bool recurse(dag::node *n) {
       return false;
     if (!recurse(d))
       return false;
-
-    d->set_recursed();
   }
   for (auto &dep : n->mod_deps()) {
     if (dep == n->source()) {
@@ -119,9 +117,10 @@ static bool recurse(dag::node *n) {
       return false;
     if (!recurse(d))
       return false;
-
-    d->set_recursed();
   }
+
+  n->set_recursed();
+
   for (auto &impl : n->mod_impls()) {
     // TODO: remove once mod_impls is sim
     sim_sbt imp{};
@@ -140,8 +139,6 @@ static bool recurse(dag::node *n) {
       if (!recurse(d))
         return false;
     }
-
-    d->set_recursed();
   }
   return true;
 }
