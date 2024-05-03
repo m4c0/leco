@@ -32,7 +32,7 @@ static void error(const char *msg) {
   throw 1;
 }
 
-static void output(uint32_t code, const char * msg) {
+static void output(uint32_t code, const char *msg) {
   fwrite(&code, sizeof(uint32_t), 1, out);
   fputs(msg, out);
   fputc('\n', out);
@@ -76,16 +76,14 @@ static bool print_if_found(const char *rel_path, const char *desc,
   output(code, abs.buffer);
   return true;
 }
-static void print_found(const char *rel_path, const char *desc,
-                        uint32_t code) {
+static void print_found(const char *rel_path, const char *desc, uint32_t code) {
   if (print_if_found(rel_path, desc, code))
     return;
 
   fprintf(stderr, "%s:%d: could not find %s\n", source.buffer, line, desc);
   throw 1;
 }
-static void print_asis(const char *rel_path, const char *desc,
-                       uint32_t code) {
+static void print_asis(const char *rel_path, const char *desc, uint32_t code) {
   output(code, rel_path);
 }
 
