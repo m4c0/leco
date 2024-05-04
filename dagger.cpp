@@ -112,11 +112,12 @@ static void read_file_list(const char *str, const char *desc, uint32_t code,
     }
     if (e == nullptr)
       throw 1;
-    char buf[1024]{};
-    strncpy(buf, str, e - str);
-    buf[e - str] = 0;
 
-    prfn(buf, desc, code);
+    sim_sbt buf{};
+    sim_sb_copy(&buf, str);
+    buf.buffer[e - str] = 0;
+
+    prfn(buf.buffer, desc, code);
 
     str = *e ? e + 1 : e;
   }
