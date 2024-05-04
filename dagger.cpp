@@ -260,8 +260,7 @@ void run(int argc, char **argv) {
       sim_sb_path_copy_parent(&parent, val);
       mkdirs(parent.buffer);
 
-      out = fopen(val, "wb");
-      if (!out) {
+      if (0 != fopen_s(&out, val, "wb")) {
         perror("failed to open output file");
         throw 1;
       }
