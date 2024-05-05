@@ -59,26 +59,28 @@ bool add_target_defs(sim_sb *buf, const char *tgt) {
 
 int main(int argc, char **argv) {
   struct gopt opts;
-  GOPT(opts, argc, argv, "cCgOt:");
+  GOPT(opts, argc, argv, "gi:Ot:");
 
   bool debug{};
   bool opt{};
   bool cpp = true;
   const char *target{HOST_TARGET};
+  const char *input{};
 
   char *val{};
   char ch;
   while ((ch = gopt_parse(&opts, &val)) != 0) {
     switch (ch) {
-    case 'c':
-      cpp = false;
-      break;
-    case 'C':
-      cpp = true;
-      break;
     case 'g':
       debug = true;
       break;
+    case 'i': {
+      input = val;
+      auto ext = sim_path_extension(input);
+      cpp = (0 == strcmp(ext, ".cpp")) || (0 == strcmp(ext, ".cppm")) ||
+            (0 == strcmp(ext, ".mm"));
+      break;
+    }
     case 'O':
       opt = true;
       break;
@@ -112,6 +114,11 @@ int main(int argc, char **argv) {
   sim_sb_concat(&args, target);
   if (!add_target_defs(&args, target))
     return usage();
+
+  if (input) {
+    sim_sb_concat(&args, " ");
+    sim_sb_concat(&args, input);
+  }
 
   for (auto i = 0; i < opts.argc; i++) {
     // TODO: escape argv
