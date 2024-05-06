@@ -66,6 +66,7 @@ int main(int argc, char **argv) {
   bool cpp = true;
   const char *target{HOST_TARGET};
   const char *input{};
+  const char *ext{};
 
   char *val{};
   char ch;
@@ -76,7 +77,7 @@ int main(int argc, char **argv) {
       break;
     case 'i': {
       input = val;
-      auto ext = sim_path_extension(input);
+      ext = sim_path_extension(input);
       cpp = (0 == strcmp(ext, ".cpp")) || (0 == strcmp(ext, ".cppm")) ||
             (0 == strcmp(ext, ".mm"));
       break;
@@ -102,6 +103,10 @@ int main(int argc, char **argv) {
     sim_sb_concat(&args, " -std=c11");
   }
   sim_sb_concat(&args, " -Wall -Wno-unknown-pragmas");
+
+  if (0 == strcmp(ext, ".m") || 0 == strcmp(ext, ".mm")) {
+    sim_sb_concat(&args, " -fmodules -fobjc-arc");
+  }
 
   if (debug) {
     sim_sb_concat(&args, " -g");
