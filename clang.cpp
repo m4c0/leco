@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
   bool cpp = true;
   const char *target{HOST_TARGET};
   const char *input{};
-  const char *ext{};
+  const char *ext{".cpp"};
 
   char *val{};
   char ch;
