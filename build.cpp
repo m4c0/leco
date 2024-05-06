@@ -11,7 +11,7 @@
 #define SEP "/"
 #endif
 
-int main(int argc, char **argv) {
+int try_main(int argc, char **argv) {
   // TODO: self-rebuild "phase 0" (aka "this cpp")
 
   puts("Building clang runner");
@@ -48,4 +48,10 @@ int main(int argc, char **argv) {
 
   puts("Doney-devito");
   return 0;
+}
+
+int main(int argc, char **argv) try {
+  return try_main(argc, argv);
+} catch (int n) {
+  fprintf(stderr, "child process failed with code %d\n", n);
 }
