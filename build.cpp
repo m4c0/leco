@@ -11,33 +11,32 @@
 #define SEP "/"
 #endif
 
+void run(const char *cmd) {
+  auto res = system(cmd);
+  if (res != 0)
+    throw res;
+}
 int try_main(int argc, char **argv) {
   // TODO: self-rebuild "phase 0" (aka "this cpp")
 
   puts("Building clang runner");
-  if (0 != system("clang++ -std=c++20 clang.cpp -o leco-clang.exe"))
-    return 1;
+  run("clang++ -std=c++20 clang.cpp -o leco-clang.exe");
 
   puts("Building dagger");
-  if (0 != system("." SEP "leco-clang.exe -- "
-                  "dagger.cpp -o leco-dagger.exe"))
-    return 1;
+  run("." SEP "leco-clang.exe -i dagger.cpp -- -o leco-dagger.exe");
 
   // TODO: move "evoker.cpp" bits to "clang.cpp"
   // TODO: make "compile.cpp" a top-level unit
   // TODO: make phase1 leaner
   puts("Building Phase 1");
-  if (0 != system("." SEP "leco-clang.exe -- "
-                  "bouncer.cpp compile.cpp "
-                  "dag.cpp dag_plugin.cpp evoker.cpp "
-                  "impls.cpp leco.cpp "
-                  "phase1.cpp -o phase1.exe"))
-    return 1;
+  run("." SEP "leco-clang.exe -- "
+      "bouncer.cpp compile.cpp "
+      "dag.cpp dag_plugin.cpp evoker.cpp "
+      "impls.cpp leco.cpp "
+      "phase1.cpp -o phase1.exe");
 
   puts("Using Phase 1 to build final stage");
-  if (0 != system("." SEP "phase1.exe")) {
-    return 1;
-  }
+  run("." SEP "phase1.exe");
 
   puts("Moving final stage to root folder");
   remove("leco.exe");
