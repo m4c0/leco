@@ -71,7 +71,8 @@ static bool compile(dag::node *n) {
     return dag::execute(n);
   }
 
-  return n->read_from_cache_file();
+  n->read_from_cache_file();
+  return true;
 }
 
 static auto find(const char *path) {

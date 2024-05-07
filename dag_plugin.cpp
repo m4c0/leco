@@ -2,15 +2,15 @@
 
 #include "cl.hpp"
 #include "context.hpp"
+#include "die.hpp"
 #include "log.hpp"
 
 #include <string.h>
 
-static void add(dag::node *n, bool (dag::node::*fn)(const char *),
-                const char *file) {
-  if (!(n->*fn)(file)) {
-    throw 0;
-  }
+static void add(const char *desc, dag::node *n,
+                bool (dag::node::*fn)(const char *), const char *file) {
+  if (!(n->*fn)(file))
+    die("could not add %s: [%s]", desc, file);
 }
 
 static void process_line(dag::node *n, uint32_t id, const char *file) {
@@ -28,37 +28,37 @@ static void process_line(dag::node *n, uint32_t id, const char *file) {
     n->set_main_mod();
     break;
   case 'bdep':
-    add(n, &dag::node::add_build_dep, file);
+    add("build dependency", n, &dag::node::add_build_dep, file);
     break;
   case 'dlls':
-    add(n, &dag::node::add_executable, file);
+    add("dll", n, &dag::node::add_executable, file);
     break;
   case 'frwk':
-    add(n, &dag::node::add_framework, file);
+    add("framework", n, &dag::node::add_framework, file);
     break;
   case 'head':
-    add(n, &dag::node::add_header, file);
+    add("header", n, &dag::node::add_header, file);
     break;
   case 'impl':
-    add(n, &dag::node::add_mod_impl, file);
+    add("implementation", n, &dag::node::add_mod_impl, file);
     break;
   case 'libr':
-    add(n, &dag::node::add_library, file);
+    add("library", n, &dag::node::add_library, file);
     break;
   case 'ldir':
-    add(n, &dag::node::add_library_dir, file);
+    add("library directory", n, &dag::node::add_library_dir, file);
     break;
   case 'mdep':
-    add(n, &dag::node::add_mod_dep, file);
+    add("module dependency", n, &dag::node::add_mod_dep, file);
     break;
   case 'rsrc':
-    add(n, &dag::node::add_resource, file);
+    add("resource", n, &dag::node::add_resource, file);
     break;
   case 'shdr':
-    add(n, &dag::node::add_shader, file);
+    add("shader", n, &dag::node::add_shader, file);
     break;
   default:
-    throw 0;
+    die("unknown tag in dag file");
   }
 }
 
@@ -82,36 +82,26 @@ bool dag::execute(dag::node *n) {
     remove(n->dag());
     return false;
   }
-  return n->read_from_cache_file();
+  n->read_from_cache_file();
+  return true;
 }
 
-bool dag::node::read_from_cache_file() {
+void dag::node::read_from_cache_file() {
   FILE *f = fopen(dag(), "r");
-  if (!f) {
-    fprintf(stderr, "dag file not found: [%s]\n", dag());
-    return false;
-  }
+  if (!f)
+    die("dag file not found: [%s]\n", dag());
 
   char buf[10240];
   while (!feof(f) && fgets(buf, sizeof(buf), f) != nullptr) {
-    if (strlen(buf) < 5) {
-      puts("invalid line");
-      return false;
-    }
+    if (strlen(buf) < 5)
+      die("invalid line in dag file");
 
     uint32_t *id = reinterpret_cast<uint32_t *>(buf);
     char *file = reinterpret_cast<char *>(id + 1);
     file[strlen(file) - 1] = 0;
 
-    try {
-      process_line(this, *id, file);
-    } catch (...) {
-      fprintf(stderr, "file not found: [%s]\n", file);
-      return false;
-    }
+    process_line(this, *id, file);
   }
 
   fclose(f);
-
-  return true;
 }
