@@ -238,6 +238,13 @@ static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
   print_found(mi.buffer, desc, code);
 }
 
+#ifndef fopen_s
+static inline int fopen_s(FILE ** fp, const char *name, const char *mode) {
+  *fp = fopen(name, mode);
+  return (*fp == nullptr) ? 1 : 0;
+}
+#endif
+
 void run(int argc, char **argv) {
   struct gopt opts;
   GOPT(opts, argc, argv, "do:i:t:");
