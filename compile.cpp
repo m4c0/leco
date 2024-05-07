@@ -1,6 +1,7 @@
 #include "compile.hpp"
 
 #include "dag.hpp"
+#include "die.hpp"
 #include "evoker.hpp"
 #include "log.hpp"
 #include "mkdir.h"
@@ -42,9 +43,9 @@ bool compile(const dag::node *n) {
     sim_sb_concat(&clang, n->source());
     sim_sb_concat(&clang, " -- -o ");
     sim_sb_concat(&clang, n->target());
-    return 0 == system(clang.buffer);
+    run(clang.buffer);
   } else {
-    fprintf(stderr, "don't know how to build %s\n", file);
-    return false;
+    die("don't know how to build %s\n", file);
   }
+  return false;
 }
