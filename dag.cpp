@@ -63,16 +63,15 @@ bool dag::node::add_shader(const char *shader) {
 static std::map<std::string, dag::node> cache{};
 void dag::clear_cache() { cache.clear(); }
 
-static bool compile(dag::node *n) {
+static void compile(dag::node *n) {
   clean(n);
 
   if (mtime_of(n->source()) > mtime_of(n->dag())) {
     xlog("processing", n->source());
-    return dag::execute(n);
+    n->create_cache_file();
   }
 
   n->read_from_cache_file();
-  return true;
 }
 
 static auto find(const char *path) {
@@ -96,8 +95,7 @@ static bool recurse(dag::node *n) {
       return elog(n->source(), "internal failure");
     if (d->recursed())
       continue;
-    if (!compile(d))
-      return false;
+    compile(d);
     if (!recurse(d))
       return false;
   }
@@ -114,8 +112,7 @@ static bool recurse(dag::node *n) {
       return elog(n->source(), "interal failure");
     if (d->recursed())
       continue;
-    if (!compile(d))
-      return false;
+    compile(d);
     if (!recurse(d))
       return false;
   }
@@ -135,8 +132,7 @@ static bool recurse(dag::node *n) {
       continue;
 
     if (strcmp(sim_sb_path_extension(&imp), ".cpp") == 0) {
-      if (!compile(d))
-        return false;
+      compile(d);
       if (!recurse(d))
         return false;
     }
@@ -149,8 +145,7 @@ dag::node *dag::process(const char *path) {
   auto [n, ins] = find(path);
   if (!n || !ins)
     return n;
-  if (!compile(n))
-    return nullptr;
+  compile(n);
   if (!n->root())
     return n;
 

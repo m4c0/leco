@@ -63,27 +63,28 @@ static void process_line(dag::node *n, uint32_t id, const char *file) {
 }
 
 extern const char *leco_argv0;
-bool dag::execute(dag::node *n) {
+void dag::node::create_cache_file() {
   sim_sbt args{10240};
   sim_sb_path_copy_parent(&args, leco_argv0);
   sim_sb_path_append(&args, "leco-dagger.exe");
   sim_sb_concat(&args, " -t ");
   sim_sb_concat(&args, cur_ctx().target.c_str());
   sim_sb_concat(&args, " -i ");
-  sim_sb_concat(&args, n->source());
+  sim_sb_concat(&args, source());
   sim_sb_concat(&args, " -o ");
-  sim_sb_concat(&args, n->dag());
+  sim_sb_concat(&args, dag());
 
   if (is_extra_verbose()) {
     sim_sb_concat(&args, " -d");
   }
 
-  if (0 != system(args.buffer)) {
-    remove(n->dag());
-    return false;
+  try {
+    run(args.buffer);
+    read_from_cache_file();
+  } catch (...) {
+    remove(dag());
+    throw;
   }
-  n->read_from_cache_file();
-  return true;
 }
 
 void dag::node::read_from_cache_file() {

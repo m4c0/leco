@@ -37,6 +37,7 @@ class node {
 public:
   explicit node(const char *n);
 
+  void create_cache_file();
   void read_from_cache_file();
 
   [[nodiscard]] bool add_build_dep(const char *src);
@@ -133,7 +134,6 @@ public:
     return m_module_pcm.buffer;
   }
 };
-[[nodiscard]] bool execute(node *n);
 
 node *get_node(const char *source);
 node *process(const char *path);
