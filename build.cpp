@@ -22,6 +22,9 @@ int try_main(int argc, char **argv) {
   puts("Building clang runner");
   run("clang++ -std=c++20 clang.cpp -o leco-clang.exe");
 
+  puts("Building deplist");
+  run("." SEP "leco-clang.exe -i deplist.cpp -- -o leco-deplist.exe");
+
   puts("Building dagger");
   run("." SEP "leco-clang.exe -i dagger.cpp -- -o leco-dagger.exe");
 
