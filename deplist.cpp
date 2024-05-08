@@ -11,7 +11,7 @@
 
 static void usage() { die("invalid usage"); }
 
-void print_dep(const char *file) {
+void print_dep(FILE * out, const char *file) {
   sim_sbt stem{};
   sim_sb_path_copy_stem(&stem, file);
 
@@ -19,13 +19,20 @@ void print_dep(const char *file) {
   if (c != nullptr)
     *c = ':';
 
-  fprintf(stdout, "-fmodule-file=%s=%s\n", stem.buffer, file);
+  fprintf(out, "-fmodule-file=%s=%s\n", stem.buffer, file);
 }
 
-void read_dag(const char *dag) {
+void read_dag(const char *dag, const char *out) {
   FILE *f{};
   if (0 != fopen_s(&f, dag, "r"))
     die("dag file not found: [%s]\n", dag);
+
+  FILE *o{};
+  if (out == nullptr) {
+    o = stdout;
+  } else if (0 != fopen_s(&o, out, "w")) {
+    die("could not open output file: [%s]\n", out);
+  }
 
   char buf[10240];
   while (!feof(f) && fgets(buf, sizeof(buf), f) != nullptr) {
@@ -38,7 +45,7 @@ void read_dag(const char *dag) {
 
     switch (*id) {
     case 'mdep':
-      print_dep(file);
+      print_dep(o, file);
       break;
     default:
       break;
@@ -50,22 +57,31 @@ void read_dag(const char *dag) {
 
 void run(int argc, char **argv) {
   struct gopt opts;
-  GOPT(opts, argc, argv, "");
+  GOPT(opts, argc, argv, "i:o:");
+
+  const char *input{};
+  const char *output{};
 
   char *val{};
   char ch;
   while ((ch = gopt_parse(&opts, &val)) != 0) {
     switch (ch) {
+    case 'i':
+      input = val;
+      break;
+    case 'o':
+      output = val;
+      break;
     default:
       usage();
     }
   }
-  if (opts.argc == 0)
+  if (opts.argc != 0)
+    usage();
+  if (!*input)
     usage();
 
-  for (auto i = 0; i < opts.argc; i++) {
-    read_dag(opts.argv[i]);
-  }
+  read_dag(input, output);
 }
 
 int main(int argc, char **argv) {
