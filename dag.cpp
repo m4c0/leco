@@ -2,6 +2,7 @@
 
 #include "../mtime/mtime.h"
 #include "cl.hpp"
+#include "context.hpp"
 #include "in2out.hpp"
 #include "log.hpp"
 #include "phase2.hpp"
@@ -29,9 +30,9 @@ static void infer_module_name(sim_sb *module_name, const sim_sb *src) {
 dag::node::node(const char *n) {
   sim_sb_path_copy_real(&m_source, n);
 
-  in2out(&m_source, &m_target, "o");
-  in2out(&m_source, &m_dag, "dag");
-  in2out(&m_source, &m_module_pcm, "pcm");
+  in2out(&m_source, &m_target, "o", cur_ctx().target.c_str());
+  in2out(&m_source, &m_dag, "dag", cur_ctx().target.c_str());
+  in2out(&m_source, &m_module_pcm, "pcm", cur_ctx().target.c_str());
   infer_module_name(&m_module_name, &m_source);
 }
 
