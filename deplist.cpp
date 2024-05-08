@@ -30,18 +30,22 @@ void print_dep(FILE *out, const char *file, const char *target) {
   fprintf(out, "-fmodule-file=%s=%s\n", stem.buffer, pcm.buffer);
 }
 
-void read_dag(const char *dag, const char *out) {
+void read_dag(const char *dag) {
   FILE *f{};
   if (0 != fopen_s(&f, dag, "r"))
     die("dag file not found: [%s]\n", dag);
 
+  sim_sbt out{};
+  sim_sb_copy(&out, dag);
+  sim_sb_path_set_extension(&out, "deps");
+
   FILE *o{};
-  if (0 != fopen_s(&o, out, "w")) {
-    die("could not open output file: [%s]\n", out);
+  if (0 != fopen_s(&o, out.buffer, "wb")) {
+    die("could not open output file: [%s]\n", out.buffer);
   }
 
   sim_sbt path{};
-  sim_sb_path_copy_parent(&path, out);
+  sim_sb_path_copy_parent(&path, out.buffer);
   const char *target = sim_sb_path_filename(&path);
 
   char buf[10240];
@@ -67,10 +71,9 @@ void read_dag(const char *dag, const char *out) {
 
 void run(int argc, char **argv) {
   struct gopt opts;
-  GOPT(opts, argc, argv, "i:o:");
+  GOPT(opts, argc, argv, "i:");
 
   const char *input{};
-  const char *output{};
 
   char *val{};
   char ch;
@@ -78,9 +81,6 @@ void run(int argc, char **argv) {
     switch (ch) {
     case 'i':
       input = val;
-      break;
-    case 'o':
-      output = val;
       break;
     default:
       usage();
@@ -90,12 +90,10 @@ void run(int argc, char **argv) {
     usage();
   if (!*input)
     usage();
-  if (!*output)
-    usage();
-  if (!strstr(output, SIM_PATHSEP_S "out" SIM_PATHSEP_S))
+  if (!strstr(input, SIM_PATHSEP_S "out" SIM_PATHSEP_S))
     usage();
 
-  read_dag(input, output);
+  read_dag(input);
 }
 
 int main(int argc, char **argv) {
