@@ -6,18 +6,26 @@
 #include "in2out.hpp"
 #include "sim.hpp"
 
+#include <set>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <string>
 
 static FILE *out{};
 static const char *target{};
+
+static std::set<std::string> added{};
 
 static void usage() { die("invalid usage"); }
 
 static void read_dag(const char *dag);
 
 static void print_dep(const char *file) {
+  auto [_, inserted] = added.insert(file);
+  if (!inserted)
+    return;
+
   sim_sbt stem{};
   sim_sb_path_copy_stem(&stem, file);
 
