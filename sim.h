@@ -22,6 +22,7 @@ void sim_sb_path_copy_append(sim_sb *dst, const char *path, const char *part);
 void sim_sb_path_parent(sim_sb *dst);
 void sim_sb_path_copy_parent(sim_sb *dst, const char *path);
 void sim_sb_path_set_extension(sim_sb *dst, const char *ext);
+void sim_sb_path_copy_stem(sim_sb *dst, const char *src);
 void sim_sb_path_copy_sb_stem(sim_sb *dst, const sim_sb *src);
 
 void sim_sb_path_copy_real(sim_sb *dst, const char *path);
@@ -200,20 +201,30 @@ void sim_sb_path_set_extension(sim_sb *dst, const char *ext) {
   sim_sb_concat(dst, ext);
 }
 
-const char *sim_sb_path_filename(const sim_sb *src) {
-  assert(src->buffer && "uninitialised buffer");
+const char *sim_path_filename(const char *src) {
+  assert(src && "uninitialised buffer");
 
-  if (src->len == 0)
+  if (*src == 0)
     return nullptr;
 
-  char *p = strrchr(src->buffer, SIM_PATHSEP);
+  const char *p = strrchr(src, SIM_PATHSEP);
   if (p == nullptr)
     return ".";
-  if (p == src->buffer)
+  if (p == src)
     return SIM_PATHSEP_S;
 
   // TODO: handle slashes at the end
   return ++p;
+}
+
+const char *sim_sb_path_filename(const sim_sb *src) {
+  assert(src && "invalid source");
+  return sim_path_filename(src->buffer);
+}
+
+void sim_sb_path_copy_stem(sim_sb *dst, const char *src) {
+  sim_sb_copy(dst, sim_path_filename(src));
+  sim_sb_path_set_extension(dst, "");
 }
 
 void sim_sb_path_copy_sb_stem(sim_sb *dst, const sim_sb *src) {
