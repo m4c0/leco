@@ -9,8 +9,8 @@
 static void usage() { die("invalid usage"); }
 
 void read_dag(const char *dag) {
-  FILE *f = fopen(dag, "r");
-  if (!f)
+  FILE *f{};
+  if (0 != fopen_s(&f, dag, "r"))
     die("dag file not found: [%s]\n", dag);
 
   char buf[10240];
@@ -22,7 +22,17 @@ void read_dag(const char *dag) {
     char *file = reinterpret_cast<char *>(id + 1);
     file[strlen(file) - 1] = 0;
 
-    // process line
+    switch (*id) {
+    case 'mdep':
+    case 'impl':
+      puts(file);
+      break;
+    case 'name':
+      puts(file);
+      break;
+    default:
+      break;
+    }
   }
 
   fclose(f);
