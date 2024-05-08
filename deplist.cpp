@@ -30,16 +30,25 @@ void read_dag(const char *dag) {
 
 void run(int argc, char **argv) {
   struct gopt opts;
-  GOPT(opts, argc, argv, "");
+  GOPT(opts, argc, argv, "i:");
+
+  const char *input{};
 
   char *val{};
   char ch;
   while ((ch = gopt_parse(&opts, &val)) != 0) {
     switch (ch) {
+    case 'i':
+      input = val;
+      break;
     default:
       usage();
     }
   }
+  if (opts.argc != 0)
+    usage();
+  if (input == nullptr)
+    usage();
 }
 
 int main(int argc, char **argv) {
