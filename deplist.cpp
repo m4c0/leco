@@ -11,13 +11,17 @@
 
 static void usage() { die("invalid usage"); }
 
-void print_dep(FILE * out, const char *file) {
+void print_dep(FILE *out, char *file) {
   sim_sbt stem{};
   sim_sb_path_copy_stem(&stem, file);
 
   auto *c = strchr(stem.buffer, '-');
   if (c != nullptr)
     *c = ':';
+
+  for (auto *c = file; *c; c++)
+    if (*c == '\\')
+      *c = '/';
 
   fprintf(out, "-fmodule-file=%s=%s\n", stem.buffer, file);
 }
