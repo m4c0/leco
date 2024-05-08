@@ -12,7 +12,7 @@
 
 static void usage() { die("invalid usage"); }
 
-void print_dep(FILE *out, const char *file) {
+void print_dep(FILE *out, const char *file, const char *target) {
   sim_sbt stem{};
   sim_sb_path_copy_stem(&stem, file);
 
@@ -21,7 +21,7 @@ void print_dep(FILE *out, const char *file) {
     *c = ':';
 
   sim_sbt pcm{};
-  in2out(file, &pcm, "pcm", "x");
+  in2out(file, &pcm, "pcm", target);
 
   for (auto *c = pcm.buffer; *c; c++)
     if (*c == '\\')
@@ -36,11 +36,13 @@ void read_dag(const char *dag, const char *out) {
     die("dag file not found: [%s]\n", dag);
 
   FILE *o{};
-  if (out == nullptr) {
-    o = stdout;
-  } else if (0 != fopen_s(&o, out, "w")) {
+  if (0 != fopen_s(&o, out, "w")) {
     die("could not open output file: [%s]\n", out);
   }
+
+  sim_sbt path{};
+  sim_sb_path_copy_parent(&path, out);
+  const char *target = sim_sb_path_filename(&path);
 
   char buf[10240];
   while (!feof(f) && fgets(buf, sizeof(buf), f) != nullptr) {
@@ -53,7 +55,7 @@ void read_dag(const char *dag, const char *out) {
 
     switch (*id) {
     case 'mdep':
-      print_dep(o, file);
+      print_dep(o, file, target);
       break;
     default:
       break;
@@ -87,6 +89,10 @@ void run(int argc, char **argv) {
   if (opts.argc != 0)
     usage();
   if (!*input)
+    usage();
+  if (!*output)
+    usage();
+  if (!strstr(output, SIM_PATHSEP_S "out" SIM_PATHSEP_S))
     usage();
 
   read_dag(input, output);
