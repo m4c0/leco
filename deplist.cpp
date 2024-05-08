@@ -15,6 +15,8 @@ static const char *target{};
 
 static void usage() { die("invalid usage"); }
 
+static void read_dag(const char *dag);
+
 static void print_dep(const char *file) {
   sim_sbt stem{};
   sim_sb_path_copy_stem(&stem, file);
@@ -26,11 +28,17 @@ static void print_dep(const char *file) {
   sim_sbt pcm{};
   in2out(file, &pcm, "pcm", target);
 
+  sim_sbt next{};
+  sim_sb_copy(&next, pcm.buffer);
+  sim_sb_path_set_extension(&next, "dag");
+
   for (auto *c = pcm.buffer; *c; c++)
     if (*c == '\\')
       *c = '/';
 
   fprintf(out, "-fmodule-file=%s=%s\n", stem.buffer, pcm.buffer);
+
+  read_dag(next.buffer);
 }
 
 static void read_dag(const char *dag) {
