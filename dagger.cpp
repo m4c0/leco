@@ -238,7 +238,7 @@ static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
   print_found(mi.buffer, desc, code);
 }
 
-#ifndef fopen_s
+#ifndef _WIN32
 static inline int fopen_s(FILE ** fp, const char *name, const char *mode) {
   *fp = fopen(name, mode);
   return (*fp == nullptr) ? 1 : 0;
