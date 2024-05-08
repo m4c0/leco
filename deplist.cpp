@@ -3,6 +3,7 @@
 
 #include "../gopt/gopt.h"
 #include "die.hpp"
+#include "in2out.hpp"
 #include "sim.hpp"
 
 #include <stdint.h>
@@ -11,7 +12,7 @@
 
 static void usage() { die("invalid usage"); }
 
-void print_dep(FILE *out, char *file) {
+void print_dep(FILE *out, const char *file) {
   sim_sbt stem{};
   sim_sb_path_copy_stem(&stem, file);
 
@@ -19,11 +20,14 @@ void print_dep(FILE *out, char *file) {
   if (c != nullptr)
     *c = ':';
 
-  for (auto *c = file; *c; c++)
+  sim_sbt pcm{};
+  in2out(file, &pcm, "pcm", "x");
+
+  for (auto *c = pcm.buffer; *c; c++)
     if (*c == '\\')
       *c = '/';
 
-  fprintf(out, "-fmodule-file=%s=%s\n", stem.buffer, file);
+  fprintf(out, "-fmodule-file=%s=%s\n", stem.buffer, pcm.buffer);
 }
 
 void read_dag(const char *dag, const char *out) {
