@@ -1,12 +1,26 @@
 #define GOPT_IMPLEMENTATION
+#define SIM_IMPLEMENTATION
 
 #include "../gopt/gopt.h"
 #include "die.hpp"
+#include "sim.hpp"
+
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
 static void usage() { die("invalid usage"); }
+
+void print_dep(const char *file) {
+  sim_sbt stem{};
+  sim_sb_path_copy_stem(&stem, file);
+
+  auto *c = strchr(stem.buffer, '-');
+  if (c != nullptr)
+    *c = ':';
+
+  fprintf(stdout, "-fmodule-file=%s=%s\n", stem.buffer, file);
+}
 
 void read_dag(const char *dag) {
   FILE *f{};
@@ -24,11 +38,7 @@ void read_dag(const char *dag) {
 
     switch (*id) {
     case 'mdep':
-    case 'impl':
-      puts(file);
-      break;
-    case 'name':
-      puts(file);
+      print_dep(file);
       break;
     default:
       break;
