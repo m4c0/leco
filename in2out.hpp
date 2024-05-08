@@ -3,13 +3,14 @@
 
 #include <string.h>
 
-static void in2out(const sim_sb *in, sim_sb *out, const char *ext, const char * target) {
-  sim_sb_copy(out, in->buffer);
-  if (strcmp(in->buffer, SIM_PATHSEP_S "out" SIM_PATHSEP_S) != 0) {
+static void in2out(const char *in, sim_sb *out, const char *ext,
+                   const char *target) {
+  sim_sb_copy(out, in);
+  if (strcmp(in, SIM_PATHSEP_S "out" SIM_PATHSEP_S) != 0) {
     sim_sb_path_parent(out);
     sim_sb_path_append(out, "out");
     sim_sb_path_append(out, target);
-    sim_sb_path_append(out, sim_sb_path_filename(in));
+    sim_sb_path_append(out, sim_path_filename(in));
   }
   sim_sb_path_set_extension(out, ext);
 }

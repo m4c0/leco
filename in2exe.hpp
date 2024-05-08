@@ -6,7 +6,7 @@
 
 static void in2exe(const dag::node *n, sim_sb *out) {
   std::string ext = n->dll() ? cur_ctx().dll_ext : "exe";
-  in2out(n->source_sb(), out, ext.c_str(), cur_ctx().target.c_str());
+  in2out(n->source(), out, ext.c_str(), cur_ctx().target.c_str());
 
   if (n->app()) {
     sim_sbt stem{};

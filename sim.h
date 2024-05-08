@@ -30,6 +30,7 @@ void sim_sb_path_copy_real(sim_sb *dst, const char *path);
 const char *sim_sb_path_extension(const sim_sb *src);
 const char *sim_sb_path_filename(const sim_sb *src);
 
+const char *sim_path_filename(const char *src);
 const char *sim_path_extension(const char *src);
 
 #ifdef _WIN32
