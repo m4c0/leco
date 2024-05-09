@@ -19,14 +19,27 @@ static void create_deplist(const char *dag) {
   run(cmd.buffer);
 }
 
-void compile_no_deps(const char *source, const char *target) {
+static void create_cmd(sim_sb *clang, const dag::node *n) {
+  sim_sb_path_copy_parent(clang, leco_argv0);
+  sim_sb_path_append(clang, "leco-clang.exe");
+  sim_sb_concat(clang, " -i ");
+  sim_sb_concat(clang, n->source());
+  sim_sb_concat(clang, " -- -c -o ");
+  sim_sb_concat(clang, n->target());
+}
+static void compile_no_deps(const dag::node *n) {
   sim_sbt clang{};
-  sim_sb_path_copy_parent(&clang, leco_argv0);
-  sim_sb_path_append(&clang, "leco-clang.exe");
-  sim_sb_concat(&clang, " -i ");
-  sim_sb_concat(&clang, source);
-  sim_sb_concat(&clang, " -- -o ");
-  sim_sb_concat(&clang, target);
+  create_cmd(&clang, n);
+  run(clang.buffer);
+}
+static void compile_with_deps(const dag::node *n) {
+  create_deplist(n->dag());
+
+  sim_sbt clang{10240};
+  create_cmd(&clang, n);
+  sim_sb_concat(&clang, " @");
+  sim_sb_concat(&clang, n->dag());
+  sim_sb_path_set_extension(&clang, "deps");
   run(clang.buffer);
 }
 
@@ -53,13 +66,12 @@ bool compile(const dag::node *n) {
 
     return evoker{"-c", pcm, obj}.pull_deps_from(n).execute();
   } else if (strcmp(ext, ".cpp") == 0) {
-    create_deplist(n->dag());
-    return evoker{"-c", file, obj}.set_cpp().pull_deps_from(n).execute();
+    compile_with_deps(n);
   } else if (strcmp(ext, ".c") == 0 || strcmp(ext, ".m") == 0 ||
              strcmp(ext, ".mm") == 0) {
-    compile_no_deps(n->source(), n->target());
+    compile_no_deps(n);
   } else {
     die("don't know how to build %s\n", file);
   }
-  return false;
+  return true;
 }
