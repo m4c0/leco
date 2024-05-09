@@ -210,7 +210,7 @@ const char *sim_path_filename(const char *src) {
 
   const char *p = strrchr(src, SIM_PATHSEP);
   if (p == nullptr)
-    return ".";
+    return src;
   if (p == src)
     return SIM_PATHSEP_S;
 
