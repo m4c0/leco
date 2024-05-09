@@ -3,6 +3,7 @@
 #include "cl.hpp"
 #include "context.hpp"
 #include "die.hpp"
+#include "fopen.hpp"
 #include "log.hpp"
 
 #include <string.h>
@@ -88,8 +89,8 @@ void dag::node::create_cache_file() {
 }
 
 void dag::node::read_from_cache_file() {
-  FILE *f = fopen(dag(), "r");
-  if (!f)
+  FILE *f{};
+  if (0 != fopen_s(&f, dag(), "r"))
     die("dag file not found: [%s]\n", dag());
 
   char buf[10240];

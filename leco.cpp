@@ -15,6 +15,7 @@
 #include "bouncer.hpp"
 #include "cl.hpp"
 #include "dag.hpp"
+#include "fopen.hpp"
 
 #include "../pprent/pprent.hpp"
 
@@ -45,8 +46,8 @@ static void dump_deps() {
     all_parents.insert(sim_sb_path_filename(&parent));
   });
 
-  FILE *f = fopen("out/requirements.txt", "w");
-  if (!f)
+  FILE *f{};
+  if (0 != fopen_s(&f, "out/requirements.txt", "w"))
     return;
   for (const auto &s : all_parents) {
     fprintf(f, "%s\n", s.c_str());

@@ -3,6 +3,7 @@
 
 #include "../gopt/gopt.h"
 #include "die.hpp"
+#include "fopen.hpp"
 #include "in2out.hpp"
 #include "sim.hpp"
 

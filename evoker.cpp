@@ -5,6 +5,7 @@
 #include "clang_dir.hpp"
 #include "context.hpp"
 #include "dag.hpp"
+#include "fopen.hpp"
 #include "sim.hpp"
 
 #include <stdio.h>
@@ -68,8 +69,8 @@ static std::string create_args_file(const auto &args, const dag::node *node) {
   if (0 != tempsie_get_temp_filename("leco", file, sizeof(file)))
     return "";
 
-  FILE *f = fopen(file, "w");
-  if (f == nullptr)
+  FILE *f{};
+  if (0 != fopen_s(&f, file, "w"))
     return "";
 
   bool first{true};

@@ -1,3 +1,5 @@
+#include "die.hpp"
+#include "fopen.hpp"
 #include "mkdir.h"
 #include "phase2.hpp"
 #include "sim.hpp"
@@ -39,7 +41,9 @@ void gen(const char *path, auto &&fn) {
   sim_sbt file{};
   sim_sb_path_copy_append(&file, path, "Contents.json");
 
-  FILE *f = fopen(file.buffer, "w");
+  FILE *f;
+  if (!fopen_s(&f, file.buffer, "w"))
+    die("could not open Contents.json");
   fprintf(f, "{");
   fn(dict{f});
   fprintf(f, "}");
