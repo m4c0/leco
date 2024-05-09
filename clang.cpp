@@ -1,10 +1,9 @@
 #define GOPT_IMPLEMENTATION
-#include "../gopt/gopt.h"
-
 #define SIM_IMPLEMENTATION
-#include "sim.h"
 
+#include "../gopt/gopt.h"
 #include "host_target.hpp"
+#include "in2out.hpp"
 
 static const char *argv0;
 
@@ -25,7 +24,7 @@ static int usage() {
   fprintf(stderr, R"(
 LECO's heavily-opiniated CLANG runner
 
-Usage: %s [-i <input> [-o <output]] [-t <target>] [-g] [-O] [-- <clang-flags>]
+Usage: %s [-i <input> [-o <output]] [-t <target>] [-g] [-O] [-v] [-- <clang-flags>]
 
 This tool uses the clang version available via PATH, except on MacOS where it 
 requires llvm to be installed via Homebrew.
@@ -44,6 +43,8 @@ Where:
       -g             enable debug flags
 
       -O             enable optimisation flags
+
+      -v             print command-line before running it
 
       <clang-flags>  pass flags as-is to clang
 )",
@@ -85,31 +86,37 @@ static bool add_target_defs(sim_sb *buf, const char *tgt) {
 }
 
 static void infer_output(sim_sb *args, const char *input, const char *target) {
+  sim_sbt out{};
+
   auto ext = sim_path_extension(input);
   if (0 == strcmp(".cppm", ext)) {
     sim_sb_concat(args, " --precompile -o ");
+    in2out(input, &out, "pcm", target);
   } else {
     sim_sb_concat(args, " -c -o ");
+    in2out(input, &out, "o", target);
   }
-  if (0 == strcmp(".pcm", ext)) {
-    sim_sb_concat(args, input);
-  } else {
-    sim_sb_concat(args, "out");
-    sim_sb_path_append(args, target);
-    sim_sb_path_append(args, sim_path_filename(input));
+
+  sim_sb_concat(args, out.buffer);
+
+  if (0 == strcmp(".cppm", ext) || 0 == strcmp(".pcm", ext) ||
+      0 == strcmp(".cpp", ext)) {
+    sim_sb_concat(args, " @");
+    sim_sb_concat(args, out.buffer);
+    sim_sb_path_set_extension(args, "deps");
   }
-  sim_sb_path_set_extension(args, "o");
 }
 
 int main(int argc, char **argv) {
   argv0 = argv[0];
 
   struct gopt opts;
-  GOPT(opts, argc, argv, "gi:Oo:t:");
+  GOPT(opts, argc, argv, "gi:Oo:t:v");
 
   bool debug{};
   bool opt{};
   bool cpp = true;
+  bool verbose{};
   const char *target{HOST_TARGET};
   const char *input{};
   const char *output{};
@@ -137,6 +144,9 @@ int main(int argc, char **argv) {
       break;
     case 't':
       target = val;
+      break;
+    case 'v':
+      verbose = true;
       break;
     default:
       return usage();
@@ -185,6 +195,10 @@ int main(int argc, char **argv) {
     // TODO: escape argv
     sim_sb_concat(&args, " ");
     sim_sb_concat(&args, opts.argv[i]);
+  }
+
+  if (verbose) {
+    fputs(args.buffer, stderr);
   }
 
   // Somehow, `system` might return 256 and our own return do a mod 256
