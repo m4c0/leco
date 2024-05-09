@@ -124,6 +124,18 @@ int main(int argc, char **argv) try {
   read_dag(input);
 
   fclose(out);
+
+  sim_sbt cmd{};
+  sim_sb_path_copy_parent(&cmd, argv[0]);
+  sim_sb_path_append(&cmd, "leco-clang.exe");
+  if (debug)
+    sim_sb_concat(&cmd, " -g");
+  if (opt)
+    sim_sb_concat(&cmd, " -O");
+  sim_sb_concat(&cmd, " -- @");
+  sim_sb_concat(&cmd, args.buffer);
+  run(cmd.buffer);
+
   return 0;
 } catch (...) {
   return 1;
