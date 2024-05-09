@@ -20,13 +20,13 @@ int try_main(int argc, char **argv) {
   // TODO: self-rebuild "phase 0" (aka "this cpp")
 
   puts("Building clang runner");
-  run("clang++ -Wall -std=c++20 clang.cpp -o leco-clang.exe");
+  run("clang++ -Wall -std=c++20 leco-clang.cpp -o leco-clang.exe");
 
   puts("Building deplist");
-  run("." SEP "leco-clang.exe -i deplist.cpp -o leco-deplist.exe");
+  run("." SEP "leco-clang.exe -i leco-deplist.cpp -o leco-deplist.exe");
 
   puts("Building dagger");
-  run("." SEP "leco-clang.exe -i dagger.cpp -o leco-dagger.exe");
+  run("." SEP "leco-clang.exe -i leco-dagger.cpp -o leco-dagger.exe");
 
   // TODO: move "evoker.cpp" bits to "clang.cpp"
   // TODO: make phase1 leaner

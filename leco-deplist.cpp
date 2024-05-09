@@ -1,3 +1,4 @@
+#pragma leco tool
 #define GOPT_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
