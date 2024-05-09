@@ -3,6 +3,7 @@
 #include "../mtime/mtime.h"
 #include "cl.hpp"
 #include "context.hpp"
+#include "die.hpp"
 #include "in2out.hpp"
 #include "log.hpp"
 #include "phase2.hpp"
@@ -88,34 +89,30 @@ static auto find(const char *path) {
   return res{ptr, inserted};
 }
 
-static bool recurse(dag::node *n) {
+static void recurse(dag::node *n) {
   for (auto &dep : n->build_deps()) {
     auto [d, ins] = find(dep.c_str());
 
     if (!d)
-      return elog(n->source(), "internal failure");
+      die("internal failure");
     if (d->recursed())
       continue;
     compile(d);
-    if (!recurse(d))
-      return false;
+    recurse(d);
   }
   for (auto &dep : n->mod_deps()) {
-    if (dep == n->source()) {
-      fprintf(stderr, "Self-referencing detected - are you using `import "
-                      "<mod>:<part>` instead of `import :<part>`?\n");
-      return false;
-    }
+    if (dep == n->source())
+      die("Self-referencing detected - are you using `import <mod>:<part>` "
+          "instead of `import :<part>`?\n");
 
     auto [d, ins] = find(dep.c_str());
 
     if (!d)
-      return elog(n->source(), "interal failure");
+      die("internal failure");
     if (d->recursed())
       continue;
     compile(d);
-    if (!recurse(d))
-      return false;
+    recurse(d);
   }
 
   n->set_recursed();
@@ -128,17 +125,15 @@ static bool recurse(dag::node *n) {
     auto [d, ins] = find(imp.buffer);
 
     if (!d)
-      return elog(n->source(), "internal failure");
+      die("internal failure");
     if (d->recursed())
       continue;
 
     if (strcmp(sim_sb_path_extension(&imp), ".cpp") == 0) {
       compile(d);
-      if (!recurse(d))
-        return false;
+      recurse(d);
     }
   }
-  return true;
 }
 
 dag::node *dag::get_node(const char *source) { return &cache.at(source); }
@@ -150,7 +145,8 @@ dag::node *dag::process(const char *path) {
   if (!n->root())
     return n;
 
-  return recurse(n) ? n : nullptr;
+  recurse(n);
+  return n;
 }
 
 void dag::visit(const dag::node *n, bool impls, void *ptr,
