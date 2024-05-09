@@ -70,10 +70,12 @@ static void read_dag(const char *dag) {
 
 int main(int argc, char **argv) try {
   struct gopt opts;
-  GOPT(opts, argc, argv, "i:o:");
+  GOPT(opts, argc, argv, "i:o:gO");
 
   const char *input{};
   const char *output{};
+  bool debug{};
+  bool opt{};
 
   char *val{};
   char ch;
@@ -84,6 +86,12 @@ int main(int argc, char **argv) try {
       break;
     case 'o':
       output = val;
+      break;
+    case 'g':
+      debug = true;
+      break;
+    case 'O':
+      opt = true;
       break;
     default:
       usage();

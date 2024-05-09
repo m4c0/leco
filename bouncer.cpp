@@ -16,6 +16,21 @@
 #include <filesystem>
 
 extern const char *leco_argv0;
+
+static void add_common_flags(sim_sb *cmd) {
+  if (enable_debug_syms()) {
+    sim_sb_concat(cmd, " -g");
+  }
+  if (is_optimised()) {
+    sim_sb_concat(cmd, " -O");
+  }
+
+  if (cur_ctx().sysroot != "") {
+    sim_sb_concat(cmd, " -- -sysroot");
+    sim_sb_concat(cmd, cur_ctx().sysroot.c_str());
+  }
+}
+
 static void compile(const dag::node *n) {
   sim_sbt path{};
   sim_sb_path_copy_parent(&path, n->target());
@@ -28,18 +43,7 @@ static void compile(const dag::node *n) {
   sim_sb_path_append(&cmd, "leco-clang.exe");
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, n->source());
-  if (enable_debug_syms()) {
-    sim_sb_concat(&cmd, " -g");
-  }
-  if (is_optimised()) {
-    sim_sb_concat(&cmd, " -O");
-  }
-
-  if (cur_ctx().sysroot != "") {
-    sim_sb_concat(&cmd, " -- -sysroot");
-    sim_sb_concat(&cmd, cur_ctx().sysroot.c_str());
-  }
-
+  add_common_flags(&cmd);
   run(cmd.buffer);
 }
 
@@ -53,7 +57,11 @@ static void link(const dag::node *n, const char *exe) {
   sim_sb_concat(&cmd, n->dag());
   sim_sb_concat(&cmd, " -o ");
   sim_sb_concat(&cmd, exe);
-  sim_sb_concat(&cmd, " -- ");
+  add_common_flags(&cmd);
+
+  if (cur_ctx().sysroot != "") {
+    sim_sb_concat(&cmd, " -- ");
+  }
   sim_sb_concat(&cmd, cur_ctx().link_flags.c_str());
   run(cmd.buffer);
 }
