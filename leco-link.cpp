@@ -17,6 +17,18 @@ static std::set<std::string> added{};
 
 static void usage() { die("invalid usage"); }
 
+static void put(const char *a) {
+  while (*a != 0) {
+    char c = *a++;
+    if (c == '\\') {
+      fputs("\\\\", out); // escapes backslash
+    } else {
+      fputc(c, out);
+    }
+  }
+  fputc('\n', out);
+}
+
 static void read_dag(const char *dag) {
   auto [_, inserted] = added.insert(dag);
   if (!inserted)
