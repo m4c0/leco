@@ -20,7 +20,7 @@ int try_main(int argc, char **argv) {
   // TODO: self-rebuild "phase 0" (aka "this cpp")
 
   puts("Building clang runner");
-  run("clang++ -std=c++20 clang.cpp -o leco-clang.exe");
+  run("clang++ -Wall -std=c++20 clang.cpp -o leco-clang.exe");
 
   puts("Building deplist");
   run("." SEP "leco-clang.exe -i deplist.cpp -o leco-deplist.exe");
