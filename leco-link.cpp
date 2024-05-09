@@ -37,7 +37,7 @@ static void read_dag(const char *dag) {
   sim_sbt obj{};
   sim_sb_copy(&obj, dag);
   sim_sb_path_set_extension(&obj, "o");
-  fprintf(out, "%s\n", obj.buffer);
+  put(obj.buffer);
 
   FILE *f{};
   if (0 != fopen_s(&f, dag, "r"))
@@ -124,11 +124,6 @@ int main(int argc, char **argv) try {
     die("could not open argument file: [%s]\n", args.buffer);
   }
 
-#ifdef _WIN32 // otherwise, face LNK1107 errors from MSVC
-  fprintf(out, "-fuse-ld=lld\n");
-#endif
-  fprintf(out, "-o\n%s\n", output);
-
   for (auto i = 0 ; i < opts.argc; i++) {
     fprintf(out, "%s\n", opts.argv[i]);
   }
@@ -146,6 +141,11 @@ int main(int argc, char **argv) try {
     sim_sb_concat(&cmd, " -O");
   sim_sb_concat(&cmd, " -- @");
   sim_sb_concat(&cmd, args.buffer);
+#ifdef _WIN32 // otherwise, face LNK1107 errors from MSVC
+  sim_sb_concat(&cmd, " -fuse-ld=lld");
+#endif
+  sim_sb_concat(&cmd, " -o ");
+  sim_sb_concat(&cmd, output);
   run(cmd.buffer);
 
   return 0;
