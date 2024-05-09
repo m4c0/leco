@@ -11,10 +11,11 @@ void usage() { die("invalid usage"); }
 
 int main(int argc, char **argv) try {
   struct gopt opts;
-  GOPT(opts, argc, argv, "i:o:");
+  GOPT(opts, argc, argv, "i:o:t:");
 
   const char *input{};
   const char *output{};
+  const char *target{};
 
   char *val{};
   char ch;
@@ -25,6 +26,9 @@ int main(int argc, char **argv) try {
       break;
     case 'o':
       output = val;
+      break;
+    case 't':
+      target = val;
       break;
     default:
       usage();
