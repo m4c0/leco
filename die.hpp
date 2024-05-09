@@ -11,7 +11,7 @@ __attribute__((format(printf, 1, 2))) inline void die(const char *msg, ...) {
   vfprintf(stderr, msg, arg);
   va_end(arg);
 
-  fputs("", stderr);
+  fputs("\n", stderr);
   throw death{};
 }
 inline void run(const char *cmd) {
