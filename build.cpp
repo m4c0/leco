@@ -23,10 +23,10 @@ int try_main(int argc, char **argv) {
   run("clang++ -std=c++20 clang.cpp -o leco-clang.exe");
 
   puts("Building deplist");
-  run("." SEP "leco-clang.exe -i deplist.cpp -- -o leco-deplist.exe");
+  run("." SEP "leco-clang.exe -i deplist.cpp -o leco-deplist.exe");
 
   puts("Building dagger");
-  run("." SEP "leco-clang.exe -i dagger.cpp -- -o leco-dagger.exe");
+  run("." SEP "leco-clang.exe -i dagger.cpp -o leco-dagger.exe");
 
   // TODO: move "evoker.cpp" bits to "clang.cpp"
   // TODO: make "compile.cpp" a top-level unit

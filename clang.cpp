@@ -84,17 +84,35 @@ static bool add_target_defs(sim_sb *buf, const char *tgt) {
   return true;
 }
 
+static void infer_output(sim_sb *args, const char *input, const char *target) {
+  auto ext = sim_path_extension(input);
+  if (0 == strcmp(".cppm", ext)) {
+    sim_sb_concat(args, " --precompile -o ");
+  } else {
+    sim_sb_concat(args, " -c -o ");
+  }
+  if (0 == strcmp(".pcm", ext)) {
+    sim_sb_concat(args, input);
+  } else {
+    sim_sb_concat(args, "out");
+    sim_sb_path_append(args, target);
+    sim_sb_path_append(args, sim_path_filename(input));
+  }
+  sim_sb_path_set_extension(args, "o");
+}
+
 int main(int argc, char **argv) {
   argv0 = argv[0];
 
   struct gopt opts;
-  GOPT(opts, argc, argv, "gi:Ot:");
+  GOPT(opts, argc, argv, "gi:Oo:t:");
 
   bool debug{};
   bool opt{};
   bool cpp = true;
   const char *target{HOST_TARGET};
   const char *input{};
+  const char *output{};
   const char *ext{".cpp"};
 
   char *val{};
@@ -111,6 +129,9 @@ int main(int argc, char **argv) {
             (0 == strcmp(ext, ".mm"));
       break;
     }
+    case 'o':
+      output = val;
+      break;
     case 'O':
       opt = true;
       break;
@@ -152,6 +173,12 @@ int main(int argc, char **argv) {
   if (input) {
     sim_sb_concat(&args, " ");
     sim_sb_concat(&args, input);
+  }
+  if (output) {
+    sim_sb_concat(&args, " -o");
+    sim_sb_concat(&args, output);
+  } else if (input) {
+    infer_output(&args, input, target);
   }
 
   for (auto i = 0; i < opts.argc; i++) {
