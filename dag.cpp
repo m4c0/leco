@@ -128,7 +128,7 @@ static bool recurse(dag::node *n) {
     auto [d, ins] = find(imp.buffer);
 
     if (!d)
-      return elog(n->source(), "interal failure");
+      return elog(n->source(), "internal failure");
     if (d->recursed())
       continue;
 
