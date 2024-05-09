@@ -4,7 +4,6 @@
 #pragma leco add_impl bundler
 #pragma leco add_impl cl
 #pragma leco add_impl cleaner
-#pragma leco add_impl compile
 #pragma leco add_impl dag
 #pragma leco add_impl dag_plugin
 #pragma leco add_impl droid_path

@@ -2,9 +2,9 @@
 
 #include "../mtime/mtime.h"
 #include "cl.hpp"
-#include "compile.hpp"
 #include "context.hpp"
 #include "dag.hpp"
+#include "die.hpp"
 #include "evoker.hpp"
 #include "in2exe.hpp"
 #include "in2out.hpp"
@@ -14,6 +14,28 @@
 #include "sim.hpp"
 
 #include <filesystem>
+
+extern const char *leco_argv0;
+static void compile(const dag::node *n) {
+  sim_sbt path{};
+  sim_sb_path_copy_parent(&path, n->target());
+  mkdirs(path.buffer);
+
+  vlog("compiling", n->source());
+
+  sim_sbt cmd{};
+  sim_sb_path_copy_parent(&cmd, leco_argv0);
+  sim_sb_path_append(&cmd, "leco-clang.exe");
+  sim_sb_concat(&cmd, " -i ");
+  sim_sb_concat(&cmd, n->source());
+  if (enable_debug_syms()) {
+    sim_sb_concat(&cmd, " -g");
+  }
+  if (is_optimised()) {
+    sim_sb_concat(&cmd, " -O");
+  }
+  run(cmd.buffer);
+}
 
 static bool link(const dag::node *n, const char *exe) {
   struct things {
@@ -82,14 +104,7 @@ bool bounce(const char *path) {
     copy_build_deps(n);
   }
 
-  bool failed = false;
-  auto mtime = dag::visit_dirty(n, [&](auto *n) {
-    if (failed)
-      return;
-    failed |= !compile(n);
-  });
-  if (failed)
-    return false;
+  auto mtime = dag::visit_dirty(n, &compile);
 
   if (!n->app() && !n->tool() && !n->dll())
     return true;
