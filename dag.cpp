@@ -65,28 +65,23 @@ bool dag::node::add_shader(const char *shader) {
 static std::map<std::string, dag::node> cache{};
 void dag::clear_cache() { cache.clear(); }
 
-static auto find(const char *path) {
-  dag::node n{path};
+static dag::node *recurse(const char *path, bool only_roots = false) {
+  sim_sbt real{};
+  sim_sb_path_copy_real(&real, path);
+  auto it = cache.find(real.buffer);
+  if (it == cache.end()) {
+    it = cache.emplace(real.buffer, real.buffer).first;
+  }
 
-  auto [it, inserted] = cache.try_emplace(n.source(), n.source());
-  auto *ptr = &(*it).second;
-
-  struct res {
-    dag::node *n;
-    bool i;
-  };
-  return res{ptr, inserted};
-}
-
-static void recurse(dag::node *n, bool only_roots = false) {
+  dag::node *n = &it->second;
   if (!n)
     die("internal failure");
   if (n->recursed())
-    return;
+    return n;
 
-  auto ext = sim_path_extension(n->source());
+  auto ext = sim_path_extension(path);
   if (0 != strcmp(".cpp", ext) && 0 != strcmp(".cppm", ext))
-    return;
+    return n;
 
   clean(n);
 
@@ -97,39 +92,30 @@ static void recurse(dag::node *n, bool only_roots = false) {
   n->read_from_cache_file();
 
   if (only_roots && !n->root())
-    return;
+    return n;
 
   for (auto &dep : n->build_deps()) {
-    auto [d, ins] = find(dep.c_str());
-    recurse(d);
+    recurse(dep.c_str());
   }
   for (auto &dep : n->mod_deps()) {
     if (dep == n->source())
       die("Self-referencing detected - are you using `import <mod>:<part>` "
           "instead of `import :<part>`?\n");
 
-    auto [d, ins] = find(dep.c_str());
-    recurse(d);
+    recurse(dep.c_str());
   }
 
   n->set_recursed();
 
   for (auto &impl : n->mod_impls()) {
-    // TODO: remove once mod_impls is sim
-    sim_sbt imp{};
-    sim_sb_copy(&imp, impl.c_str());
-
-    auto [d, ins] = find(imp.buffer);
-    recurse(d);
+    recurse(impl.c_str());
   }
+
+  return n;
 }
 
 dag::node *dag::get_node(const char *source) { return &cache.at(source); }
-dag::node *dag::process(const char *path) {
-  auto [n, ins] = find(path);
-  recurse(n, true);
-  return n;
-}
+dag::node *dag::process(const char *path) { return recurse(path, true); }
 
 void dag::visit(const dag::node *n, bool impls, void *ptr,
                 void (*fn)(void *, const dag::node *)) {
