@@ -135,8 +135,8 @@ public:
   }
 };
 
-node *get_node(const char *source);
-node *process(const char *path);
+const node *get_node(const char *source);
+const node *process(const char *path);
 void clear_cache();
 
 void visit(const node *n, bool impls, void *ptr,

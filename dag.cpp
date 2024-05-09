@@ -114,8 +114,8 @@ static dag::node *recurse(const char *path, bool only_roots = false) {
   return n;
 }
 
-dag::node *dag::get_node(const char *source) { return &cache.at(source); }
-dag::node *dag::process(const char *path) { return recurse(path, true); }
+const dag::node *dag::get_node(const char *source) { return &cache.at(source); }
+const dag::node *dag::process(const char *path) { return recurse(path, true); }
 
 void dag::visit(const dag::node *n, bool impls, void *ptr,
                 void (*fn)(void *, const dag::node *)) {
