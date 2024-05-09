@@ -19,6 +19,17 @@ static void create_deplist(const char *dag) {
   run(cmd.buffer);
 }
 
+void compile_no_deps(const char *source, const char *target) {
+  sim_sbt clang{};
+  sim_sb_path_copy_parent(&clang, leco_argv0);
+  sim_sb_path_append(&clang, "leco-clang.exe");
+  sim_sb_concat(&clang, " -i ");
+  sim_sb_concat(&clang, source);
+  sim_sb_concat(&clang, " -- -o ");
+  sim_sb_concat(&clang, target);
+  run(clang.buffer);
+}
+
 bool compile(const dag::node *n) {
   auto file = n->source();
   auto obj = n->target();
@@ -46,14 +57,7 @@ bool compile(const dag::node *n) {
     return evoker{"-c", file, obj}.set_cpp().pull_deps_from(n).execute();
   } else if (strcmp(ext, ".c") == 0 || strcmp(ext, ".m") == 0 ||
              strcmp(ext, ".mm") == 0) {
-    sim_sbt clang{};
-    sim_sb_path_copy_parent(&clang, leco_argv0);
-    sim_sb_path_append(&clang, "leco-clang.exe");
-    sim_sb_concat(&clang, " -i ");
-    sim_sb_concat(&clang, n->source());
-    sim_sb_concat(&clang, " -- -o ");
-    sim_sb_concat(&clang, n->target());
-    run(clang.buffer);
+    compile_no_deps(n->source(), n->target());
   } else {
     die("don't know how to build %s\n", file);
   }
