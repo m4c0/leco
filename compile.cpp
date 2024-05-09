@@ -2,7 +2,6 @@
 
 #include "dag.hpp"
 #include "die.hpp"
-#include "evoker.hpp"
 #include "log.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
@@ -18,73 +17,26 @@ static void create_deplist(const char *dag) {
   sim_sb_concat(&cmd, dag);
   run(cmd.buffer);
 }
-
-static void create_cmd(sim_sb *clang, const char *src, const char *tgt) {
-  sim_sb_path_copy_parent(clang, leco_argv0);
-  sim_sb_path_append(clang, "leco-clang.exe");
-  sim_sb_concat(clang, " -i ");
-  sim_sb_concat(clang, src);
-  sim_sb_concat(clang, " -- -c -o ");
-  sim_sb_concat(clang, tgt);
-}
-static void create_cmd(sim_sb *clang, const dag::node *n) {
-  create_cmd(clang, n->source(), n->target());
-}
-static void add_deps(sim_sb *clang, const dag::node *n) {
-  sim_sb_concat(clang, " @");
-  sim_sb_concat(clang, n->dag());
-  sim_sb_path_set_extension(clang, "deps");
-}
-
-static void compile_no_deps(const dag::node *n) {
-  sim_sbt clang{};
-  create_cmd(&clang, n);
-  run(clang.buffer);
-}
-static void compile_with_deps(const dag::node *n) {
-  create_deplist(n->dag());
-
-  sim_sbt clang{10240};
-  create_cmd(&clang, n);
-  add_deps(&clang, n);
-  run(clang.buffer);
-}
-static void compile_pcm(const dag::node *n) {
-  sim_sbt clang{10240};
-  create_cmd(&clang, n->module_pcm(), n->target());
-  add_deps(&clang, n);
-  run(clang.buffer);
-}
-
 bool compile(const dag::node *n) {
-  auto file = n->source();
-  auto obj = n->target();
-
   sim_sbt path{};
-  sim_sb_path_copy_parent(&path, obj);
+  sim_sb_path_copy_parent(&path, n->target());
   mkdirs(path.buffer);
 
-  vlog("compiling", obj);
+  vlog("compiling", n->source());
+  create_deplist(n->dag());
 
-  auto ext = sim_path_extension(file);
-  if (strcmp(ext, ".cppm") == 0) {
-    auto pcm = n->module_pcm();
-    create_deplist(n->dag());
-
-    if (!evoker{"--precompile", file, pcm}
-             .set_cpp()
-             .pull_deps_from(n)
-             .execute())
-      return false;
-
-    compile_pcm(n);
-  } else if (strcmp(ext, ".cpp") == 0) {
-    compile_with_deps(n);
-  } else if (strcmp(ext, ".c") == 0 || strcmp(ext, ".m") == 0 ||
-             strcmp(ext, ".mm") == 0) {
-    compile_no_deps(n);
-  } else {
-    die("don't know how to build %s\n", file);
+  sim_sbt cmd{};
+  sim_sb_path_copy_parent(&cmd, leco_argv0);
+  sim_sb_path_append(&cmd, "leco-clang.exe");
+  sim_sb_concat(&cmd, " -i ");
+  sim_sb_concat(&cmd, n->source());
+  if (enable_debug_syms()) {
+    sim_sb_concat(&cmd, " -g");
   }
+  if (is_optimised()) {
+    sim_sb_concat(&cmd, " -O");
+  }
+  run(cmd.buffer);
+
   return true;
 }
