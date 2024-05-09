@@ -65,17 +65,6 @@ bool dag::node::add_shader(const char *shader) {
 static std::map<std::string, dag::node> cache{};
 void dag::clear_cache() { cache.clear(); }
 
-static void compile(dag::node *n) {
-  clean(n);
-
-  if (mtime_of(n->source()) > mtime_of(n->dag())) {
-    xlog("processing", n->source());
-    n->create_cache_file();
-  }
-
-  n->read_from_cache_file();
-}
-
 static auto find(const char *path) {
   dag::node n{path};
 
@@ -90,6 +79,14 @@ static auto find(const char *path) {
 }
 
 static void recurse(dag::node *n, bool only_roots = false) {
+  clean(n);
+
+  if (mtime_of(n->source()) > mtime_of(n->dag())) {
+    xlog("processing", n->source());
+    n->create_cache_file();
+  }
+  n->read_from_cache_file();
+
   if (only_roots && !n->root())
     return;
 
@@ -100,7 +97,6 @@ static void recurse(dag::node *n, bool only_roots = false) {
       die("internal failure");
     if (d->recursed())
       continue;
-    compile(d);
     recurse(d);
   }
   for (auto &dep : n->mod_deps()) {
@@ -114,7 +110,6 @@ static void recurse(dag::node *n, bool only_roots = false) {
       die("internal failure");
     if (d->recursed())
       continue;
-    compile(d);
     recurse(d);
   }
 
@@ -133,7 +128,6 @@ static void recurse(dag::node *n, bool only_roots = false) {
       continue;
 
     if (strcmp(sim_sb_path_extension(&imp), ".cpp") == 0) {
-      compile(d);
       recurse(d);
     }
   }
@@ -144,7 +138,6 @@ dag::node *dag::process(const char *path) {
   auto [n, ins] = find(path);
   if (!n || !ins)
     return n;
-  compile(n);
   recurse(n, true);
   return n;
 }
