@@ -34,6 +34,12 @@ static void compile(const dag::node *n) {
   if (is_optimised()) {
     sim_sb_concat(&cmd, " -O");
   }
+
+  if (cur_ctx().sysroot != "") {
+    sim_sb_concat(&cmd, " -- -sysroot");
+    sim_sb_concat(&cmd, cur_ctx().sysroot.c_str());
+  }
+
   run(cmd.buffer);
 }
 
