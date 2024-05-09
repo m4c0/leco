@@ -80,34 +80,30 @@ static bool link(const dag::node *n, const char *exe) {
   return e.execute();
 }
 
-bool bounce(const char *path) {
+void bounce(const char *path) {
   auto ext = sim_path_extension(path);
   if (ext == nullptr)
-    return true;
+    return;
 
   if (strcmp(ext, ".cppm") != 0 && strcmp(ext, ".cpp") != 0)
-    return true;
+    return;
 
   auto n = dag::process(path);
-  if (!n)
-    return false;
   if (!n->root())
-    return true;
+    return;
 
   if (n->tool() && !cur_ctx().native_target)
-    return true;
+    return;
 
   for (const auto &d : n->build_deps()) {
-    if (!bounce(d.c_str()))
-      return false;
-
+    bounce(d.c_str());
     copy_build_deps(n);
   }
 
   auto mtime = dag::visit_dirty(n, &compile);
 
   if (!n->app() && !n->tool() && !n->dll())
-    return true;
+    return;
 
   sim_sbt exe_path{};
   in2exe(n, &exe_path);
@@ -120,6 +116,4 @@ bool bounce(const char *path) {
   if (n->app()) {
     bundle(n, exe_path.buffer);
   }
-
-  return true;
 }

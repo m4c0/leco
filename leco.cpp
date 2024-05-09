@@ -30,9 +30,7 @@ bool run_target() {
   dag::clear_cache();
 
   for (auto file : pprent::list(".")) {
-    if (!bounce(file))
-      return false;
-
+    bounce(file);
     errno = 0;
   }
   return errno ? error() : true;

@@ -1,2 +1,2 @@
 #pragma once
-bool bounce(const char *path);
+void bounce(const char *path);
