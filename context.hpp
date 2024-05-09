@@ -1,13 +1,10 @@
 #pragma once
 #include <string>
-#include <vector>
 
 struct sim_sb;
 
 struct context {
-  std::vector<std::string> predefs{};
-  std::vector<std::string> cxx_flags{};
-  std::vector<std::string> link_flags{};
+  std::string link_flags{};
   std::string target{};
   std::string sysroot{};
   std::string rpath{};

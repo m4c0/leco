@@ -39,10 +39,6 @@ static void construct_args(const char *in, std::vector<std::string> &args) {
     args.push_back("--sysroot");
     args.push_back(cur_ctx().sysroot.c_str());
   }
-
-  for (auto f : cur_ctx().cxx_flags) {
-    args.push_back(f);
-  }
 }
 
 evoker::evoker() { construct_args("null.cpp", m_args); }

@@ -4,14 +4,10 @@
 
 namespace t::impl {
 context android(const char *tgt) {
-  std::vector<std::string> predefs{};
-  predefs.push_back("LECO_TARGET_ANDROID");
-
   sim_sbt llvm{};
   find_android_llvm(&llvm);
   sim_sb_path_append(&llvm, "sysroot");
   return context{
-      .predefs = predefs,
       .target = tgt,
       .sysroot = llvm.buffer,
       .dll_ext = "so",
@@ -40,27 +36,12 @@ static std::string apple_sysroot(const char *sdk) {
   return "";
 #endif
 }
-std::vector<std::string> macos_link_flags() {
-  std::vector<std::string> flags{};
-  flags.push_back("-rpath");
-  flags.push_back("@executable_path");
-  return flags;
-}
-std::vector<std::string> ios_link_flags() {
-  std::vector<std::string> flags{};
-  flags.push_back("-rpath");
-  flags.push_back("@executable_path/Frameworks");
-  return flags;
-}
+std::string macos_link_flags() { return "-rpath @executable_path"; }
+std::string ios_link_flags() { return "-rpath @executable_path/Frameworks"; }
 } // namespace t::impl
 namespace t {
 context macosx() {
-  std::vector<std::string> predefs{};
-  predefs.push_back("LECO_TARGET_MACOSX");
-  predefs.push_back("LECO_TARGET_APPLE");
-  predefs.push_back("_C99_SOURCE");
   return context{
-      .predefs = predefs,
       .link_flags = impl::macos_link_flags(),
       .target = "x86_64-apple-macosx11.6.0",
       .sysroot = impl::apple_sysroot("macosx"),
@@ -84,13 +65,7 @@ context macosx() {
   };
 }
 context iphoneos() {
-  std::vector<std::string> predefs{};
-  predefs.push_back("LECO_TARGET_IPHONEOS");
-  predefs.push_back("LECO_TARGET_IOS");
-  predefs.push_back("LECO_TARGET_APPLE");
-  predefs.push_back("_C99_SOURCE");
   return context{
-      .predefs = predefs,
       .link_flags = impl::ios_link_flags(),
       .target = "arm64-apple-ios16.1",
       .sysroot = impl::apple_sysroot("iphoneos"),
@@ -115,13 +90,7 @@ context iphoneos() {
   };
 }
 context iphonesimulator() {
-  std::vector<std::string> predefs{};
-  predefs.push_back("LECO_TARGET_IPHONESIMULATOR");
-  predefs.push_back("LECO_TARGET_IOS");
-  predefs.push_back("LECO_TARGET_APPLE");
-  predefs.push_back("_C99_SOURCE");
   return context{
-      .predefs = predefs,
       .link_flags = impl::ios_link_flags(),
       .target = "x86_64-apple-ios16.1-simulator",
       .sysroot = impl::apple_sysroot("iphonesimulator"),
@@ -137,10 +106,7 @@ context iphonesimulator() {
 }
 
 context windows() {
-  std::vector<std::string> predefs{};
-  predefs.push_back("LECO_TARGET_WINDOWS");
   return context{
-      .predefs = predefs,
       .target = "x86_64-pc-windows-msvc",
       .dll_ext = "dll",
       .app_exe_path =
@@ -156,10 +122,7 @@ context windows() {
 }
 
 context linux() {
-  std::vector<std::string> predefs{};
-  predefs.push_back("LECO_TARGET_LINUX");
   return context{
-      .predefs = predefs,
       .target = "x86_64-pc-linux-gnu",
       .dll_ext = "so",
       .app_exe_path =

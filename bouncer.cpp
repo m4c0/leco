@@ -59,9 +59,7 @@ static bool link(const dag::node *n, const char *exe) {
   if (n->dll()) {
     e.push_arg("-shared");
   }
-  for (auto l : cur_ctx().link_flags) {
-    e.push_arg(l.c_str());
-  }
+  e.push_arg(cur_ctx().link_flags.c_str());
 
   dag::visit(n, true, [&](auto *n) {
     e.push_arg(n->target());
