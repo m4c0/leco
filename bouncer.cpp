@@ -45,7 +45,8 @@ static bool link(const dag::node *n, const char *exe) {
   } t{};
 
   evoker e{};
-  e.set_out(exe);
+  e.push_arg("-o");
+  e.push_arg(exe);
 #ifdef _WIN32 // otherwise, face LNK1107 errors from MSVC
   e.push_arg("-fuse-ld=lld");
 #endif

@@ -46,12 +46,6 @@ static void construct_args(const char *in, std::vector<std::string> &args) {
 }
 
 evoker::evoker() { construct_args("null.cpp", m_args); }
-evoker::evoker(const char *verb, const char *in, const char *out) {
-  construct_args(in, m_args);
-  push_arg(verb);
-  push_arg(in);
-  set_out(out);
-}
 
 static void out_file(FILE *f, const char *a) {
   while (*a != 0) {
@@ -64,7 +58,7 @@ static void out_file(FILE *f, const char *a) {
   }
   fputc('\n', f);
 }
-static std::string create_args_file(const auto &args, const dag::node *node) {
+static std::string create_args_file(const auto &args) {
   char file[1024];
   if (0 != tempsie_get_temp_filename("leco", file, sizeof(file)))
     return "";
@@ -82,23 +76,11 @@ static std::string create_args_file(const auto &args, const dag::node *node) {
     out_file(f, a.c_str());
   }
 
-  if (node != nullptr) {
-    dag::visit(node, false, [&](auto *n) {
-      fprintf(f, "-fmodule-file=%s=", n->module_name());
-      out_file(f, n->module_pcm());
-    });
-  }
   fclose(f);
 
   return file;
 }
-evoker &evoker::add_predefs() {
-  for (auto def : cur_ctx().predefs) {
-    m_args.push_back(std::string{"-D"} + def);
-  }
-  return *this;
-}
-vex evoker::prepare_args() { return vex{create_args_file(m_args, m_node)}; }
+vex evoker::prepare_args() { return vex{create_args_file(m_args)}; }
 bool evoker::execute() {
   vex v = prepare_args();
   if (!v)
@@ -113,12 +95,6 @@ bool evoker::execute() {
   sim_sb_concat(&cmd, " @");
   sim_sb_concat(&cmd, v.argument_file());
   return 0 == system(cmd.buffer);
-}
-
-evoker &evoker::suppress_pragmas() { return push_arg("-Wno-unknown-pragmas"); }
-
-evoker &evoker::set_cpp() {
-  return push_arg("-std=c++2b").add_predefs().suppress_pragmas();
 }
 
 #ifdef _WIN32
