@@ -41,6 +41,9 @@ static void read_dag(const char *dag) {
     file[strlen(file) - 1] = 0;
 
     switch (*id) {
+    case 'tdll':
+      fprintf(out, "-shared\n");
+      break;
     case 'frwk':
       fprintf(out, "-framework\n%s\n", file);
       break;
@@ -67,9 +70,10 @@ static void read_dag(const char *dag) {
 
 int main(int argc, char **argv) try {
   struct gopt opts;
-  GOPT(opts, argc, argv, "i:");
+  GOPT(opts, argc, argv, "i:o:");
 
   const char *input{};
+  const char *output{};
 
   char *val{};
   char ch;
@@ -78,11 +82,14 @@ int main(int argc, char **argv) try {
     case 'i':
       input = val;
       break;
+    case 'o':
+      output = val;
+      break;
     default:
       usage();
     }
   }
-  if (opts.argc != 0)
+  if (!input || !output)
     usage();
 
   sim_sbt path{};
@@ -95,6 +102,15 @@ int main(int argc, char **argv) try {
 
   if (0 != fopen_s(&out, args.buffer, "wb")) {
     die("could not open argument file: [%s]\n", args.buffer);
+  }
+
+#ifdef _WIN32 // otherwise, face LNK1107 errors from MSVC
+  fprintf(out, "-fuse-ld=lld\n");
+#endif
+  fprintf(out, "-o\n%s\n", output);
+
+  for (auto i = 0 ; i < opts.argc; i++) {
+    fprintf(out, "%s\n", opts.argv[i]);
   }
 
   read_dag(input);
