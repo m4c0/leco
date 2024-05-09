@@ -79,6 +79,15 @@ static auto find(const char *path) {
 }
 
 static void recurse(dag::node *n, bool only_roots = false) {
+  if (!n)
+    die("internal failure");
+  if (n->recursed())
+    return;
+
+  auto ext = sim_path_extension(n->source());
+  if (0 != strcmp(".cpp", ext) && 0 != strcmp(".cppm", ext))
+    return;
+
   clean(n);
 
   if (mtime_of(n->source()) > mtime_of(n->dag())) {
@@ -92,11 +101,6 @@ static void recurse(dag::node *n, bool only_roots = false) {
 
   for (auto &dep : n->build_deps()) {
     auto [d, ins] = find(dep.c_str());
-
-    if (!d)
-      die("internal failure");
-    if (d->recursed())
-      continue;
     recurse(d);
   }
   for (auto &dep : n->mod_deps()) {
@@ -105,11 +109,6 @@ static void recurse(dag::node *n, bool only_roots = false) {
           "instead of `import :<part>`?\n");
 
     auto [d, ins] = find(dep.c_str());
-
-    if (!d)
-      die("internal failure");
-    if (d->recursed())
-      continue;
     recurse(d);
   }
 
@@ -121,23 +120,13 @@ static void recurse(dag::node *n, bool only_roots = false) {
     sim_sb_copy(&imp, impl.c_str());
 
     auto [d, ins] = find(imp.buffer);
-
-    if (!d)
-      die("internal failure");
-    if (d->recursed())
-      continue;
-
-    if (strcmp(sim_sb_path_extension(&imp), ".cpp") == 0) {
-      recurse(d);
-    }
+    recurse(d);
   }
 }
 
 dag::node *dag::get_node(const char *source) { return &cache.at(source); }
 dag::node *dag::process(const char *path) {
   auto [n, ins] = find(path);
-  if (!n || !ins)
-    return n;
   recurse(n, true);
   return n;
 }
