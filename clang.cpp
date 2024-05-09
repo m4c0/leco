@@ -2,6 +2,7 @@
 #define SIM_IMPLEMENTATION
 
 #include "../gopt/gopt.h"
+#include "die.hpp"
 #include "host_target.hpp"
 #include "in2out.hpp"
 
@@ -85,6 +86,16 @@ static bool add_target_defs(sim_sb *buf, const char *tgt) {
   return true;
 }
 
+static void create_deplist(const char *out) {
+  sim_sbt cmd{};
+  sim_sb_path_copy_parent(&cmd, argv0);
+  sim_sb_path_append(&cmd, "leco-deplist.exe");
+  sim_sb_concat(&cmd, " -i ");
+  sim_sb_concat(&cmd, out);
+  sim_sb_path_set_extension(&cmd, "dag");
+  run(cmd.buffer);
+}
+
 static void infer_output(sim_sb *args, const char *input, const char *target) {
   sim_sbt out{};
 
@@ -101,13 +112,15 @@ static void infer_output(sim_sb *args, const char *input, const char *target) {
 
   if (0 == strcmp(".cppm", ext) || 0 == strcmp(".pcm", ext) ||
       0 == strcmp(".cpp", ext)) {
+    create_deplist(out.buffer);
+
     sim_sb_concat(args, " @");
     sim_sb_concat(args, out.buffer);
     sim_sb_path_set_extension(args, "deps");
   }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) try {
   argv0 = argv[0];
 
   struct gopt opts;
@@ -201,6 +214,8 @@ int main(int argc, char **argv) {
     fputs(args.buffer, stderr);
   }
 
-  // Somehow, `system` might return 256 and our own return do a mod 256
-  return 0 == system(args.buffer) ? 0 : 1;
+  run(args.buffer);
+  return 0;
+} catch (...) {
+  return 1;
 }
