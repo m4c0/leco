@@ -19,14 +19,23 @@ static void create_deplist(const char *dag) {
   run(cmd.buffer);
 }
 
-static void create_cmd(sim_sb *clang, const dag::node *n) {
+static void create_cmd(sim_sb *clang, const char *src, const char *tgt) {
   sim_sb_path_copy_parent(clang, leco_argv0);
   sim_sb_path_append(clang, "leco-clang.exe");
   sim_sb_concat(clang, " -i ");
-  sim_sb_concat(clang, n->source());
+  sim_sb_concat(clang, src);
   sim_sb_concat(clang, " -- -c -o ");
-  sim_sb_concat(clang, n->target());
+  sim_sb_concat(clang, tgt);
 }
+static void create_cmd(sim_sb *clang, const dag::node *n) {
+  create_cmd(clang, n->source(), n->target());
+}
+static void add_deps(sim_sb *clang, const dag::node *n) {
+  sim_sb_concat(clang, " @");
+  sim_sb_concat(clang, n->dag());
+  sim_sb_path_set_extension(clang, "deps");
+}
+
 static void compile_no_deps(const dag::node *n) {
   sim_sbt clang{};
   create_cmd(&clang, n);
@@ -37,9 +46,13 @@ static void compile_with_deps(const dag::node *n) {
 
   sim_sbt clang{10240};
   create_cmd(&clang, n);
-  sim_sb_concat(&clang, " @");
-  sim_sb_concat(&clang, n->dag());
-  sim_sb_path_set_extension(&clang, "deps");
+  add_deps(&clang, n);
+  run(clang.buffer);
+}
+static void compile_pcm(const dag::node *n) {
+  sim_sbt clang{10240};
+  create_cmd(&clang, n->module_pcm(), n->target());
+  add_deps(&clang, n);
   run(clang.buffer);
 }
 
@@ -64,7 +77,7 @@ bool compile(const dag::node *n) {
              .execute())
       return false;
 
-    return evoker{"-c", pcm, obj}.pull_deps_from(n).execute();
+    compile_pcm(n);
   } else if (strcmp(ext, ".cpp") == 0) {
     compile_with_deps(n);
   } else if (strcmp(ext, ".c") == 0 || strcmp(ext, ".m") == 0 ||
