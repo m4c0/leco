@@ -6,6 +6,8 @@
 
 #include "host_target.hpp"
 
+static const char *argv0;
+
 static void clang_cmd(sim_sb *buf, const char *exe) {
 #if __APPLE__
   sim_sb_copy(buf, "/usr/local/opt/llvm@16/bin");
@@ -18,13 +20,38 @@ static void clang_cmd(sim_sb *buf, const char *exe) {
 #endif
 }
 
-int usage() {
+static int usage() {
   // TODO: print usage
-  fprintf(stderr, "invalid usage\n");
+  fprintf(stderr, R"(
+LECO's heavily-opiniated CLANG runner
+
+Usage: %s [-i <input> [-o <output]] [-t <target>] [-g] [-O] [-- <clang-flags>]
+
+This tool uses the clang version available via PATH, except on MacOS where it 
+requires llvm to be installed via Homebrew.
+
+Where:
+      -i <input>     input file. When used, certain flags will be automatically
+                     inferred, like compilation type ("-c" v "--precompile"),
+                     output filename, etc
+
+      -o <output>    output file. Only works as an override for the output file
+                     when the flag "-i" is also specified
+
+      -t <target>    target triple (check this tool's source for list of
+                     supported targets)
+
+      -g             enable debug flags
+
+      -O             enable optimisation flags
+
+      <clang-flags>  pass flags as-is to clang
+)",
+          argv0);
   return 1;
 }
 
-bool add_target_defs(sim_sb *buf, const char *tgt) {
+static bool add_target_defs(sim_sb *buf, const char *tgt) {
   if (0 == strcmp(tgt, "x86_64-pc-windows-msvc")) {
     sim_sb_concat(buf, " -DLECO_TARGET_WINDOWS");
   } else if (0 == strcmp(tgt, "x86_64-pc-linux-gnu")) {
@@ -58,6 +85,8 @@ bool add_target_defs(sim_sb *buf, const char *tgt) {
 }
 
 int main(int argc, char **argv) {
+  argv0 = argv[0];
+
   struct gopt opts;
   GOPT(opts, argc, argv, "gi:Ot:");
 
