@@ -29,6 +29,9 @@ int try_main(int argc, char **argv) {
   puts("Building dagger");
   run("." SEP "leco-clang.exe -i leco-dagger.cpp -o leco-dagger.exe");
 
+  puts("Building linker");
+  run("." SEP "leco-clang.exe -i leco-link.cpp -o leco-link.exe");
+
   // TODO: move "evoker.cpp" bits to "clang.cpp"
   // TODO: make phase1 leaner
   puts("Building Phase 1");
