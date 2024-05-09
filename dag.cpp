@@ -89,7 +89,10 @@ static auto find(const char *path) {
   return res{ptr, inserted};
 }
 
-static void recurse(dag::node *n) {
+static void recurse(dag::node *n, bool only_roots = false) {
+  if (only_roots && !n->root())
+    return;
+
   for (auto &dep : n->build_deps()) {
     auto [d, ins] = find(dep.c_str());
 
@@ -142,10 +145,7 @@ dag::node *dag::process(const char *path) {
   if (!n || !ins)
     return n;
   compile(n);
-  if (!n->root())
-    return n;
-
-  recurse(n);
+  recurse(n, true);
   return n;
 }
 
