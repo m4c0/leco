@@ -6,8 +6,6 @@
 #include "mkdir.h"
 #include "sim.hpp"
 
-#include <string.h>
-
 extern const char *leco_argv0;
 static void create_deplist(const char *dag) {
   sim_sbt cmd{};
