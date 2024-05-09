@@ -43,46 +43,19 @@ static void compile(const dag::node *n) {
   run(cmd.buffer);
 }
 
-static bool link(const dag::node *n, const char *exe) {
-  struct things {
-    std::set<std::string> frameworks{};
-    std::set<std::string> libraries{};
-    std::set<std::string> library_dirs{};
-  } t{};
+static void link(const dag::node *n, const char *exe) {
+  vlog("linking", exe);
 
-  evoker e{};
-  e.push_arg("-o");
-  e.push_arg(exe);
-#ifdef _WIN32 // otherwise, face LNK1107 errors from MSVC
-  e.push_arg("-fuse-ld=lld");
-#endif
-  if (n->dll()) {
-    e.push_arg("-shared");
-  }
-  e.push_arg(cur_ctx().link_flags.c_str());
-
-  dag::visit(n, true, [&](auto *n) {
-    e.push_arg(n->target());
-
-    for (auto &fw : n->frameworks()) {
-      auto [it, added] = t.frameworks.insert(fw);
-      if (added) {
-        e.push_arg("-framework").push_arg(fw.c_str());
-      }
-    }
-    for (auto &lib : n->libraries()) {
-      auto [it, added] = t.libraries.insert(lib);
-      if (added)
-        e.push_arg("-l").push_arg(lib.c_str());
-    }
-    for (auto &lib : n->library_dirs()) {
-      auto [id, added] = t.library_dirs.insert(lib);
-      if (added)
-        e.push_arg("-L").push_arg(lib.c_str());
-    }
-  });
-
-  return e.execute();
+  sim_sbt cmd{};
+  sim_sb_path_copy_parent(&cmd, leco_argv0);
+  sim_sb_path_append(&cmd, "leco-link.exe");
+  sim_sb_concat(&cmd, " -i ");
+  sim_sb_concat(&cmd, n->dag());
+  sim_sb_concat(&cmd, " -o ");
+  sim_sb_concat(&cmd, exe);
+  sim_sb_concat(&cmd, " -- ");
+  sim_sb_concat(&cmd, cur_ctx().link_flags.c_str());
+  run(cmd.buffer);
 }
 
 void bounce(const char *path) {
@@ -114,7 +87,6 @@ void bounce(const char *path) {
   in2exe(n, &exe_path);
 
   if (mtime > mtime_of(exe_path.buffer)) {
-    vlog("linking", exe_path.buffer);
     link(n, exe_path.buffer);
   }
 
