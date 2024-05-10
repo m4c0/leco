@@ -26,7 +26,7 @@ static void add_common_flags(sim_sb *cmd) {
   }
 
   if (cur_ctx().sysroot != "") {
-    sim_sb_concat(cmd, " -- -sysroot");
+    sim_sb_concat(cmd, " -- --sysroot ");
     sim_sb_concat(cmd, cur_ctx().sysroot.c_str());
   }
 }
