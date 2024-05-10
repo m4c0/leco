@@ -82,12 +82,13 @@ static void read_dag(const char *dag) {
 
 int main(int argc, char **argv) try {
   struct gopt opts;
-  GOPT(opts, argc, argv, "i:o:gO");
+  GOPT(opts, argc, argv, "i:o:gOv");
 
   const char *input{};
   const char *output{};
   bool debug{};
   bool opt{};
+  bool verbose{};
 
   char *val{};
   char ch;
@@ -104,6 +105,9 @@ int main(int argc, char **argv) try {
       break;
     case 'O':
       opt = true;
+      break;
+    case 'v':
+      verbose = true;
       break;
     default:
       usage();
@@ -124,7 +128,7 @@ int main(int argc, char **argv) try {
     die("could not open argument file: [%s]\n", args.buffer);
   }
 
-  for (auto i = 0 ; i < opts.argc; i++) {
+  for (auto i = 0; i < opts.argc; i++) {
     fprintf(out, "%s\n", opts.argv[i]);
   }
 
@@ -146,6 +150,10 @@ int main(int argc, char **argv) try {
 #endif
   sim_sb_concat(&cmd, " -o ");
   sim_sb_concat(&cmd, output);
+
+  if (verbose)
+    fprintf(stderr, "%s\n", cmd.buffer);
+
   run(cmd.buffer);
 
   return 0;
