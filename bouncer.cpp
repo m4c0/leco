@@ -69,9 +69,6 @@ static void link(const dag::node *n, const char *exe) {
   sim_sb_concat(&cmd, exe);
   add_common_flags(&cmd);
 
-  if (cur_ctx().sysroot != "") {
-    sim_sb_concat(&cmd, " -- ");
-  }
   sim_sb_concat(&cmd, cur_ctx().link_flags.c_str());
   run(cmd.buffer);
 }
