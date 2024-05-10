@@ -5,7 +5,6 @@
 #include "context.hpp"
 #include "dag.hpp"
 #include "die.hpp"
-#include "evoker.hpp"
 #include "in2exe.hpp"
 #include "in2out.hpp"
 #include "log.hpp"
