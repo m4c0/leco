@@ -32,12 +32,10 @@ int try_main(int argc, char **argv) {
   puts("Building linker");
   run("." SEP "leco-clang.exe -i leco-link.cpp -o leco-link.exe");
 
-  // TODO: move "evoker.cpp" bits to "clang.cpp"
   // TODO: make phase1 leaner
   puts("Building Phase 1");
   run("." SEP "leco-clang.exe -- "
-      "bouncer.cpp dag.cpp dag_plugin.cpp "
-      "evoker.cpp impls.cpp leco.cpp "
+      "bouncer.cpp dag.cpp dag_plugin.cpp impls.cpp leco.cpp "
       "phase1.cpp -o phase1.exe");
 
   puts("Using Phase 1 to build final stage");
