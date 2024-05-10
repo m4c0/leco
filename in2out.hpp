@@ -6,7 +6,7 @@
 static void in2out(const char *in, sim_sb *out, const char *ext,
                    const char *target) {
   sim_sb_copy(out, in);
-  if (strcmp(in, SIM_PATHSEP_S "out" SIM_PATHSEP_S) != 0) {
+  if (strstr(in, SIM_PATHSEP_S "out" SIM_PATHSEP_S) == nullptr) {
     sim_sb_path_parent(out);
     sim_sb_path_append(out, "out");
     sim_sb_path_append(out, target);
