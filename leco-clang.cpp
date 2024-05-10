@@ -212,7 +212,7 @@ int main(int argc, char **argv) try {
   }
 
   if (verbose) {
-    fputs(args.buffer, stderr);
+    fprintf(stderr, "%s\n", args.buffer);
   }
 
   run(args.buffer);
