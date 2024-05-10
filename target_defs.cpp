@@ -36,8 +36,8 @@ static std::string apple_sysroot(const char *sdk) {
   return "";
 #endif
 }
-std::string macos_link_flags() { return "-rpath @executable_path"; }
-std::string ios_link_flags() { return "-rpath @executable_path/Frameworks"; }
+std::string macos_link_flags() { return " -rpath @executable_path"; }
+std::string ios_link_flags() { return " -rpath @executable_path/Frameworks"; }
 } // namespace t::impl
 namespace t {
 context macosx() {
