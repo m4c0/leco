@@ -171,10 +171,12 @@ int main(int argc, char **argv) try {
   sim_sb_new(&args, 10240);
   if (cpp) {
     clang_cmd(&args, "clang++");
-    sim_sb_concat(&args, " -std=c++2b");
+    if (0 != strcmp(ext, ".mm"))
+      sim_sb_concat(&args, " -std=c++2b");
   } else {
     clang_cmd(&args, "clang");
-    sim_sb_concat(&args, " -std=c11");
+    if (0 != strcmp(ext, ".m"))
+      sim_sb_concat(&args, " -std=c11");
   }
   sim_sb_concat(&args, " -Wall -Wno-unknown-pragmas");
 
