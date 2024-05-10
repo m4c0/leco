@@ -9,9 +9,14 @@
 #include "fopen.hpp"
 #include "in2out.hpp"
 #include "sim.hpp"
+#include "log.hpp"
 
 #include <filesystem>
 #include <stdint.h>
+#include <set>
+#include <string>
+
+static std::set<std::string> added{};
 
 static const char *target{};
 static const char *exedir{};
@@ -19,17 +24,39 @@ static const char *resdir{};
 
 static void usage() { die("invalid usage"); }
 
+static void copy_shader(const char *file) {
+  sim_sbt out{};
+  sim_sb_path_copy_append(&out, resdir, sim_path_filename(file));
+  sim_sb_concat(&out, ".spv");
+  if (mtime_of(out.buffer) > mtime_of(file))
+    return;
+
+  log("compiling shader", file);
+  sim_sbt cmd{10240};
+  sim_sb_printf(&cmd, "glslangValidator -V -o %s %s", out.buffer, file);
+  run(cmd.buffer);
+}
+
+static void copy_dll(const char *file) {
+}
+static void copy_bdep(const char *file) {
+}
 static void copy_res(const char *file) {
   sim_sbt path{};
   sim_sb_path_copy_append(&path, resdir, sim_path_filename(file));
   if (mtime_of(path.buffer) > mtime_of(file))
     return;
 
+  log("copying resource", file);
   remove(path.buffer);
   std::filesystem::copy_file(file, path.buffer);
 }
 
 static void read_dag(const char *dag) {
+  auto [_, inserted] = added.insert(dag);
+  if (!inserted)
+    return;
+
   FILE *f{};
   if (0 != fopen_s(&f, dag, "r"))
     die("dag file not found: [%s]\n", dag);
@@ -44,14 +71,18 @@ static void read_dag(const char *dag) {
     file[strlen(file) - 1] = 0;
 
     switch (*id) {
+    case 'bdep':
+      copy_bdep(file);
+      break;
     case 'dlls':
+      copy_dll(file);
       break;
     case 'rsrc':
       copy_res(file);
       break;
     case 'shdr':
+      copy_shader(file);
       break;
-
     case 'impl':
     case 'mdep': {
       sim_sbt ddag{};
