@@ -34,11 +34,6 @@ static void read_dag(const char *dag) {
   if (!inserted)
     return;
 
-  sim_sbt obj{};
-  sim_sb_copy(&obj, dag);
-  sim_sb_path_set_extension(&obj, "o");
-  put(obj.buffer);
-
   FILE *f{};
   if (0 != fopen_s(&f, dag, "r"))
     die("dag file not found: [%s]\n", dag);
@@ -78,6 +73,11 @@ static void read_dag(const char *dag) {
   }
 
   fclose(f);
+
+  sim_sbt obj{};
+  sim_sb_copy(&obj, dag);
+  sim_sb_path_set_extension(&obj, "o");
+  put(obj.buffer);
 }
 
 int main(int argc, char **argv) try {
