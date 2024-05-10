@@ -74,6 +74,7 @@ static void read_dag(const char *dag) {
 
   fclose(f);
 
+  // Add object after dependencies as this kinda enforces the static init order
   sim_sbt obj{};
   sim_sb_copy(&obj, dag);
   sim_sb_path_set_extension(&obj, "o");
