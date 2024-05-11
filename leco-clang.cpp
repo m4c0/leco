@@ -90,8 +90,6 @@ static bool add_target_defs(sim_sb *buf, const char *tgt) {
 static void create_deplist(const char *out) {
   sim_sbt cmd{};
   sim_sb_path_copy_parent(&cmd, argv0);
-  sim_sb_path_append(&cmd, "out");
-  sim_sb_path_append(&cmd, HOST_TARGET);
   sim_sb_path_append(&cmd, "leco-deplist.exe");
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, out);
