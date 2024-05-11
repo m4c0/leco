@@ -65,6 +65,9 @@ const char *sim_path_extension(const char *src);
 #define SIM_STRNCPY strncpy
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 void sim_sb_new(sim_sb *sb, unsigned size) {
   assert(sb && "invalid string buffer");
   assert(size > 0 && "invalid buffer size");
@@ -244,4 +247,7 @@ void sim_sb_path_copy_real(sim_sb *dst, const char *path) {
 #endif
   dst->len = strlen(dst->buffer);
 }
+#ifdef __cplusplus
+}
+#endif //__cplusplus
 #endif // SIM_IMPLEMENTATION
