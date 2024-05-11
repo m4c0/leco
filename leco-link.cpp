@@ -137,6 +137,16 @@ int main(int argc, char **argv) try {
 
   fclose(out);
 
+#ifdef _WIN32
+  sim_sbt bkp{};
+  sim_sb_copy(&bkp, output);
+  sim_sb_concat(&bkp, ".bkp");
+
+  // This is the only way of overwrite an open executable
+  remove(bkp.buffer);
+  rename(output, bkp.buffer);
+#endif
+
   sim_sbt cmd{};
   sim_sb_path_copy_parent(&cmd, argv[0]);
   sim_sb_path_append(&cmd, "leco-clang.exe");
