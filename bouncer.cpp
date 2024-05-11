@@ -5,6 +5,7 @@
 #include "context.hpp"
 #include "dag.hpp"
 #include "die.hpp"
+#include "host_target.hpp"
 #include "in2exe.hpp"
 #include "in2out.hpp"
 #include "log.hpp"
@@ -15,6 +16,12 @@
 #include <filesystem>
 
 extern const char *leco_argv0;
+static void prep(sim_sb *cmd, const char *tool) {
+  sim_sb_path_copy_parent(cmd, leco_argv0);
+  sim_sb_path_append(cmd, "out");
+  sim_sb_path_append(cmd, HOST_TARGET);
+  sim_sb_path_append(cmd, tool);
+}
 
 static void add_common_flags(sim_sb *cmd) {
   if (enable_debug_syms()) {
@@ -38,8 +45,7 @@ static void compile(const dag::node *n) {
   vlog("compiling", n->source());
 
   sim_sbt cmd{};
-  sim_sb_path_copy_parent(&cmd, leco_argv0);
-  sim_sb_path_append(&cmd, "leco-clang.exe");
+  prep(&cmd, "leco-clang.exe");
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, n->source());
   add_common_flags(&cmd);
@@ -48,8 +54,7 @@ static void compile(const dag::node *n) {
   if (0 != strcmp(".cppm", sim_path_extension(n->source())))
     return;
 
-  sim_sb_path_copy_parent(&cmd, leco_argv0);
-  sim_sb_path_append(&cmd, "leco-clang.exe");
+  prep(&cmd, "leco-clang.exe");
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, n->module_pcm());
   add_common_flags(&cmd);
@@ -60,8 +65,7 @@ static void link(const dag::node *n, const char *exe) {
   vlog("linking", exe);
 
   sim_sbt cmd{};
-  sim_sb_path_copy_parent(&cmd, leco_argv0);
-  sim_sb_path_append(&cmd, "leco-link.exe");
+  prep(&cmd, "leco-link.exe");
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, n->dag());
   sim_sb_concat(&cmd, " -o ");
