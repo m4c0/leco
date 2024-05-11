@@ -25,16 +25,16 @@ int try_main(int argc, char **argv) {
   run("clang++ -Wall -Wno-unknown-pragmas -std=c++20 leco-clang.cpp -o " CLANG);
 
   puts("Building deplist");
-  run(CLANG " -i leco-deplist.cpp");
+  run(CLANG " -i leco-deplist.cpp -o out/" HOST_TARGET "/leco-deplist.exe");
 
   puts("Building dagger");
-  run(CLANG " -i leco-dagger.cpp");
+  run(CLANG " -i leco-dagger.cpp -o out/" HOST_TARGET "/leco-dagger.exe");
 
   puts("Building sysroot finder");
-  run(CLANG " -i leco-sysroot.cpp");
+  run(CLANG " -i leco-sysroot.cpp -o out/" HOST_TARGET "/leco-sysroot.exe");
 
   puts("Building linker");
-  run(CLANG " -i leco-link.cpp");
+  run(CLANG " -i leco-link.cpp -o out/" HOST_TARGET "/leco-link.exe");
 
   // TODO: make phase1 leaner
   puts("Building Phase 1");
