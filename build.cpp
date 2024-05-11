@@ -29,6 +29,9 @@ int try_main(int argc, char **argv) {
   puts("Building dagger");
   run("." SEP "leco-clang.exe -i leco-dagger.cpp -o leco-dagger.exe");
 
+  puts("Building sysroot finder");
+  run("." SEP "leco-clang.exe -i leco-sysroot.cpp");
+
   puts("Building linker");
   run("." SEP "leco-clang.exe -i leco-link.cpp -o leco-link.exe");
 
