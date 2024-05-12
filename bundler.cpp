@@ -69,21 +69,13 @@ void copy_build_deps(const dag::node *n) {
   }
 }
 static void copy_resources(const dag::node *n, const char *res_path) {
-  for (auto &r : n->resources()) {
-    // TODO: remove when set is sim
-    sim_sbt rf{};
-    sim_sb_copy(&rf, r.c_str());
-
-    sim_sbt path{};
-    sim_sb_path_copy_append(&path, res_path, sim_sb_path_filename(&rf));
-
-    if (mtime_of(path.buffer) >= mtime_of(rf.buffer))
-      continue;
-
-    vlog("copying resource", path.buffer);
-    remove(path.buffer);
-    std::filesystem::copy_file(rf.buffer, path.buffer);
-  }
+  sim_sbt cmd{};
+  prep(&cmd, "leco-rsrc.exe");
+  sim_sb_concat(&cmd, " -i ");
+  sim_sb_concat(&cmd, n->dag());
+  sim_sb_concat(&cmd, " -r ");
+  sim_sb_concat(&cmd, res_path);
+  run(cmd.buffer);
 }
 
 bool bundle(const dag::node *n, const char *exe_path) {
