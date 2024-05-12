@@ -1,4 +1,7 @@
+#define MKDIR_IMPLEMENTATION
+#define SIM_IMPLEMENTATION
 #include "host_target.hpp"
+#include "mkdir.h"
 
 #include <errno.h>
 #include <stdio.h>
@@ -20,6 +23,7 @@ void run(const char *cmd) {
 }
 int try_main(int argc, char **argv) {
   // TODO: self-rebuild "phase 0" (aka "this cpp")
+  mkdirs("out" SEP HOST_TARGET);
 
   puts("Building clang runner");
   run("clang++ -Wall -Wno-unknown-pragmas -std=c++20 leco-clang.cpp -o " CLANG);
