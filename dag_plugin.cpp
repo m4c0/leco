@@ -9,6 +9,8 @@
 
 #include <string.h>
 
+void prep(sim_sb *cmd, const char *tool);
+
 static void add(const char *desc, dag::node *n,
                 bool (dag::node::*fn)(const char *), const char *file) {
   if (!(n->*fn)(file))
@@ -64,13 +66,9 @@ static void process_line(dag::node *n, uint32_t id, const char *file) {
   }
 }
 
-extern const char *leco_argv0;
 void dag::node::create_cache_file() {
   sim_sbt args{10240};
-  sim_sb_path_copy_parent(&args, leco_argv0);
-  sim_sb_path_append(&args, "out");
-  sim_sb_path_append(&args, HOST_TARGET);
-  sim_sb_path_append(&args, "leco-dagger.exe");
+  prep(&args, "leco-dagger.exe");
   sim_sb_concat(&args, " -t ");
   sim_sb_concat(&args, cur_ctx().target.c_str());
   sim_sb_concat(&args, " -i ");
