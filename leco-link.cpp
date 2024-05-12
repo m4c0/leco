@@ -138,13 +138,13 @@ int main(int argc, char **argv) try {
   fclose(out);
 
 #ifdef _WIN32
+  // We can rename but we can't overwrite an open executable
+
   sim_sbt bkp{};
   sim_sb_copy(&bkp, output);
   sim_sb_concat(&bkp, ".bkp");
 
-  // This is the only way of overwrite an open executable
   remove(bkp.buffer);
-  rename(output, bkp.buffer);
 #endif
 
   sim_sbt cmd{};
@@ -156,16 +156,23 @@ int main(int argc, char **argv) try {
     sim_sb_concat(&cmd, " -O");
   sim_sb_concat(&cmd, " -- @");
   sim_sb_concat(&cmd, args.buffer);
-#ifdef _WIN32 // otherwise, face LNK1107 errors from MSVC
-  sim_sb_concat(&cmd, " -fuse-ld=lld");
-#endif
   sim_sb_concat(&cmd, " -o ");
+#ifdef _WIN32
+  sim_sb_concat(&cmd, bkp.buffer);
+  // otherwise, face LNK1107 errors from MSVC
+  sim_sb_concat(&cmd, " -fuse-ld=lld");
+#else
   sim_sb_concat(&cmd, output);
+#endif
 
   if (verbose)
     fprintf(stderr, "%s\n", cmd.buffer);
 
   run(cmd.buffer);
+
+#ifdef _WIN32
+  rename(bkp.buffer, output);
+#endif
 
   return 0;
 } catch (...) {
