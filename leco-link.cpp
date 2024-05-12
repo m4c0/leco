@@ -138,13 +138,20 @@ int main(int argc, char **argv) try {
   fclose(out);
 
 #ifdef _WIN32
-  // We can rename but we can't overwrite an open executable
+  // We can rename but we can't overwrite an open executable.
+  // To link "clang" we need the old version, so we have to compile in a new
+  // place then do the appropriate renames.
 
-  sim_sbt bkp{};
-  sim_sb_copy(&bkp, output);
-  sim_sb_concat(&bkp, ".bkp");
+  sim_sbt next{};
+  sim_sb_copy(&next, output);
+  sim_sb_concat(&next, ".new");
 
-  remove(bkp.buffer);
+  sim_sbt prev{};
+  sim_sb_copy(&prev, output);
+  sim_sb_concat(&prev, ".old");
+
+  remove(next.buffer);
+  remove(prev.buffer);
 #endif
 
   sim_sbt cmd{};
@@ -158,7 +165,7 @@ int main(int argc, char **argv) try {
   sim_sb_concat(&cmd, args.buffer);
   sim_sb_concat(&cmd, " -o ");
 #ifdef _WIN32
-  sim_sb_concat(&cmd, bkp.buffer);
+  sim_sb_concat(&cmd, next.buffer);
   // otherwise, face LNK1107 errors from MSVC
   sim_sb_concat(&cmd, " -fuse-ld=lld");
 #else
@@ -171,7 +178,8 @@ int main(int argc, char **argv) try {
   run(cmd.buffer);
 
 #ifdef _WIN32
-  rename(bkp.buffer, output);
+  rename(output, prev.buffer);
+  rename(next.buffer, output);
 #endif
 
   return 0;
