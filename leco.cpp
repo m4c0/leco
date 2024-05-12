@@ -15,6 +15,7 @@
 #include "cl.hpp"
 #include "dag.hpp"
 #include "fopen.hpp"
+#include "host_target.hpp"
 
 #include "../pprent/pprent.hpp"
 
@@ -55,6 +56,14 @@ static void dump_deps() {
 }
 
 const char *leco_argv0;
+
+void prep(sim_sb *cmd, const char *tool) {
+  sim_sb_path_copy_parent(cmd, leco_argv0);
+  sim_sb_path_append(cmd, "out");
+  sim_sb_path_append(cmd, HOST_TARGET);
+  sim_sb_path_append(cmd, tool);
+}
+
 extern "C" int main(int argc, char **argv) {
   leco_argv0 = argv[0];
 #ifdef _WIN32

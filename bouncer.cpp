@@ -5,9 +5,7 @@
 #include "context.hpp"
 #include "dag.hpp"
 #include "die.hpp"
-#include "host_target.hpp"
 #include "in2exe.hpp"
-#include "in2out.hpp"
 #include "log.hpp"
 #include "mkdir.h"
 #include "phase2.hpp"
@@ -15,13 +13,7 @@
 
 #include <filesystem>
 
-extern const char *leco_argv0;
-static void prep(sim_sb *cmd, const char *tool) {
-  sim_sb_path_copy_parent(cmd, leco_argv0);
-  sim_sb_path_append(cmd, "out");
-  sim_sb_path_append(cmd, HOST_TARGET);
-  sim_sb_path_append(cmd, tool);
-}
+void prep(sim_sb *cmd, const char *tool);
 
 static void add_common_flags(sim_sb *cmd) {
   if (enable_debug_syms()) {

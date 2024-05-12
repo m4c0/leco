@@ -1,33 +1,23 @@
 #include "../mtime/mtime.h"
 #include "context.hpp"
 #include "dag.hpp"
+#include "die.hpp"
 #include "in2exe.hpp"
 #include "log.hpp"
 #include "mkdir.h"
 
 #include <filesystem>
 
-static bool compile_shaders(const dag::node *n, const char *res_path) {
-  for (auto &s : n->shaders()) {
-    // TODO: remove when set is sim
-    sim_sbt in{};
-    sim_sb_copy(&in, s.c_str());
+void prep(sim_sb *cmd, const char *tool);
 
-    sim_sbt out{};
-    sim_sb_path_copy_append(&out, res_path, sim_sb_path_filename(&in));
-    sim_sb_concat(&out, ".spv");
-
-    if (mtime_of(out.buffer) > mtime_of(in.buffer))
-      continue;
-
-    vlog("compiling shader", out.buffer);
-
-    sim_sbt cmd{1024};
-    sim_sb_printf(&cmd, "glslangValidator -V -o %s %s", out.buffer, in.buffer);
-    if (0 != system(cmd.buffer))
-      return false;
-  }
-  return true;
+static void compile_shaders(const dag::node *n, const char *res_path) {
+  sim_sbt cmd{};
+  prep(&cmd, "leco-shaders.exe");
+  sim_sb_concat(&cmd, " -i ");
+  sim_sb_concat(&cmd, n->dag());
+  sim_sb_concat(&cmd, " -r ");
+  sim_sb_concat(&cmd, res_path);
+  run(cmd.buffer);
 }
 static void copy_exe(const char *log, const sim_sb *ef, const char *exe_path) {
   const auto &rpath = cur_ctx().rpath;
@@ -102,14 +92,11 @@ bool bundle(const dag::node *n, const char *exe_path) {
   cur_ctx().app_res_path(&res_path);
   mkdirs(res_path.buffer);
 
-  bool success = true;
   dag::visit(n, true, [&](auto *n) {
-    success &= compile_shaders(n, res_path.buffer);
+    compile_shaders(n, res_path.buffer);
     copy_exes(n, exe_path);
     copy_resources(n, res_path.buffer);
   });
-  if (!success)
-    return false;
 
   cur_ctx().bundle(exe_path, n->module_name());
   return true;
