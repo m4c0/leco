@@ -19,51 +19,18 @@
 static std::set<std::string> added{};
 
 static const char *target{};
-static const char *exedir{};
 static const char *resdir{};
 
 static void usage() { die("invalid usage"); }
 
-static void copy_shader(const char *file) {
-  sim_sbt out{};
-  sim_sb_path_copy_append(&out, resdir, sim_path_filename(file));
-  sim_sb_concat(&out, ".spv");
-  if (mtime_of(out.buffer) > mtime_of(file))
-    return;
-
-  log("compiling shader", file);
-  sim_sbt cmd{10240};
-  sim_sb_printf(&cmd, "glslangValidator -V -o %s %s", out.buffer, file);
-  run(cmd.buffer);
-}
-
-static void copy(const char * what, const char *file, const char *out) {
-  if (mtime_of(out) > mtime_of(file))
-    return;
-
-  log(what, file);
-  if (0 != remove(out)) {
-    // Rename original file. This is a "Windows-approved" way of modifying an
-    // open executable.
-    sim_sbt bkp{};
-    sim_sb_copy(&bkp, out);
-    sim_sb_concat(&bkp, ".bkp");
-    remove(bkp.buffer);
-    rename(out, bkp.buffer);
-  }
-  std::filesystem::copy_file(file, out);
-}
-
-static void copy_dll(const char *file) {
-}
-
-static void copy_bdep(const char *file) {
-}
-
 static void copy_res(const char *file) {
   sim_sbt path{};
   sim_sb_path_copy_append(&path, resdir, sim_path_filename(file));
-  copy("copying resource", file, path.buffer);
+  if (mtime_of(path.buffer) > mtime_of(file))
+    return;
+
+  log("copying resource", file);
+  std::filesystem::copy_file(file, path.buffer);
 }
 
 static void read_dag(const char *dag) {
@@ -85,17 +52,8 @@ static void read_dag(const char *dag) {
     file[strlen(file) - 1] = 0;
 
     switch (*id) {
-    case 'bdep':
-      copy_bdep(file);
-      break;
-    case 'dlls':
-      copy_dll(file);
-      break;
     case 'rsrc':
       copy_res(file);
-      break;
-    case 'shdr':
-      copy_shader(file);
       break;
     case 'impl':
     case 'mdep': {
@@ -114,7 +72,7 @@ static void read_dag(const char *dag) {
 
 int main(int argc, char **argv) try {
   struct gopt opts;
-  GOPT(opts, argc, argv, "r:e:i:");
+  GOPT(opts, argc, argv, "r:i:");
 
   const char *input{};
 
@@ -125,9 +83,6 @@ int main(int argc, char **argv) try {
     case 'i':
       input = val;
       break;
-    case 'e':
-      exedir = val;
-      break;
     case 'r':
       resdir = val;
       break;
@@ -135,7 +90,7 @@ int main(int argc, char **argv) try {
       usage();
     }
   }
-  if (!input || !exedir || !resdir)
+  if (!input || !resdir)
     usage();
   if (opts.argc != 0)
     usage();
