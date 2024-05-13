@@ -30,6 +30,7 @@ static void copy_res(const char *file) {
     return;
 
   log("copying resource", file);
+  remove(path.buffer);
   std::filesystem::copy_file(file, path.buffer);
 }
 
