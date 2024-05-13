@@ -59,10 +59,6 @@ const char *leco_argv0;
 
 void prep(sim_sb *cmd, const char *tool) {
   sim_sb_path_copy_parent(cmd, leco_argv0);
-  if (nullptr == strstr(leco_argv0, SIM_PATHSEP_S "out" SIM_PATHSEP_S)) {
-    sim_sb_path_append(cmd, "out");
-    sim_sb_path_append(cmd, HOST_TARGET);
-  }
   sim_sb_path_append(cmd, tool);
 }
 
