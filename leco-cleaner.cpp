@@ -43,17 +43,6 @@ static void rm_rf(sim_sb *path) {
   // unlink(path->buffer);
 }
 
-static void rm_out(const char *parent) {
-  sim_sbt path{};
-  sim_sb_copy(&path, parent);
-  sim_sb_path_append(&path, "out");
-  sim_sb_path_append(&path, target);
-  if (!log_all)
-    log("removing", path.buffer);
-
-  rm_rf(&path);
-}
-
 #include <set>
 #include <string>
 static std::set<std::string> temp{};
@@ -100,7 +89,10 @@ static void remove_with_deps(sim_sb *path) {
     sim_sb_path_parent(path);
   }
 
-  rm_out(path->buffer);
+  if (!log_all)
+    log("removing", path->buffer);
+
+  rm_rf(path);
 }
 
 int main(int argc, char **argv) try {
@@ -135,7 +127,11 @@ int main(int argc, char **argv) try {
   if (all) {
     remove_with_deps(&cwd);
   } else {
-    rm_out(cwd.buffer);
+    sim_sb_path_append(&cwd, "out");
+    sim_sb_path_append(&cwd, target);
+    if (!log_all)
+      log("removing", cwd.buffer);
+    rm_rf(&cwd);
   }
 
   return 0;
