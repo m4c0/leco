@@ -46,10 +46,10 @@ int try_main(int argc, char **argv) {
   // TODO: make phase1 leaner
   puts("Building Phase 1");
   run(CLANG " -- bouncer.cpp dag.cpp dag_plugin.cpp impls.cpp leco-driver.cpp "
-            "phase1.cpp -o phase1.exe");
+            "phase1.cpp -o out/" HOST_TARGET "/phase1.exe");
 
   puts("Using Phase 1 to build final stage");
-  run("." SEP "phase1.exe");
+  run("out" SEP HOST_TARGET SEP "phase1.exe");
 
   puts("Doney-devito");
   return 0;
