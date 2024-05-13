@@ -25,6 +25,9 @@ int try_main(int argc, char **argv) {
   // TODO: self-rebuild "phase 0" (aka "this cpp")
   mkdirs("out" SEP HOST_TARGET);
 
+  puts("Building meta runner");
+  run("clang++ -Wall -Wno-unknown-pragmas -std=c++20 leco.cpp -o leco.exe");
+
   puts("Building clang runner");
   run("clang++ -Wall -Wno-unknown-pragmas -std=c++20 leco-clang.cpp -o " CLANG);
 
@@ -42,18 +45,11 @@ int try_main(int argc, char **argv) {
 
   // TODO: make phase1 leaner
   puts("Building Phase 1");
-  run(CLANG " -- bouncer.cpp dag.cpp dag_plugin.cpp impls.cpp leco.cpp "
+  run(CLANG " -- bouncer.cpp dag.cpp dag_plugin.cpp impls.cpp leco-driver.cpp "
             "phase1.cpp -o phase1.exe");
 
   puts("Using Phase 1 to build final stage");
   run("." SEP "phase1.exe");
-
-  puts("Moving final stage to root folder");
-  remove("leco.exe");
-  if (0 != rename("out/" HOST_TARGET "/leco.exe", "leco.exe")) {
-    perror("failed to rename");
-    return 1;
-  }
 
   puts("Doney-devito");
   return 0;
