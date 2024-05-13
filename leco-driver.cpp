@@ -59,25 +59,6 @@ bool run_target() {
   }
   return errno ? error() : true;
 }
-// TODO: move to another tool
-static void dump_deps() {
-  std::set<std::string> all_parents{};
-
-  dag::visit_all([&](auto *n) {
-    // TODO: maybe consider headers, too
-    sim_sbt parent{};
-    sim_sb_path_copy_parent(&parent, n->source());
-    all_parents.insert(sim_sb_path_filename(&parent));
-  });
-
-  FILE *f{};
-  if (0 != fopen_s(&f, "out/requirements.txt", "w"))
-    return;
-  for (const auto &s : all_parents) {
-    fprintf(f, "%s\n", s.c_str());
-  }
-  fclose(f);
-}
 
 extern "C" int main(int argc, char **argv) {
   leco_argv0 = argv[0];
@@ -92,7 +73,6 @@ extern "C" int main(int argc, char **argv) {
     if (!for_each_target(run_target))
       return 1;
 
-    dump_deps();
     return 0;
   } catch (const std::exception &e) {
     fprintf(stderr, "exception: %s\n", e.what());
