@@ -79,8 +79,6 @@ static dag::node *recurse(const char *path, bool only_roots = false) {
   if (n->recursed())
     return n;
 
-  clean(n);
-
   if (mtime_of(n->source()) > mtime_of(n->dag())) {
     xlog("processing", n->source());
     n->create_cache_file();
