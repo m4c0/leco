@@ -79,10 +79,6 @@ static dag::node *recurse(const char *path, bool only_roots = false) {
   if (n->recursed())
     return n;
 
-  auto ext = sim_path_extension(path);
-  if (0 != strcmp(".cpp", ext) && 0 != strcmp(".cppm", ext))
-    return n;
-
   clean(n);
 
   if (mtime_of(n->source()) > mtime_of(n->dag())) {
@@ -90,6 +86,10 @@ static dag::node *recurse(const char *path, bool only_roots = false) {
     n->create_cache_file();
   }
   n->read_from_cache_file();
+
+  auto ext = sim_path_extension(path);
+  if (0 != strcmp(".cpp", ext) && 0 != strcmp(".cppm", ext))
+    return n;
 
   if (only_roots && !n->root())
     return n;
