@@ -13,6 +13,7 @@
 #include "bouncer.hpp"
 #include "cl.hpp"
 #include "dag.hpp"
+#include "die.hpp"
 #include "fopen.hpp"
 #include "host_target.hpp"
 
@@ -21,13 +22,36 @@
 #include <errno.h>
 #include <string.h>
 
+const char *leco_argv0;
+
+void prep(sim_sb *cmd, const char *tool) {
+  sim_sb_path_copy_parent(cmd, leco_argv0);
+  sim_sb_path_append(cmd, tool);
+}
+
 static bool error() {
   perror("could not list current directory");
   return false;
 }
 
+static void cleaner() {
+  if (!should_clean_current())
+    return;
+
+  sim_sbt cmd{};
+  prep(&cmd, "leco-cleaner.exe");
+  if (is_extra_verbose()) {
+    sim_sb_concat(&cmd, " -v");
+  }
+  if (should_clean_all()) {
+    sim_sb_concat(&cmd, " -a");
+  }
+  run(cmd.buffer);
+}
+
 bool run_target() {
   dag::clear_cache();
+  cleaner();
 
   for (auto file : pprent::list(".")) {
     bounce(file);
@@ -35,6 +59,7 @@ bool run_target() {
   }
   return errno ? error() : true;
 }
+// TODO: move to another tool
 static void dump_deps() {
   std::set<std::string> all_parents{};
 
@@ -52,13 +77,6 @@ static void dump_deps() {
     fprintf(f, "%s\n", s.c_str());
   }
   fclose(f);
-}
-
-const char *leco_argv0;
-
-void prep(sim_sb *cmd, const char *tool) {
-  sim_sb_path_copy_parent(cmd, leco_argv0);
-  sim_sb_path_append(cmd, tool);
 }
 
 extern "C" int main(int argc, char **argv) {
