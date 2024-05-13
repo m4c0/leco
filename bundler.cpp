@@ -10,15 +10,6 @@
 
 void prep(sim_sb *cmd, const char *tool);
 
-static void compile_shaders(const dag::node *n, const char *res_path) {
-  sim_sbt cmd{};
-  prep(&cmd, "leco-shaders.exe");
-  sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, n->dag());
-  sim_sb_concat(&cmd, " -r ");
-  sim_sb_concat(&cmd, res_path);
-  run(cmd.buffer);
-}
 static void copy_exe(const char *log, const sim_sb *ef, const char *exe_path) {
   const auto &rpath = cur_ctx().rpath;
 
@@ -85,7 +76,6 @@ bool bundle(const dag::node *n, const char *exe_path) {
   mkdirs(res_path.buffer);
 
   dag::visit(n, true, [&](auto *n) {
-    compile_shaders(n, res_path.buffer);
     copy_exes(n, exe_path);
     copy_resources(n, res_path.buffer);
   });
