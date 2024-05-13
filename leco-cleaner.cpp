@@ -13,6 +13,10 @@
 
 #include <stdio.h>
 
+#ifndef _WIN32
+#include <unistd.h>
+#endif
+
 static bool log_all{};
 static const char *target{HOST_TARGET};
 
@@ -40,7 +44,11 @@ static void rm_rf(sim_sb *path) {
   }
   if (log_all)
     log("removing", path->buffer);
-  // unlink(path->buffer);
+
+  unlink(path->buffer);
+#ifndef _WIN32
+  rmdir(path->buffer);
+#endif
 }
 
 #include <set>
