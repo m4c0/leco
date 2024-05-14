@@ -3,13 +3,13 @@
 #define MTIME_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
-#include "../gopt/gopt.h"
 #include "../mtime/mtime.h"
 #include "die.hpp"
 #include "fopen.hpp"
+#include "gopt.hpp"
 #include "in2out.hpp"
-#include "sim.hpp"
 #include "log.hpp"
+#include "sim.hpp"
 
 #include <filesystem>
 #include <stdint.h>
@@ -88,14 +88,8 @@ static void read_dag(const char *dag) {
 }
 
 int main(int argc, char **argv) try {
-  struct gopt opts;
-  GOPT(opts, argc, argv, "r:i:");
-
   const char *input{};
-
-  char *val{};
-  char ch;
-  while ((ch = gopt_parse(&opts, &val)) != 0) {
+  auto opts = gopt_parse(argc, argv, "r:i:", [&](auto ch, auto val) {
     switch (ch) {
     case 'i':
       input = val;
@@ -106,7 +100,8 @@ int main(int argc, char **argv) try {
     default:
       usage();
     }
-  }
+  });
+
   if (!input || !resdir)
     usage();
   if (opts.argc != 0)
