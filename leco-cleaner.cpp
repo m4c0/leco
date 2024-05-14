@@ -3,10 +3,11 @@
 #define PPRENT_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
-#include "../gopt/gopt.h"
 #include "../pprent/pprent.hpp"
+#include "dag2.hpp"
 #include "die.hpp"
 #include "fopen.hpp"
+#include "gopt.hpp"
 #include "host_target.hpp"
 #include "log.hpp"
 #include "sim.hpp"
@@ -67,20 +68,9 @@ static void remove_with_deps(sim_sb *path) {
       continue;
 
     sim_sb_path_append(path, entry);
-    FILE *f{};
-    if (0 != fopen_s(&f, path->buffer, "r"))
-      die("failed to remove: %s", path->buffer);
 
-    char buf[10240];
-    while (!feof(f) && fgets(buf, sizeof(buf), f) != nullptr) {
-      if (strlen(buf) < 5)
-        die("invalid line in dag file [%s]", path->buffer);
-
-      uint32_t *id = reinterpret_cast<uint32_t *>(buf);
-      char *file = reinterpret_cast<char *>(id + 1);
-      file[strlen(file) - 1] = 0;
-
-      switch (*id) {
+    dag_read(path->buffer, [](auto id, auto file) {
+      switch (id) {
       case 'impl':
       case 'mdep': {
         sim_sbt p{};
@@ -91,7 +81,7 @@ static void remove_with_deps(sim_sb *path) {
       default:
         break;
       }
-    }
+    });
 
     fclose(f);
     sim_sb_path_parent(path);
@@ -104,14 +94,8 @@ static void remove_with_deps(sim_sb *path) {
 }
 
 int main(int argc, char **argv) try {
-  struct gopt opts;
-  GOPT(opts, argc, argv, "avt:");
-
   bool all{};
-
-  char *val{};
-  char ch;
-  while ((ch = gopt_parse(&opts, &val)) != 0) {
+  auto opts = gopt_parse(argc, argv, "avt:", [&](auto ch, auto val) {
     switch (ch) {
     case 'a':
       all = true;
@@ -126,7 +110,7 @@ int main(int argc, char **argv) try {
       usage(argv[0]);
       break;
     }
-  }
+  });
   if (opts.argc != 0)
     usage(argv[0]);
 
