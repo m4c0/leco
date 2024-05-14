@@ -2,9 +2,10 @@
 #define GOPT_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
-#include "../gopt/gopt.h"
+#include "dag2.hpp"
 #include "die.hpp"
 #include "fopen.hpp"
+#include "gopt.hpp"
 #include "in2out.hpp"
 #include "sim.hpp"
 
@@ -24,10 +25,6 @@ static void usage() { die("invalid usage"); }
 static void read_dag(const char *dag);
 
 static void print_dep(const char *file) {
-  auto [_, inserted] = added.insert(file);
-  if (!inserted)
-    return;
-
   sim_sbt stem{};
   sim_sb_path_copy_stem(&stem, file);
 
@@ -38,54 +35,37 @@ static void print_dep(const char *file) {
   sim_sbt pcm{};
   in2out(file, &pcm, "pcm", target);
 
-  sim_sbt next{};
-  sim_sb_copy(&next, pcm.buffer);
-  sim_sb_path_set_extension(&next, "dag");
-
   for (auto *c = pcm.buffer; *c; c++)
     if (*c == '\\')
       *c = '/';
 
   fprintf(out, "-fmodule-file=%s=%s\n", stem.buffer, pcm.buffer);
-
-  read_dag(next.buffer);
 }
 
 static void read_dag(const char *dag) {
-  FILE *f{};
-  if (0 != fopen_s(&f, dag, "r"))
-    die("dag file not found: [%s]\n", dag);
+  auto [_, inserted] = added.insert(dag);
+  if (!inserted)
+    return;
 
-  char buf[10240];
-  while (!feof(f) && fgets(buf, sizeof(buf), f) != nullptr) {
-    if (strlen(buf) < 5)
-      die("invalid line in dag file");
-
-    uint32_t *id = reinterpret_cast<uint32_t *>(buf);
-    char *file = reinterpret_cast<char *>(id + 1);
-    file[strlen(file) - 1] = 0;
-
-    switch (*id) {
-    case 'mdep':
+  dag_read(dag, [](auto id, auto file) {
+    switch (id) {
+    case 'mdep': {
       print_dep(file);
+
+      sim_sbt ddag{};
+      in2out(file, &ddag, "dag", target);
+      read_dag(ddag.buffer);
       break;
+    }
     default:
       break;
     }
-  }
-
-  fclose(f);
+  });
 }
 
 void run(int argc, char **argv) {
-  struct gopt opts;
-  GOPT(opts, argc, argv, "i:");
-
   const char *input{};
-
-  char *val{};
-  char ch;
-  while ((ch = gopt_parse(&opts, &val)) != 0) {
+  auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
     switch (ch) {
     case 'i':
       input = val;
@@ -93,7 +73,7 @@ void run(int argc, char **argv) {
     default:
       usage();
     }
-  }
+  });
   if (opts.argc != 0)
     usage();
   if (!*input)
