@@ -46,17 +46,14 @@ static void copy_exes(const dag::node *n, const char *exe_path) {
     copy_exe("copying library", &ef, exe_path);
   }
 }
-void copy_build_deps(const dag::node *n) {
-  sim_sbt exe_path{};
-  in2exe(n, &exe_path);
-
+static void copy_build_deps(const dag::node *n, const char *exe_path) {
   for (const auto &d : n->build_deps()) {
     auto dn = dag::get_node(d.c_str());
 
     sim_sbt exe{};
     in2exe(dn, &exe);
 
-    copy_exe("copying dependency", &exe, exe_path.buffer);
+    copy_exe("copying dependency", &exe, exe_path);
   }
 }
 static void copy_resources(const dag::node *n, const char *res_path) {
@@ -75,6 +72,7 @@ bool bundle(const dag::node *n, const char *exe_path) {
   cur_ctx().app_res_path(&res_path);
   mkdirs(res_path.buffer);
 
+  copy_build_deps(n, exe_path);
   dag::visit(n, true, [&](auto *n) { copy_exes(n, exe_path); });
   copy_resources(n, res_path.buffer);
 

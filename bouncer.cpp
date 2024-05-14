@@ -85,7 +85,6 @@ void bounce(const char *path) {
 
   for (const auto &d : n->build_deps()) {
     bounce(d.c_str());
-    copy_build_deps(n);
   }
 
   auto mtime = dag::visit_dirty(n, &compile);
