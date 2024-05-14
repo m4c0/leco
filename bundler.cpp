@@ -75,10 +75,8 @@ bool bundle(const dag::node *n, const char *exe_path) {
   cur_ctx().app_res_path(&res_path);
   mkdirs(res_path.buffer);
 
-  dag::visit(n, true, [&](auto *n) {
-    copy_exes(n, exe_path);
-    copy_resources(n, res_path.buffer);
-  });
+  dag::visit(n, true, [&](auto *n) { copy_exes(n, exe_path); });
+  copy_resources(n, res_path.buffer);
 
   cur_ctx().bundle(exe_path, n->module_name());
   return true;
