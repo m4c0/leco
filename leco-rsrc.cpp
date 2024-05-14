@@ -4,6 +4,7 @@
 #define SIM_IMPLEMENTATION
 
 #include "../mtime/mtime.h"
+#include "dag2.hpp"
 #include "die.hpp"
 #include "fopen.hpp"
 #include "gopt.hpp"
@@ -52,20 +53,8 @@ static void read_dag(const char *dag) {
   if (!inserted)
     return;
 
-  FILE *f{};
-  if (0 != fopen_s(&f, dag, "r"))
-    die("dag file not found: [%s]\n", dag);
-
-  char buf[10240];
-  while (!feof(f) && fgets(buf, sizeof(buf), f) != nullptr) {
-    if (strlen(buf) < 5)
-      die("invalid line in dag file");
-
-    uint32_t *id = reinterpret_cast<uint32_t *>(buf);
-    char *file = reinterpret_cast<char *>(id + 1);
-    file[strlen(file) - 1] = 0;
-
-    switch (*id) {
+  dag_read(dag, [](auto id, auto file) {
+    switch (id) {
     case 'rsrc':
       copy_res(file);
       break;
@@ -82,9 +71,7 @@ static void read_dag(const char *dag) {
     default:
       break;
     }
-  }
-
-  fclose(f);
+  });
 }
 
 int main(int argc, char **argv) try {
