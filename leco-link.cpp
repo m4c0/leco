@@ -2,9 +2,10 @@
 #define GOPT_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
-#include "../gopt/gopt.h"
+#include "dag2.hpp"
 #include "die.hpp"
 #include "fopen.hpp"
+#include "gopt.hpp"
 #include "in2out.hpp"
 #include "sim.hpp"
 
@@ -34,20 +35,8 @@ static void read_dag(const char *dag) {
   if (!inserted)
     return;
 
-  FILE *f{};
-  if (0 != fopen_s(&f, dag, "r"))
-    die("dag file not found: [%s]\n", dag);
-
-  char buf[10240];
-  while (!feof(f) && fgets(buf, sizeof(buf), f) != nullptr) {
-    if (strlen(buf) < 5)
-      die("invalid line in dag file");
-
-    uint32_t *id = reinterpret_cast<uint32_t *>(buf);
-    char *file = reinterpret_cast<char *>(id + 1);
-    file[strlen(file) - 1] = 0;
-
-    switch (*id) {
+  dag_read(dag, [](auto id, auto file) {
+    switch (id) {
     case 'tdll':
       fprintf(out, "-shared\n");
       break;
@@ -70,9 +59,7 @@ static void read_dag(const char *dag) {
     default:
       break;
     }
-  }
-
-  fclose(f);
+  });
 
   // Add object after dependencies as this kinda enforces the static init order
   sim_sbt obj{};
@@ -82,18 +69,12 @@ static void read_dag(const char *dag) {
 }
 
 int main(int argc, char **argv) try {
-  struct gopt opts;
-  GOPT(opts, argc, argv, "i:o:gOv");
-
   const char *input{};
   const char *output{};
   bool debug{};
   bool opt{};
   bool verbose{};
-
-  char *val{};
-  char ch;
-  while ((ch = gopt_parse(&opts, &val)) != 0) {
+  auto opts = gopt_parse(argc, argv, "i:o:gOv", [&](auto ch, auto val) {
     switch (ch) {
     case 'i':
       input = val;
@@ -113,7 +94,7 @@ int main(int argc, char **argv) try {
     default:
       usage();
     }
-  }
+  });
   if (!input || !output)
     usage();
 
