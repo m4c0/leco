@@ -83,7 +83,6 @@ static void remove_with_deps(sim_sb *path) {
       }
     });
 
-    fclose(f);
     sim_sb_path_parent(path);
   }
 
