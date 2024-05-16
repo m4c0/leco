@@ -19,7 +19,7 @@ static const char *apple_sysroot(const char *sdk) {
   sim_sbt cmd{};
   sim_sb_printf(&cmd, "xcrun --show-sdk-path --sdk %s", sdk);
 
-  char buf[256];
+  static char buf[256];
 
   auto f = popen(cmd.buffer, "r");
   auto path = fgets(buf, sizeof(buf), f);
@@ -28,7 +28,6 @@ static const char *apple_sysroot(const char *sdk) {
   if (path == nullptr)
     return nullptr;
 
-  puts(path);
   path[strlen(path) - 1] = 0; // chomp "\n"
   return path;
 #endif
