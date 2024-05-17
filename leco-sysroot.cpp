@@ -1,7 +1,11 @@
 #pragma leco tool
 #define GOPT_IMPLEMENTATION
+#define PPRENT_IMPLEMENTATION
+#define MTIME_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
+#include "../mtime/mtime.h"
+#include "../pprent/pprent.hpp"
 #include "die.hpp"
 #include "gopt.hpp"
 #include "host_target.hpp"
@@ -10,6 +14,48 @@
 #include <string.h>
 
 void usage() { die("invalid usage"); }
+
+static bool exists(const sim_sb *path) { return mtime_of(path->buffer) > 0; }
+
+static void find_android_llvm(sim_sb *res) {
+  const auto sdk = getenv("ANDROID_SDK_ROOT");
+  if (sdk == nullptr)
+    die("undefined ANDROID_SDK_ROOT");
+
+  sim_sb_path_copy_append(res, sdk, "ndk-bundle");
+  if (exists(res))
+    return;
+
+  sim_sb_path_copy_append(res, sdk, "ndk");
+  if (!exists(res))
+    die("ANDROID_SDK_ROOT path does not contain a folder named 'sdk': [%s]",
+        res->buffer);
+
+  sim_sbt max{};
+  sim_sb_copy(&max, "");
+
+  for (auto e : pprent::list(res->buffer)) {
+    if (strcmp(max.buffer, e) > 0)
+      continue;
+
+    sim_sb_copy(&max, e);
+  }
+
+  sim_sb_path_append(res, max.buffer);
+  sim_sb_path_append(res, "toolchains");
+  sim_sb_path_append(res, "llvm");
+  sim_sb_path_append(res, "prebuilt");
+  if (!exists(res))
+    die("prebuilt path isn't a directory: [%s]", res->buffer);
+
+  DIR *dir = opendir(res->buffer);
+  dirent *dp = readdir(dir);
+  if (dp == nullptr)
+    die("no LLVM inside prebuilt dir: [%s]", res->buffer);
+
+  sim_sb_path_append(res, dp->d_name);
+  closedir(dir);
+}
 
 static const char *apple_sysroot(const char *sdk) {
 #ifndef __APPLE__
@@ -34,7 +80,9 @@ static const char *apple_sysroot(const char *sdk) {
 }
 
 static const char *android_sysroot() {
-  die("todo");
+  sim_sbt llvm{};
+  find_android_llvm(&llvm);
+  sim_sb_path_append(&llvm, "sysroot");
   return nullptr;
 }
 
@@ -66,7 +114,7 @@ static const char *sysroot_for_target(const char *target) {
   return nullptr;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) try {
   const char *target{HOST_TARGET};
   auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
     switch (ch) {
@@ -84,4 +132,6 @@ int main(int argc, char **argv) {
   auto sysroot = sysroot_for_target(target);
   if (sysroot)
     puts(sysroot);
+} catch (...) {
+  return 1;
 }
