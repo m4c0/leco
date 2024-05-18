@@ -1,6 +1,8 @@
 #pragma once
 #include "die.hpp"
 #include "fopen.hpp"
+
+#include <stdint.h>
 #include <string.h>
 
 void dag_read(const char *dag, auto &&fn) {
