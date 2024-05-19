@@ -1,8 +1,10 @@
 #pragma leco tool
 #define GOPT_IMPLEMENTATION
+#define POPEN_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
 #include "../gopt/gopt.h"
+#include "../popen/popen.h"
 #include "die.hpp"
 #include "host_target.hpp"
 #include "in2out.hpp"
@@ -54,7 +56,7 @@ Where:
   return 1;
 }
 
-static bool add_target_defs(sim_sb *buf, const char *tgt) {
+static void add_target_defs(sim_sb *buf, const char *tgt) {
   if (0 == strcmp(tgt, "x86_64-pc-windows-msvc")) {
     sim_sb_concat(buf, " -DLECO_TARGET_WINDOWS");
   } else if (0 == strcmp(tgt, "x86_64-pc-linux-gnu")) {
@@ -82,9 +84,43 @@ static bool add_target_defs(sim_sb *buf, const char *tgt) {
   } else if (0 == strcmp(tgt, "x86_64-none-linux-android26")) {
     sim_sb_concat(buf, " -DLECO_TARGET_ANDROID");
   } else {
-    return false;
+    die("invalid target: [%s]", tgt);
   }
-  return true;
+}
+
+static void stamp(sim_sb *args, char **&argp, const char *arg) {
+  sim_sb_concat(args, " ");
+  *argp++ = args->buffer + args->len;
+  sim_sb_concat(args, arg);
+}
+static void add_sysroot(sim_sb *args, const char *target) {
+  sim_sbt sra{};
+
+  char *argv[10]{};
+  char **argp = argv;
+
+  *argp++ = sra.buffer;
+  sim_sb_path_copy_parent(&sra, argv0);
+  sim_sb_path_append(&sra, "leco-sysroot.exe");
+  stamp(&sra, argp, "-t");
+  stamp(&sra, argp, target);
+
+  FILE *f;
+  FILE *ferr;
+  if (0 != proc_open(argv, &f, &ferr))
+    die("could not infer sysroot");
+
+  sim_sbt sysroot{};
+  if (!fgets(sysroot.buffer, sysroot.size, f))
+    die("failed to infer sysroot");
+
+  sim_sbt buf{};
+  while (!feof(ferr) && fgets(buf.buffer, buf.size, ferr) != nullptr) {
+    fputs(buf.buffer, stderr);
+  }
+
+  fclose(f);
+  fclose(ferr);
 }
 
 static void create_deplist(const char *out) {
@@ -193,8 +229,9 @@ int main(int argc, char **argv) try {
 
   sim_sb_concat(&args, " -target ");
   sim_sb_concat(&args, target);
-  if (!add_target_defs(&args, target))
-    return usage();
+  add_target_defs(&args, target);
+  if (0 != strcmp(target, HOST_TARGET))
+    add_sysroot(&args, target);
 
   if (input) {
     sim_sb_concat(&args, " ");
