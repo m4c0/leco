@@ -7,6 +7,7 @@
 #include "../mtime/mtime.h"
 #include "../pprent/pprent.hpp"
 #include "die.hpp"
+#include "fopen.hpp"
 #include "gopt.hpp"
 #include "host_target.hpp"
 #include "sim.hpp"
@@ -110,7 +111,6 @@ static const char *sysroot_for_target(const char *target) {
     return android_sysroot();
   }
 
-  die("invalid target: [%s]", target);
   return nullptr;
 }
 
@@ -129,9 +129,26 @@ int main(int argc, char **argv) try {
   if (opts.argc > 0)
     usage();
 
+  sim_sbt cf{};
+  sim_sb_path_copy_real(&cf, argv[0]);
+  sim_sb_path_parent(&cf);
+  sim_sb_path_append(&cf, "sysroot");
+  if (mtime_of(cf.buffer) > 0) {
+    f::open f{cf.buffer, "r"};
+    sim_sbt buf{};
+    if (fgets(buf.buffer, buf.size, *f) != nullptr) {
+      fwrite(buf.buffer, 1, buf.size, stdout);
+      return 0;
+    }
+  }
+
   auto sysroot = sysroot_for_target(target);
-  if (sysroot)
+  if (sysroot) {
     puts(sysroot);
+
+    f::open f{cf.buffer, "w"};
+    fputs(sysroot, *f);
+  }
 } catch (...) {
   return 1;
 }
