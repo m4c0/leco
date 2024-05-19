@@ -246,6 +246,7 @@ void run(int argc, char **argv) {
 
   bool dump_errors{};
   char *target{};
+  f::open fout{};
 
   char *val{};
   char ch;
@@ -261,11 +262,8 @@ void run(int argc, char **argv) {
       sim_sbt parent{};
       sim_sb_path_copy_parent(&parent, val);
       mkdirs(parent.buffer);
-
-      if (0 != fopen_s(&out, val, "wb")) {
-        perror("failed to open output file");
-        throw 1;
-      }
+      fout = f::open{val, "w"};
+      out = *fout;
       break;
     }
     case 't':
@@ -394,7 +392,6 @@ void run(int argc, char **argv) {
 
   fclose(f);
   fclose(ferr);
-  fclose(out);
 }
 
 int main(int argc, char **argv) {
