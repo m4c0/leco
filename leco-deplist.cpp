@@ -85,17 +85,14 @@ void run(int argc, char **argv) {
   sim_sb_copy(&output, input);
   sim_sb_path_set_extension(&output, "deps");
 
-  if (0 != fopen_s(&out, output.buffer, "wb")) {
-    die("could not open output file: [%s]\n", output.buffer);
-  }
+  f::open f{output.buffer, "wb"};
+  out = *f;
 
   sim_sbt path{};
   sim_sb_path_copy_parent(&path, output.buffer);
   target = sim_sb_path_filename(&path);
 
   read_dag(input);
-
-  fclose(out);
 }
 
 int main(int argc, char **argv) {

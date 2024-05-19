@@ -6,12 +6,10 @@
 #include <string.h>
 
 void dag_read(const char *dag, auto &&fn) {
-  FILE *f{};
-  if (0 != fopen_s(&f, dag, "r"))
-    die("dag file not found: [%s]\n", dag);
+  f::open f{dag, "r"};
 
   char buf[10240];
-  while (!feof(f) && fgets(buf, sizeof(buf), f) != nullptr) {
+  while (!feof(*f) && fgets(buf, sizeof(buf), *f) != nullptr) {
     if (strlen(buf) < 5)
       die("invalid line in dag file");
 
@@ -21,6 +19,4 @@ void dag_read(const char *dag, auto &&fn) {
 
     fn(*id, file);
   }
-
-  fclose(f);
 }

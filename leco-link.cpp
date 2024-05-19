@@ -106,17 +106,16 @@ int main(int argc, char **argv) try {
   sim_sb_copy(&args, input);
   sim_sb_path_set_extension(&args, "link");
 
-  if (0 != fopen_s(&out, args.buffer, "wb")) {
-    die("could not open argument file: [%s]\n", args.buffer);
+  {
+    f::open f{args.buffer, "wb"};
+    out = *f;
+
+    for (auto i = 0; i < opts.argc; i++) {
+      fprintf(out, "%s\n", opts.argv[i]);
+    }
+
+    read_dag(input);
   }
-
-  for (auto i = 0; i < opts.argc; i++) {
-    fprintf(out, "%s\n", opts.argv[i]);
-  }
-
-  read_dag(input);
-
-  fclose(out);
 
 #ifdef _WIN32
   // We can rename but we can't overwrite an open executable.

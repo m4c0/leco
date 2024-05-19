@@ -41,13 +41,10 @@ void gen(const char *path, auto &&fn) {
   sim_sbt file{};
   sim_sb_path_copy_append(&file, path, "Contents.json");
 
-  FILE *f;
-  if (!fopen_s(&f, file.buffer, "w"))
-    die("could not open Contents.json");
-  fprintf(f, "{");
-  fn(dict{f});
-  fprintf(f, "}");
-  fclose(f);
+  f::open f{file.buffer, "w"};
+  fprintf(*f, "{");
+  fn(dict{*f});
+  fprintf(*f, "}");
 }
 } // namespace json
 
