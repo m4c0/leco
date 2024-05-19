@@ -4,37 +4,13 @@
 
 namespace t::impl {
 context android(const char *tgt) {
-  sim_sbt llvm{};
-  find_android_llvm(&llvm);
-  sim_sb_path_append(&llvm, "sysroot");
   return context{
       .target = tgt,
-      .sysroot = llvm.buffer,
       .dll_ext = "so",
       .app_exe_path = [](auto exe, auto stem) {},
       .app_res_path = [](auto exe) {},
       .bundle = [](auto exe, auto stem) {},
   };
-}
-static std::string apple_sysroot(const char *sdk) {
-#ifdef __APPLE__
-  sim_sbt cmd{};
-  sim_sb_printf(&cmd, "xcrun --show-sdk-path --sdk %s", sdk);
-
-  char buf[256];
-
-  auto f = popen(cmd.buffer, "r");
-  auto path = fgets(buf, sizeof(buf), f);
-  pclose(f);
-
-  if (path == nullptr)
-    return "";
-
-  path[strlen(path) - 1] = 0; // chomp "\n"
-  return path;
-#else
-  return "";
-#endif
 }
 std::string macos_link_flags() { return " -rpath @executable_path"; }
 std::string ios_link_flags() { return " -rpath @executable_path/Frameworks"; }
@@ -44,7 +20,6 @@ context macosx() {
   return context{
       .link_flags = impl::macos_link_flags(),
       .target = "x86_64-apple-macosx11.6.0",
-      .sysroot = impl::apple_sysroot("macosx"),
       .dll_ext = "dylib",
       .app_exe_path =
           [](sim_sb *exe, const char *stem) {
@@ -68,7 +43,6 @@ context iphoneos() {
   return context{
       .link_flags = impl::ios_link_flags(),
       .target = "arm64-apple-ios16.1",
-      .sysroot = impl::apple_sysroot("iphoneos"),
       .rpath = "Frameworks",
       .dll_ext = "dylib",
       .app_exe_path =
@@ -93,7 +67,6 @@ context iphonesimulator() {
   return context{
       .link_flags = impl::ios_link_flags(),
       .target = "x86_64-apple-ios16.1-simulator",
-      .sysroot = impl::apple_sysroot("iphonesimulator"),
       .dll_ext = "dylib",
       .app_exe_path =
           [](sim_sb *exe, const char *stem) {
