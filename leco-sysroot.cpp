@@ -1,7 +1,8 @@
 #pragma leco tool
 #define GOPT_IMPLEMENTATION
-#define PPRENT_IMPLEMENTATION
+#define MKDIR_IMPLEMENTATION
 #define MTIME_IMPLEMENTATION
+#define PPRENT_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
 #include "../mtime/mtime.h"
@@ -10,6 +11,7 @@
 #include "fopen.hpp"
 #include "gopt.hpp"
 #include "host_target.hpp"
+#include "mkdir.h"
 #include "sim.hpp"
 
 #include <string.h>
@@ -132,6 +134,9 @@ int main(int argc, char **argv) try {
   sim_sbt cf{};
   sim_sb_path_copy_real(&cf, argv[0]);
   sim_sb_path_parent(&cf);
+  sim_sb_path_parent(&cf);
+  sim_sb_path_append(&cf, target);
+  mkdirs(cf.buffer);
   sim_sb_path_append(&cf, "sysroot");
   if (mtime_of(cf.buffer) > 0) {
     f::open f{cf.buffer, "r"};
