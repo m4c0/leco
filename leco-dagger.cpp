@@ -3,14 +3,13 @@
 #define POPEN_IMPLEMENTATION
 #define MKDIR_IMPLEMENTATION
 #define MTIME_IMPLEMENTATION
+#define SIM_IMPLEMENTATION
 
 #include "../gopt/gopt.h"
 #include "../mtime/mtime.h"
 #include "../popen/popen.h"
 #include "fopen.hpp"
 #include "mkdir.h"
-
-#define SIM_IMPLEMENTATION
 #include "sim.hpp"
 
 enum class exe_t {

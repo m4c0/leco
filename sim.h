@@ -44,7 +44,6 @@ const char *sim_path_extension(const char *src);
 #ifdef __cplusplus
 }
 #endif //__cplusplus
-#endif // SIM_H
 
 #ifdef SIM_IMPLEMENTATION
 #include "pathmax.h"
@@ -251,3 +250,4 @@ void sim_sb_path_copy_real(sim_sb *dst, const char *path) {
 }
 #endif //__cplusplus
 #endif // SIM_IMPLEMENTATION
+#endif // SIM_H
