@@ -11,14 +11,8 @@
 void prep(sim_sb *cmd, const char *tool);
 
 static void copy_exe(const char *log, const sim_sb *ef, const char *exe_path) {
-  const auto &rpath = cur_ctx().rpath;
-
   sim_sbt path{};
   sim_sb_path_copy_parent(&path, exe_path);
-  if (rpath != "") {
-    sim_sb_path_append(&path, rpath.c_str());
-    mkdirs(path.buffer);
-  }
   sim_sb_path_append(&path, sim_sb_path_filename(ef));
 
   if (mtime_of(path.buffer) > mtime_of(ef->buffer))

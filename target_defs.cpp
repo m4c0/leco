@@ -12,13 +12,10 @@ context android(const char *tgt) {
       .bundle = [](auto exe, auto stem) {},
   };
 }
-std::string macos_link_flags() { return " -rpath @executable_path"; }
-std::string ios_link_flags() { return " -rpath @executable_path/Frameworks"; }
 } // namespace t::impl
 namespace t {
 context macosx() {
   return context{
-      .link_flags = impl::macos_link_flags(),
       .target = "x86_64-apple-macosx11.6.0",
       .dll_ext = "dylib",
       .app_exe_path =
@@ -41,9 +38,7 @@ context macosx() {
 }
 context iphoneos() {
   return context{
-      .link_flags = impl::ios_link_flags(),
       .target = "arm64-apple-ios16.1",
-      .rpath = "Frameworks",
       .dll_ext = "dylib",
       .app_exe_path =
           [](sim_sb *exe, const char *stem) {
@@ -65,7 +60,6 @@ context iphoneos() {
 }
 context iphonesimulator() {
   return context{
-      .link_flags = impl::ios_link_flags(),
       .target = "x86_64-apple-ios16.1-simulator",
       .dll_ext = "dylib",
       .app_exe_path =
