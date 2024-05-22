@@ -1,20 +1,35 @@
 #pragma leco tool
 
 #define GOPT_IMPLEMENTATION
+#define MTIME_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
+#include "../mtime/mtime.h"
 #include "dag2.hpp"
 #include "die.hpp"
 #include "gopt.hpp"
 #include "in2out.hpp"
+#include "log.hpp"
 #include "sim.hpp"
 
 #include <set>
 #include <string>
 
-static const char *target;
+static const char *exedir{};
+static const char *target{};
 
 static void usage() { die("invalid usage"); }
+
+static void copy_exe(const char *input) {
+  sim_sbt path{};
+  sim_sb_path_copy_parent(&path, exedir);
+  sim_sb_path_append(&path, sim_path_filename(input));
+
+  if (mtime_of(path.buffer) > mtime_of(input))
+    return;
+
+  log("copying library", path.buffer);
+}
 
 static std::set<std::string> added{};
 static void read_dag(const char *dag) {
@@ -24,6 +39,9 @@ static void read_dag(const char *dag) {
 
   dag_read(dag, [](auto id, auto file) {
     switch (id) {
+    case 'dlls':
+      copy_exe(file);
+      break;
     case 'impl':
     case 'mdep': {
       sim_sbt ddag{};
@@ -39,7 +57,6 @@ static void read_dag(const char *dag) {
 
 int main(int argc, char **argv) try {
   const char *input{};
-  const char *exedir{};
 
   auto opts = gopt_parse(argc, argv, "e:i:", [&](auto ch, auto val) {
     switch (ch) {
