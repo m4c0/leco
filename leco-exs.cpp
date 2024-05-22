@@ -12,6 +12,7 @@
 #include "log.hpp"
 #include "sim.hpp"
 
+#include <filesystem>
 #include <set>
 #include <string>
 
@@ -29,6 +30,17 @@ static void copy_exe(const char *input) {
     return;
 
   log("copying library", path.buffer);
+
+  if (0 != remove(path.buffer)) {
+    // Rename original file. This is a "Windows-approved" way of modifying an
+    // open executable.
+    sim_sbt bkp{};
+    sim_sb_copy(&bkp, path.buffer);
+    sim_sb_concat(&bkp, ".bkp");
+    remove(bkp.buffer);
+    rename(path.buffer, bkp.buffer);
+  }
+  std::filesystem::copy_file(input, path.buffer);
 }
 
 static std::set<std::string> added{};
