@@ -14,7 +14,9 @@
 
 #include <stdio.h>
 
-#ifndef _WIN32
+#ifdef _WIN32
+#define unlink _unlink
+#else
 #include <unistd.h>
 #endif
 
