@@ -31,15 +31,6 @@ static void copy_exe(const char *log, const sim_sb *ef, const char *exe_path) {
   }
   std::filesystem::copy_file(ef->buffer, path.buffer);
 }
-static void copy_exes(const dag::node *n, const char *exe_path) {
-  for (auto &e : n->executables()) {
-    // TODO: remove when set is sim
-    sim_sbt ef{};
-    sim_sb_copy(&ef, e.c_str());
-
-    copy_exe("copying library", &ef, exe_path);
-  }
-}
 static void copy_build_deps(const dag::node *n, const char *exe_path) {
   for (const auto &d : n->build_deps()) {
     auto dn = dag::get_node(d.c_str());
@@ -49,6 +40,16 @@ static void copy_build_deps(const dag::node *n, const char *exe_path) {
 
     copy_exe("copying dependency", &exe, exe_path);
   }
+}
+
+static void copy_exes(const dag::node *n, const char *exe_path) {
+  sim_sbt cmd{};
+  prep(&cmd, "leco-exs.exe");
+  sim_sb_concat(&cmd, " -i ");
+  sim_sb_concat(&cmd, n->dag());
+  sim_sb_concat(&cmd, " -e ");
+  sim_sb_concat(&cmd, exe_path);
+  run(cmd.buffer);
 }
 static void copy_resources(const dag::node *n, const char *res_path) {
   sim_sbt cmd{};
@@ -67,7 +68,7 @@ bool bundle(const dag::node *n, const char *exe_path) {
   mkdirs(res_path.buffer);
 
   copy_build_deps(n, exe_path);
-  dag::visit(n, true, [&](auto *n) { copy_exes(n, exe_path); });
+  copy_exes(n, exe_path);
   copy_resources(n, res_path.buffer);
 
   cur_ctx().bundle(exe_path, n->module_name());
