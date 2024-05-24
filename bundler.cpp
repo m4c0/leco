@@ -51,12 +51,6 @@ static void copy(const char *with, const dag::node *n, const char *to) {
   sim_sb_concat(&cmd, to);
   run(cmd.buffer);
 }
-static void copy_exes(const dag::node *n, const char *exe_path) {
-  copy("leco-exs.exe", n, exe_path);
-}
-static void copy_resources(const dag::node *n, const char *res_path) {
-  copy("leco-rsrc.exe", n, res_path);
-}
 
 bool bundle(const dag::node *n, const char *exe_path) {
   sim_sbt res_path{};
@@ -65,8 +59,8 @@ bool bundle(const dag::node *n, const char *exe_path) {
   mkdirs(res_path.buffer);
 
   copy_build_deps(n, exe_path);
-  copy_exes(n, exe_path);
-  copy_resources(n, res_path.buffer);
+  copy("leco-exs.exe", n, exe_path);
+  copy("leco-rsrc.exe", n, res_path.buffer);
 
   cur_ctx().bundle(exe_path, n->module_name());
   return true;
