@@ -12,7 +12,7 @@ void prep(sim_sb *cmd, const char *tool);
 
 static void copy_exe(const char *log, const sim_sb *ef, const char *exe_path) {
   sim_sbt path{};
-  sim_sb_path_copy_parent(&path, exe_path);
+  sim_sb_copy(&path, exe_path);
   sim_sb_path_append(&path, sim_sb_path_filename(ef));
 
   if (mtime_of(path.buffer) > mtime_of(ef->buffer))
@@ -52,16 +52,19 @@ static void copy(const char *with, const dag::node *n, const char *to) {
   run(cmd.buffer);
 }
 
-bool bundle(const dag::node *n, const char *exe_path) {
+bool bundle(const dag::node *n, const char *exe) {
   sim_sbt res_path{};
-  sim_sb_copy(&res_path, exe_path);
+  sim_sb_copy(&res_path, exe);
   cur_ctx().app_res_path(&res_path);
   mkdirs(res_path.buffer);
 
-  copy_build_deps(n, exe_path);
-  copy("leco-exs.exe", n, exe_path);
+  sim_sbt exe_path{};
+  sim_sb_path_copy_parent(&exe_path, exe);
+
+  copy_build_deps(n, exe_path.buffer);
+  copy("leco-exs.exe", n, exe_path.buffer);
   copy("leco-rsrc.exe", n, res_path.buffer);
 
-  cur_ctx().bundle(exe_path, n->module_name());
+  cur_ctx().bundle(exe, n->module_name());
   return true;
 }
