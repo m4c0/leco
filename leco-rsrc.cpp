@@ -27,7 +27,7 @@ static void usage() { die("invalid usage"); }
 static void copy_res(const char *file) {
   sim_sbt path{};
   sim_sb_path_copy_append(&path, resdir, sim_path_filename(file));
-  if (mtime_of(path.buffer) > mtime_of(file))
+  if (mtime_of(path.buffer) >= mtime_of(file))
     return;
 
   log("copying resource", file);
