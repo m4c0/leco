@@ -42,23 +42,20 @@ static void copy_build_deps(const dag::node *n, const char *exe_path) {
   }
 }
 
-static void copy_exes(const dag::node *n, const char *exe_path) {
+static void copy(const char *with, const dag::node *n, const char *to) {
   sim_sbt cmd{};
-  prep(&cmd, "leco-exs.exe");
+  prep(&cmd, with);
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, n->dag());
   sim_sb_concat(&cmd, " -o ");
-  sim_sb_concat(&cmd, exe_path);
+  sim_sb_concat(&cmd, to);
   run(cmd.buffer);
 }
+static void copy_exes(const dag::node *n, const char *exe_path) {
+  copy("leco-exs.exe", n, exe_path);
+}
 static void copy_resources(const dag::node *n, const char *res_path) {
-  sim_sbt cmd{};
-  prep(&cmd, "leco-rsrc.exe");
-  sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, n->dag());
-  sim_sb_concat(&cmd, " -o ");
-  sim_sb_concat(&cmd, res_path);
-  run(cmd.buffer);
+  copy("leco-rsrc.exe", n, res_path);
 }
 
 bool bundle(const dag::node *n, const char *exe_path) {
