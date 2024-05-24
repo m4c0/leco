@@ -70,12 +70,12 @@ static void read_dag(const char *dag) {
 int main(int argc, char **argv) try {
   const char *input{};
 
-  auto opts = gopt_parse(argc, argv, "e:i:", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "e:o:", [&](auto ch, auto val) {
     switch (ch) {
     case 'i':
       input = val;
       break;
-    case 'e':
+    case 'o':
       exedir = val;
       break;
     default:

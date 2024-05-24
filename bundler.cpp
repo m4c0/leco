@@ -47,7 +47,7 @@ static void copy_exes(const dag::node *n, const char *exe_path) {
   prep(&cmd, "leco-exs.exe");
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, n->dag());
-  sim_sb_concat(&cmd, " -e ");
+  sim_sb_concat(&cmd, " -o ");
   sim_sb_concat(&cmd, exe_path);
   run(cmd.buffer);
 }
@@ -56,7 +56,7 @@ static void copy_resources(const dag::node *n, const char *res_path) {
   prep(&cmd, "leco-rsrc.exe");
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, n->dag());
-  sim_sb_concat(&cmd, " -r ");
+  sim_sb_concat(&cmd, " -o ");
   sim_sb_concat(&cmd, res_path);
   run(cmd.buffer);
 }
