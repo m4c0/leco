@@ -5,7 +5,6 @@
 #include "context.hpp"
 #include "dag.hpp"
 #include "die.hpp"
-#include "in2exe.hpp"
 #include "log.hpp"
 #include "mkdir.h"
 #include "phase2.hpp"
@@ -85,8 +84,11 @@ void bounce(const char *path) {
   if (!n->app() && !n->tool() && !n->dll())
     return;
 
+  const char *exe_ext = n->dll() ? cur_ctx().dll_ext.c_str() : "exe";
+
   sim_sbt exe_path{};
-  in2exe(n, &exe_path);
+  sim_sb_copy(&exe_path, n->dag());
+  sim_sb_path_set_extension(&exe_path, exe_ext);
 
   if (mtime > mtime_of(exe_path.buffer)) {
     link(n, exe_path.buffer);

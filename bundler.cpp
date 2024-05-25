@@ -15,7 +15,7 @@ static void copy_exe(const char *log, const sim_sb *ef, const char *exe_path) {
   sim_sb_copy(&path, exe_path);
   sim_sb_path_append(&path, sim_sb_path_filename(ef));
 
-  if (mtime_of(path.buffer) > mtime_of(ef->buffer))
+  if (mtime_of(path.buffer) >= mtime_of(ef->buffer))
     return;
 
   vlog(log, path.buffer);
@@ -54,7 +54,8 @@ static void copy(const char *with, const dag::node *n, const char *to) {
 
 void bundle(const dag::node *n) {
   sim_sbt exe{};
-  in2exe(n, &exe);
+  sim_sb_copy(&exe, n->dag());
+  sim_sb_path_set_extension(&exe, "exe");
 
   sim_sbt res_path{};
   sim_sb_copy(&res_path, exe.buffer);
@@ -62,8 +63,10 @@ void bundle(const dag::node *n) {
   mkdirs(res_path.buffer);
 
   sim_sbt exe_path{};
-  sim_sb_path_copy_parent(&exe_path, exe.buffer);
+  in2exe(n, &exe_path);
+  sim_sb_path_parent(&exe_path);
 
+  copy_exe("copying executable", &exe, exe_path.buffer);
   copy_build_deps(n, exe_path.buffer);
   copy("leco-exs.exe", n, exe_path.buffer);
   copy("leco-rsrc.exe", n, res_path.buffer);
