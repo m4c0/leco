@@ -10,6 +10,7 @@
 #include "phase2.hpp"
 #include "sim.hpp"
 
+#include <string.h>
 #include <filesystem>
 
 void prep(sim_sb *cmd, const char *tool);
