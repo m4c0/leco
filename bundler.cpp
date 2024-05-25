@@ -52,19 +52,21 @@ static void copy(const char *with, const dag::node *n, const char *to) {
   run(cmd.buffer);
 }
 
-bool bundle(const dag::node *n, const char *exe) {
+void bundle(const dag::node *n) {
+  sim_sbt exe{};
+  in2exe(n, &exe);
+
   sim_sbt res_path{};
-  sim_sb_copy(&res_path, exe);
+  sim_sb_copy(&res_path, exe.buffer);
   cur_ctx().app_res_path(&res_path);
   mkdirs(res_path.buffer);
 
   sim_sbt exe_path{};
-  sim_sb_path_copy_parent(&exe_path, exe);
+  sim_sb_path_copy_parent(&exe_path, exe.buffer);
 
   copy_build_deps(n, exe_path.buffer);
   copy("leco-exs.exe", n, exe_path.buffer);
   copy("leco-rsrc.exe", n, res_path.buffer);
 
-  cur_ctx().bundle(exe, n->module_name());
-  return true;
+  cur_ctx().bundle(exe.buffer, n->module_name());
 }

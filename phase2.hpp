@@ -4,7 +4,7 @@ class node;
 }
 struct sim_sb;
 
-bool bundle(const dag::node *n, const char *exe_path);
+void bundle(const dag::node *n);
 void copy_build_deps(const dag::node *n);
 
 bool actool(const char *path);

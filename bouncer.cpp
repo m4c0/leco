@@ -93,6 +93,6 @@ void bounce(const char *path) {
   }
 
   if (n->app()) {
-    bundle(n, exe_path.buffer);
+    bundle(n);
   }
 }

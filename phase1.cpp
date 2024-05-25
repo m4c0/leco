@@ -26,5 +26,5 @@ bool for_each_target(bool (*fn)()) {
   return fn();
 }
 
-bool bundle(const dag::node *n, const char *exe_path) { return true; }
+void bundle(const dag::node *n) {}
 void copy_build_deps(const dag::node *n) {}
