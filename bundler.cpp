@@ -66,7 +66,6 @@ void bundle(const dag::node *n) {
   in2exe(n, &exe_path);
   sim_sb_path_parent(&exe_path);
 
-  copy_exe("copying executable", &exe, exe_path.buffer);
   copy_build_deps(n, exe_path.buffer);
   copy("leco-exs.exe", n, exe_path.buffer);
   copy("leco-rsrc.exe", n, res_path.buffer);

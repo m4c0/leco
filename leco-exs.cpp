@@ -29,7 +29,7 @@ static void copy_exe(const char *input) {
   if (mtime_of(path.buffer) > mtime_of(input))
     return;
 
-  log("copying library", path.buffer);
+  log("copying", path.buffer);
 
   if (0 != remove(path.buffer)) {
     // Rename original file. This is a "Windows-approved" way of modifying an
@@ -91,6 +91,11 @@ int main(int argc, char **argv) try {
   sim_sbt path{};
   sim_sb_path_copy_parent(&path, input);
   target = sim_sb_path_filename(&path);
+
+  sim_sbt exe{};
+  sim_sb_copy(&exe, input);
+  sim_sb_path_set_extension(&exe, "exe");
+  copy_exe(exe.buffer);
 
   read_dag(input);
 } catch (...) {
