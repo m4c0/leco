@@ -23,7 +23,7 @@ static void usage() { die("invalid usage"); }
 
 static void copy_exe(const char *input) {
   sim_sbt path{};
-  sim_sb_path_copy_parent(&path, exedir);
+  sim_sb_copy(&path, exedir);
   sim_sb_path_append(&path, sim_path_filename(input));
 
   if (mtime_of(path.buffer) > mtime_of(input))
