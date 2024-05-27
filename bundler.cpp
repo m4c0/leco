@@ -12,8 +12,7 @@
 void prep(sim_sb *cmd, const char *tool);
 
 static void in2exe(const dag::node *n, sim_sb *out) {
-  std::string ext = n->dll() ? cur_ctx().dll_ext : "exe";
-  in2out(n->source(), out, ext.c_str(), cur_ctx().target.c_str());
+  in2out(n->source(), out, "exe", cur_ctx().target.c_str());
 
   if (n->app()) {
     sim_sbt stem{};
@@ -24,38 +23,6 @@ static void in2exe(const dag::node *n, sim_sb *out) {
     sim_sbt path{};
     sim_sb_path_copy_parent(&path, out->buffer);
     mkdirs(path.buffer);
-  }
-}
-
-static void copy_exe(const char *log, const sim_sb *ef, const char *exe_path) {
-  sim_sbt path{};
-  sim_sb_copy(&path, exe_path);
-  sim_sb_path_append(&path, sim_sb_path_filename(ef));
-
-  if (mtime_of(path.buffer) >= mtime_of(ef->buffer))
-    return;
-
-  vlog(log, path.buffer);
-
-  if (0 != remove(path.buffer)) {
-    // Rename original file. This is a "Windows-approved" way of modifying an
-    // open executable.
-    sim_sbt bkp{};
-    sim_sb_copy(&bkp, path.buffer);
-    sim_sb_concat(&bkp, ".bkp");
-    remove(bkp.buffer);
-    rename(path.buffer, bkp.buffer);
-  }
-  std::filesystem::copy_file(ef->buffer, path.buffer);
-}
-static void copy_build_deps(const dag::node *n, const char *exe_path) {
-  for (const auto &d : n->build_deps()) {
-    auto dn = dag::get_node(d.c_str());
-
-    sim_sbt exe{};
-    in2exe(dn, &exe);
-
-    copy_exe("copying dependency", &exe, exe_path);
   }
 }
 
@@ -83,7 +50,6 @@ void bundle(const dag::node *n) {
   in2exe(n, &exe_path);
   sim_sb_path_parent(&exe_path);
 
-  copy_build_deps(n, exe_path.buffer);
   copy("leco-exs.exe", n, exe_path.buffer);
   copy("leco-rsrc.exe", n, res_path.buffer);
 

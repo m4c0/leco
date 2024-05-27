@@ -43,6 +43,30 @@ static void copy_exe(const char *input) {
   std::filesystem::copy_file(input, path.buffer);
 }
 
+static void copy_bdep(const char *src) {
+  sim_sbt dag{};
+  in2out(src, &dag, "dag", target);
+
+  const char *ext = "exe";
+  dag_read(dag.buffer, [&](auto id, auto file) {
+    if (id != 'tdll')
+      return;
+
+    if (0 == strcmp(target, "x86_64-pc-windows-msvc")) {
+      ext = "dll";
+    } else if ((0 == strcmp(target, "x86_64-apple-macosx11.6.0")) ||
+               (0 == strcmp(target, "arm64-apple-ios16.1")) ||
+               (0 == strcmp(target, "x86_64-apple-ios16.1-simulator"))) {
+      ext = "dylib";
+    } else {
+      ext = "so";
+    }
+  });
+
+  sim_sb_path_set_extension(&dag, ext);
+  copy_exe(dag.buffer);
+}
+
 static std::set<std::string> added{};
 static void read_dag(const char *dag) {
   auto [_, inserted] = added.insert(dag);
@@ -51,6 +75,9 @@ static void read_dag(const char *dag) {
 
   dag_read(dag, [](auto id, auto file) {
     switch (id) {
+    case 'bdep':
+      copy_bdep(file);
+      break;
     case 'dlls':
       copy_exe(file);
       break;
