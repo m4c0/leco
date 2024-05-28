@@ -10,7 +10,6 @@
 #pragma leco add_impl plist
 #pragma leco add_impl target_defs
 
-#include "bouncer.hpp"
 #include "cl.hpp"
 #include "dag.hpp"
 #include "die.hpp"
@@ -49,6 +48,7 @@ static void cleaner() {
   run(cmd.buffer);
 }
 
+void bounce(const char *path);
 bool run_target() {
   dag::clear_cache();
   cleaner();
