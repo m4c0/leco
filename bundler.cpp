@@ -28,16 +28,17 @@ void bundle(const dag::node *n) {
   sim_sbt stem{};
   sim_sb_path_copy_sb_stem(&stem, &exe);
 
-  sim_sbt res_path{};
-  sim_sb_copy(&res_path, exe.buffer);
-  cur_ctx().app_res_path(&res_path);
-  mkdirs(res_path.buffer);
-
   sim_sbt exe_path{};
   sim_sb_copy(&exe_path, exe.buffer);
   cur_ctx().app_exe_path(&exe_path, stem.buffer);
   sim_sb_path_parent(&exe_path);
   mkdirs(exe_path.buffer);
+
+  sim_sbt res_path{};
+  sim_sb_copy(&res_path, exe_path.buffer);
+  sim_sb_path_append(&res_path, "hack"); // TODO: pull logic from target_defs
+  cur_ctx().app_res_path(&res_path);
+  mkdirs(res_path.buffer);
 
   copy("leco-exs.exe", n, exe_path.buffer);
   copy("leco-rsrc.exe", n, res_path.buffer);
