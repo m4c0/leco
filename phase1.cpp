@@ -27,4 +27,3 @@ bool for_each_target(bool (*fn)()) {
 }
 
 void bundle(const dag::node *n) {}
-void copy_build_deps(const dag::node *n) {}
