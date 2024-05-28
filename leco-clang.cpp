@@ -7,7 +7,7 @@
 #include "../popen/popen.h"
 #include "die.hpp"
 #include "host_target.hpp"
-#include "in2out.hpp"
+#include "sim.hpp"
 
 static const char *argv0;
 
@@ -134,15 +134,24 @@ static void create_deplist(const char *out) {
 }
 
 static void infer_output(sim_sb *args, const char *input, const char *target) {
-  sim_sbt out{};
-
   auto ext = sim_path_extension(input);
+
+  sim_sbt out{};
+  if (0 == strcmp(".pcm", ext)) {
+    sim_sb_copy(&out, input);
+  } else {
+    sim_sb_path_copy_parent(&out, input);
+    sim_sb_path_append(&out, "out");
+    sim_sb_path_append(&out, target);
+    sim_sb_path_append(&out, sim_path_filename(input));
+  }
+
   if (0 == strcmp(".cppm", ext)) {
     sim_sb_concat(args, " --precompile -o ");
-    in2out(input, &out, "pcm", target);
+    sim_sb_path_set_extension(&out, "pcm");
   } else {
     sim_sb_concat(args, " -c -o ");
-    in2out(input, &out, "o", target);
+    sim_sb_path_set_extension(&out, "o");
   }
 
   sim_sb_concat(args, out.buffer);
