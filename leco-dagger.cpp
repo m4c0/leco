@@ -372,6 +372,12 @@ void run(int argc, char **argv) {
     }
   }
 
+  sim_sbt path{};
+  sim_sb_path_copy_parent(&path, source.buffer);
+  sim_sb_path_append(&path, "out");
+  sim_sb_path_append(&path, target);
+  sim_sb_path_append(&path, sim_sb_path_filename(&source));
+
   switch (exe_type) {
   case exe_t::none:
     break;
@@ -379,13 +385,24 @@ void run(int argc, char **argv) {
     output('tmmd', "");
     break;
   case exe_t::app:
-    output('tapp', "");
+    sim_sb_path_set_extension(&path, "exe");
+    output('tapp', path.buffer);
     break;
   case exe_t::dll:
-    output('tdll', "");
+    if (0 == strcmp(target, "x86_64-pc-windows-msvc")) {
+      sim_sb_path_set_extension(&path, "dll");
+    } else if ((0 == strcmp(target, "x86_64-apple-macosx11.6.0")) ||
+               (0 == strcmp(target, "arm64-apple-ios16.1")) ||
+               (0 == strcmp(target, "x86_64-apple-ios16.1-simulator"))) {
+      sim_sb_path_set_extension(&path, "dylib");
+    } else {
+      sim_sb_path_set_extension(&path, "so");
+    }
+    output('tdll', path.buffer);
     break;
   case exe_t::tool:
-    output('tool', "");
+    sim_sb_path_set_extension(&path, "exe");
+    output('tool', path.buffer);
     break;
   }
 
