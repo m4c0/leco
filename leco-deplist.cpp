@@ -22,8 +22,6 @@ static std::set<std::string> added{};
 
 static void usage() { die("invalid usage"); }
 
-static void read_dag(const char *dag);
-
 static void print_dep(const char *file) {
   sim_sbt stem{};
   sim_sb_path_copy_stem(&stem, file);
