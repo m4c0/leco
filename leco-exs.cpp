@@ -47,24 +47,17 @@ static void copy_bdep(const char *src) {
   sim_sbt dag{};
   in2out(src, &dag, "dag", target);
 
-  const char *ext = "exe";
   dag_read(dag.buffer, [&](auto id, auto file) {
-    if (id != 'tdll')
-      return;
-
-    if (0 == strcmp(target, "x86_64-pc-windows-msvc")) {
-      ext = "dll";
-    } else if ((0 == strcmp(target, "x86_64-apple-macosx11.6.0")) ||
-               (0 == strcmp(target, "arm64-apple-ios16.1")) ||
-               (0 == strcmp(target, "x86_64-apple-ios16.1-simulator"))) {
-      ext = "dylib";
-    } else {
-      ext = "so";
+    switch (id) {
+    case 'tdll':
+    case 'tool':
+    case 'tapp':
+      copy_exe(file);
+      break;
+    default:
+      break;
     }
   });
-
-  sim_sb_path_set_extension(&dag, ext);
-  copy_exe(dag.buffer);
 }
 
 static std::set<std::string> added{};
