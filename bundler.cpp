@@ -2,7 +2,6 @@
 #include "context.hpp"
 #include "dag.hpp"
 #include "die.hpp"
-#include "in2out.hpp"
 #include "log.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
@@ -35,11 +34,9 @@ void bundle(const dag::node *n) {
   mkdirs(res_path.buffer);
 
   sim_sbt exe_path{};
-  in2out(n->source(), &exe_path, "exe", cur_ctx().target.c_str());
+  sim_sb_copy(&exe_path, exe.buffer);
   cur_ctx().app_exe_path(&exe_path, stem.buffer);
-
-  sim_sbt path{};
-  sim_sb_path_copy_parent(&path, exe_path.buffer);
+  sim_sb_path_parent(&exe_path);
   mkdirs(exe_path.buffer);
 
   copy("leco-exs.exe", n, exe_path.buffer);
