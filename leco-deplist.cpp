@@ -22,16 +22,17 @@ static std::set<std::string> added{};
 
 static void usage() { die("invalid usage"); }
 
-static void print_dep(const char *file) {
+static void print_dep(const char *dag) {
   sim_sbt stem{};
-  sim_sb_path_copy_stem(&stem, file);
+  sim_sb_path_copy_stem(&stem, dag);
 
   auto *c = strchr(stem.buffer, '-');
   if (c != nullptr)
     *c = ':';
 
   sim_sbt pcm{};
-  in2out(file, &pcm, "pcm", target);
+  sim_sb_copy(&pcm, dag);
+  sim_sb_path_set_extension(&pcm, "pcm");
 
   for (auto *c = pcm.buffer; *c; c++)
     if (*c == '\\')
@@ -45,11 +46,11 @@ static void read_dag(const char *dag) {
   if (!inserted)
     return;
 
+  print_dep(dag);
+
   dag_read(dag, [](auto id, auto file) {
     switch (id) {
     case 'mdep': {
-      print_dep(file);
-
       sim_sbt ddag{};
       in2out(file, &ddag, "dag", target);
       read_dag(ddag.buffer);
