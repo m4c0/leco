@@ -155,7 +155,10 @@ uint64_t dag::visit_dirty(const dag::node *n, void *ptr,
     auto mtime = mtime_of(n->source());
     mtime = mtime > pmt ? mtime : pmt;
 
-    // TODO: consider headers as well
+    for (auto &d : n->headers()) {
+      auto dmt = mtime_of(d.c_str());
+      mtime = mtime > dmt ? mtime : dmt;
+    }
     for (auto &d : n->build_deps()) {
       auto dmt = rec(rec, get_node(d.c_str()), {});
       mtime = mtime > dmt ? mtime : dmt;
