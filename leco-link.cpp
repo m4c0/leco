@@ -155,7 +155,7 @@ int main(int argc, char **argv) try {
 
   if (0 == strcmp(target, TGT_OSX)) {
     sim_sb_concat(&cmd, " -rpath @executable_path");
-  } else if (0 == strcmp(target, TGT_IOS) ||
+  } else if (0 == strcmp(target, TGT_IPHONEOS) ||
              0 == strcmp(target, TGT_IOS_SIMULATOR)) {
     sim_sb_concat(&cmd, " -rpath @executable_path/Frameworks");
   }

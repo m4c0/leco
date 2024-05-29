@@ -393,7 +393,7 @@ void run(int argc, char **argv) {
     if (0 == strcmp(target, TGT_WINDOWS)) {
       sim_sb_path_set_extension(&path, "dll");
     } else if ((0 == strcmp(target, TGT_OSX)) ||
-               (0 == strcmp(target, TGT_IOS)) ||
+               (0 == strcmp(target, TGT_IPHONEOS)) ||
                (0 == strcmp(target, TGT_IOS_SIMULATOR))) {
       sim_sb_path_set_extension(&path, "dylib");
     } else {

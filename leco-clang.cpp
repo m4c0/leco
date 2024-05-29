@@ -65,7 +65,7 @@ static void add_target_defs(sim_sb *buf, const char *tgt) {
     sim_sb_concat(buf, " -DLECO_TARGET_MACOSX");
     sim_sb_concat(buf, " -DLECO_TARGET_APPLE");
     sim_sb_concat(buf, " -D_C99_SOURCE");
-  } else if (0 == strcmp(tgt, TGT_IOS)) {
+  } else if (0 == strcmp(tgt, TGT_IPHONEOS)) {
     sim_sb_concat(buf, " -DLECO_TARGET_IPHONEOS");
     sim_sb_concat(buf, " -DLECO_TARGET_IOS");
     sim_sb_concat(buf, " -DLECO_TARGET_APPLE");

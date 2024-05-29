@@ -93,7 +93,7 @@ static const char *sysroot_for_target(const char *target) {
   if (0 == strcmp(target, TGT_OSX)) {
     return apple_sysroot("macosx");
   }
-  if (0 == strcmp(target, TGT_IOS)) {
+  if (0 == strcmp(target, TGT_IPHONEOS)) {
     return apple_sysroot("iphoneos");
   }
   if (0 == strcmp(target, TGT_IOS_SIMULATOR)) {
