@@ -43,5 +43,5 @@ void bundle(const dag::node *n) {
   copy("leco-exs.exe", n->dag(), exe_path.buffer);
   copy("leco-rsrc.exe", n->dag(), res_path.buffer);
 
-  cur_ctx().bundle(exe.buffer, n->module_name());
+  cur_ctx().bundle(exe.buffer, stem.buffer);
 }
