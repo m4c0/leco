@@ -1,10 +1,7 @@
 #pragma once
-namespace dag {
-class node;
-}
 struct sim_sb;
 
-void bundle(const dag::node *n);
+void bundle(const char *dag);
 
 bool actool(const char *path);
 void gen_iphone_plists(const char *exe_path, const char *name);

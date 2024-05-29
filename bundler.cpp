@@ -20,9 +20,9 @@ static void copy(const char *with, const char *dag, const char *to) {
   run(cmd.buffer);
 }
 
-void bundle(const dag::node *n) {
+void bundle(const char *dag) {
   sim_sbt exe{};
-  sim_sb_copy(&exe, n->dag());
+  sim_sb_copy(&exe, dag);
   sim_sb_path_set_extension(&exe, "exe");
 
   sim_sbt stem{};
@@ -40,8 +40,8 @@ void bundle(const dag::node *n) {
   cur_ctx().app_res_path(&res_path);
   mkdirs(res_path.buffer);
 
-  copy("leco-exs.exe", n->dag(), exe_path.buffer);
-  copy("leco-rsrc.exe", n->dag(), res_path.buffer);
+  copy("leco-exs.exe", dag, exe_path.buffer);
+  copy("leco-rsrc.exe", dag, res_path.buffer);
 
   cur_ctx().bundle(exe.buffer, stem.buffer);
 }

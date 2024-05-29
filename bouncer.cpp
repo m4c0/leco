@@ -94,6 +94,6 @@ void bounce(const char *path) {
   }
 
   if (n->app()) {
-    bundle(n);
+    bundle(n->dag());
   }
 }

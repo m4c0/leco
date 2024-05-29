@@ -1,5 +1,4 @@
 #include "context.hpp"
-#include "dag.hpp"
 #include "host_target.hpp"
 #include "sim.h"
 
@@ -26,4 +25,4 @@ bool for_each_target(bool (*fn)()) {
   return fn();
 }
 
-void bundle(const dag::node *n) {}
+void bundle(const char *) {}
