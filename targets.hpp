@@ -16,3 +16,10 @@
 #elif __linux__
 #define HOST_TARGET TGT_LINUX
 #endif
+
+#define IS_TGT(t, x) (0 == strcmp((t), (x)))
+#define IS_TGT_DROID(t)                                                        \
+  (IS_TGT(t, TGT_DROID_AARCH64) || IS_TGT(t, TGT_DROID_ARMV7) ||               \
+   IS_TGT(t, TGT_DROID_X86) || IS_TGT(t, TGT_DROID_X86_64))
+#define IS_TGT_IOS(t) (IS_TGT(t, TGT_IPHONEOS) || IS_TGT(t, TGT_IOS_SIMULATOR))
+#define IS_TGT_APPLE(t) (IS_TGT(t, TGT_OSX) || IS_TGT_IOS(t))

@@ -390,11 +390,9 @@ void run(int argc, char **argv) {
     output('tapp', path.buffer);
     break;
   case exe_t::dll:
-    if (0 == strcmp(target, TGT_WINDOWS)) {
+    if (IS_TGT(target, TGT_WINDOWS)) {
       sim_sb_path_set_extension(&path, "dll");
-    } else if ((0 == strcmp(target, TGT_OSX)) ||
-               (0 == strcmp(target, TGT_IPHONEOS)) ||
-               (0 == strcmp(target, TGT_IOS_SIMULATOR))) {
+    } else if (IS_TGT_APPLE(target)) {
       sim_sb_path_set_extension(&path, "dylib");
     } else {
       sim_sb_path_set_extension(&path, "so");

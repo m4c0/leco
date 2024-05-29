@@ -90,26 +90,15 @@ static const char *android_sysroot() {
 }
 
 static const char *sysroot_for_target(const char *target) {
-  if (0 == strcmp(target, TGT_OSX)) {
+  if (IS_TGT(target, TGT_OSX)) {
     return apple_sysroot("macosx");
-  }
-  if (0 == strcmp(target, TGT_IPHONEOS)) {
+  } else if (IS_TGT(target, TGT_IPHONEOS)) {
     return apple_sysroot("iphoneos");
-  }
-  if (0 == strcmp(target, TGT_IOS_SIMULATOR)) {
+  } else if (IS_TGT(target, TGT_IOS_SIMULATOR)) {
     return apple_sysroot("iphonesimulator");
   }
 
-  if (0 == strcmp(target, TGT_DROID_AARCH64)) {
-    return android_sysroot();
-  }
-  if (0 == strcmp(target, TGT_DROID_ARMV7)) {
-    return android_sysroot();
-  }
-  if (0 == strcmp(target, TGT_DROID_X86)) {
-    return android_sysroot();
-  }
-  if (0 == strcmp(target, TGT_DROID_X86_64)) {
+  if (IS_TGT_DROID(target)) {
     return android_sysroot();
   }
 

@@ -57,31 +57,25 @@ Where:
 }
 
 static void add_target_defs(sim_sb *buf, const char *tgt) {
-  if (0 == strcmp(tgt, TGT_WINDOWS)) {
+  if (IS_TGT(tgt, TGT_WINDOWS)) {
     sim_sb_concat(buf, " -DLECO_TARGET_WINDOWS");
-  } else if (0 == strcmp(tgt, TGT_LINUX)) {
+  } else if (IS_TGT(tgt, TGT_LINUX)) {
     sim_sb_concat(buf, " -DLECO_TARGET_LINUX");
-  } else if (0 == strcmp(tgt, TGT_OSX)) {
+  } else if (IS_TGT(tgt, TGT_OSX)) {
     sim_sb_concat(buf, " -DLECO_TARGET_MACOSX");
     sim_sb_concat(buf, " -DLECO_TARGET_APPLE");
     sim_sb_concat(buf, " -D_C99_SOURCE");
-  } else if (0 == strcmp(tgt, TGT_IPHONEOS)) {
+  } else if (IS_TGT(tgt, TGT_IPHONEOS)) {
     sim_sb_concat(buf, " -DLECO_TARGET_IPHONEOS");
     sim_sb_concat(buf, " -DLECO_TARGET_IOS");
     sim_sb_concat(buf, " -DLECO_TARGET_APPLE");
     sim_sb_concat(buf, " -D_C99_SOURCE");
-  } else if (0 == strcmp(tgt, TGT_IOS_SIMULATOR)) {
+  } else if (IS_TGT(tgt, TGT_IOS_SIMULATOR)) {
     sim_sb_concat(buf, " -DLECO_TARGET_IPHONESIMULATOR");
     sim_sb_concat(buf, " -DLECO_TARGET_IOS");
     sim_sb_concat(buf, " -DLECO_TARGET_APPLE");
     sim_sb_concat(buf, " -D_C99_SOURCE");
-  } else if (0 == strcmp(tgt, TGT_DROID_AARCH64)) {
-    sim_sb_concat(buf, " -DLECO_TARGET_ANDROID");
-  } else if (0 == strcmp(tgt, TGT_DROID_ARMV7)) {
-    sim_sb_concat(buf, " -DLECO_TARGET_ANDROID");
-  } else if (0 == strcmp(tgt, TGT_DROID_X86)) {
-    sim_sb_concat(buf, " -DLECO_TARGET_ANDROID");
-  } else if (0 == strcmp(tgt, TGT_DROID_X86_64)) {
+  } else if (IS_TGT_DROID(tgt)) {
     sim_sb_concat(buf, " -DLECO_TARGET_ANDROID");
   } else {
     die("invalid target: [%s]", tgt);
