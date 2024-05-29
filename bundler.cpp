@@ -10,11 +10,11 @@
 
 void prep(sim_sb *cmd, const char *tool);
 
-static void copy(const char *with, const dag::node *n, const char *to) {
+static void copy(const char *with, const char *dag, const char *to) {
   sim_sbt cmd{};
   prep(&cmd, with);
   sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, n->dag());
+  sim_sb_concat(&cmd, dag);
   sim_sb_concat(&cmd, " -o ");
   sim_sb_concat(&cmd, to);
   run(cmd.buffer);
@@ -40,8 +40,8 @@ void bundle(const dag::node *n) {
   cur_ctx().app_res_path(&res_path);
   mkdirs(res_path.buffer);
 
-  copy("leco-exs.exe", n, exe_path.buffer);
-  copy("leco-rsrc.exe", n, res_path.buffer);
+  copy("leco-exs.exe", n->dag(), exe_path.buffer);
+  copy("leco-rsrc.exe", n->dag(), res_path.buffer);
 
   cur_ctx().bundle(exe.buffer, n->module_name());
 }
