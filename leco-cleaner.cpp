@@ -8,9 +8,9 @@
 #include "die.hpp"
 #include "fopen.hpp"
 #include "gopt.hpp"
-#include "host_target.hpp"
 #include "log.hpp"
 #include "sim.hpp"
+#include "targets.hpp"
 
 #include <stdio.h>
 

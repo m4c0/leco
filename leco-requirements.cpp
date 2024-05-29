@@ -8,8 +8,8 @@
 #include "die.hpp"
 #include "fopen.hpp"
 #include "gopt.hpp"
-#include "host_target.hpp"
 #include "sim.hpp"
+#include "targets.hpp"
 
 #include <set>
 #include <string>

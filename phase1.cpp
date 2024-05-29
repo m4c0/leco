@@ -1,6 +1,6 @@
 #include "context.hpp"
-#include "host_target.hpp"
 #include "sim.h"
+#include "targets.hpp"
 
 bool actool(const char *path) { return false; }
 void gen_iphone_plists(const char *exe_path, const char *name) {}

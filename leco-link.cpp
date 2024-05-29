@@ -8,6 +8,7 @@
 #include "gopt.hpp"
 #include "in2out.hpp"
 #include "sim.hpp"
+#include "targets.hpp"
 
 #include <set>
 #include <string>
@@ -152,10 +153,10 @@ int main(int argc, char **argv) try {
   sim_sb_concat(&cmd, output);
 #endif
 
-  if (0 == strcmp(target, "x86_64-apple-macosx11.6.0")) {
+  if (0 == strcmp(target, TGT_OSX)) {
     sim_sb_concat(&cmd, " -rpath @executable_path");
-  } else if (0 == strcmp(target, "arm64-apple-ios16.1") ||
-             0 == strcmp(target, "x86_64-apple-ios16.1-simulator")) {
+  } else if (0 == strcmp(target, TGT_IOS) ||
+             0 == strcmp(target, TGT_IOS_SIMULATOR)) {
     sim_sb_concat(&cmd, " -rpath @executable_path/Frameworks");
   }
 

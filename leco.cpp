@@ -1,8 +1,8 @@
 #define SIM_IMPLEMENTATION
 
 #include "die.hpp"
-#include "host_target.hpp"
 #include "sim.hpp"
+#include "targets.hpp"
 
 #include <stdlib.h>
 

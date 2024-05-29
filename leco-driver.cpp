@@ -14,7 +14,7 @@
 #include "dag.hpp"
 #include "die.hpp"
 #include "fopen.hpp"
-#include "host_target.hpp"
+#include "targets.hpp"
 
 #include "../pprent/pprent.hpp"
 

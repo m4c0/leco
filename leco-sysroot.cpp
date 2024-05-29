@@ -10,9 +10,9 @@
 #include "die.hpp"
 #include "fopen.hpp"
 #include "gopt.hpp"
-#include "host_target.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
+#include "targets.hpp"
 
 #include <string.h>
 
@@ -90,26 +90,26 @@ static const char *android_sysroot() {
 }
 
 static const char *sysroot_for_target(const char *target) {
-  if (0 == strcmp(target, "x86_64-apple-macosx11.6.0")) {
+  if (0 == strcmp(target, TGT_OSX)) {
     return apple_sysroot("macosx");
   }
-  if (0 == strcmp(target, "arm64-apple-ios16.1")) {
+  if (0 == strcmp(target, TGT_IOS)) {
     return apple_sysroot("iphoneos");
   }
-  if (0 == strcmp(target, "x86_64-apple-ios16.1-simulator")) {
+  if (0 == strcmp(target, TGT_IOS_SIMULATOR)) {
     return apple_sysroot("iphonesimulator");
   }
 
-  if (0 == strcmp(target, "aarch64-none-linux-android26")) {
+  if (0 == strcmp(target, TGT_DROID_AARCH64)) {
     return android_sysroot();
   }
-  if (0 == strcmp(target, "armv7-none-linux-androideabi26")) {
+  if (0 == strcmp(target, TGT_DROID_ARMV7)) {
     return android_sysroot();
   }
-  if (0 == strcmp(target, "i686-none-linux-android26")) {
+  if (0 == strcmp(target, TGT_DROID_X86)) {
     return android_sysroot();
   }
-  if (0 == strcmp(target, "x86_64-none-linux-android26")) {
+  if (0 == strcmp(target, TGT_DROID_X86_64)) {
     return android_sysroot();
   }
 

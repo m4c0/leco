@@ -6,8 +6,8 @@
 #include "../gopt/gopt.h"
 #include "../popen/popen.h"
 #include "die.hpp"
-#include "host_target.hpp"
 #include "sim.hpp"
+#include "targets.hpp"
 
 static const char *argv0;
 
@@ -57,31 +57,31 @@ Where:
 }
 
 static void add_target_defs(sim_sb *buf, const char *tgt) {
-  if (0 == strcmp(tgt, "x86_64-pc-windows-msvc")) {
+  if (0 == strcmp(tgt, TGT_WINDOWS)) {
     sim_sb_concat(buf, " -DLECO_TARGET_WINDOWS");
-  } else if (0 == strcmp(tgt, "x86_64-pc-linux-gnu")) {
+  } else if (0 == strcmp(tgt, TGT_LINUX)) {
     sim_sb_concat(buf, " -DLECO_TARGET_LINUX");
-  } else if (0 == strcmp(tgt, "x86_64-apple-macosx11.6.0")) {
+  } else if (0 == strcmp(tgt, TGT_OSX)) {
     sim_sb_concat(buf, " -DLECO_TARGET_MACOSX");
     sim_sb_concat(buf, " -DLECO_TARGET_APPLE");
     sim_sb_concat(buf, " -D_C99_SOURCE");
-  } else if (0 == strcmp(tgt, "arm64-apple-ios16.1")) {
+  } else if (0 == strcmp(tgt, TGT_IOS)) {
     sim_sb_concat(buf, " -DLECO_TARGET_IPHONEOS");
     sim_sb_concat(buf, " -DLECO_TARGET_IOS");
     sim_sb_concat(buf, " -DLECO_TARGET_APPLE");
     sim_sb_concat(buf, " -D_C99_SOURCE");
-  } else if (0 == strcmp(tgt, "x86_64-apple-ios16.1-simulator")) {
+  } else if (0 == strcmp(tgt, TGT_IOS_SIMULATOR)) {
     sim_sb_concat(buf, " -DLECO_TARGET_IPHONESIMULATOR");
     sim_sb_concat(buf, " -DLECO_TARGET_IOS");
     sim_sb_concat(buf, " -DLECO_TARGET_APPLE");
     sim_sb_concat(buf, " -D_C99_SOURCE");
-  } else if (0 == strcmp(tgt, "aarch64-none-linux-android26")) {
+  } else if (0 == strcmp(tgt, TGT_DROID_AARCH64)) {
     sim_sb_concat(buf, " -DLECO_TARGET_ANDROID");
-  } else if (0 == strcmp(tgt, "armv7-none-linux-androideabi26")) {
+  } else if (0 == strcmp(tgt, TGT_DROID_ARMV7)) {
     sim_sb_concat(buf, " -DLECO_TARGET_ANDROID");
-  } else if (0 == strcmp(tgt, "i686-none-linux-android26")) {
+  } else if (0 == strcmp(tgt, TGT_DROID_X86)) {
     sim_sb_concat(buf, " -DLECO_TARGET_ANDROID");
-  } else if (0 == strcmp(tgt, "x86_64-none-linux-android26")) {
+  } else if (0 == strcmp(tgt, TGT_DROID_X86_64)) {
     sim_sb_concat(buf, " -DLECO_TARGET_ANDROID");
   } else {
     die("invalid target: [%s]", tgt);

@@ -11,6 +11,7 @@
 #include "fopen.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
+#include "targets.hpp"
 
 enum class exe_t {
   none,
@@ -389,11 +390,11 @@ void run(int argc, char **argv) {
     output('tapp', path.buffer);
     break;
   case exe_t::dll:
-    if (0 == strcmp(target, "x86_64-pc-windows-msvc")) {
+    if (0 == strcmp(target, TGT_WINDOWS)) {
       sim_sb_path_set_extension(&path, "dll");
-    } else if ((0 == strcmp(target, "x86_64-apple-macosx11.6.0")) ||
-               (0 == strcmp(target, "arm64-apple-ios16.1")) ||
-               (0 == strcmp(target, "x86_64-apple-ios16.1-simulator"))) {
+    } else if ((0 == strcmp(target, TGT_OSX)) ||
+               (0 == strcmp(target, TGT_IOS)) ||
+               (0 == strcmp(target, TGT_IOS_SIMULATOR))) {
       sim_sb_path_set_extension(&path, "dylib");
     } else {
       sim_sb_path_set_extension(&path, "so");
