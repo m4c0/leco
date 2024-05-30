@@ -27,7 +27,8 @@ static void compile(const dag::node *n) {
   sim_sb_path_copy_parent(&path, n->target());
   mkdirs(path.buffer);
 
-  vlog("compiling", n->source());
+  if (is_verbose())
+    log("compiling", n->source());
 
   sim_sbt cmd{};
   prep(&cmd, "leco-clang.exe");
@@ -47,7 +48,8 @@ static void compile(const dag::node *n) {
 }
 
 static void link(const dag::node *n, const char *exe) {
-  vlog("linking", exe);
+  if (is_verbose())
+    log("linking", exe);
 
   sim_sbt cmd{};
   prep(&cmd, "leco-link.exe");

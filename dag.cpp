@@ -80,7 +80,8 @@ static dag::node *recurse(const char *path, bool only_roots = false) {
     return n;
 
   if (mtime_of(n->source()) > mtime_of(n->dag())) {
-    xlog("processing", n->source());
+    if (is_extra_verbose())
+      log("processing", n->source());
     n->create_cache_file();
   }
   n->read_from_cache_file();

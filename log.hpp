@@ -1,6 +1,4 @@
 #pragma once
-#include "cl.hpp"
-
 #include <stdio.h>
 
 #ifndef _WIN32
@@ -22,17 +20,9 @@ static void log(unsigned colour, const char *verb, const char *msg) {
 static inline void log(const char *verb, const char *msg) {
   log(34, verb, msg);
 }
-static inline void vlog(const char *verb, const char *msg) {
-  if (is_verbose())
-    log(verb, msg);
-}
 static inline void wlog(const char *verb, const char *msg) {
   log(33, verb, msg);
 }
 static inline void dlog(const char *verb, const char *msg) {
   log(35, verb, msg);
-}
-static inline void xlog(const char *verb, const char *msg) {
-  if (is_extra_verbose())
-    dlog(verb, msg);
 }
