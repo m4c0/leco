@@ -1,6 +1,7 @@
 #include "cl.hpp"
 #include "../gopt/gopt.h"
 #include "context.hpp"
+#include "die.hpp"
 #include "target_defs.hpp"
 
 #include <stdio.h>
@@ -12,6 +13,8 @@
 #else
 #include <unistd.h>
 #endif
+
+static const char *target{"host"};
 
 static int clean_level{};
 bool should_clean_current() { return clean_level > 0; }
@@ -27,74 +30,43 @@ bool enable_debug_syms() { return debug; }
 static bool optimise{};
 bool is_optimised() { return optimise; }
 
-enum targets {
-  host = 0,
-  apple,
-  macosx,
-  ios,
-  iphoneos,
-  iphonesimulator,
-  linux,
-  windows,
-  android
-};
-static targets target;
-bool parse_target(const char *n) {
-  constexpr const char *vals[]{"host",  "apple",    "macosx",
-                               "ios",   "iphoneos", "iphonesimulator",
-                               "linux", "windows",  "android"};
-  int i = 0;
-  for (auto x : vals) {
-    if (strcmp(x, n) == 0) {
-      target = static_cast<targets>(i);
-      return true;
-    }
-    i++;
-  }
-  return false;
-}
 bool for_each_target(bool (*fn)()) {
   const auto run = [&](auto &&ctx_fn) {
     cur_ctx() = ctx_fn();
     return fn();
   };
 
-  switch (target) {
 #ifdef __APPLE__
-  case apple:
+  if (0 == strcmp(target, "apple"))
     return run(t::macosx) && run(t::iphoneos) && run(t::iphonesimulator);
 
-  case ios:
+  if (0 == strcmp(target, "ios"))
     return run(t::iphoneos) && run(t::iphonesimulator);
 
-  case host:
-  case macosx:
+  if (0 == strcmp(target, "host") || 0 == strcmp(target, "macosx"))
     return run(t::macosx);
-  case iphoneos:
+  if (0 == strcmp(target, "iphoneos"))
     return run(t::iphoneos);
-  case iphonesimulator:
+  if (0 == strcmp(target, "iphonesimulator"))
     return run(t::iphonesimulator);
 #endif
 
 #ifdef _WIN32
-  case host:
-  case windows:
+  if (0 == strcmp(target, "host") || 0 == strcmp(target, "windows"))
     return run(t::windows);
 #endif
 
 #ifdef __linux__
-  case host:
-  case linux:
+  if (0 == strcmp(target, "host") || 0 == strcmp(target, "linux"))
     return run(t::linux);
 #endif
 
-  case android:
+  if (0 == strcmp(target, "ios"))
     return run(t::android_aarch64) && run(t::android_armv7) &&
            run(t::android_i686) && run(t::android_x86_64);
 
-  default:
-    return false;
-  };
+  die("unknown target: %s", target);
+  return false;
 }
 
 bool usage() {
@@ -152,8 +124,7 @@ bool parse_args(int argc, char **argv) {
       verbose = 0;
       break;
     case 't':
-      if (!parse_target(val))
-        return false;
+      target = val;
       break;
     case 'v':
       verbose = 2;
