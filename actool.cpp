@@ -92,6 +92,18 @@ static bool run_actool(const char *plist, const char *app_path,
   return 0 == std::system(cmd.buffer);
 }
 
+static void gen_iconset(const char *xcassets) {
+  mkdirs(xcassets);
+  create_xca_contents(xcassets);
+
+  sim_sbt appiconset{};
+  sim_sb_path_copy_append(&appiconset, xcassets, "AppIcon.appiconset");
+
+  mkdirs(appiconset.buffer);
+  create_icon_contents(appiconset.buffer);
+  copy_icon(appiconset.buffer);
+}
+
 bool actool(const char *app_path) {
   sim_sbt prod{};
   sim_sb_path_copy_parent(&prod, app_path);
@@ -108,15 +120,7 @@ bool actool(const char *app_path) {
   sim_sbt xcassets{};
   sim_sb_path_copy_append(&xcassets, build_path.buffer, "Assets.xcassets");
 
-  sim_sbt appiconset{};
-  sim_sb_path_copy_append(&appiconset, xcassets.buffer, "AppIcon.appiconset");
-
-  mkdirs(xcassets.buffer);
-  create_xca_contents(xcassets.buffer);
-
-  mkdirs(appiconset.buffer);
-  create_icon_contents(appiconset.buffer);
-  copy_icon(appiconset.buffer);
+  gen_iconset(xcassets.buffer);
 
   return run_actool(plist.buffer, app_path, xcassets.buffer);
 }
