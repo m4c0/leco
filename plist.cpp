@@ -1,4 +1,3 @@
-#include "context.hpp"
 #include "sim.hpp"
 
 #include <fstream>
