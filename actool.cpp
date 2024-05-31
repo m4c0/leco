@@ -69,6 +69,29 @@ static void copy_icon(const char *path) {
   std::filesystem::copy_file("icon.png", file.buffer);
 }
 
+static bool run_actool(const char *plist, const char *app_path,
+                       const char *xcassets) {
+  sim_sbt cmd{10240};
+  sim_sb_printf(&cmd,
+                "actool "
+                "--notices --warnings --errors "
+                "--output-format human-readable-text "
+                "--app-icon AppIcon "
+                "--accent-color AccentColor "
+                "--compress-pngs "
+                "--target-device iphone "
+                "--target-device ipad "
+                "--platform iphoneos "
+                "--filter-for-thinning-device-configuration iPhone16,1 "
+                "--filter-for-device-os-version 17.0 "
+                "--minimum-deployment-target 17.0 "
+                "--output-partial-info-plist %s "
+                "--compile %s "
+                "%s",
+                plist, app_path, xcassets);
+  return 0 == std::system(cmd.buffer);
+}
+
 bool actool(const char *app_path) {
   sim_sbt prod{};
   sim_sb_path_copy_parent(&prod, app_path);
@@ -89,29 +112,11 @@ bool actool(const char *app_path) {
   sim_sb_path_copy_append(&appiconset, xcassets.buffer, "AppIcon.appiconset");
 
   mkdirs(xcassets.buffer);
-  mkdirs(appiconset.buffer);
-
   create_xca_contents(xcassets.buffer);
+
+  mkdirs(appiconset.buffer);
   create_icon_contents(appiconset.buffer);
   copy_icon(appiconset.buffer);
 
-  sim_sbt cmd{1024};
-  sim_sb_printf(&cmd,
-                "actool "
-                "--notices --warnings --errors "
-                "--output-format human-readable-text "
-                "--app-icon AppIcon "
-                "--accent-color AccentColor "
-                "--compress-pngs "
-                "--target-device iphone "
-                "--target-device ipad "
-                "--platform iphoneos "
-                "--filter-for-thinning-device-configuration iPhone16,1 "
-                "--filter-for-device-os-version 17.0 "
-                "--minimum-deployment-target 17.0 "
-                "--output-partial-info-plist %s "
-                "--compile %s "
-                "%s",
-                plist.buffer, app_path, xcassets.buffer);
-  return 0 == std::system(cmd.buffer);
+  return run_actool(plist.buffer, app_path, xcassets.buffer);
 }
