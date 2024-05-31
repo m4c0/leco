@@ -21,15 +21,9 @@ class node {
   sim_sbt m_module_name{};
   sim_sbt m_module_pcm{};
   std::set<std::string> m_build_deps{};
-  std::set<std::string> m_executables{};
-  std::set<std::string> m_frameworks{};
   std::set<std::string> m_headers{};
-  std::set<std::string> m_libraries{};
-  std::set<std::string> m_library_dirs{};
   std::set<std::string> m_mod_deps{};
   std::set<std::string> m_mod_impls{};
-  std::set<std::string> m_resources{};
-  std::set<std::string> m_shaders{};
   bool m_compiled{};
   root_t m_root{};
   bool m_recursed{};
@@ -41,21 +35,9 @@ public:
   void read_from_cache_file();
 
   [[nodiscard]] bool add_build_dep(const char *src);
-  [[nodiscard]] bool add_executable(const char *e);
-  bool add_framework(const char *fw) {
-    m_frameworks.insert(fw);
-    return true;
-  }
   [[nodiscard]] bool add_header(const char *fname);
-  bool add_library(const char *lib) {
-    m_libraries.insert(lib);
-    return true;
-  }
-  [[nodiscard]] bool add_library_dir(const char *dir);
   [[nodiscard]] bool add_mod_dep(const char *mod_name);
   [[nodiscard]] bool add_mod_impl(const char *mod_impl);
-  [[nodiscard]] bool add_resource(const char *res);
-  [[nodiscard]] bool add_shader(const char *shd);
 
   void set_app() { m_root = root_t::app; }
   void set_compiled() { m_compiled = true; }
@@ -70,32 +52,14 @@ public:
   [[nodiscard]] constexpr const auto &build_deps() const noexcept {
     return m_build_deps;
   }
-  [[nodiscard]] constexpr const auto &executables() const noexcept {
-    return m_executables;
-  }
-  [[nodiscard]] constexpr const auto &frameworks() const noexcept {
-    return m_frameworks;
-  }
   [[nodiscard]] constexpr const auto &headers() const noexcept {
     return m_headers;
-  }
-  [[nodiscard]] constexpr const auto &libraries() const noexcept {
-    return m_libraries;
-  }
-  [[nodiscard]] constexpr const auto &library_dirs() const noexcept {
-    return m_library_dirs;
   }
   [[nodiscard]] constexpr const auto &mod_deps() const noexcept {
     return m_mod_deps;
   }
   [[nodiscard]] constexpr const auto &mod_impls() const noexcept {
     return m_mod_impls;
-  }
-  [[nodiscard]] constexpr const auto &resources() const noexcept {
-    return m_resources;
-  }
-  [[nodiscard]] constexpr const auto &shaders() const noexcept {
-    return m_shaders;
   }
 
   [[nodiscard]] constexpr auto root_type() const noexcept { return m_root; }

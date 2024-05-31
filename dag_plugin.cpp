@@ -32,32 +32,14 @@ static void process_line(dag::node *n, uint32_t id, const char *file) {
   case 'bdep':
     add("build dependency", n, &dag::node::add_build_dep, file);
     break;
-  case 'dlls':
-    add("dll", n, &dag::node::add_executable, file);
-    break;
-  case 'frwk':
-    add("framework", n, &dag::node::add_framework, file);
-    break;
   case 'head':
     add("header", n, &dag::node::add_header, file);
     break;
   case 'impl':
     add("implementation", n, &dag::node::add_mod_impl, file);
     break;
-  case 'libr':
-    add("library", n, &dag::node::add_library, file);
-    break;
-  case 'ldir':
-    add("library directory", n, &dag::node::add_library_dir, file);
-    break;
   case 'mdep':
     add("module dependency", n, &dag::node::add_mod_dep, file);
-    break;
-  case 'rsrc':
-    add("resource", n, &dag::node::add_resource, file);
-    break;
-  case 'shdr':
-    add("shader", n, &dag::node::add_shader, file);
     break;
   default:
     die("unknown tag in dag file");

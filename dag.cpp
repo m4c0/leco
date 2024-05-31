@@ -40,26 +40,14 @@ dag::node::node(const char *n) {
 bool dag::node::add_build_dep(const char *dep) {
   return add_real_abs(m_build_deps, dep);
 }
-bool dag::node::add_executable(const char *executable) {
-  return add_real_abs(m_executables, executable);
-}
 bool dag::node::add_header(const char *fname) {
   return add_real_abs(m_headers, fname);
-}
-bool dag::node::add_library_dir(const char *dir) {
-  return add_real_abs(m_library_dirs, dir);
 }
 bool dag::node::add_mod_dep(const char *mod_name) {
   return add_real_abs(m_mod_deps, mod_name);
 }
 bool dag::node::add_mod_impl(const char *mod_impl) {
   return add_real_abs(m_mod_impls, mod_impl);
-}
-bool dag::node::add_resource(const char *resource) {
-  return add_real_abs(m_resources, resource);
-}
-bool dag::node::add_shader(const char *shader) {
-  return add_real_abs(m_shaders, shader);
 }
 
 static std::map<std::string, dag::node> cache{};
