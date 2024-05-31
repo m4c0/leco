@@ -73,7 +73,7 @@ void common_app_plist(dict &d, const char *name, const char *sdk) {
 
   d.string("CFBundleDevelopmentRegion", "en");
   d.string("CFBundleDisplayName", name);
-  d.string("CFBundleExecutable", exe.name);
+  d.string("CFBundleExecutable", exe.buffer);
   d.string("CFBundleIdentifier", id.buffer);
   d.string("CFBundleInfoDictionaryVersion", "6.0");
   d.string("CFBundlePackageType", "APPL");

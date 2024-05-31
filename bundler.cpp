@@ -21,33 +21,60 @@ static void copy(const char *with, const char *dag, const char *to) {
   run(cmd.buffer);
 }
 
+static void dir_bundle(const char *dag) {
+  sim_sbt path{};
+  sim_sb_copy(&path, dag);
+  sim_sb_path_set_extension(&path, "app");
+  mkdirs(path.buffer);
+
+  copy("leco-exs.exe", dag, path.buffer);
+  copy("leco-rsrc.exe", dag, path.buffer);
+}
+
+static void osx_bundle(const char *dag) {
+  sim_sbt path{};
+  sim_sb_copy(&path, dag);
+  sim_sb_path_set_extension(&path, "app");
+  sim_sb_path_append(&path, "Contents");
+  sim_sb_path_append(&path, "MacOS");
+  mkdirs(path.buffer);
+  copy("leco-exs.exe", dag, path.buffer);
+
+  sim_sb_path_parent(&path);
+  sim_sb_path_append(&path, "Resources");
+  mkdirs(path.buffer);
+  copy("leco-rsrc.exe", dag, path.buffer);
+}
+
+static void ios_bundle(const char *dag) {
+  sim_sbt path{};
+  sim_sb_path_copy_parent(&path, dag);
+  sim_sb_path_append(&path, "export.xcarchive");
+  sim_sb_path_append(&path, "Products");
+  sim_sb_path_append(&path, "Applications");
+  sim_sb_path_append(&path, sim_path_filename(dag));
+  sim_sb_path_set_extension(&path, "app");
+  mkdirs(path.buffer);
+  copy("leco-exs.exe", dag, path.buffer);
+
+  sim_sb_path_parent(&path);
+  copy("leco-rsrc.exe", dag, path.buffer);
+
+  sim_sb_path_append(&path, sim_path_filename(dag));
+  sim_sb_path_set_extension(&path, "exe");
+  gen_iphone_ipa(path.buffer);
+}
+
 void bundle(const char *dag) {
-  sim_sbt exe{};
-  sim_sb_copy(&exe, dag);
-  sim_sb_path_set_extension(&exe, "exe");
-
-  sim_sbt stem{};
-  sim_sb_path_copy_sb_stem(&stem, &exe);
-
-  sim_sbt exe_path{};
-  sim_sb_copy(&exe_path, exe.buffer);
-  cur_ctx().app_exe_path(&exe_path, stem.buffer);
-  sim_sb_path_parent(&exe_path);
-  mkdirs(exe_path.buffer);
-
-  sim_sbt res_path{};
-  sim_sb_copy(&res_path, exe_path.buffer);
-  sim_sb_path_append(&res_path, "hack"); // TODO: pull logic from target_defs
-  cur_ctx().app_res_path(&res_path);
-  mkdirs(res_path.buffer);
-
-  copy("leco-exs.exe", dag, exe_path.buffer);
-  copy("leco-rsrc.exe", dag, res_path.buffer);
-
   sim_sbt path{};
   sim_sb_path_copy_parent(&path, dag);
   auto target = sim_sb_path_filename(&path);
 
-  if (IS_TGT_IOS(target))
-    gen_iphone_ipa(exe.buffer);
+  if (IS_TGT_IOS(target)) {
+    ios_bundle(dag);
+  } else if (IS_TGT(target, TGT_OSX)) {
+    osx_bundle(dag);
+  } else {
+    dir_bundle(dag);
+  }
 }
