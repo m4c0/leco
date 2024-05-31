@@ -9,43 +9,6 @@
 
 void prep(sim_sb *cmd, const char *tool);
 
-static void add(const char *desc, dag::node *n,
-                bool (dag::node::*fn)(const char *), const char *file) {
-  if (!(n->*fn)(file))
-    die("could not add %s: [%s]", desc, file);
-}
-
-static void process_line(dag::node *n, uint32_t id, const char *file) {
-  switch (id) {
-  case 'tool':
-    n->set_tool();
-    break;
-  case 'tapp':
-    n->set_app();
-    break;
-  case 'tdll':
-    n->set_dll();
-    break;
-  case 'tmmd':
-    n->set_main_mod();
-    break;
-  case 'bdep':
-    add("build dependency", n, &dag::node::add_build_dep, file);
-    break;
-  case 'head':
-    add("header", n, &dag::node::add_header, file);
-    break;
-  case 'impl':
-    add("implementation", n, &dag::node::add_mod_impl, file);
-    break;
-  case 'mdep':
-    add("module dependency", n, &dag::node::add_mod_dep, file);
-    break;
-  default:
-    die("unknown tag in dag file");
-  }
-}
-
 void dag::node::create_cache_file() {
   sim_sbt args{10240};
   prep(&args, "leco-dagger.exe");
@@ -70,5 +33,32 @@ void dag::node::create_cache_file() {
 }
 
 void dag::node::read_from_cache_file() {
-  dag_read(dag(), [this](auto id, auto file) { process_line(this, id, file); });
+  dag_read(dag(), [this](auto id, auto file) {
+    switch (id) {
+    case 'tool':
+      set_tool();
+      break;
+    case 'tapp':
+      set_app();
+      break;
+    case 'tdll':
+      set_dll();
+      break;
+    case 'tmmd':
+      set_main_mod();
+      break;
+    case 'bdep':
+      add_build_dep(file);
+      break;
+    case 'head':
+      add_header(file);
+      break;
+    case 'impl':
+      add_mod_impl(file);
+      break;
+    case 'mdep':
+      add_mod_dep(file);
+      break;
+    }
+  });
 }
