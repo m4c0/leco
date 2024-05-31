@@ -3,6 +3,8 @@
 
 #include <fstream>
 
+bool actool(const char *path);
+
 namespace plist {
 class dict {
   std::ostream &o;
@@ -198,7 +200,13 @@ static bool export_archive(const char *bundle_path, const char *xca_path) {
                 xca_path, bundle_path, bundle_path);
   return 0 == system(cmd.buffer);
 }
-void gen_iphone_plists(const char *exe, const char *name) {
+void gen_iphone_ipa(const char *exe) {
+  if (!actool(exe))
+    return;
+
+  sim_sbt name{};
+  sim_sb_path_copy_stem(&name, exe);
+
   sim_sbt app_path{};
   sim_sb_path_copy_parent(&app_path, exe);
 
@@ -210,13 +218,13 @@ void gen_iphone_plists(const char *exe, const char *name) {
   sim_sbt build_path{};
   sim_sb_path_copy_parent(&build_path, exca.buffer);
 
-  gen_info_plist(app_path.buffer, name, build_path.buffer);
+  gen_info_plist(app_path.buffer, name.buffer, build_path.buffer);
   if (!compile_launch(app_path.buffer))
     return;
   if (!code_sign(app_path.buffer))
     return;
 
-  gen_archive_plist(exca.buffer, name);
-  gen_export_plist(build_path.buffer, name);
+  gen_archive_plist(exca.buffer, name.buffer);
+  gen_export_plist(build_path.buffer, name.buffer);
   export_archive(build_path.buffer, exca.buffer);
 }
