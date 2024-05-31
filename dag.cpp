@@ -81,31 +81,6 @@ static dag::node *recurse(const char *path, bool only_roots = false) {
 const dag::node *dag::get_node(const char *source) { return &cache.at(source); }
 const dag::node *dag::process(const char *path) { return recurse(path, true); }
 
-void dag::visit(const dag::node *n, bool impls, void *ptr,
-                void (*fn)(void *, const dag::node *)) {
-  std::set<std::string> visited{};
-
-  const auto rec = [&](auto rec, auto *n) {
-    if (visited.contains(n->source()))
-      return;
-
-    for (auto &d : n->build_deps()) {
-      rec(rec, get_node(d.c_str()));
-    }
-    for (auto &d : n->mod_deps()) {
-      rec(rec, get_node(d.c_str()));
-    }
-
-    fn(ptr, n);
-    visited.insert(n->source());
-
-    if (impls)
-      for (auto &d : n->mod_impls()) {
-        rec(rec, get_node(d.c_str()));
-      }
-  };
-  rec(rec, n);
-}
 uint64_t dag::visit_dirty(const dag::node *n, void *ptr,
                           void (*fn)(void *, const dag::node *)) {
   std::map<std::string, uint64_t> visited{};
@@ -151,10 +126,4 @@ uint64_t dag::visit_dirty(const dag::node *n, void *ptr,
   };
   rec(rec, n, {});
   return max;
-}
-
-void dag::visit_all(void *ptr, void (*fn)(void *, const dag::node *)) {
-  for (const auto &[k, v] : cache) {
-    fn(ptr, &v);
-  }
 }
