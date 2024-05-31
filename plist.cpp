@@ -68,10 +68,12 @@ void gen(std::ostream &o, auto &&fn) {
 void common_app_plist(dict &d, const char *name, const char *sdk) {
   sim_sbt id{};
   sim_sb_printf(&id, "br.com.tpk.%s", name);
+  sim_sbt exe{};
+  sim_sb_printf(&id, "%s.exe", name);
 
   d.string("CFBundleDevelopmentRegion", "en");
   d.string("CFBundleDisplayName", name);
-  d.string("CFBundleExecutable", name);
+  d.string("CFBundleExecutable", exe.name);
   d.string("CFBundleIdentifier", id.buffer);
   d.string("CFBundleInfoDictionaryVersion", "6.0");
   d.string("CFBundlePackageType", "APPL");
