@@ -75,7 +75,7 @@ static void copy_icon(const char *path) {
   std::filesystem::copy_file("icon.png", file.buffer);
 }
 
-static bool run_actool(const char *plist, const char *app_path,
+static void run_actool(const char *plist, const char *app_path,
                        const char *xcassets) {
   sim_sbt cmd{10240};
   sim_sb_printf(&cmd,
@@ -95,7 +95,7 @@ static bool run_actool(const char *plist, const char *app_path,
                 "--compile %s "
                 "%s",
                 plist, app_path, xcassets);
-  return 0 == std::system(cmd.buffer);
+  run(cmd.buffer);
 }
 
 static void gen_assets(const char *build_path, sim_sb *xcassets) {
@@ -112,31 +112,16 @@ static void gen_assets(const char *build_path, sim_sb *xcassets) {
   copy_icon(appiconset.buffer);
 }
 
-static bool actool(const char *app_path) {
-  sim_sbt prod{};
-  sim_sb_path_copy_parent(&prod, app_path);
-
-  sim_sbt exca{};
-  sim_sb_path_copy_parent(&exca, prod.buffer);
-
-  sim_sbt build_path{};
-  sim_sb_path_copy_parent(&build_path, exca.buffer);
-
-  sim_sbt plist{};
-  sim_sb_path_copy_append(&plist, build_path.buffer, "icon-partial.plist");
-
-  sim_sbt xcassets{};
-  gen_assets(build_path.buffer, &xcassets);
-
-  return run_actool(plist.buffer, app_path, xcassets.buffer);
-}
-
 static void usage() { die("invalid usage"); }
 
 int main(int argc, char **argv) try {
   const char *input{};
-  auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
+  const char *app_path{};
+  auto opts = gopt_parse(argc, argv, "i:a:", [&](auto ch, auto val) {
     switch (ch) {
+    case 'a':
+      app_path = val;
+      break;
     case 'i':
       input = val;
       break;
@@ -145,9 +130,19 @@ int main(int argc, char **argv) try {
       break;
     }
   });
-  if (!input || opts.argc != 0)
+  if (!input || !app_path || opts.argc != 0)
     usage();
 
+  sim_sbt path{};
+  sim_sb_path_copy_parent(&path, input);
+
+  sim_sbt xcassets{};
+  gen_assets(path.buffer, &xcassets);
+
+  sim_sbt plist{};
+  sim_sb_path_copy_append(&plist, path.buffer, "icon-partial.plist");
+
+  run_actool(plist.buffer, app_path, xcassets.buffer);
   return 0;
 } catch (...) {
   return 1;
