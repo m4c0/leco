@@ -2,8 +2,6 @@
 
 #include <fstream>
 
-bool actool(const char *app_path);
-
 namespace plist {
 class dict {
   std::ostream &o;
@@ -207,9 +205,6 @@ void gen_iphone_ipa(const char *exe) {
 
   sim_sbt app_path{};
   sim_sb_path_copy_parent(&app_path, exe);
-
-  if (!actool(app_path.buffer))
-    return;
 
   sim_sbt exca{};
   sim_sb_path_copy_parent(&exca, app_path.buffer); // Applications

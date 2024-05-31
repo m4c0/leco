@@ -11,6 +11,13 @@ void prep(sim_sb *cmd, const char *tool);
 
 void gen_iphone_ipa(const char *exe_path);
 
+static void call(const char *with, const char *dag) {
+  sim_sbt cmd{};
+  prep(&cmd, with);
+  sim_sb_concat(&cmd, " -i ");
+  sim_sb_concat(&cmd, dag);
+  run(cmd.buffer);
+}
 static void copy(const char *with, const char *dag, const char *to) {
   sim_sbt cmd{};
   prep(&cmd, with);
@@ -47,6 +54,8 @@ static void osx_bundle(const char *dag) {
 }
 
 static void ios_bundle(const char *dag) {
+  call("leco-xcassets.exe", dag);
+
   sim_sbt path{};
   sim_sb_path_copy_parent(&path, dag);
   sim_sb_path_append(&path, "export.xcarchive");

@@ -1,5 +1,4 @@
 #pragma leco tool
-#pragma leco add_impl actool
 #pragma leco add_impl bouncer
 #pragma leco add_impl bundler
 #pragma leco add_impl cl

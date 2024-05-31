@@ -1,5 +1,11 @@
+#pragma leco tool
+#define GOPT_IMPLEMENTATION
+#define MKDIR_IMPLEMENTATION
+#define SIM_IMPLEMENTATION
+
 #include "die.hpp"
 #include "fopen.hpp"
+#include "gopt.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
 
@@ -106,7 +112,7 @@ static void gen_assets(const char *build_path, sim_sb *xcassets) {
   copy_icon(appiconset.buffer);
 }
 
-bool actool(const char *app_path) {
+static bool actool(const char *app_path) {
   sim_sbt prod{};
   sim_sb_path_copy_parent(&prod, app_path);
 
@@ -123,4 +129,26 @@ bool actool(const char *app_path) {
   gen_assets(build_path.buffer, &xcassets);
 
   return run_actool(plist.buffer, app_path, xcassets.buffer);
+}
+
+static void usage() { die("invalid usage"); }
+
+int main(int argc, char **argv) try {
+  const char *input{};
+  auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
+    switch (ch) {
+    case 'i':
+      input = val;
+      break;
+    default:
+      usage();
+      break;
+    }
+  });
+  if (!input || opts.argc != 0)
+    usage();
+
+  return 0;
+} catch (...) {
+  return 1;
 }
