@@ -1,8 +1,6 @@
 #include "../mtime/mtime.h"
 #include "context.hpp"
-#include "dag.hpp"
 #include "die.hpp"
-#include "log.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
 
