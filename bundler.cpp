@@ -3,10 +3,14 @@
 #include "die.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
+#include "targets.hpp"
 
 #include <filesystem>
 
 void prep(sim_sb *cmd, const char *tool);
+
+bool actool(const char *path);
+void gen_iphone_plists(const char *exe_path, const char *name);
 
 static void copy(const char *with, const char *dag, const char *to) {
   sim_sbt cmd{};
@@ -41,5 +45,11 @@ void bundle(const char *dag) {
   copy("leco-exs.exe", dag, exe_path.buffer);
   copy("leco-rsrc.exe", dag, res_path.buffer);
 
-  cur_ctx().bundle(exe.buffer, stem.buffer);
+  sim_sbt path{};
+  sim_sb_path_copy_parent(&path, dag);
+  auto target = sim_sb_path_filename(&path);
+
+  if (IS_TGT_IOS(target))
+    if (actool(exe.buffer))
+      gen_iphone_plists(exe.buffer, stem.buffer);
 }

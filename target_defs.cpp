@@ -9,7 +9,6 @@ context android(const char *tgt) {
       .dll_ext = "so",
       .app_exe_path = [](auto exe, auto stem) {},
       .app_res_path = [](auto exe) {},
-      .bundle = [](auto exe, auto stem) {},
   };
 }
 } // namespace t::impl
@@ -32,7 +31,6 @@ context macosx() {
             sim_sb_path_parent(exe);
             sim_sb_path_append(exe, "Resources");
           },
-      .bundle = [](auto exe, auto stem) {},
       .native_target = true,
   };
 }
@@ -51,11 +49,6 @@ context iphoneos() {
             sim_sb_path_append(exe, stem);
           },
       .app_res_path = sim_sb_path_parent,
-      .bundle =
-          [](auto exe, auto stem) {
-            if (actool(exe))
-              gen_iphone_plists(exe, stem);
-          },
   };
 }
 context iphonesimulator() {
@@ -68,7 +61,6 @@ context iphonesimulator() {
             sim_sb_path_append(exe, stem);
           },
       .app_res_path = sim_sb_path_parent,
-      .bundle = [](auto exe, auto stem) {},
   };
 }
 
@@ -83,7 +75,6 @@ context windows() {
             sim_sb_path_set_extension(exe, "exe");
           },
       .app_res_path = sim_sb_path_parent,
-      .bundle = [](auto exe, auto stem) {},
       .native_target = true,
   };
 }
@@ -99,7 +90,6 @@ context linux() {
             sim_sb_path_set_extension(exe, "exe");
           },
       .app_res_path = sim_sb_path_parent,
-      .bundle = [](auto exe, auto stem) {},
       .native_target = true,
   };
 }

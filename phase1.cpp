@@ -2,8 +2,6 @@
 #include "sim.h"
 #include "targets.hpp"
 
-bool actool(const char *path) { return false; }
-void gen_iphone_plists(const char *exe_path, const char *name) {}
 bool find_android_llvm(sim_sb *out) { return false; }
 
 bool should_clean_current() { return false; }
