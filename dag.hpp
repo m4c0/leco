@@ -34,10 +34,10 @@ public:
   void create_cache_file();
   void read_from_cache_file();
 
-  [[nodiscard]] bool add_build_dep(const char *src);
-  [[nodiscard]] bool add_header(const char *fname);
-  [[nodiscard]] bool add_mod_dep(const char *mod_name);
-  [[nodiscard]] bool add_mod_impl(const char *mod_impl);
+  void add_build_dep(const char *src) { m_build_deps.insert(src); }
+  void add_header(const char *fname) { m_headers.insert(fname); }
+  void add_mod_dep(const char *mod_name) { m_mod_deps.insert(mod_name); }
+  void add_mod_impl(const char *mod_impl) { m_mod_impls.insert(mod_impl); }
 
   void set_app() { m_root = root_t::app; }
   void set_compiled() { m_compiled = true; }

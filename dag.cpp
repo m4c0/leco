@@ -10,16 +10,6 @@
 
 #include <map>
 
-static inline bool path_exists(const char *path) { return mtime_of(path) > 0; }
-[[nodiscard]] static bool add_real_abs(std::set<std::string> &set,
-                                       const char *path) {
-  if (!path_exists(path))
-    return false;
-
-  set.insert(path);
-  return true;
-}
-
 static void infer_module_name(sim_sb *module_name, const sim_sb *src) {
   sim_sb_path_copy_sb_stem(module_name, src);
 
@@ -35,19 +25,6 @@ dag::node::node(const char *n) {
   in2out(source(), &m_dag, "dag", cur_ctx().target.c_str());
   in2out(source(), &m_module_pcm, "pcm", cur_ctx().target.c_str());
   infer_module_name(&m_module_name, &m_source);
-}
-
-bool dag::node::add_build_dep(const char *dep) {
-  return add_real_abs(m_build_deps, dep);
-}
-bool dag::node::add_header(const char *fname) {
-  return add_real_abs(m_headers, fname);
-}
-bool dag::node::add_mod_dep(const char *mod_name) {
-  return add_real_abs(m_mod_deps, mod_name);
-}
-bool dag::node::add_mod_impl(const char *mod_impl) {
-  return add_real_abs(m_mod_impls, mod_impl);
 }
 
 static std::map<std::string, dag::node> cache{};
