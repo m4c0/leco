@@ -2,7 +2,7 @@
 
 #include <fstream>
 
-bool actool(const char *path);
+bool actool(const char *app_path);
 
 namespace plist {
 class dict {
@@ -200,14 +200,14 @@ static bool export_archive(const char *bundle_path, const char *xca_path) {
   return 0 == system(cmd.buffer);
 }
 void gen_iphone_ipa(const char *exe) {
-  if (!actool(exe))
-    return;
-
   sim_sbt name{};
   sim_sb_path_copy_stem(&name, exe);
 
   sim_sbt app_path{};
   sim_sb_path_copy_parent(&app_path, exe);
+
+  if (!actool(app_path.buffer))
+    return;
 
   sim_sbt exca{};
   sim_sb_path_copy_parent(&exca, app_path.buffer); // Applications

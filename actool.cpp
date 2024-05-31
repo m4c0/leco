@@ -69,12 +69,9 @@ static void copy_icon(const char *path) {
   std::filesystem::copy_file("icon.png", file.buffer);
 }
 
-bool actool(const char *path) {
-  sim_sbt app_path{};
-  sim_sb_path_copy_parent(&app_path, path);
-
+bool actool(const char *app_path) {
   sim_sbt prod{};
-  sim_sb_path_copy_parent(&prod, app_path.buffer);
+  sim_sb_path_copy_parent(&prod, app_path);
 
   sim_sbt exca{};
   sim_sb_path_copy_parent(&exca, prod.buffer);
@@ -115,6 +112,6 @@ bool actool(const char *path) {
                 "--output-partial-info-plist %s "
                 "--compile %s "
                 "%s",
-                plist.buffer, app_path.buffer, xcassets.buffer);
+                plist.buffer, app_path, xcassets.buffer);
   return 0 == std::system(cmd.buffer);
 }
