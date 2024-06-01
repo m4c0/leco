@@ -13,6 +13,7 @@
 #include "targets.hpp"
 
 #include <filesystem>
+#include <string.h>
 
 static const char *tool_dir;
 
