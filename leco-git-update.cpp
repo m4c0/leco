@@ -17,13 +17,11 @@
 
 static const char *target{HOST_TARGET};
 
+static std::set<std::string> unique_parents{};
+
 static std::set<std::string> added{};
 static void read_dag(const char *dag) {
-  sim_sbt parent{};
-  sim_sb_path_copy_parent(&parent, dag);
-  sim_sb_path_parent(&parent);
-  sim_sb_path_parent(&parent);
-  auto [_, inserted] = added.insert(parent.buffer);
+  auto [_, inserted] = added.insert(dag);
   if (!inserted)
     return;
 
@@ -41,11 +39,11 @@ static void read_dag(const char *dag) {
     }
   });
 
-  sim_sbt cmd{};
-  sim_sb_copy(&cmd, "git -C ../");
-  sim_sb_concat(&cmd, sim_path_filename(parent.buffer));
-  sim_sb_concat(&cmd, " pull");
-  puts(cmd.buffer);
+  sim_sbt parent{};
+  sim_sb_path_copy_parent(&parent, dag);
+  sim_sb_path_parent(&parent);
+  sim_sb_path_parent(&parent);
+  unique_parents.insert(parent.buffer);
 }
 
 static void usage() { die("invalid usage"); }
@@ -74,5 +72,13 @@ int main(int argc, char ** argv) {
     sim_sbt file{};
     sim_sb_path_copy_append(&file, cwd.buffer, entry);
     read_dag(file.buffer);
+  }
+
+  for (auto &parent : unique_parents) {
+    sim_sbt cmd{};
+    sim_sb_copy(&cmd, "git -C ../");
+    sim_sb_concat(&cmd, sim_path_filename(parent.c_str()));
+    sim_sb_concat(&cmd, " pull");
+    puts(cmd.buffer);
   }
 }
