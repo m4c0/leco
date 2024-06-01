@@ -1,6 +1,7 @@
 #include "sim.hpp"
 
 #include <fstream>
+#include <string>
 
 namespace plist {
 class dict {
