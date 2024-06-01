@@ -26,7 +26,7 @@ static void copy_exe(const char *input) {
   sim_sb_copy(&path, exedir);
   sim_sb_path_append(&path, sim_path_filename(input));
 
-  if (mtime_of(path.buffer) > mtime_of(input))
+  if (mtime_of(path.buffer) >= mtime_of(input))
     return;
 
   log("copying", path.buffer);
