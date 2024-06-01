@@ -1,7 +1,7 @@
 #define MKDIR_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
-#include "host_target.hpp"
 #include "mkdir.h"
+#include "targets.hpp"
 
 #include <errno.h>
 #include <stdio.h>
