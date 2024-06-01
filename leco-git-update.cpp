@@ -79,6 +79,6 @@ int main(int argc, char ** argv) {
     sim_sb_copy(&cmd, "git -C ../");
     sim_sb_concat(&cmd, sim_path_filename(parent.c_str()));
     sim_sb_concat(&cmd, " pull");
-    puts(cmd.buffer);
+    run(cmd.buffer);
   }
 }
