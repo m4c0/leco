@@ -22,5 +22,3 @@ context &cur_ctx() {
 bool for_each_target(bool (*fn)()) {
   return fn();
 }
-
-void bundle(const char *) {}

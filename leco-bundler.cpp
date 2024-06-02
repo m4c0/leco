@@ -1,19 +1,26 @@
+#pragma leco tool
+#pragma leco add_impl plist
+#define GOPT_IMPLEMENTATION
+#define MKDIR_IMPLEMENTATION
+#define SIM_IMPLEMENTATION
+
 #include "../mtime/mtime.h"
 #include "context.hpp"
 #include "die.hpp"
+#include "gopt.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
 #include "targets.hpp"
 
 #include <filesystem>
 
-void prep(sim_sb *cmd, const char *tool);
+static const char *tool_dir;
 
 void gen_iphone_ipa(const char *exe_path);
 
 static void xcassets(const char *with, const char *dag, const char *app_path) {
   sim_sbt cmd{};
-  prep(&cmd, with);
+  sim_sb_path_copy_append(&cmd, tool_dir, with);
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, dag);
   sim_sb_concat(&cmd, " -a ");
@@ -23,7 +30,7 @@ static void xcassets(const char *with, const char *dag, const char *app_path) {
 
 static void copy(const char *with, const char *dag, const char *to) {
   sim_sbt cmd{};
-  prep(&cmd, with);
+  sim_sb_path_copy_append(&cmd, tool_dir, with);
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, dag);
   sim_sb_concat(&cmd, " -o ");
@@ -77,7 +84,7 @@ static void ios_bundle(const char *dag) {
   gen_iphone_ipa(path.buffer);
 }
 
-void bundle(const char *dag) {
+static void bundle(const char *dag) {
   sim_sbt path{};
   sim_sb_path_copy_parent(&path, dag);
   auto target = sim_sb_path_filename(&path);
@@ -89,4 +96,27 @@ void bundle(const char *dag) {
   } else {
     dir_bundle(dag);
   }
+}
+
+static void usage() { die("invalid usage"); }
+
+int main(int argc, char **argv) try {
+  const char *input{};
+  auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
+    switch (ch) {
+    case 'i':
+      input = val;
+      break;
+    default:
+      usage();
+      break;
+    }
+  });
+  if (opts.argc != 0 || !input)
+    usage();
+
+  bundle(input);
+  return 0;
+} catch (...) {
+  return 1;
 }

@@ -5,7 +5,6 @@
 #include "die.hpp"
 #include "log.hpp"
 #include "mkdir.h"
-#include "phase2.hpp"
 #include "sim.hpp"
 
 #include <string.h>
@@ -61,6 +60,18 @@ static void link(const dag::node *n, const char *exe) {
   run(cmd.buffer);
 }
 
+static void bundle(const dag::node *n) {
+  if (is_verbose())
+    log("bundling", n->source());
+
+  sim_sbt cmd{};
+  prep(&cmd, "leco-bundle.exe");
+  sim_sb_concat(&cmd, " -i ");
+  sim_sb_concat(&cmd, n->dag());
+  add_common_flags(&cmd);
+  run(cmd.buffer);
+}
+
 void bounce(const char *path) {
   auto ext = sim_path_extension(path);
   if (ext == nullptr)
@@ -96,6 +107,6 @@ void bounce(const char *path) {
   }
 
   if (n->app()) {
-    bundle(n->dag());
+    bundle(n);
   }
 }
