@@ -115,6 +115,10 @@ int main(int argc, char **argv) try {
   if (opts.argc != 0 || !input)
     usage();
 
+  sim_sbt argv0{};
+  sim_sb_path_copy_parent(&argv0, argv[0]);
+  tool_dir = argv0.buffer;
+
   bundle(input);
   return 0;
 } catch (...) {
