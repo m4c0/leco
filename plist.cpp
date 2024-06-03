@@ -190,16 +190,6 @@ static bool code_sign(const char *bundle_path) {
   // TODO: improve error
   return 0 == std::system(cmd.buffer);
 }
-static bool export_archive(const char *bundle_path, const char *xca_path) {
-  sim_sbt cmd{1024};
-  sim_sb_printf(&cmd,
-                "xcodebuild -exportArchive"
-                " -archivePath %s"
-                " -exportPath %s/export"
-                " -exportOptionsPlist %s/export.plist",
-                xca_path, bundle_path, bundle_path);
-  return 0 == system(cmd.buffer);
-}
 void gen_iphone_ipa(const char *exe) {
   sim_sbt name{};
   sim_sb_path_copy_stem(&name, exe);
@@ -223,5 +213,4 @@ void gen_iphone_ipa(const char *exe) {
 
   gen_archive_plist(exca.buffer, name.buffer);
   gen_export_plist(build_path.buffer, name.buffer);
-  export_archive(build_path.buffer, exca.buffer);
 }

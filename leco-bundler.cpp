@@ -18,9 +18,17 @@ static const char *tool_dir;
 
 void gen_iphone_ipa(const char *exe_path);
 
-static void xcassets(const char *with, const char *dag, const char *app_path) {
+static void ipa(const char *dag) {
   sim_sbt cmd{};
-  sim_sb_path_copy_append(&cmd, tool_dir, with);
+  sim_sb_path_copy_append(&cmd, tool_dir, "leco-ipa.exe");
+  sim_sb_concat(&cmd, " -i ");
+  sim_sb_concat(&cmd, dag);
+  run(cmd.buffer);
+}
+
+static void xcassets(const char *dag, const char *app_path) {
+  sim_sbt cmd{};
+  sim_sb_path_copy_append(&cmd, tool_dir, "leco-xcassets.exe");
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, dag);
   sim_sb_concat(&cmd, " -a ");
@@ -74,7 +82,7 @@ static void ios_bundle(const char *dag) {
   mkdirs(path.buffer);
 
   copy("leco-exs.exe", dag, path.buffer);
-  xcassets("leco-xcassets.exe", dag, path.buffer);
+  xcassets(dag, path.buffer);
 
   sim_sb_path_parent(&path);
   copy("leco-rsrc.exe", dag, path.buffer);
@@ -82,6 +90,8 @@ static void ios_bundle(const char *dag) {
   sim_sb_path_append(&path, sim_path_filename(dag));
   sim_sb_path_set_extension(&path, "exe");
   gen_iphone_ipa(path.buffer);
+
+  ipa(dag);
 }
 
 static void bundle(const char *dag) {
