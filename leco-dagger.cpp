@@ -21,6 +21,7 @@ enum class exe_t {
   app,
 };
 
+static const char *argv0;
 static sim_sbt source{};
 static unsigned line{};
 static exe_t exe_type{};
@@ -28,7 +29,23 @@ static sim_sbt mod_name{};
 static FILE *out{stdout};
 
 static int usage() {
-  fprintf(stderr, "invalid usage\n");
+  fprintf(stderr, R"(
+LECO tool responsible for preprocessing C++ files containing leco pragmas and
+storing dependencies in a DAG-like file.
+
+Usage: %s [-d] -i <input.cpp> [-o <output.dag>] [-t <target>]
+
+Where:
+        -d: Dump errors from clang if enabled
+
+        -i: Source file name
+
+        -o: Output file name. Defaults to standard output.
+
+        -t: Target triple. Defaults to host target.
+
+)",
+          argv0);
   throw 1;
 }
 
@@ -247,6 +264,8 @@ void run(int argc, char **argv) {
   bool dump_errors{};
   char *target{};
   f::open fout{};
+
+  argv0 = argv[0];
 
   char *val{};
   char ch;
