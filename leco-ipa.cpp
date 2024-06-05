@@ -1,10 +1,10 @@
 #pragma leco tool
-#define GOPT_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
 #include "die.hpp"
-#include "gopt.hpp"
 #include "sim.hpp"
+
+import gopt;
 
 void usage() { die("invalid usage"); }
 

@@ -1,19 +1,19 @@
 #pragma leco tool
 #pragma leco add_impl plist
-#define GOPT_IMPLEMENTATION
 #define MKDIR_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
 #include "../mtime/mtime.h"
 #include "context.hpp"
 #include "die.hpp"
-#include "gopt.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
 #include "targets.hpp"
 
 #include <filesystem>
 #include <string.h>
+
+import gopt;
 
 static const char *tool_dir;
 

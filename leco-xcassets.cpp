@@ -1,16 +1,16 @@
 #pragma leco tool
-#define GOPT_IMPLEMENTATION
 #define MKDIR_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
 #include "die.hpp"
 #include "fopen.hpp"
-#include "gopt.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
 
 #include <filesystem>
 #include <stdio.h>
+
+import gopt;
 
 namespace json {
 class dict {

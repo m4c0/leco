@@ -1,5 +1,4 @@
 #pragma leco tool
-#define GOPT_IMPLEMENTATION
 #define PPRENT_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
@@ -7,7 +6,6 @@
 #include "dag2.hpp"
 #include "die.hpp"
 #include "fopen.hpp"
-#include "gopt.hpp"
 #include "log.hpp"
 #include "sim.hpp"
 #include "targets.hpp"
@@ -19,6 +17,8 @@
 #else
 #include <unistd.h>
 #endif
+
+import gopt;
 
 static bool log_all{};
 static const char *target{HOST_TARGET};

@@ -1,13 +1,11 @@
 #pragma leco tool
 
-#define GOPT_IMPLEMENTATION
 #define MTIME_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
 #include "../mtime/mtime.h"
 #include "dag2.hpp"
 #include "die.hpp"
-#include "gopt.hpp"
 #include "in2out.hpp"
 #include "log.hpp"
 #include "sim.hpp"
@@ -15,6 +13,8 @@
 #include <filesystem>
 #include <set>
 #include <string>
+
+import gopt;
 
 static const char *exedir{};
 static const char *target{};

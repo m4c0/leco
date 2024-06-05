@@ -1,5 +1,4 @@
 #pragma leco tool
-#define GOPT_IMPLEMENTATION
 #define MTIME_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
@@ -7,7 +6,6 @@
 #include "dag2.hpp"
 #include "die.hpp"
 #include "fopen.hpp"
-#include "gopt.hpp"
 #include "in2out.hpp"
 #include "log.hpp"
 #include "sim.hpp"
@@ -16,6 +14,8 @@
 #include <stdint.h>
 #include <set>
 #include <string>
+
+import gopt;
 
 static std::set<std::string> added{};
 
