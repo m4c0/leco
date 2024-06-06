@@ -68,7 +68,6 @@ static void bundle(const dag::node *n) {
   prep(&cmd, "leco-bundler.exe");
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, n->dag());
-  add_common_flags(&cmd);
   run(cmd.buffer);
 }
 
