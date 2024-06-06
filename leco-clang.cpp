@@ -28,7 +28,7 @@ static int usage() {
   fprintf(stderr, R"(
 LECO's heavily-opiniated CLANG runner
 
-Usage: %s [-i <input> [-o <output]] [-t <target>] [-g] [-O] [-v] [-- <clang-flags>]
+Usage: %s [-i <input> [-o <output>]] [-t <target>] [-g] [-O] [-v] [-- <clang-flags>]
 
 This tool uses the clang version available via PATH, except on MacOS where it 
 requires llvm to be installed via Homebrew.
