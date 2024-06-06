@@ -37,9 +37,6 @@ int try_main(int argc, char **argv) {
   puts("Building dagger");
   run(CLANG " -i leco-dagger.cpp -o out/" HOST_TARGET "/leco-dagger.exe");
 
-  puts("Building sysroot finder");
-  run(CLANG " -i leco-sysroot.cpp -o out/" HOST_TARGET "/leco-sysroot.exe");
-
   puts("Building linker");
   run(CLANG " -i leco-link.cpp -o out/" HOST_TARGET "/leco-link.exe");
 
