@@ -1,30 +1,19 @@
 #include "dag.hpp"
 
 #include "../mtime/mtime.h"
-#include "cl.hpp"
 #include "context.hpp"
 #include "dag2.hpp"
 #include "die.hpp"
 #include "in2out.hpp"
-#include "log.hpp"
 
 #include <map>
 
 void prep(sim_sb *cmd, const char *tool);
 
-static void infer_module_name(sim_sb *module_name, const sim_sb *src) {
-  sim_sb_path_copy_sb_stem(module_name, src);
-
-  auto p = strchr(module_name->buffer, '-');
-  if (p != nullptr)
-    *p = ':';
-}
-
 dag::node::node(const char *n) {
   sim_sb_path_copy_real(&m_source, n);
 
   in2out(source(), &m_dag, "dag", cur_ctx().target.c_str());
-  infer_module_name(&m_module_name, &m_source);
 }
 
 static std::map<std::string, dag::node> cache{};
