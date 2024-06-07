@@ -69,34 +69,6 @@ bool for_each_target(bool (*fn)()) {
   return false;
 }
 
-bool usage() {
-  fprintf(stderr, R"(
-  Usage: ../leco/leco.exe [-c] [-C <dir>] [-D] [-g] [-O] [-t <target>] [-v]
-
-  Where:
-    -c -- clean current module before build (if repeated, clean all modules)
-
-    -C -- change to this directory before build
-
-    -g -- enable debug symbols
-
-    -O -- enable optimisations
-
-    -q -- make build quieter
-
-    -t <target> -- one of:
-      iphoneos, iphonesimulator: for its referring platform (requires Apple SDKs)
-      ios: for both iPhoneOS and iPhoneSimulator
-      android: for all four Android architectures (requires Android SDK)
-      apple, linux, macosx, windows: for their respective platforms (requires their SDKs)
-      host: for the same platform as the host (default)
-
-    -v -- enable extra verboseness
-
-)");
-  return false;
-}
-
 bool parse_args(int argc, char **argv) {
   struct gopt opts {};
   GOPT(opts, argc, argv, "C:cgqOt:v");
@@ -130,12 +102,12 @@ bool parse_args(int argc, char **argv) {
       verbose = 2;
       break;
     default:
-      return usage();
+      return false;
     }
   }
 
   if (opts.argc != 0)
-    return usage();
+    return false;
 
   return true;
 }
