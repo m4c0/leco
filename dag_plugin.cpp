@@ -19,10 +19,6 @@ void dag::node::create_cache_file() {
   sim_sb_concat(&args, " -o ");
   sim_sb_concat(&args, dag());
 
-  if (is_extra_verbose()) {
-    sim_sb_concat(&args, " -d");
-  }
-
   try {
     run(args.buffer);
     read_from_cache_file();

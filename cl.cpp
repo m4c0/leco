@@ -20,10 +20,6 @@ static int clean_level{};
 bool should_clean_current() { return clean_level > 0; }
 bool should_clean_all() { return clean_level > 1; }
 
-static int verbose{1};
-bool is_verbose() { return verbose > 0; }
-bool is_extra_verbose() { return verbose > 1; }
-
 static bool debug{};
 bool enable_debug_syms() { return debug; }
 
@@ -71,7 +67,7 @@ bool for_each_target(bool (*fn)()) {
 
 bool parse_args(int argc, char **argv) {
   struct gopt opts {};
-  GOPT(opts, argc, argv, "C:cgqOt:v");
+  GOPT(opts, argc, argv, "C:cgOt:");
 
   char *val{};
   char ch;
@@ -92,14 +88,8 @@ bool parse_args(int argc, char **argv) {
     case 'O':
       optimise = true;
       break;
-    case 'q':
-      verbose = 0;
-      break;
     case 't':
       target = val;
-      break;
-    case 'v':
-      verbose = 2;
       break;
     default:
       return false;

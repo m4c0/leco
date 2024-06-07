@@ -58,9 +58,6 @@ static void cleaner() {
 
   sim_sbt cmd{};
   prep(&cmd, "leco-cleaner.exe");
-  if (is_extra_verbose()) {
-    sim_sb_concat(&cmd, " -v");
-  }
   if (should_clean_all()) {
     sim_sb_concat(&cmd, " -a");
   }
