@@ -27,6 +27,7 @@ static unsigned line{};
 static exe_t exe_type{};
 static sim_sbt mod_name{};
 static FILE *out{stdout};
+static const char *out_filename{};
 
 static int usage() {
   fprintf(stderr, R"(
@@ -283,6 +284,7 @@ void run(int argc, char **argv) {
       mkdirs(parent.buffer);
       fout = f::open{val, "w"};
       out = *fout;
+      out_filename = val;
       break;
     }
     case 't':
@@ -432,5 +434,8 @@ int main(int argc, char **argv) try {
   run(argc, argv);
   return 0;
 } catch (int n) {
+  if (out_filename != nullptr) {
+    remove(out_filename);
+  }
   return n;
 }

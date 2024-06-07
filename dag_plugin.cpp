@@ -19,13 +19,8 @@ void dag::node::create_cache_file() {
   sim_sb_concat(&args, " -o ");
   sim_sb_concat(&args, dag());
 
-  try {
-    run(args.buffer);
-    read_from_cache_file();
-  } catch (...) {
-    remove(dag());
-    throw;
-  }
+  run(args.buffer);
+  read_from_cache_file();
 }
 
 void dag::node::read_from_cache_file() {
