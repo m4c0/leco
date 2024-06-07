@@ -63,20 +63,8 @@ public:
 
   [[nodiscard]] constexpr auto root_type() const noexcept { return m_root; }
 
-  [[nodiscard]] constexpr bool app() const noexcept {
-    return m_root == root_t::app;
-  }
   [[nodiscard]] constexpr bool compiled() const noexcept { return m_compiled; }
-  [[nodiscard]] constexpr bool dll() const noexcept {
-    return m_root == root_t::dll;
-  }
   [[nodiscard]] constexpr bool recursed() const noexcept { return m_recursed; }
-  [[nodiscard]] constexpr bool root() const noexcept {
-    return m_root != root_t::none;
-  }
-  [[nodiscard]] constexpr bool tool() const noexcept {
-    return m_root == root_t::tool;
-  }
 
   [[nodiscard]] constexpr const sim_sb *source_sb() const noexcept {
     return &m_source;

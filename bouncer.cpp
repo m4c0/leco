@@ -45,15 +45,22 @@ static void compile(const dag::node *n) {
   run(cmd.buffer);
 }
 
-static void link(const dag::node *n, const char *exe) {
-  log("linking", exe);
+static void link(const char *dag, const char *exe_ext, uint64_t mtime) {
+  sim_sbt exe_path{};
+  sim_sb_copy(&exe_path, dag);
+  sim_sb_path_set_extension(&exe_path, exe_ext);
+
+  if (mtime <= mtime_of(exe_path.buffer))
+    return;
+
+  log("linking", exe_path.buffer);
 
   sim_sbt cmd{};
   prep(&cmd, "leco-link.exe");
   sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, n->dag());
+  sim_sb_concat(&cmd, dag);
   sim_sb_concat(&cmd, " -o ");
-  sim_sb_concat(&cmd, exe);
+  sim_sb_concat(&cmd, exe_path.buffer);
   add_common_flags(&cmd);
   run(cmd.buffer);
 }
@@ -66,6 +73,14 @@ static void bundle(const dag::node *n) {
   run(cmd.buffer);
 }
 
+void bounce(const char *path);
+static auto compile_with_deps(const dag::node *n) {
+  for (const auto &d : n->build_deps()) {
+    bounce(d.c_str());
+  }
+  return dag::visit_dirty(n, &compile);
+}
+
 void bounce(const char *path) {
   auto ext = sim_path_extension(path);
   if (ext == nullptr)
@@ -75,32 +90,28 @@ void bounce(const char *path) {
     return;
 
   auto n = dag::process(path);
-  if (!n->root())
+  switch (n->root_type()) {
+    uint64_t mtime;
+  case dag::root_t::none:
     return;
-
-  if (n->tool() && !cur_ctx().native_target)
+  case dag::root_t::main_mod:
+    compile_with_deps(n);
     return;
+  case dag::root_t::dll:
+    mtime = compile_with_deps(n);
+    link(n->dag(), cur_ctx().dll_ext.c_str(), mtime);
+    break;
+  case dag::root_t::tool:
+    if (!cur_ctx().native_target)
+      return;
 
-  for (const auto &d : n->build_deps()) {
-    bounce(d.c_str());
-  }
-
-  auto mtime = dag::visit_dirty(n, &compile);
-
-  if (!n->app() && !n->tool() && !n->dll())
-    return;
-
-  const char *exe_ext = n->dll() ? cur_ctx().dll_ext.c_str() : "exe";
-
-  sim_sbt exe_path{};
-  sim_sb_copy(&exe_path, n->dag());
-  sim_sb_path_set_extension(&exe_path, exe_ext);
-
-  if (mtime > mtime_of(exe_path.buffer)) {
-    link(n, exe_path.buffer);
-  }
-
-  if (n->app()) {
+    mtime = compile_with_deps(n);
+    link(n->dag(), "exe", mtime);
+    break;
+  case dag::root_t::app:
+    mtime = compile_with_deps(n);
+    link(n->dag(), "exe", mtime);
     bundle(n);
+    break;
   }
 }

@@ -90,7 +90,7 @@ static dag::node *recurse(const char *path, bool only_roots = false) {
   if (0 != strcmp(".cpp", ext) && 0 != strcmp(".cppm", ext))
     return n;
 
-  if (only_roots && !n->root())
+  if (only_roots && n->root_type() == dag::root_t::none)
     return n;
 
   for (auto &dep : n->build_deps()) {
