@@ -3,6 +3,7 @@
 #include "../mtime/mtime.h"
 #include "cl.hpp"
 #include "context.hpp"
+#include "dag2.hpp"
 #include "die.hpp"
 #include "in2out.hpp"
 #include "log.hpp"
@@ -56,7 +57,34 @@ static dag::node *recurse(const char *path, bool only_roots = false) {
     sim_sb_concat(&args, n->dag());
     run(args.buffer);
   }
-  n->read_from_cache_file();
+  dag_read(n->dag(), [n](auto id, auto file) {
+    switch (id) {
+    case 'tool':
+      n->set_tool();
+      break;
+    case 'tapp':
+      n->set_app();
+      break;
+    case 'tdll':
+      n->set_dll();
+      break;
+    case 'tmmd':
+      n->set_main_mod();
+      break;
+    case 'bdep':
+      n->add_build_dep(file);
+      break;
+    case 'head':
+      n->add_header(file);
+      break;
+    case 'impl':
+      n->add_mod_impl(file);
+      break;
+    case 'mdep':
+      n->add_mod_dep(file);
+      break;
+    }
+  });
 
   auto ext = sim_path_extension(path);
   if (0 != strcmp(".cpp", ext) && 0 != strcmp(".cppm", ext))

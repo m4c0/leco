@@ -6,8 +6,6 @@ bool find_android_llvm(sim_sb *out) { return false; }
 
 bool should_clean_current() { return false; }
 bool should_clean_all() { return false; }
-bool is_verbose() { return true; }
-bool is_extra_verbose() { return false; }
 bool is_optimised() { return true; }
 bool enable_debug_syms() { return false; }
 bool parse_args(int argc, char **argv) { return true; }

@@ -2,7 +2,6 @@
 #pragma leco add_impl bouncer
 #pragma leco add_impl cl
 #pragma leco add_impl dag
-#pragma leco add_impl dag_plugin
 #pragma leco add_impl impls
 #pragma leco add_impl target_defs
 
