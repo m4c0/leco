@@ -7,11 +7,11 @@
 
 namespace dag {
 enum class root_t {
-  none,
-  main_mod,
-  dll,
-  tool,
-  app,
+  none = 0,
+  main_mod = 'tmmd',
+  dll = 'tdll',
+  tool = 'tool',
+  app = 'tapp',
 };
 
 class node {
