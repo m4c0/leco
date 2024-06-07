@@ -17,10 +17,19 @@
 
 static FILE *out{};
 static const char *target{};
+static const char *argv0{};
 
 static std::set<std::string> added{};
 
-static void usage() { die("invalid usage"); }
+static void usage() {
+  die(R"(
+Usage: %s -i <input>
+
+Where:
+        -i: input DAG file (must be inside the "out" folder)
+)",
+      argv0);
+}
 
 static void print_dep(const char *dag) {
   sim_sbt stem{};
@@ -63,6 +72,8 @@ static void read_dag(const char *dag) {
 }
 
 void run(int argc, char **argv) {
+  argv0 = argv[0];
+
   const char *input{};
   auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
     switch (ch) {
