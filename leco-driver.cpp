@@ -69,6 +69,13 @@ bool run_target() {
   cleaner();
 
   for (auto file : pprent::list(".")) {
+    auto ext = sim_path_extension(file);
+    if (ext == nullptr)
+      continue;
+
+    if (strcmp(ext, ".cppm") != 0 && strcmp(ext, ".cpp") != 0)
+      continue;
+
     bounce(file);
     errno = 0;
   }

@@ -4,7 +4,6 @@
 #include "dag.hpp"
 #include "die.hpp"
 #include "log.hpp"
-#include "mkdir.h"
 #include "sim.hpp"
 
 #include <string.h>
@@ -82,13 +81,6 @@ static auto compile_with_deps(const dag::node *n) {
 }
 
 void bounce(const char *path) {
-  auto ext = sim_path_extension(path);
-  if (ext == nullptr)
-    return;
-
-  if (strcmp(ext, ".cppm") != 0 && strcmp(ext, ".cpp") != 0)
-    return;
-
   auto n = dag::process(path);
   switch (n->root_type()) {
     uint64_t mtime;
