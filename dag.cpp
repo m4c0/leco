@@ -25,7 +25,6 @@ dag::node::node(const char *n) {
 
   in2out(source(), &m_target, "o", cur_ctx().target.c_str());
   in2out(source(), &m_dag, "dag", cur_ctx().target.c_str());
-  in2out(source(), &m_module_pcm, "pcm", cur_ctx().target.c_str());
   infer_module_name(&m_module_name, &m_source);
 }
 

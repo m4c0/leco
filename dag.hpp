@@ -19,7 +19,6 @@ class node {
   sim_sbt m_target{};
   sim_sbt m_dag{};
   sim_sbt m_module_name{};
-  sim_sbt m_module_pcm{};
   std::set<std::string> m_build_deps{};
   std::set<std::string> m_headers{};
   std::set<std::string> m_mod_deps{};
@@ -30,8 +29,6 @@ class node {
 
 public:
   explicit node(const char *n);
-
-  void read_from_cache_file();
 
   void add_build_dep(const char *src) { m_build_deps.insert(src); }
   void add_header(const char *fname) { m_headers.insert(fname); }
@@ -74,9 +71,6 @@ public:
   }
   [[nodiscard]] constexpr const char *module_name() const noexcept {
     return m_module_name.buffer;
-  }
-  [[nodiscard]] constexpr const char *module_pcm() const noexcept {
-    return m_module_pcm.buffer;
   }
 };
 

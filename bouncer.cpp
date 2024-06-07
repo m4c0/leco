@@ -38,9 +38,13 @@ static void compile(const dag::node *n) {
   if (0 != strcmp(".cppm", sim_path_extension(n->source())))
     return;
 
+  sim_sbt pcm{};
+  sim_sb_copy(&pcm, n->source());
+  sim_sb_path_set_extension(&pcm, "pcm");
+
   prep(&cmd, "leco-clang.exe");
   sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, n->module_pcm());
+  sim_sb_concat(&cmd, pcm.buffer);
   add_common_flags(&cmd);
   run(cmd.buffer);
 }
