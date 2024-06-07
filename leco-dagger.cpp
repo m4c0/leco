@@ -428,11 +428,9 @@ void run(int argc, char **argv) {
   fclose(ferr);
 }
 
-int main(int argc, char **argv) {
-  try {
-    run(argc, argv);
-    return 0;
-  } catch (int n) {
-    return n;
-  }
+int main(int argc, char **argv) try {
+  run(argc, argv);
+  return 0;
+} catch (int n) {
+  return n;
 }
