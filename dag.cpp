@@ -23,7 +23,6 @@ static void infer_module_name(sim_sb *module_name, const sim_sb *src) {
 dag::node::node(const char *n) {
   sim_sb_path_copy_real(&m_source, n);
 
-  in2out(source(), &m_target, "o", cur_ctx().target.c_str());
   in2out(source(), &m_dag, "dag", cur_ctx().target.c_str());
   infer_module_name(&m_module_name, &m_source);
 }
@@ -137,10 +136,13 @@ uint64_t dag::visit_dirty(const dag::node *n, void *ptr,
       mtime = mtime > dmt ? mtime : dmt;
     }
 
-    if (mtime > mtime_of(n->target())) {
+    sim_sbt tgt{};
+    sim_sb_copy(&tgt, n->dag());
+    sim_sb_path_set_extension(&tgt, "o");
+    if (mtime > mtime_of(tgt.buffer)) {
       fn(ptr, n);
       // Get the mtime again after `fn` possibly changed it
-      mtime = mtime_of(n->target());
+      mtime = mtime_of(tgt.buffer);
     }
 
     max = max > mtime ? max : mtime;

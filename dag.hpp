@@ -16,7 +16,6 @@ enum class root_t {
 
 class node {
   sim_sbt m_source{};
-  sim_sbt m_target{};
   sim_sbt m_dag{};
   sim_sbt m_module_name{};
   std::set<std::string> m_build_deps{};
@@ -62,9 +61,6 @@ public:
   }
   [[nodiscard]] constexpr const char *source() const noexcept {
     return m_source.buffer;
-  }
-  [[nodiscard]] constexpr const char *target() const noexcept {
-    return m_target.buffer;
   }
   [[nodiscard]] constexpr const char *dag() const noexcept {
     return m_dag.buffer;

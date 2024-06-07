@@ -22,10 +22,6 @@ static void add_common_flags(sim_sb *cmd) {
 }
 
 static void compile(const dag::node *n) {
-  sim_sbt path{};
-  sim_sb_path_copy_parent(&path, n->target());
-  mkdirs(path.buffer);
-
   log("compiling", n->source());
 
   sim_sbt cmd{};
@@ -39,7 +35,7 @@ static void compile(const dag::node *n) {
     return;
 
   sim_sbt pcm{};
-  sim_sb_copy(&pcm, n->source());
+  sim_sb_copy(&pcm, n->dag());
   sim_sb_path_set_extension(&pcm, "pcm");
 
   prep(&cmd, "leco-clang.exe");
