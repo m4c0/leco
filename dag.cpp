@@ -60,16 +60,18 @@ static dag::node *recurse(const char *path, bool only_roots = false) {
   dag_read(n->dag(), [n](auto id, auto file) {
     switch (id) {
     case 'tool':
-      n->set_tool();
+      n->set_root_type(dag::root_t::tool);
       break;
     case 'tapp':
-      n->set_app();
+      n->set_root_type(dag::root_t::app);
       break;
     case 'tdll':
-      n->set_dll();
+      n->set_root_type(dag::root_t::dll);
       break;
     case 'tmmd':
-      n->set_main_mod();
+      if (n->root_type() == dag::root_t::none)
+        n->set_root_type(dag::root_t::main_mod);
+
       break;
     case 'bdep':
       n->add_build_dep(file);

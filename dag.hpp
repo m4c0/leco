@@ -38,15 +38,8 @@ public:
   void add_mod_dep(const char *mod_name) { m_mod_deps.insert(mod_name); }
   void add_mod_impl(const char *mod_impl) { m_mod_impls.insert(mod_impl); }
 
-  void set_app() { m_root = root_t::app; }
   void set_compiled() { m_compiled = true; }
-  void set_dll() { m_root = root_t::dll; }
-  void set_main_mod() {
-    if (m_root == root_t::none)
-      m_root = root_t::main_mod;
-  }
   void set_recursed() { m_recursed = true; }
-  void set_tool() { m_root = root_t::tool; }
 
   [[nodiscard]] constexpr const auto &build_deps() const noexcept {
     return m_build_deps;
@@ -62,6 +55,7 @@ public:
   }
 
   [[nodiscard]] constexpr auto root_type() const noexcept { return m_root; }
+  void set_root_type(root_t t) { m_root = t; }
 
   [[nodiscard]] constexpr bool compiled() const noexcept { return m_compiled; }
   [[nodiscard]] constexpr bool recursed() const noexcept { return m_recursed; }
