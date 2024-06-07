@@ -31,7 +31,6 @@ class node {
 public:
   explicit node(const char *n);
 
-  void create_cache_file();
   void read_from_cache_file();
 
   void add_build_dep(const char *src) { m_build_deps.insert(src); }

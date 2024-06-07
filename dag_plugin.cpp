@@ -7,22 +7,6 @@
 
 #include <string.h>
 
-void prep(sim_sb *cmd, const char *tool);
-
-void dag::node::create_cache_file() {
-  sim_sbt args{10240};
-  prep(&args, "leco-dagger.exe");
-  sim_sb_concat(&args, " -t ");
-  sim_sb_concat(&args, cur_ctx().target.c_str());
-  sim_sb_concat(&args, " -i ");
-  sim_sb_concat(&args, source());
-  sim_sb_concat(&args, " -o ");
-  sim_sb_concat(&args, dag());
-
-  run(args.buffer);
-  read_from_cache_file();
-}
-
 void dag::node::read_from_cache_file() {
   dag_read(dag(), [this](auto id, auto file) {
     switch (id) {

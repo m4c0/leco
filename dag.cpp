@@ -9,6 +9,8 @@
 
 #include <map>
 
+void prep(sim_sb *cmd, const char *tool);
+
 static void infer_module_name(sim_sb *module_name, const sim_sb *src) {
   sim_sb_path_copy_sb_stem(module_name, src);
 
@@ -44,7 +46,15 @@ static dag::node *recurse(const char *path, bool only_roots = false) {
     return n;
 
   if (mtime_of(n->source()) > mtime_of(n->dag())) {
-    n->create_cache_file();
+    sim_sbt args{10240};
+    prep(&args, "leco-dagger.exe");
+    sim_sb_concat(&args, " -t ");
+    sim_sb_concat(&args, cur_ctx().target.c_str());
+    sim_sb_concat(&args, " -i ");
+    sim_sb_concat(&args, n->source());
+    sim_sb_concat(&args, " -o ");
+    sim_sb_concat(&args, n->dag());
+    run(args.buffer);
   }
   n->read_from_cache_file();
 
