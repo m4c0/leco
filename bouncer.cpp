@@ -11,14 +11,7 @@
 
 void prep(sim_sb *cmd, const char *tool);
 
-static void add_common_flags(sim_sb *cmd) {
-  if (enable_debug_syms()) {
-    sim_sb_concat(cmd, " -g");
-  }
-  if (is_optimised()) {
-    sim_sb_concat(cmd, " -O");
-  }
-}
+static const char *common_flags;
 
 static void compile(const dag::node *n) {
   log("compiling", n->source());
@@ -27,7 +20,7 @@ static void compile(const dag::node *n) {
   prep(&cmd, "leco-clang.exe");
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, n->source());
-  add_common_flags(&cmd);
+  sim_sb_concat(&cmd, common_flags);
   run(cmd.buffer);
 
   if (0 != strcmp(".cppm", sim_path_extension(n->source())))
@@ -40,7 +33,7 @@ static void compile(const dag::node *n) {
   prep(&cmd, "leco-clang.exe");
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, pcm.buffer);
-  add_common_flags(&cmd);
+  sim_sb_concat(&cmd, common_flags);
   run(cmd.buffer);
 }
 
@@ -60,7 +53,7 @@ static void link(const char *dag, const char *exe_ext, uint64_t mtime) {
   sim_sb_concat(&cmd, dag);
   sim_sb_concat(&cmd, " -o ");
   sim_sb_concat(&cmd, exe_path.buffer);
-  add_common_flags(&cmd);
+  sim_sb_concat(&cmd, common_flags);
   run(cmd.buffer);
 }
 
@@ -81,6 +74,13 @@ static auto compile_with_deps(const dag::node *n) {
 }
 
 void bounce(const char *path) {
+  sim_sbt flags{};
+  if (enable_debug_syms())
+    sim_sb_concat(&flags, " -g");
+  if (is_optimised())
+    sim_sb_concat(&flags, " -O");
+  common_flags = flags.buffer;
+
   auto n = dag::process(path);
   switch (n->root_type()) {
     uint64_t mtime;
