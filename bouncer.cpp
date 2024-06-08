@@ -105,38 +105,33 @@ void bounce(const char *path) {
   in2out(path, &dag, "dag", cur_ctx().target.c_str());
 
   dagger(src.buffer, dag.buffer);
-  dag_read(dag.buffer, [](auto id, auto file) {
+  dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
+      const dag::node *n;
+      uint64_t mtime;
     case 'tapp':
+      n = dag::process(path);
+      mtime = compile_with_deps(n);
+      link(dag.buffer, "exe", mtime);
+      bundle(n);
+      break;
     case 'tdll':
+      n = dag::process(path);
+      mtime = compile_with_deps(n);
+      link(dag.buffer, cur_ctx().dll_ext.c_str(), mtime);
+      break;
     case 'tool':
+      if (!cur_ctx().native_target)
+        return;
+
+      n = dag::process(path);
+      mtime = compile_with_deps(n);
+      link(dag.buffer, "exe", mtime);
+      break;
     case 'tmmd':
+      n = dag::process(path);
+      compile_with_deps(n);
+      break;
     }
   });
-
-  auto n = dag::process(path);
-  switch (n->root_type()) {
-    uint64_t mtime;
-  case dag::root_t::none:
-    return;
-  case dag::root_t::main_mod:
-    compile_with_deps(n);
-    return;
-  case dag::root_t::dll:
-    mtime = compile_with_deps(n);
-    link(n->dag(), cur_ctx().dll_ext.c_str(), mtime);
-    break;
-  case dag::root_t::tool:
-    if (!cur_ctx().native_target)
-      return;
-
-    mtime = compile_with_deps(n);
-    link(n->dag(), "exe", mtime);
-    break;
-  case dag::root_t::app:
-    mtime = compile_with_deps(n);
-    link(n->dag(), "exe", mtime);
-    bundle(n);
-    break;
-  }
 }
