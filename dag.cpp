@@ -44,13 +44,14 @@ static dag::node *recurse(const char *path, bool only_roots = false) {
     sim_sb_concat(&args, n->dag());
     run(args.buffer);
   }
-  dag_read(n->dag(), [n](auto id, auto file) {
+  bool root = false;
+  dag_read(n->dag(), [&](auto id, auto file) {
     switch (id) {
     case 'tapp':
     case 'tdll':
     case 'tool':
     case 'tmmd':
-      n->set_root_type(static_cast<dag::root_t>(id));
+      root = true;
       break;
     case 'bdep':
       n->add_build_dep(file);
@@ -71,7 +72,7 @@ static dag::node *recurse(const char *path, bool only_roots = false) {
   if (0 != strcmp(".cpp", ext) && 0 != strcmp(".cppm", ext))
     return n;
 
-  if (only_roots && n->root_type() == dag::root_t::none)
+  if (only_roots && !root)
     return n;
 
   for (auto &dep : n->build_deps()) {

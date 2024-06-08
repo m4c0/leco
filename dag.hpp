@@ -22,7 +22,6 @@ class node {
   std::set<std::string> m_mod_deps{};
   std::set<std::string> m_mod_impls{};
   bool m_compiled{};
-  root_t m_root{};
   bool m_recursed{};
 
 public:
@@ -48,9 +47,6 @@ public:
   [[nodiscard]] constexpr const auto &mod_impls() const noexcept {
     return m_mod_impls;
   }
-
-  [[nodiscard]] constexpr auto root_type() const noexcept { return m_root; }
-  void set_root_type(root_t t) { m_root = t; }
 
   [[nodiscard]] constexpr bool compiled() const noexcept { return m_compiled; }
   [[nodiscard]] constexpr bool recursed() const noexcept { return m_recursed; }
