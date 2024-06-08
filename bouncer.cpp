@@ -90,6 +90,11 @@ static auto compile_with_deps(const char *path) {
   }
   return dag::visit_dirty(n, &compile);
 }
+static auto compile_and_link(const char *src, const char *dag,
+                             const char *ext) {
+  auto mtime = compile_with_deps(src);
+  link(dag, ext, mtime);
+}
 
 void bounce(const char *path) {
   sim_sbt flags{};
@@ -108,22 +113,16 @@ void bounce(const char *path) {
   dagger(src.buffer, dag.buffer);
   dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
-      uint64_t mtime;
     case 'tapp':
-      mtime = compile_with_deps(path);
-      link(dag.buffer, "exe", mtime);
+      compile_and_link(path, dag.buffer, "exe");
       bundle(dag.buffer);
       break;
     case 'tdll':
-      mtime = compile_with_deps(path);
-      link(dag.buffer, cur_ctx().dll_ext.c_str(), mtime);
+      compile_and_link(path, dag.buffer, cur_ctx().dll_ext.c_str());
       break;
     case 'tool':
-      if (!cur_ctx().native_target)
-        return;
-
-      mtime = compile_with_deps(path);
-      link(dag.buffer, "exe", mtime);
+      if (cur_ctx().native_target)
+        compile_and_link(path, dag.buffer, "exe");
       break;
     case 'tmmd':
       compile_with_deps(path);
