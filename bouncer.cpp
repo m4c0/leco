@@ -83,16 +83,23 @@ static void dagger(const char *src, const char *dag) {
 }
 
 void bounce(const char *path);
-static auto compile_with_deps(const char *path) {
-  auto n = dag::process(path);
-  for (const auto &d : n->build_deps()) {
-    bounce(d.c_str());
-  }
+static auto compile_with_deps(const char *src, const char *dag) {
+  dag_read(dag, [&](auto id, auto file) {
+    switch (id) {
+    case 'bdep':
+      bounce(file);
+      break;
+    default:
+      break;
+    }
+  });
+
+  auto n = dag::process(src);
   return dag::visit_dirty(n, &compile);
 }
 static auto compile_and_link(const char *src, const char *dag,
                              const char *ext) {
-  auto mtime = compile_with_deps(src);
+  auto mtime = compile_with_deps(src, dag);
   link(dag, ext, mtime);
 }
 
@@ -125,7 +132,9 @@ void bounce(const char *path) {
         compile_and_link(path, dag.buffer, "exe");
       break;
     case 'tmmd':
-      compile_with_deps(path);
+      compile_with_deps(path, dag.buffer);
+      break;
+    default:
       break;
     }
   });
