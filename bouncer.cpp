@@ -59,11 +59,11 @@ static void link(const char *dag, const char *exe_ext, uint64_t mtime) {
   run(cmd.buffer);
 }
 
-static void bundle(const dag::node *n) {
+static void bundle(const char *dag) {
   sim_sbt cmd{};
   prep(&cmd, "leco-bundler.exe");
   sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, n->dag());
+  sim_sb_concat(&cmd, dag);
   run(cmd.buffer);
 }
 
@@ -83,7 +83,8 @@ static void dagger(const char *src, const char *dag) {
 }
 
 void bounce(const char *path);
-static auto compile_with_deps(const dag::node *n) {
+static auto compile_with_deps(const char *path) {
+  auto n = dag::process(path);
   for (const auto &d : n->build_deps()) {
     bounce(d.c_str());
   }
@@ -107,30 +108,25 @@ void bounce(const char *path) {
   dagger(src.buffer, dag.buffer);
   dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
-      const dag::node *n;
       uint64_t mtime;
     case 'tapp':
-      n = dag::process(path);
-      mtime = compile_with_deps(n);
+      mtime = compile_with_deps(path);
       link(dag.buffer, "exe", mtime);
-      bundle(n);
+      bundle(dag.buffer);
       break;
     case 'tdll':
-      n = dag::process(path);
-      mtime = compile_with_deps(n);
+      mtime = compile_with_deps(path);
       link(dag.buffer, cur_ctx().dll_ext.c_str(), mtime);
       break;
     case 'tool':
       if (!cur_ctx().native_target)
         return;
 
-      n = dag::process(path);
-      mtime = compile_with_deps(n);
+      mtime = compile_with_deps(path);
       link(dag.buffer, "exe", mtime);
       break;
     case 'tmmd':
-      n = dag::process(path);
-      compile_with_deps(n);
+      compile_with_deps(path);
       break;
     }
   });
