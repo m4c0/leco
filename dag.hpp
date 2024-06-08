@@ -63,7 +63,6 @@ public:
 };
 
 const node *get_node(const char *source);
-const node *process(const char *path);
 void clear_cache();
 
 uint64_t visit_dirty(const char *path, void *ptr,
