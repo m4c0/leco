@@ -19,7 +19,7 @@ dag::node::node(const char *n) {
 static std::map<std::string, dag::node> cache{};
 void dag::clear_cache() { cache.clear(); }
 
-static dag::node *recurse(const char *path, bool only_roots = false) {
+static dag::node *recurse(const char *path) {
   sim_sbt real{};
   sim_sb_path_copy_real(&real, path);
   auto it = cache.find(real.buffer);
@@ -44,15 +44,8 @@ static dag::node *recurse(const char *path, bool only_roots = false) {
     sim_sb_concat(&args, n->dag());
     run(args.buffer);
   }
-  bool root = false;
-  dag_read(n->dag(), [&](auto id, auto file) {
+  dag_read(n->dag(), [n](auto id, auto file) {
     switch (id) {
-    case 'tapp':
-    case 'tdll':
-    case 'tool':
-    case 'tmmd':
-      root = true;
-      break;
     case 'bdep':
       n->add_build_dep(file);
       break;
@@ -70,9 +63,6 @@ static dag::node *recurse(const char *path, bool only_roots = false) {
 
   auto ext = sim_path_extension(path);
   if (0 != strcmp(".cpp", ext) && 0 != strcmp(".cppm", ext))
-    return n;
-
-  if (only_roots && !root)
     return n;
 
   for (auto &dep : n->build_deps()) {
@@ -96,7 +86,7 @@ static dag::node *recurse(const char *path, bool only_roots = false) {
 }
 
 const dag::node *dag::get_node(const char *source) { return &cache.at(source); }
-const dag::node *dag::process(const char *path) { return recurse(path, true); }
+const dag::node *dag::process(const char *path) { return recurse(path); }
 
 uint64_t dag::visit_dirty(const dag::node *n, void *ptr,
                           void (*fn)(void *, const dag::node *)) {
