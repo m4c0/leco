@@ -2,7 +2,9 @@
 #include "cl.hpp"
 #include "context.hpp"
 #include "dag.hpp"
+#include "dag2.hpp"
 #include "die.hpp"
+#include "in2out.hpp"
 #include "log.hpp"
 #include "sim.hpp"
 
@@ -65,6 +67,21 @@ static void bundle(const dag::node *n) {
   run(cmd.buffer);
 }
 
+static void dagger(const char *src, const char *dag) {
+  if (mtime_of(src) < mtime_of(dag))
+    return;
+
+  sim_sbt args{10240};
+  prep(&args, "leco-dagger.exe");
+  sim_sb_concat(&args, " -t ");
+  sim_sb_concat(&args, cur_ctx().target.c_str());
+  sim_sb_concat(&args, " -i ");
+  sim_sb_concat(&args, src);
+  sim_sb_concat(&args, " -o ");
+  sim_sb_concat(&args, dag);
+  run(args.buffer);
+}
+
 void bounce(const char *path);
 static auto compile_with_deps(const dag::node *n) {
   for (const auto &d : n->build_deps()) {
@@ -80,6 +97,22 @@ void bounce(const char *path) {
   if (is_optimised())
     sim_sb_concat(&flags, " -O");
   common_flags = flags.buffer;
+
+  sim_sbt src{};
+  sim_sb_path_copy_real(&src, path);
+
+  sim_sbt dag{};
+  in2out(path, &dag, "dag", cur_ctx().target.c_str());
+
+  dagger(src.buffer, dag.buffer);
+  dag_read(dag.buffer, [](auto id, auto file) {
+    switch (id) {
+    case 'tapp':
+    case 'tdll':
+    case 'tool':
+    case 'tmmd':
+    }
+  });
 
   auto n = dag::process(path);
   switch (n->root_type()) {
