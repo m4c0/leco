@@ -66,9 +66,10 @@ const node *get_node(const char *source);
 const node *process(const char *path);
 void clear_cache();
 
-uint64_t visit_dirty(const node *n, void *ptr, void (*fn)(void *, const node *));
-uint64_t visit_dirty(const node *n, auto &&fn) {
-  return visit_dirty(n, &fn, [](void *p, const node *nn) {
+uint64_t visit_dirty(const char *path, void *ptr,
+                     void (*fn)(void *, const node *));
+uint64_t visit_dirty(const char *path, auto &&fn) {
+  return visit_dirty(path, &fn, [](void *p, const node *nn) {
     auto pfn = static_cast<decltype(&fn)>(p);
     (*pfn)(nn);
   });

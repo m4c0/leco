@@ -94,8 +94,7 @@ static auto compile_with_deps(const char *src, const char *dag) {
     }
   });
 
-  auto n = dag::process(src);
-  return dag::visit_dirty(n, &compile);
+  return dag::visit_dirty(src, &compile);
 }
 static auto compile_and_link(const char *src, const char *dag,
                              const char *ext) {

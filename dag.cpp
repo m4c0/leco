@@ -88,9 +88,11 @@ static dag::node *recurse(const char *path) {
 const dag::node *dag::get_node(const char *source) { return &cache.at(source); }
 const dag::node *dag::process(const char *path) { return recurse(path); }
 
-uint64_t dag::visit_dirty(const dag::node *n, void *ptr,
+uint64_t dag::visit_dirty(const char *path, void *ptr,
                           void (*fn)(void *, const dag::node *)) {
   std::map<std::string, uint64_t> visited{};
+
+  auto n = process(path);
 
   uint64_t max{};
   const auto rec = [&](auto rec, auto *n, uint64_t pmt) -> uint64_t {
