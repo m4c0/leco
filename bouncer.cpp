@@ -15,21 +15,21 @@ void prep(sim_sb *cmd, const char *tool);
 
 static const char *common_flags;
 
-static void compile(const dag::node *n) {
-  log("compiling", n->source());
+static void compile(const char *src, const char *dag) {
+  log("compiling", src);
 
   sim_sbt cmd{};
   prep(&cmd, "leco-clang.exe");
   sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, n->source());
+  sim_sb_concat(&cmd, src);
   sim_sb_concat(&cmd, common_flags);
   run(cmd.buffer);
 
-  if (0 != strcmp(".cppm", sim_path_extension(n->source())))
+  if (0 != strcmp(".cppm", sim_path_extension(src)))
     return;
 
   sim_sbt pcm{};
-  sim_sb_copy(&pcm, n->dag());
+  sim_sb_copy(&pcm, dag);
   sim_sb_path_set_extension(&pcm, "pcm");
 
   prep(&cmd, "leco-clang.exe");
@@ -94,7 +94,8 @@ static auto compile_with_deps(const char *src, const char *dag) {
     }
   });
 
-  return dag::visit_dirty(src, &compile);
+  return dag::visit_dirty(
+      src, [](auto n) { return compile(n->source(), n->dag()); });
 }
 static auto compile_and_link(const char *src, const char *dag,
                              const char *ext) {
