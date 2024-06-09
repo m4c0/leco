@@ -8,8 +8,10 @@
 #include "log.hpp"
 #include "sim.hpp"
 
-#include <string.h>
 #include <filesystem>
+#include <set>
+#include <string.h>
+#include <string>
 
 void prep(sim_sb *cmd, const char *tool);
 
@@ -82,9 +84,30 @@ static void dagger(const char *src, const char *dag) {
   run(args.buffer);
 }
 
+static std::set<std::string> visited{};
+static void build_dag(const char *src) {
+  if (!visited.insert(src).second)
+    return;
+
+  sim_sbt dag{};
+  in2out(src, &dag, "dag", cur_ctx().target.c_str());
+
+  dagger(src, dag.buffer);
+  dag_read(dag.buffer, [](auto id, auto file) {
+    switch (id) {
+    case 'impl':
+    case 'mdep':
+      build_dag(file);
+      break;
+    default:
+      break;
+    }
+  });
+}
+
 void bounce(const char *path);
 static auto compile_with_deps(const char *src, const char *dag) {
-  dag_read(dag, [&](auto id, auto file) {
+  dag_read(dag, [](auto id, auto file) {
     switch (id) {
     case 'bdep':
       bounce(file);
@@ -93,6 +116,9 @@ static auto compile_with_deps(const char *src, const char *dag) {
       break;
     }
   });
+
+  visited.clear();
+  build_dag(src);
 
   return dag::visit_dirty(
       src, [](auto n) { return compile(n->source(), n->dag()); });

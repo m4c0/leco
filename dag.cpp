@@ -33,17 +33,6 @@ static dag::node *recurse(const char *path) {
   if (n->recursed())
     return n;
 
-  if (mtime_of(n->source()) > mtime_of(n->dag())) {
-    sim_sbt args{10240};
-    prep(&args, "leco-dagger.exe");
-    sim_sb_concat(&args, " -t ");
-    sim_sb_concat(&args, cur_ctx().target.c_str());
-    sim_sb_concat(&args, " -i ");
-    sim_sb_concat(&args, n->source());
-    sim_sb_concat(&args, " -o ");
-    sim_sb_concat(&args, n->dag());
-    run(args.buffer);
-  }
   dag_read(n->dag(), [n](auto id, auto file) {
     switch (id) {
     case 'bdep':
