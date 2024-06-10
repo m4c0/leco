@@ -2,31 +2,15 @@
 #include "sim.hpp"
 
 namespace t {
-context macosx() {
-  return context{
-      .target = "x86_64-apple-macosx11.6.0",
-      .native_target = true,
-  };
-}
+context macosx() { return context{.target = "x86_64-apple-macosx11.6.0"}; }
 context iphoneos() { return context{.target = "arm64-apple-ios16.1"}; }
 context iphonesimulator() {
   return context{.target = "x86_64-apple-ios16.1-simulator"};
 }
 
-context windows() {
-  return context{
-      .target = "x86_64-pc-windows-msvc",
-      .app_res_path = sim_sb_path_parent,
-      .native_target = true,
-  };
-}
+context windows() { return context{.target = "x86_64-pc-windows-msvc"}; }
 
-context linux() {
-  return context{
-      .target = "x86_64-pc-linux-gnu",
-      .native_target = true,
-  };
-}
+context linux() { return context{.target = "x86_64-pc-linux-gnu"}; }
 
 static context android(const char *tgt) { return context{.target = tgt}; }
 context android_aarch64() { return android("aarch64-none-linux-android26"); }

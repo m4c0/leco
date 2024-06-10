@@ -11,10 +11,7 @@ bool enable_debug_syms() { return false; }
 bool parse_args(int argc, char **argv) { return true; }
 
 context &cur_ctx() {
-  static context i{
-      .target = HOST_TARGET,
-      .native_target = true,
-  };
+  static context i{.target = HOST_TARGET};
   return i;
 }
 bool for_each_target(bool (*fn)()) {
