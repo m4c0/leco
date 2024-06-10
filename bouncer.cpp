@@ -1,6 +1,5 @@
 #include "../mtime/mtime.h"
 #include "cl.hpp"
-#include "context.hpp"
 #include "dag.hpp"
 #include "dag2.hpp"
 #include "die.hpp"
@@ -16,6 +15,7 @@
 void prep(sim_sb *cmd, const char *tool);
 
 static const char *common_flags;
+static const char *target;
 
 static void compile(const char *src, const char *dag) {
   log("compiling", src);
@@ -72,7 +72,7 @@ static void dagger(const char *src, const char *dag) {
   sim_sbt args{10240};
   prep(&args, "leco-dagger.exe");
   sim_sb_concat(&args, " -t ");
-  sim_sb_concat(&args, cur_ctx().target.c_str());
+  sim_sb_concat(&args, target);
   sim_sb_concat(&args, " -i ");
   sim_sb_concat(&args, src);
   sim_sb_concat(&args, " -o ");
@@ -86,7 +86,7 @@ static void build_dag(const char *src) {
     return;
 
   sim_sbt dag{};
-  in2out(src, &dag, "dag", cur_ctx().target.c_str());
+  in2out(src, &dag, "dag", target);
 
   dagger(src, dag.buffer);
   dag_read(dag.buffer, [](auto id, auto file) {
@@ -101,7 +101,7 @@ static void build_dag(const char *src) {
   });
 }
 
-void bounce(const char *path);
+static void bounce(const char *path);
 static auto compile_with_deps(const char *src, const char *dag) {
   dag_read(dag, [](auto id, auto file) {
     switch (id) {
@@ -125,19 +125,12 @@ static auto compile_and_link(const char *src, const char *dag,
   link(dag, exe, mtime);
 }
 
-void bounce(const char *path) {
-  sim_sbt flags{};
-  if (enable_debug_syms())
-    sim_sb_concat(&flags, " -g");
-  if (is_optimised())
-    sim_sb_concat(&flags, " -O");
-  common_flags = flags.buffer;
-
+static void bounce(const char *path) {
   sim_sbt src{};
   sim_sb_path_copy_real(&src, path);
 
   sim_sbt dag{};
-  in2out(path, &dag, "dag", cur_ctx().target.c_str());
+  in2out(path, &dag, "dag", target);
 
   dagger(src.buffer, dag.buffer);
   dag_read(dag.buffer, [&](auto id, auto file) {
@@ -157,4 +150,16 @@ void bounce(const char *path) {
       break;
     }
   });
+}
+void bounce(const char *path, const char *target) {
+  sim_sbt flags{};
+  if (enable_debug_syms())
+    sim_sb_concat(&flags, " -g");
+  if (is_optimised())
+    sim_sb_concat(&flags, " -O");
+  common_flags = flags.buffer;
+
+  ::target = target;
+
+  bounce(path);
 }

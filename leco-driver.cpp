@@ -6,6 +6,7 @@
 #pragma leco add_impl target_defs
 
 #include "cl.hpp"
+#include "context.hpp"
 #include "dag.hpp"
 #include "die.hpp"
 #include "fopen.hpp"
@@ -63,7 +64,7 @@ static void cleaner() {
   run(cmd.buffer);
 }
 
-void bounce(const char *path);
+void bounce(const char *path, const char *target);
 bool run_target() {
   dag::clear_cache();
   cleaner();
@@ -76,7 +77,7 @@ bool run_target() {
     if (strcmp(ext, ".cppm") != 0 && strcmp(ext, ".cpp") != 0)
       continue;
 
-    bounce(file);
+    bounce(file, cur_ctx().target.c_str());
     errno = 0;
   }
   return errno ? error() : true;
