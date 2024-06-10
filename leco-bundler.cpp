@@ -4,7 +4,6 @@
 #define SIM_IMPLEMENTATION
 
 #include "../mtime/mtime.h"
-#include "context.hpp"
 #include "die.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
