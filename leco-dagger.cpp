@@ -421,8 +421,10 @@ void run(int argc, char **argv) {
     output('tdll', path.buffer);
     break;
   case exe_t::tool:
-    sim_sb_path_set_extension(&path, "exe");
-    output('tool', path.buffer);
+    if (0 == strcmp(target, HOST_TARGET)) {
+      sim_sb_path_set_extension(&path, "exe");
+      output('tool', path.buffer);
+    }
     break;
   }
 

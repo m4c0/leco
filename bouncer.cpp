@@ -147,11 +147,8 @@ void bounce(const char *path) {
       bundle(dag.buffer);
       break;
     case 'tdll':
-      compile_and_link(path, dag.buffer, file);
-      break;
     case 'tool':
-      if (cur_ctx().native_target)
-        compile_and_link(path, dag.buffer, file);
+      compile_and_link(path, dag.buffer, file);
       break;
     case 'tmmd':
       compile_with_deps(path, dag.buffer);
