@@ -41,22 +41,18 @@ static void compile(const char *src, const char *dag) {
   run(cmd.buffer);
 }
 
-static void link(const char *dag, const char *exe_ext, uint64_t mtime) {
-  sim_sbt exe_path{};
-  sim_sb_copy(&exe_path, dag);
-  sim_sb_path_set_extension(&exe_path, exe_ext);
-
-  if (mtime <= mtime_of(exe_path.buffer))
+static void link(const char *dag, const char *exe, uint64_t mtime) {
+  if (mtime <= mtime_of(exe))
     return;
 
-  log("linking", exe_path.buffer);
+  log("linking", exe);
 
   sim_sbt cmd{};
   prep(&cmd, "leco-link.exe");
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, dag);
   sim_sb_concat(&cmd, " -o ");
-  sim_sb_concat(&cmd, exe_path.buffer);
+  sim_sb_concat(&cmd, exe);
   sim_sb_concat(&cmd, common_flags);
   run(cmd.buffer);
 }
@@ -124,9 +120,9 @@ static auto compile_with_deps(const char *src, const char *dag) {
       src, [](auto n) { return compile(n->source(), n->dag()); });
 }
 static auto compile_and_link(const char *src, const char *dag,
-                             const char *ext) {
+                             const char *exe) {
   auto mtime = compile_with_deps(src, dag);
-  link(dag, ext, mtime);
+  link(dag, exe, mtime);
 }
 
 void bounce(const char *path) {
@@ -147,15 +143,15 @@ void bounce(const char *path) {
   dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
     case 'tapp':
-      compile_and_link(path, dag.buffer, "exe");
+      compile_and_link(path, dag.buffer, file);
       bundle(dag.buffer);
       break;
     case 'tdll':
-      compile_and_link(path, dag.buffer, cur_ctx().dll_ext.c_str());
+      compile_and_link(path, dag.buffer, file);
       break;
     case 'tool':
       if (cur_ctx().native_target)
-        compile_and_link(path, dag.buffer, "exe");
+        compile_and_link(path, dag.buffer, file);
       break;
     case 'tmmd':
       compile_with_deps(path, dag.buffer);
