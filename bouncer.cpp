@@ -95,9 +95,6 @@ static auto build_dag(const char *src) {
   in2out(src, &out, "o", target);
 
   dagger(src, dag.buffer);
-  if (mtime > mtime_of(out.buffer)) {
-    compile(src, dag.buffer);
-  }
   dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
     case 'head':
@@ -105,6 +102,18 @@ static auto build_dag(const char *src) {
       break;
     case 'bdep':
     case 'mdep':
+      mtime = max(mtime, build_dag(file));
+      break;
+    default:
+      break;
+    }
+  });
+  if (mtime > mtime_of(out.buffer)) {
+    compile(src, dag.buffer);
+  }
+
+  dag_read(dag.buffer, [&](auto id, auto file) {
+    switch (id) {
     case 'impl':
       mtime = max(mtime, build_dag(file));
       break;
