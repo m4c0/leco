@@ -1,15 +1,14 @@
 #pragma leco tool
 #pragma leco add_impl bouncer
 #pragma leco add_impl cl
-#pragma leco add_impl dag
 #pragma leco add_impl impls
 #pragma leco add_impl target_defs
 
 #include "cl.hpp"
 #include "context.hpp"
-#include "dag.hpp"
 #include "die.hpp"
 #include "fopen.hpp"
+#include "sim.hpp"
 #include "targets.hpp"
 
 #include "../pprent/pprent.hpp"
@@ -66,7 +65,6 @@ static void cleaner() {
 
 void bounce(const char *path, const char *target);
 bool run_target() {
-  dag::clear_cache();
   cleaner();
 
   for (auto file : pprent::list(".")) {

@@ -1,6 +1,5 @@
 #include "../mtime/mtime.h"
 #include "cl.hpp"
-#include "dag.hpp"
 #include "dag2.hpp"
 #include "die.hpp"
 #include "in2out.hpp"
