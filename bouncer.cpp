@@ -8,7 +8,7 @@
 #include "sim.hpp"
 
 #include <filesystem>
-#include <set>
+#include <map>
 #include <string.h>
 #include <string>
 
@@ -80,25 +80,41 @@ static void dagger(const char *src, const char *dag) {
   run(args.buffer);
 }
 
-static std::set<std::string> visited{};
-static void build_dag(const char *src) {
-  if (!visited.insert(src).second)
-    return;
+static auto max(auto a, auto b) { return a > b ? a : b; }
+
+static std::map<std::string, uint64_t> cached{};
+static auto build_dag(const char *src) {
+  auto &mtime = cached[src];
+  if (mtime != 0)
+    return mtime;
+
+  mtime = mtime_of(src);
 
   sim_sbt dag{};
   in2out(src, &dag, "dag", target);
+  sim_sbt out{};
+  in2out(src, &out, "o", target);
 
   dagger(src, dag.buffer);
-  dag_read(dag.buffer, [](auto id, auto file) {
+  if (mtime > mtime_of(out.buffer)) {
+    compile(src, dag.buffer);
+  }
+  dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
-    case 'impl':
+    case 'head':
+      mtime = max(mtime, mtime_of(file));
+      break;
+    case 'bdep':
     case 'mdep':
-      build_dag(file);
+    case 'impl':
+      mtime = max(mtime, build_dag(file));
       break;
     default:
       break;
     }
   });
+
+  return mtime;
 }
 
 static void bounce(const char *path);
@@ -113,10 +129,7 @@ static auto compile_with_deps(const char *src, const char *dag) {
     }
   });
 
-  build_dag(src);
-
-  return dag::visit_dirty(
-      src, [](auto n) { return compile(n->source(), n->dag()); });
+  return build_dag(src);
 }
 static auto compile_and_link(const char *src, const char *dag,
                              const char *exe) {
@@ -125,7 +138,7 @@ static auto compile_and_link(const char *src, const char *dag,
 }
 
 static void bounce(const char *path) {
-  visited.clear();
+  cached.clear();
 
   sim_sbt src{};
   sim_sb_path_copy_real(&src, path);
