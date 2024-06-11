@@ -175,5 +175,7 @@ void bounce(const char *path, const char *target) {
 
   ::target = target;
 
-  bounce(path);
+  sim_sbt rpath{};
+  sim_sb_path_copy_real(&rpath, path);
+  bounce(rpath.buffer);
 }
