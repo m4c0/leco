@@ -113,7 +113,6 @@ static auto compile_with_deps(const char *src, const char *dag) {
     }
   });
 
-  visited.clear();
   build_dag(src);
 
   return dag::visit_dirty(
@@ -126,6 +125,8 @@ static auto compile_and_link(const char *src, const char *dag,
 }
 
 static void bounce(const char *path) {
+  visited.clear();
+
   sim_sbt src{};
   sim_sb_path_copy_real(&src, path);
 
