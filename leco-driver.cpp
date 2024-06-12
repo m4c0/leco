@@ -1,12 +1,15 @@
 #pragma leco tool
 #pragma leco add_impl cl
-#pragma leco add_impl impls
 #pragma leco add_impl target_defs
 
+#define GOPT_IMPLEMENTATION
+#define PPRENT_IMPLEMENTATION
+#define SIM_IMPLEMENTATION
 #include "cl.hpp"
 #include "context.hpp"
 #include "die.hpp"
 #include "fopen.hpp"
+#include "gopt.hpp"
 #include "sim.hpp"
 #include "targets.hpp"
 
