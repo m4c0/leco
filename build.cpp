@@ -40,9 +40,12 @@ int try_main(int argc, char **argv) {
   puts("Building linker");
   run(CLANG " -i leco-link.cpp -o out/" HOST_TARGET "/leco-link.exe");
 
+  puts("Building recurser");
+  run(CLANG " -i leco-recurse.cpp -o out/" HOST_TARGET "/leco-recurse.exe");
+
   // TODO: make phase1 leaner
   puts("Building Phase 1");
-  run(CLANG " -- bouncer.cpp impls.cpp leco-driver.cpp "
+  run(CLANG " -- impls.cpp leco-driver.cpp "
             "phase1.cpp -o out/" HOST_TARGET "/phase1.exe");
 
   puts("Using Phase 1 to build final stage");

@@ -1,7 +1,13 @@
+#pragma leco tool
+#define GOPT_IMPLEMENTATION
+#define MTIME_IMPLEMENTATION
+#define SIM_IMPLEMENTATION
+
 #include "../mtime/mtime.h"
 #include "cl.hpp"
 #include "dag2.hpp"
 #include "die.hpp"
+#include "gopt.hpp"
 #include "in2out.hpp"
 #include "log.hpp"
 #include "sim.hpp"
@@ -11,10 +17,14 @@
 #include <string.h>
 #include <string>
 
-void prep(sim_sb *cmd, const char *tool);
-
 static const char *common_flags;
 static const char *target;
+static const char *argv0;
+
+void prep(sim_sb *cmd, const char *tool) {
+  sim_sb_path_copy_parent(cmd, argv0);
+  sim_sb_path_append(cmd, tool);
+}
 
 static void compile(const char *src, const char *dag) {
   log("compiling", src);
@@ -173,17 +183,37 @@ static void bounce(const char *path) {
     }
   });
 }
-void bounce(const char *path, const char *target) {
+
+static void usage() { die("invalid usage"); }
+
+int main(int argc, char **argv) try {
   sim_sbt flags{};
-  if (enable_debug_syms())
-    sim_sb_concat(&flags, " -g");
-  if (is_optimised())
-    sim_sb_concat(&flags, " -O");
-  common_flags = flags.buffer;
-
-  ::target = target;
-
   sim_sbt rpath{};
-  sim_sb_path_copy_real(&rpath, path);
+
+  auto opts = gopt_parse(argc, argv, "t:i:gO", [&](auto ch, auto val) {
+    switch (ch) {
+    case 'i':
+      sim_sb_path_copy_real(&rpath, val);
+      break;
+    case 't':
+      target = val;
+      break;
+    case 'g':
+      sim_sb_concat(&flags, " -g");
+      break;
+    case 'O':
+      sim_sb_concat(&flags, " -O");
+      break;
+    default:
+      usage();
+    }
+  });
+  if (opts.argc != 0 || rpath.len == 0)
+    usage();
+
+  argv0 = argv[0];
+  common_flags = flags.buffer;
   bounce(rpath.buffer);
+} catch (...) {
+  return 1;
 }

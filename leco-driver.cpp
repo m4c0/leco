@@ -1,5 +1,4 @@
 #pragma leco tool
-#pragma leco add_impl bouncer
 #pragma leco add_impl cl
 #pragma leco add_impl impls
 #pragma leco add_impl target_defs
@@ -63,7 +62,6 @@ static void cleaner() {
   run(cmd.buffer);
 }
 
-void bounce(const char *path, const char *target);
 bool run_target() {
   cleaner();
 
@@ -75,7 +73,18 @@ bool run_target() {
     if (strcmp(ext, ".cppm") != 0 && strcmp(ext, ".cpp") != 0)
       continue;
 
-    bounce(file, cur_ctx().target.c_str());
+    sim_sbt cmd{};
+    prep(&cmd, "leco-recurse.exe");
+    sim_sb_concat(&cmd, " -t ");
+    sim_sb_concat(&cmd, cur_ctx().target.c_str());
+    sim_sb_concat(&cmd, " -i ");
+    sim_sb_concat(&cmd, file);
+    if (is_optimised())
+      sim_sb_concat(&cmd, " -g");
+    if (is_optimised())
+      sim_sb_concat(&cmd, " -O");
+    run(cmd.buffer);
+
     errno = 0;
   }
   return errno ? error() : true;
