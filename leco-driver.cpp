@@ -1,7 +1,4 @@
 #pragma leco tool
-#pragma leco add_impl cl
-#pragma leco add_impl target_defs
-
 #define GOPT_IMPLEMENTATION
 #define PPRENT_IMPLEMENTATION
 #define SIM_IMPLEMENTATION

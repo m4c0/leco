@@ -4,7 +4,6 @@
 #define SIM_IMPLEMENTATION
 
 #include "../mtime/mtime.h"
-#include "cl.hpp"
 #include "dag2.hpp"
 #include "die.hpp"
 #include "gopt.hpp"

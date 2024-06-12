@@ -22,7 +22,7 @@ void run(const char *cmd) {
     throw res;
 }
 int try_main(int argc, char **argv) {
-  // TODO: self-rebuild "phase 0" (aka "this cpp")
+  // TODO: self-rebuild this cpp
   mkdirs("out" SEP HOST_TARGET);
 
   puts("Building clang runner");
@@ -43,13 +43,11 @@ int try_main(int argc, char **argv) {
   puts("Building recurser");
   run(CLANG " -i leco-recurse.cpp -o out/" HOST_TARGET "/leco-recurse.exe");
 
-  // TODO: make phase1 leaner
-  puts("Building Phase 1");
-  run(CLANG " -- leco-driver.cpp "
-            "phase1.cpp -o out/" HOST_TARGET "/phase1.exe");
+  puts("Building driver");
+  run(CLANG " -- leco-driver.cpp -o out/" HOST_TARGET "/leco-driver.exe");
 
-  puts("Using Phase 1 to build final stage");
-  run("out" SEP HOST_TARGET SEP "phase1.exe");
+  puts("Using LECO to build final stage");
+  run("./leco.exe");
 
   puts("Doney-devito");
   return 0;
