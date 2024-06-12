@@ -7,6 +7,10 @@
 #include <stdlib.h>
 
 int main(int argc, char **argv) try {
+#ifdef _WIN32
+  system(""); // enable ANSI colours
+#endif
+
   sim_sbt cmd{10240};
   sim_sb_path_copy_real(&cmd, argv[0]);
   sim_sb_path_parent(&cmd);

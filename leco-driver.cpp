@@ -95,9 +95,6 @@ bool run_target() {
 
 extern "C" int main(int argc, char **argv) try {
   leco_argv0 = argv[0];
-#ifdef _WIN32
-  system(""); // enable ANSI colours
-#endif
 
   if (!parse_args(argc, argv))
     usage();
