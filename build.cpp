@@ -1,5 +1,6 @@
 #define MKDIR_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
+#include "die.hpp"
 #include "mkdir.h"
 #include "targets.hpp"
 
@@ -16,11 +17,6 @@
 
 #define CLANG "out" SEP HOST_TARGET SEP "leco-clang.exe"
 
-void run(const char *cmd) {
-  auto res = system(cmd);
-  if (res != 0)
-    throw res;
-}
 int try_main(int argc, char **argv) {
   // TODO: self-rebuild this cpp
   mkdirs("out" SEP HOST_TARGET);
