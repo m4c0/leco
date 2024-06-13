@@ -7,7 +7,6 @@
 #include "dag2.hpp"
 #include "die.hpp"
 #include "in2out.hpp"
-#include "log.hpp"
 #include "sim.hpp"
 
 #include <filesystem>

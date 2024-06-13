@@ -18,3 +18,7 @@ inline void run(const char *cmd) {
   if (0 != system(cmd))
     die("command failed: %s", cmd);
 }
+
+static inline void log(const char *verb, const char *msg) {
+  fprintf(stderr, "%20s %s\n", verb, msg);
+}

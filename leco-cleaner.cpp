@@ -6,7 +6,6 @@
 #include "dag2.hpp"
 #include "die.hpp"
 #include "fopen.hpp"
-#include "log.hpp"
 #include "sim.hpp"
 #include "targets.hpp"
 

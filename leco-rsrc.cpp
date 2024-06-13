@@ -7,7 +7,6 @@
 #include "die.hpp"
 #include "fopen.hpp"
 #include "in2out.hpp"
-#include "log.hpp"
 #include "sim.hpp"
 
 #include <filesystem>
