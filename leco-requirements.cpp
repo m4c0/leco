@@ -5,7 +5,6 @@
 #include "../pprent/pprent.hpp"
 #include "dag2.hpp"
 #include "die.hpp"
-#include "fopen.hpp"
 #include "sim.hpp"
 #include "targets.hpp"
 

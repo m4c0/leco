@@ -2,7 +2,6 @@
 #define PPRENT_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 #include "die.hpp"
-#include "fopen.hpp"
 #include "gopt.hpp"
 #include "sim.hpp"
 #include "targets.hpp"

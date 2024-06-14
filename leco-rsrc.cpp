@@ -5,7 +5,6 @@
 #include "../mtime/mtime.h"
 #include "dag2.hpp"
 #include "die.hpp"
-#include "fopen.hpp"
 #include "in2out.hpp"
 #include "sim.hpp"
 
