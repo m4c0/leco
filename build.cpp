@@ -1,4 +1,3 @@
-#define MKDIR_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 #include "die.hpp"
 #include "mkdir.h"

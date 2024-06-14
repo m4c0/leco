@@ -1,21 +1,7 @@
-#ifndef MKDIR_H
-#define MKDIR_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-void mkdirs(const char *path);
-
-#ifdef __cplusplus
-}
-#endif
-#endif // MKDIR_H
-
-#ifdef MKDIR_IMPLEMENTATION
-
+#pragma once
 #include "pathmax.h"
 #include "sim.h"
+
 #include <errno.h>
 
 #ifdef _WIN32
@@ -39,5 +25,3 @@ void mkdirs(const char *path) {
 
   _mkdir(path);
 }
-
-#endif // MKDIR_IMPLEMENTATION

@@ -1,6 +1,5 @@
 #pragma leco tool
 #pragma leco add_impl plist
-#define MKDIR_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
 #include "../mtime/mtime.h"
