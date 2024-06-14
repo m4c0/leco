@@ -1,3 +1,4 @@
+#define GOPT_IMPLEMENTATION
 #include "../gopt/gopt.h"
 
 static auto gopt_parse(int argc, char **argv, const char *format, auto &&fn) {

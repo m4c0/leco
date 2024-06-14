@@ -1,5 +1,4 @@
 #pragma leco tool
-#define GOPT_IMPLEMENTATION
 #define MTIME_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 

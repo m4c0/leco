@@ -1,5 +1,4 @@
 #pragma leco tool
-#define GOPT_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
 #include "dag2.hpp"
