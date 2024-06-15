@@ -42,7 +42,7 @@ int try_main(int argc, char **argv) {
   run(CLANG " -- leco-driver.cpp -o out/" HOST_TARGET "/leco-driver.exe");
 
   puts("Using LECO to build final stage");
-  run("./leco.exe");
+  run("." SEP "leco.exe");
 
   puts("Doney-devito");
   return 0;
