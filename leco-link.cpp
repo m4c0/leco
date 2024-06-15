@@ -15,8 +15,20 @@
 static const char *target{};
 static FILE *out{};
 static std::set<std::string> added{};
+static const char *argv0{};
 
-static void usage() { die("invalid usage"); }
+static void usage() {
+  die(R"(
+Usage: %s -i <input.dag> -o <output.exe> [-g] [-O]
+
+Where:
+        -i: input DAG
+        -o: output executable
+        -g: enable debug symbols
+        -O: enable optimisations
+)",
+      argv0);
+}
 
 static void put(const char *a) {
   while (*a != 0) {
@@ -69,12 +81,13 @@ static void read_dag(const char *dag) {
 }
 
 int main(int argc, char **argv) try {
+  argv0 = argv[0];
+
   const char *input{};
   const char *output{};
   bool debug{};
   bool opt{};
-  bool verbose{};
-  auto opts = gopt_parse(argc, argv, "i:o:gOv", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "i:o:gO", [&](auto ch, auto val) {
     switch (ch) {
     case 'i':
       input = val;
@@ -87,9 +100,6 @@ int main(int argc, char **argv) try {
       break;
     case 'O':
       opt = true;
-      break;
-    case 'v':
-      verbose = true;
       break;
     default:
       usage();
@@ -157,9 +167,6 @@ int main(int argc, char **argv) try {
   } else if (IS_TGT_IOS(target)) {
     sim_sb_concat(&cmd, " -rpath @executable_path/Frameworks");
   }
-
-  if (verbose)
-    fprintf(stderr, "%s\n", cmd.buffer);
 
   run(cmd.buffer);
 
