@@ -2,14 +2,10 @@
 #pragma leco add_impl plist
 #define SIM_IMPLEMENTATION
 
-#include "../mtime/mtime.h"
 #include "die.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
 #include "targets.hpp"
-
-#include <filesystem>
-#include <string.h>
 
 import gopt;
 
