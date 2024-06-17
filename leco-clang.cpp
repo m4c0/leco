@@ -1,9 +1,11 @@
 #pragma leco tool
 #define GOPT_IMPLEMENTATION
+#define MTIME_IMPLEMENTATION
 #define POPEN_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
 #include "../gopt/gopt.h"
+#include "../mtime/mtime.h"
 #include "../popen/popen.h"
 #include "die.hpp"
 #include "sim.hpp"
@@ -117,14 +119,18 @@ static void add_sysroot(sim_sb *args, const char *target) {
   fclose(ferr);
 }
 
-static void create_deplist(const char *out) {
+static bool create_deplist(const char *out) {
   sim_sbt cmd{};
   sim_sb_path_copy_parent(&cmd, argv0);
   sim_sb_path_append(&cmd, "leco-deplist.exe");
+  if (mtime_of(cmd.buffer) == 0)
+    return false;
+
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, out);
   sim_sb_path_set_extension(&cmd, "dag");
   run(cmd.buffer);
+  return true;
 }
 
 static void infer_output(sim_sb *args, const char *input, const char *target) {
@@ -152,11 +158,11 @@ static void infer_output(sim_sb *args, const char *input, const char *target) {
 
   if (0 == strcmp(".cppm", ext) || 0 == strcmp(".pcm", ext) ||
       0 == strcmp(".cpp", ext)) {
-    create_deplist(out.buffer);
-
-    sim_sb_concat(args, " @");
-    sim_sb_concat(args, out.buffer);
-    sim_sb_path_set_extension(args, "deps");
+    if (create_deplist(out.buffer)) {
+      sim_sb_concat(args, " @");
+      sim_sb_concat(args, out.buffer);
+      sim_sb_path_set_extension(args, "deps");
+    }
   }
 }
 
