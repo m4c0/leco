@@ -26,7 +26,6 @@ static void clang_cmd(sim_sb *buf, const char *exe) {
 }
 
 static int usage() {
-  // TODO: print usage
   fprintf(stderr, R"(
 LECO's heavily-opiniated CLANG runner
 
