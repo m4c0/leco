@@ -15,6 +15,7 @@
 import gopt;
 
 static const char *target{HOST_TARGET};
+static const char *argv0;
 
 static std::set<std::string> unique_parents{};
 
@@ -45,9 +46,19 @@ static void read_dag(const char *dag) {
   unique_parents.insert(parent.buffer);
 }
 
-static void usage() { die("invalid usage"); }
+static void usage() {
+  die(R"(
+Usage: %s -t <target>
+
+Where:
+        -t: Target triple to scan. The list might vary based on target
+            depending on the platform-specifics of each dependency.
+)",
+      argv0);
+}
 
 int main(int argc, char ** argv) {
+  argv0 = argv[0];
   auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
     switch (ch) {
     case 't':
