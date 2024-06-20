@@ -14,6 +14,7 @@
 import gopt;
 
 static const char *target{HOST_TARGET};
+static const char *argv0;
 
 static std::set<std::string> collected{};
 
@@ -49,10 +50,19 @@ void collect_deps(sim_sb *path) {
   }
 }
 
-static void usage() { die("invalid usage"); }
+static void usage() {
+  die(R"(
+Usage: %s -t <target>
 
-int main(int argc, char ** argv) {
+Where:
+        -t: Target triple to scan. The list might vary based on target
+            depending on the platform-specifics of each dependency.
+)",
+      argv0);
+}
+
 int main(int argc, char **argv) try {
+  argv0 = argv[0];
   auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
     switch (ch) {
     case 't':
