@@ -57,7 +57,7 @@ Where:
       argv0);
 }
 
-int main(int argc, char ** argv) {
+int main(int argc, char **argv) try {
   argv0 = argv[0];
   auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
     switch (ch) {
@@ -91,4 +91,6 @@ int main(int argc, char ** argv) {
     sim_sb_concat(&cmd, " pull");
     run(cmd.buffer);
   }
+} catch (...) {
+  return 1;
 }

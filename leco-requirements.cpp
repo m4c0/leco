@@ -52,6 +52,7 @@ void collect_deps(sim_sb *path) {
 static void usage() { die("invalid usage"); }
 
 int main(int argc, char ** argv) {
+int main(int argc, char **argv) try {
   auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
     switch (ch) {
     case 't':
@@ -71,4 +72,6 @@ int main(int argc, char ** argv) {
   for (const auto &s : collected) {
     puts(sim_path_filename(s.c_str()));
   }
+} catch (...) {
+  return 1;
 }
