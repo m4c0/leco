@@ -5,7 +5,6 @@
 #include "../mtime/mtime.h"
 #include "dag2.hpp"
 #include "die.hpp"
-#include "gopt.hpp"
 #include "in2out.hpp"
 #include "sim.hpp"
 
@@ -13,6 +12,8 @@
 #include <map>
 #include <string.h>
 #include <string>
+
+import gopt;
 
 static const char *common_flags;
 static const char *target;

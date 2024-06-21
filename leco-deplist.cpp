@@ -4,7 +4,6 @@
 #include "dag2.hpp"
 #include "die.hpp"
 #include "fopen.hpp"
-#include "gopt.hpp"
 #include "in2out.hpp"
 #include "sim.hpp"
 
@@ -13,6 +12,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <string>
+
+import gopt;
 
 static FILE *out{};
 static const char *target{};

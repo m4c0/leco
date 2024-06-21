@@ -7,12 +7,13 @@
 #include "../pprent/pprent.hpp"
 #include "die.hpp"
 #include "fopen.hpp"
-#include "gopt.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
 #include "targets.hpp"
 
 #include <string.h>
+
+import gopt;
 
 void usage() { die("invalid usage"); }
 

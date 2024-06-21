@@ -1,10 +1,8 @@
 #pragma leco tool
-#define GOPT_IMPLEMENTATION
 #define POPEN_IMPLEMENTATION
 #define MTIME_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
-#include "../gopt/gopt.h"
 #include "../mtime/mtime.h"
 #include "../popen/popen.h"
 #include "die.hpp"
@@ -12,6 +10,8 @@
 #include "mkdir.h"
 #include "sim.hpp"
 #include "targets.hpp"
+
+import gopt;
 
 enum class exe_t {
   none,
@@ -256,18 +256,13 @@ static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
 }
 
 void run(int argc, char **argv) {
-  struct gopt opts;
-  GOPT(opts, argc, argv, "do:i:t:");
-
   bool dump_errors{};
   char *target{};
   f::open fout{};
 
   argv0 = argv[0];
 
-  char *val{};
-  char ch;
-  while ((ch = gopt_parse(&opts, &val)) != 0) {
+  auto opts = gopt_parse(argc, argv, "do:i:t:", [&](auto ch, auto val) {
     switch (ch) {
     case 'd':
       dump_errors = true;
@@ -290,9 +285,9 @@ void run(int argc, char **argv) {
     default:
       usage();
     }
-  }
+  });
 
-  if (source.len == 0)
+  if (source.len == 0 || opts.argc != 0)
     usage();
 
   char *clang_argv[100]{};

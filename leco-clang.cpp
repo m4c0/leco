@@ -120,6 +120,12 @@ static void add_sysroot(sim_sb *args, const char *target) {
 }
 
 static bool create_deplist(const char *out) {
+  sim_sbt dag{};
+  sim_sb_copy(&dag, out);
+  sim_sb_path_set_extension(&dag, "dag");
+  if (mtime_of(dag.buffer) == 0)
+    return false;
+
   sim_sbt cmd{};
   sim_sb_path_copy_parent(&cmd, argv0);
   sim_sb_path_append(&cmd, "leco-deplist.exe");
@@ -127,8 +133,7 @@ static bool create_deplist(const char *out) {
     return false;
 
   sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, out);
-  sim_sb_path_set_extension(&cmd, "dag");
+  sim_sb_concat(&cmd, dag.buffer);
   run(cmd.buffer);
   return true;
 }

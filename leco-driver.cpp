@@ -2,7 +2,6 @@
 #define PPRENT_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 #include "die.hpp"
-#include "gopt.hpp"
 #include "sim.hpp"
 #include "targets.hpp"
 
@@ -17,6 +16,8 @@
 #else
 #include <unistd.h>
 #endif
+
+import gopt;
 
 const char *leco_argv0;
 const char *common_flags;
