@@ -9,7 +9,7 @@
 #include "../popen/popen.h"
 #include "die.hpp"
 #include "mkdir.h"
-#include "sim.hpp"
+#include "sim.h"
 #include "targets.hpp"
 
 static const char *argv0;
@@ -90,7 +90,8 @@ static void stamp(sim_sb *args, char **&argp, const char *arg) {
   sim_sb_concat(args, arg);
 }
 static void add_sysroot(sim_sb *args, const char *target) {
-  sim_sbt sra{};
+  sim_sb sra{};
+  sim_sb_new(&sra, 10240);
 
   char *argv[10]{};
   char **argp = argv;
@@ -106,13 +107,15 @@ static void add_sysroot(sim_sb *args, const char *target) {
   if (0 != proc_open(argv, &f, &ferr))
     die("could not infer sysroot");
 
-  sim_sbt sysroot{};
+  sim_sb sysroot{};
+  sim_sb_new(&sysroot, 10240);
   if (!fgets(sysroot.buffer, sysroot.size, f))
     die("failed to infer sysroot");
 
-  sim_sbt buf{};
-  while (!feof(ferr) && fgets(buf.buffer, buf.size, ferr) != nullptr) {
-    fputs(buf.buffer, stderr);
+  sim_sb_concat(args, sysroot.buffer);
+
+  while (!feof(ferr) && fgets(sra.buffer, sra.size, ferr) != nullptr) {
+    fputs(sra.buffer, stderr);
   }
 
   fclose(f);
@@ -120,13 +123,15 @@ static void add_sysroot(sim_sb *args, const char *target) {
 }
 
 static bool create_deplist(const char *out) {
-  sim_sbt dag{};
+  sim_sb dag{};
+  sim_sb_new(&dag, 10240);
   sim_sb_copy(&dag, out);
   sim_sb_path_set_extension(&dag, "dag");
   if (mtime_of(dag.buffer) == 0)
     return false;
 
-  sim_sbt cmd{};
+  sim_sb cmd{};
+  sim_sb_new(&cmd, 10240);
   sim_sb_path_copy_parent(&cmd, argv0);
   sim_sb_path_append(&cmd, "leco-deplist.exe");
   if (mtime_of(cmd.buffer) == 0)
@@ -141,7 +146,8 @@ static bool create_deplist(const char *out) {
 static void infer_output(sim_sb *args, const char *input, const char *target) {
   auto ext = sim_path_extension(input);
 
-  sim_sbt out{};
+  sim_sb out{};
+  sim_sb_new(&out, 10240);
   if (0 == strcmp(".pcm", ext)) {
     sim_sb_copy(&out, input);
   } else {
@@ -159,7 +165,8 @@ static void infer_output(sim_sb *args, const char *input, const char *target) {
     sim_sb_path_set_extension(&out, "o");
   }
 
-  sim_sbt path{};
+  sim_sb path{};
+  sim_sb_new(&path, 10240);
   sim_sb_path_copy_parent(&path, out.buffer);
   mkdirs(path.buffer);
 

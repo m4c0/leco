@@ -3,7 +3,7 @@
 
 #include "../mtime/mtime.h"
 #include "die.hpp"
-#include "sim.hpp"
+#include "sim.h"
 #include "targets.hpp"
 
 #include <stdlib.h>
@@ -13,7 +13,8 @@ int main(int argc, char **argv) try {
   system(""); // enable ANSI colours
 #endif
 
-  sim_sbt cmd{10240};
+  sim_sb cmd{};
+  sim_sb_new(&cmd, 10240);
   sim_sb_path_copy_real(&cmd, argv[0]);
   sim_sb_path_parent(&cmd);
   sim_sb_path_append(&cmd, "out");
