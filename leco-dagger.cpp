@@ -7,6 +7,7 @@
 #include "../gopt/gopt.h"
 #include "../mtime/mtime.h"
 #include "../popen/popen.h"
+#include "die.hpp"
 #include "fopen.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
@@ -28,8 +29,8 @@ static sim_sbt mod_name{};
 static FILE *out{stdout};
 static const char *out_filename{};
 
-static int usage() {
-  fprintf(stderr, R"(
+static void usage() {
+  die(R"(
 LECO tool responsible for preprocessing C++ files containing leco pragmas and
 storing dependencies in a DAG-like file.
 
@@ -45,13 +46,11 @@ Where:
         -t: Target triple. Defaults to host target.
 
 )",
-          argv0);
-  throw 1;
+      argv0);
 }
 
 static void error(const char *msg) {
-  fprintf(stderr, "%s:%d: %s\n", source.buffer, line, msg);
-  throw 1;
+  die("%s:%d: %s\n", source.buffer, line, msg);
 }
 
 static void output(uint32_t code, const char *msg) {
@@ -102,8 +101,7 @@ static void print_found(const char *rel_path, const char *desc, uint32_t code) {
   if (print_if_found(rel_path, desc, code))
     return;
 
-  fprintf(stderr, "%s:%d: could not find %s\n", source.buffer, line, desc);
-  throw 1;
+  die("%s:%d: could not find %s\n", source.buffer, line, desc);
 }
 static void print_asis(const char *rel_path, const char *desc, uint32_t code) {
   output(code, rel_path);
@@ -434,9 +432,9 @@ void run(int argc, char **argv) {
 int main(int argc, char **argv) try {
   run(argc, argv);
   return 0;
-} catch (int n) {
+} catch (...) {
   if (out_filename != nullptr) {
     remove(out_filename);
   }
-  return n;
+  return 1;
 }
