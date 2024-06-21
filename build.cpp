@@ -3,10 +3,7 @@
 #include "mkdir.h"
 #include "targets.hpp"
 
-#include <errno.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #if _WIN32
 #define SEP "\\"
@@ -19,6 +16,11 @@
 #define GOPT_PCM "../gopt/out/" HOST_TARGET "/gopt.pcm"
 #define GOPT                                                                   \
   "-fmodule-file=gopt=" GOPT_PCM " ../gopt/out/" HOST_TARGET "/gopt.o"
+
+#define TOOL(name)                                                             \
+  puts("Building " name);                                                      \
+  run(CLANG " -i leco-" name ".cpp -o out/" HOST_TARGET "/leco-" name ".exe "  \
+            "-- " GOPT)
 
 int try_main(int argc, char **argv) {
   // TODO: self-rebuild this cpp
@@ -34,25 +36,11 @@ int try_main(int argc, char **argv) {
   puts("Building meta runner");
   run(CLANG " -i leco.cpp -o leco.exe");
 
-  puts("Building deplist");
-  run(CLANG " -i leco-deplist.cpp -o out/" HOST_TARGET "/leco-deplist.exe "
-            "-- " GOPT);
-
-  puts("Building dagger");
-  run(CLANG " -i leco-dagger.cpp -o out/" HOST_TARGET "/leco-dagger.exe "
-            "-- " GOPT);
-
-  puts("Building linker");
-  run(CLANG " -i leco-link.cpp -o out/" HOST_TARGET "/leco-link.exe "
-            "-- " GOPT);
-
-  puts("Building recurser");
-  run(CLANG " -i leco-recurse.cpp -o out/" HOST_TARGET "/leco-recurse.exe "
-            "-- " GOPT);
-
-  puts("Building driver");
-  run(CLANG " -i leco-driver.cpp -o out/" HOST_TARGET "/leco-driver.exe "
-            "-- " GOPT);
+  TOOL("deplist");
+  TOOL("dagger");
+  TOOL("link");
+  TOOL("recurse");
+  TOOL("driver");
 
   puts("Using LECO to build final stage");
   run("." SEP "leco.exe");
