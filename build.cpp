@@ -30,7 +30,7 @@ int try_main(int argc, char **argv) {
   run("clang++ -Wall -Wno-unknown-pragmas -std=c++20 leco-clang.cpp -o " CLANG);
 
   puts("Building core modules");
-  run(CLANG " -i ../gopt/gopt.cppm");
+  run(CLANG " -i .." SEP "gopt" SEP "gopt.cppm");
   run(CLANG " -i " GOPT_PCM);
 
   puts("Building meta runner");
