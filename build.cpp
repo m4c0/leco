@@ -13,7 +13,7 @@
 
 #define CLANG "out" SEP HOST_TARGET SEP "leco-clang.exe"
 
-#define GOPT_PCM "../gopt/out/" HOST_TARGET "/gopt.pcm"
+#define GOPT_PCM ".." SEP "gopt" SEP "out" SEP HOST_TARGET SEP "gopt.pcm"
 #define GOPT                                                                   \
   "-fmodule-file=gopt=" GOPT_PCM " ../gopt/out/" HOST_TARGET "/gopt.o"
 
