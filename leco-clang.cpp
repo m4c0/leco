@@ -193,9 +193,10 @@ int main(int argc, char **argv) try {
   bool cpp = true;
   bool verbose{};
   const char *target{HOST_TARGET};
-  const char *input{};
   const char *output{};
   const char *ext{".cpp"};
+
+  sim_sb input{};
 
   char *val{};
   char ch;
@@ -205,8 +206,9 @@ int main(int argc, char **argv) try {
       debug = true;
       break;
     case 'i': {
-      input = val;
-      ext = sim_path_extension(input);
+      sim_sb_new(&input, 10240);
+      sim_sb_path_copy_real(&input, val);
+      ext = sim_path_extension(input.buffer);
       cpp = (0 == strcmp(ext, ".cpp")) || (0 == strcmp(ext, ".cppm")) ||
             (0 == strcmp(ext, ".mm"));
       break;
@@ -258,15 +260,15 @@ int main(int argc, char **argv) try {
   if (0 != strcmp(target, HOST_TARGET))
     add_sysroot(&args, target);
 
-  if (input) {
+  if (input.len != 0) {
     sim_sb_concat(&args, " ");
-    sim_sb_concat(&args, input);
+    sim_sb_concat(&args, input.buffer);
   }
   if (output) {
     sim_sb_concat(&args, " -o");
     sim_sb_concat(&args, output);
-  } else if (input) {
-    infer_output(&args, input, target);
+  } else if (input.len != 0) {
+    infer_output(&args, input.buffer, target);
   }
 
   for (auto i = 0; i < opts.argc; i++) {
