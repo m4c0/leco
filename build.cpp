@@ -13,14 +13,15 @@
 
 #define CLANG "out" SEP HOST_TARGET SEP "leco-clang.exe"
 
-#define GOPT_PCM ".." SEP "gopt" SEP "out" SEP HOST_TARGET SEP "gopt.pcm"
-#define GOPT                                                                   \
-  "-fmodule-file=gopt=" GOPT_PCM " ../gopt/out/" HOST_TARGET "/gopt.o"
+#define PCM(name) ".." SEP name SEP "out" SEP HOST_TARGET SEP name ".pcm"
+#define MARG(name) "-fmodule-file=" name "=" PCM(name) " " PCM(name)
+
+#define MODULE(name) run(CLANG " -i .." SEP name SEP name ".cppm");
 
 #define TOOL(name)                                                             \
   puts("Building " name);                                                      \
   run(CLANG " -i leco-" name ".cpp -o out/" HOST_TARGET "/leco-" name ".exe "  \
-            "-- " GOPT)
+            "-- " MARG("gopt"))
 
 int try_main(int argc, char **argv) {
   // TODO: self-rebuild this cpp
@@ -30,8 +31,7 @@ int try_main(int argc, char **argv) {
   run("clang++ -Wall -Wno-unknown-pragmas -std=c++20 leco-clang.cpp -o " CLANG);
 
   puts("Building core modules");
-  run(CLANG " -i .." SEP "gopt" SEP "gopt.cppm");
-  run(CLANG " -i " GOPT_PCM);
+  MODULE("gopt");
 
   puts("Building meta runner");
   run(CLANG " -i leco.cpp -o leco.exe");
