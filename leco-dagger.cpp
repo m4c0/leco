@@ -1,9 +1,7 @@
 #pragma leco tool
 #define POPEN_IMPLEMENTATION
-#define MTIME_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
-#include "../mtime/mtime.h"
 #include "../popen/popen.h"
 #include "die.hpp"
 #include "fopen.hpp"
@@ -12,6 +10,7 @@
 #include "targets.hpp"
 
 import gopt;
+import mtime;
 
 enum class exe_t {
   none,
@@ -85,9 +84,9 @@ static bool print_if_found(const char *rel_path, const char *desc,
   sim_sb_path_append(&path, rel_path);
 
   sim_sbt abs{};
-  if (mtime_of(path.buffer) == 0) {
+  if (mtime::of(path.buffer) == 0) {
     sim_sb_path_copy_real(&abs, rel_path);
-    if (mtime_of(abs.buffer) == 0) {
+    if (mtime::of(abs.buffer) == 0) {
       return false;
     }
   } else {

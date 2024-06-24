@@ -1,8 +1,6 @@
 #pragma leco tool
-#define MTIME_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
-#include "../mtime/mtime.h"
 #include "dag2.hpp"
 #include "die.hpp"
 #include "in2out.hpp"
@@ -14,6 +12,7 @@
 #include <string>
 
 import gopt;
+import mtime;
 
 static const char *common_flags;
 static const char *target;
@@ -49,7 +48,7 @@ static void compile(const char *src, const char *dag) {
 }
 
 static void link(const char *dag, const char *exe, uint64_t mtime) {
-  if (mtime <= mtime_of(exe))
+  if (mtime <= mtime::of(exe))
     return;
 
   log("linking", exe);
@@ -73,7 +72,7 @@ static void bundle(const char *dag) {
 }
 
 static void dagger(const char *src, const char *dag) {
-  if (mtime_of(src) < mtime_of(dag))
+  if (mtime::of(src) < mtime::of(dag))
     return;
 
   sim_sbt args{10240};
@@ -95,7 +94,7 @@ static auto build_dag(const char *src) {
   if (mtime != 0)
     return mtime;
 
-  mtime = mtime_of(src);
+  mtime = mtime::of(src);
 
   sim_sbt dag{};
   in2out(src, &dag, "dag", target);
@@ -106,7 +105,7 @@ static auto build_dag(const char *src) {
   dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
     case 'head':
-      mtime = max(mtime, mtime_of(file));
+      mtime = max(mtime, mtime::of(file));
       break;
     case 'bdep':
     case 'mdep':
@@ -116,7 +115,7 @@ static auto build_dag(const char *src) {
       break;
     }
   });
-  if (mtime > mtime_of(out.buffer)) {
+  if (mtime > mtime::of(out.buffer)) {
     compile(src, dag.buffer);
   }
 
