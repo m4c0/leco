@@ -1,9 +1,7 @@
 #pragma leco tool
-#define MTIME_IMPLEMENTATION
 #define PPRENT_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
-#include "../mtime/mtime.h"
 #include "../pprent/pprent.hpp"
 #include "die.hpp"
 #include "fopen.hpp"
@@ -14,10 +12,11 @@
 #include <string.h>
 
 import gopt;
+import mtime;
 
 void usage() { die("invalid usage"); }
 
-static bool exists(const sim_sb *path) { return mtime_of(path->buffer) > 0; }
+static bool exists(const sim_sb *path) { return mtime::of(path->buffer) > 0; }
 
 static void find_android_llvm(sim_sb *res) {
   const auto sdk = getenv("ANDROID_SDK_ROOT");
@@ -126,7 +125,7 @@ int main(int argc, char **argv) try {
   sim_sb_path_append(&cf, target);
   mkdirs(cf.buffer);
   sim_sb_path_append(&cf, "sysroot");
-  if (mtime_of(cf.buffer) > 0) {
+  if (mtime::of(cf.buffer) > 0) {
     f::open f{cf.buffer, "r"};
     sim_sbt buf{};
     if (fgets(buf.buffer, buf.size, *f) != nullptr) {

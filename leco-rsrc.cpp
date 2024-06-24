@@ -1,8 +1,6 @@
 #pragma leco tool
-#define MTIME_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
-#include "../mtime/mtime.h"
 #include "dag2.hpp"
 #include "die.hpp"
 #include "in2out.hpp"
@@ -14,6 +12,7 @@
 #include <string>
 
 import gopt;
+import mtime;
 
 static std::set<std::string> added{};
 
@@ -25,7 +24,7 @@ static void usage() { die("invalid usage"); }
 static void copy_res(const char *file) {
   sim_sbt path{};
   sim_sb_path_copy_append(&path, resdir, sim_path_filename(file));
-  if (mtime_of(path.buffer) >= mtime_of(file))
+  if (mtime::of(path.buffer) >= mtime::of(file))
     return;
 
   log("copying resource", file);
@@ -37,7 +36,7 @@ static void copy_shader(const char *file) {
   sim_sbt out{};
   sim_sb_path_copy_append(&out, resdir, sim_path_filename(file));
   sim_sb_concat(&out, ".spv");
-  if (mtime_of(out.buffer) > mtime_of(file))
+  if (mtime::of(out.buffer) > mtime::of(file))
     return;
 
   log("compiling shader", file);

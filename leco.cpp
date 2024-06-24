@@ -1,12 +1,12 @@
-#define MTIME_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
-#include "../mtime/mtime.h"
 #include "die.hpp"
 #include "sim.h"
 #include "targets.hpp"
 
 #include <stdlib.h>
+
+import mtime;
 
 int main(int argc, char **argv) try {
 #ifdef _WIN32

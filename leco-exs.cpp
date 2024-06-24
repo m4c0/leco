@@ -1,9 +1,7 @@
 #pragma leco tool
 
-#define MTIME_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
-#include "../mtime/mtime.h"
 #include "dag2.hpp"
 #include "die.hpp"
 #include "in2out.hpp"
@@ -14,6 +12,7 @@
 #include <string>
 
 import gopt;
+import mtime;
 
 static const char *exedir{};
 static const char *target{};
@@ -25,7 +24,7 @@ static void copy_exe(const char *input) {
   sim_sb_copy(&path, exedir);
   sim_sb_path_append(&path, sim_path_filename(input));
 
-  if (mtime_of(path.buffer) >= mtime_of(input))
+  if (mtime::of(path.buffer) >= mtime::of(input))
     return;
 
   log("copying", path.buffer);
