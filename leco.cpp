@@ -27,7 +27,7 @@ int main(int argc, char **argv) try {
     sim_sb_path_append(&cmd, "leco-");
     sim_sb_concat(&cmd, argv[1]);
     sim_sb_concat(&cmd, ".exe");
-    if (mtime_of(cmd.buffer) > 0) {
+    if (mtime::of(cmd.buffer) > 0) {
       argi++;
     } else {
       sim_sb_path_parent(&cmd);
