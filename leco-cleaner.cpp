@@ -1,8 +1,6 @@
 #pragma leco tool
-#define PPRENT_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
-#include "../pprent/pprent.hpp"
 #include "dag2.hpp"
 #include "die.hpp"
 #include "sim.hpp"
@@ -17,6 +15,7 @@
 #endif
 
 import gopt;
+import pprent;
 
 static bool log_all{};
 static const char *target{HOST_TARGET};

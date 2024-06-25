@@ -1,8 +1,6 @@
 #pragma leco tool
-#define PPRENT_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
-#include "../pprent/pprent.hpp"
 #include "dag2.hpp"
 #include "die.hpp"
 #include "sim.hpp"
@@ -12,6 +10,7 @@
 #include <string>
 
 import gopt;
+import pprent;
 
 static const char *target{HOST_TARGET};
 static const char *argv0;

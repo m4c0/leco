@@ -1,8 +1,6 @@
 #pragma leco tool
-#define PPRENT_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
-#include "../pprent/pprent.hpp"
 #include "die.hpp"
 #include "fopen.hpp"
 #include "mkdir.h"
@@ -13,6 +11,7 @@
 
 import gopt;
 import mtime;
+import pprent;
 
 void usage() { die("invalid usage"); }
 

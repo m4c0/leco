@@ -21,7 +21,7 @@
 #define TOOL(name)                                                             \
   puts("Building " name);                                                      \
   run(CLANG " -i leco-" name ".cpp -o out/" HOST_TARGET "/leco-" name ".exe "  \
-            "--" MARG("gopt") MARG("mtime"))
+            "--" MARG("gopt") MARG("mtime") MARG("pprent"))
 
 int try_main(int argc, char **argv) {
   // TODO: self-rebuild this cpp
@@ -35,7 +35,7 @@ int try_main(int argc, char **argv) {
   MODULE("mtime");
 
   puts("Building meta runner");
-  run(CLANG " -i leco.cpp -o leco.exe");
+  run(CLANG " -i leco.cpp -o leco.exe --" MARG("mtime"));
 
   TOOL("deplist");
   TOOL("dagger");

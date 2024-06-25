@@ -1,11 +1,8 @@
 #pragma leco tool
-#define PPRENT_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 #include "die.hpp"
 #include "sim.hpp"
 #include "targets.hpp"
-
-#include "../pprent/pprent.hpp"
 
 #include <errno.h>
 #include <string.h>
@@ -18,6 +15,7 @@
 #endif
 
 import gopt;
+import pprent;
 
 const char *leco_argv0;
 const char *common_flags;
