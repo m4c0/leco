@@ -49,13 +49,14 @@ static void find_android_llvm(sim_sb *res) {
   if (!exists(res))
     die("prebuilt path isn't a directory: [%s]", res->buffer);
 
-  DIR *dir = opendir(res->buffer);
-  dirent *dp = readdir(dir);
-  if (dp == nullptr)
-    die("no LLVM inside prebuilt dir: [%s]", res->buffer);
+  for (auto e : pprent::list(res->buffer)) {
+    if (e[0] == '.')
+      continue;
 
-  sim_sb_path_append(res, dp->d_name);
-  closedir(dir);
+    sim_sb_path_append(res, e);
+    return;
+  }
+  die("no LLVM inside prebuilt dir: [%s]", res->buffer);
 }
 
 static const char *apple_sysroot(const char *sdk) {
