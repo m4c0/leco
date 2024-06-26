@@ -16,6 +16,7 @@
 
 import gopt;
 import pprent;
+import strset;
 
 static bool log_all{};
 static const char *target{HOST_TARGET};
@@ -51,12 +52,9 @@ static void rm_rf(sim_sb *path) {
 #endif
 }
 
-#include <set>
-#include <string>
-static std::set<std::string> temp{};
+static strset temp{};
 static void remove_with_deps(sim_sb *path) {
-  auto [_, x] = temp.emplace(path->buffer);
-  if (!x)
+  if (!temp.insert(path->buffer))
     return;
 
   sim_sb_path_append(path, "out");

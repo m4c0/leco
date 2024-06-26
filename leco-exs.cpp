@@ -8,11 +8,10 @@
 #include "sim.hpp"
 
 #include <filesystem>
-#include <set>
-#include <string>
 
 import gopt;
 import mtime;
+import strset;
 
 static const char *exedir{};
 static const char *target{};
@@ -58,10 +57,9 @@ static void copy_bdep(const char *src) {
   });
 }
 
-static std::set<std::string> added{};
+static strset added{};
 static void read_dag(const char *dag) {
-  auto [_, inserted] = added.insert(dag);
-  if (!inserted)
+  if (!added.insert(dag))
     return;
 
   dag_read(dag, [](auto id, auto file) {

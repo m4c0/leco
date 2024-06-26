@@ -6,20 +6,17 @@
 #include "sim.hpp"
 #include "targets.hpp"
 
-#include <set>
-#include <string>
-
 import gopt;
 import pprent;
+import strset;
 
 static const char *target{HOST_TARGET};
 static const char *argv0;
 
-static std::set<std::string> collected{};
+static strset collected{};
 
 void collect_deps(sim_sb *path) {
-  auto [_, x] = collected.emplace(path->buffer);
-  if (!x)
+  if (!collected.insert(path->buffer))
     return;
 
   sim_sb_path_append(path, "out");

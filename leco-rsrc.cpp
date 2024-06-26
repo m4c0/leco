@@ -8,13 +8,12 @@
 
 #include <filesystem>
 #include <stdint.h>
-#include <set>
-#include <string>
 
 import gopt;
 import mtime;
+import strset;
 
-static std::set<std::string> added{};
+static strset added{};
 
 static const char *target{};
 static const char *resdir{};
@@ -46,8 +45,7 @@ static void copy_shader(const char *file) {
 }
 
 static void read_dag(const char *dag) {
-  auto [_, inserted] = added.insert(dag);
-  if (!inserted)
+  if (!added.insert(dag))
     return;
 
   dag_read(dag, [](auto id, auto file) {

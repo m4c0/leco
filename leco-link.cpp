@@ -8,14 +8,12 @@
 #include "sim.hpp"
 #include "targets.hpp"
 
-#include <set>
-#include <string>
-
 import gopt;
+import strset;
 
 static const char *target{};
 static FILE *out{};
-static std::set<std::string> added{};
+static strset added{};
 static const char *argv0{};
 
 static void usage() {
@@ -44,8 +42,7 @@ static void put(const char *a) {
 }
 
 static void read_dag(const char *dag) {
-  auto [_, inserted] = added.insert(dag);
-  if (!inserted)
+  if (!added.insert(dag))
     return;
 
   dag_read(dag, [](auto id, auto file) {

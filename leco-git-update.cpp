@@ -7,21 +7,18 @@
 #include "sim.hpp"
 #include "targets.hpp"
 
-#include <set>
-#include <string>
-
 import gopt;
 import pprent;
+import strset;
 
 static const char *target{HOST_TARGET};
 static const char *argv0;
 
-static std::set<std::string> unique_parents{};
+static strset unique_parents{};
 
-static std::set<std::string> added{};
+static strset added{};
 static void read_dag(const char *dag) {
-  auto [_, inserted] = added.insert(dag);
-  if (!inserted)
+  if (!added.insert(dag))
     return;
 
   dag_read(dag, [](auto id, auto file) {
