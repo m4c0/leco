@@ -7,19 +7,18 @@
 #include "in2out.hpp"
 #include "sim.hpp"
 
-#include <set>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <string>
 
 import gopt;
+import strset;
 
 static FILE *out{};
 static const char *target{};
 static const char *argv0{};
 
-static std::set<std::string> added{};
+static strset added{};
 
 static void usage() {
   die(R"(
@@ -51,8 +50,7 @@ static void print_dep(const char *dag) {
 }
 
 static void read_dag(const char *dag) {
-  auto [_, inserted] = added.insert(dag);
-  if (!inserted)
+  if (!added.insert(dag))
     return;
 
   print_dep(dag);
