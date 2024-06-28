@@ -6,7 +6,6 @@
 #include "in2out.hpp"
 #include "sim.hpp"
 
-#include <filesystem>
 #include <map>
 #include <string.h>
 #include <string>
