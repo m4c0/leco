@@ -3,15 +3,13 @@
 #define SIM_IMPLEMENTATION
 
 #include "dag2.hpp"
-#include "die.hpp"
 #include "in2out.hpp"
 #include "sim.hpp"
-
-#include <filesystem>
 
 import gopt;
 import mtime;
 import strset;
+import sys;
 
 static const char *exedir{};
 static const char *target{};
@@ -37,7 +35,7 @@ static void copy_exe(const char *input) {
     remove(bkp.buffer);
     rename(path.buffer, bkp.buffer);
   }
-  std::filesystem::copy_file(input, path.buffer);
+  sys::link(input, path.buffer);
 }
 
 static void copy_bdep(const char *src) {

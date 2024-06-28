@@ -1,15 +1,14 @@
 #pragma leco tool
 #define SIM_IMPLEMENTATION
 
-#include "die.hpp"
 #include "fopen.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
 
-#include <filesystem>
 #include <stdio.h>
 
 import gopt;
+import sys;
 
 namespace json {
 class dict {
@@ -71,7 +70,7 @@ static void create_icon_contents(const char *path) {
 static void copy_icon(const char *path) {
   sim_sbt file{};
   sim_sb_path_copy_append(&file, path, "icon.png");
-  std::filesystem::copy_file("icon.png", file.buffer);
+  sys::link("icon.png", file.buffer);
 }
 
 static void run_actool(const char *plist, const char *app_path,

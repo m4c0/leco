@@ -2,23 +2,22 @@
 #define SIM_IMPLEMENTATION
 
 #include "dag2.hpp"
-#include "die.hpp"
 #include "in2out.hpp"
 #include "sim.hpp"
 
-#include <filesystem>
 #include <stdint.h>
 
 import gopt;
 import mtime;
 import strset;
+import sys;
 
 static strset added{};
 
 static const char *target{};
 static const char *resdir{};
 
-static void usage() { die("invalid usage"); }
+static void usage() { sys::die("invalid usage"); }
 
 static void copy_res(const char *file) {
   sim_sbt path{};
@@ -26,9 +25,8 @@ static void copy_res(const char *file) {
   if (mtime::of(path.buffer) >= mtime::of(file))
     return;
 
-  log("copying resource", file);
-  remove(path.buffer);
-  std::filesystem::copy_file(file, path.buffer);
+  log("hard-linking resource", file);
+  sys::link(file, path.buffer);
 }
 
 static void copy_shader(const char *file) {
