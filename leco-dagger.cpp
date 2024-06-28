@@ -258,7 +258,7 @@ static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
 
 void run(int argc, char **argv) {
   bool dump_errors{};
-  char *target{};
+  const char *target{HOST_TARGET};
   f::open fout{};
 
   argv0 = argv[0];
@@ -299,10 +299,8 @@ void run(int argc, char **argv) {
 
   sim_sb_path_copy_parent(&args, argv[0]);
   sim_sb_path_append(&args, "leco-clang.exe");
-  if (target != nullptr) {
-    stamp(&args, argp, "-t");
-    stamp(&args, argp, target);
-  }
+  stamp(&args, argp, "-t");
+  stamp(&args, argp, target);
   stamp(&args, argp, "--");
   stamp(&args, argp, "-E");
   stamp(&args, argp, source.buffer);
