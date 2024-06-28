@@ -4,7 +4,6 @@
 #include "dag2.hpp"
 #include "die.hpp"
 #include "fopen.hpp"
-#include "in2out.hpp"
 #include "sim.hpp"
 
 #include <stdint.h>
@@ -58,10 +57,8 @@ static void read_dag(const char *dag) {
 
   dag_read(dag, [](auto id, auto file) {
     switch (id) {
-    case 'mdep': {
-      sim_sbt ddag{};
-      in2out(file, &ddag, "dag", target);
-      read_dag(ddag.buffer);
+    case 'mdag': {
+      read_dag(file);
       break;
     }
     default:
