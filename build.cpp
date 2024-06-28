@@ -36,6 +36,7 @@ int try_main(int argc, char **argv) {
   puts("Building core modules");
   MODULE("gopt");
   MODULE("mtime");
+  MODULE("pprent");
   LOCAL_MODULE("strset");
 
   puts("Building meta runner");
