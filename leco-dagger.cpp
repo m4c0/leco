@@ -27,6 +27,7 @@ static exe_t exe_type{};
 static sim_sbt mod_name{};
 static FILE *out{stdout};
 static const char *out_filename{};
+static const char *target{HOST_TARGET};
 
 static void usage() {
   die(R"(
@@ -175,9 +176,21 @@ static void find_header(const char *l) {
 
   print_found(hdr.buffer, "header", 'head');
 }
-static void add_mod_dep(char *p, const char *desc) {
-  static constexpr uint32_t code = 'mdep';
+static bool print_mod_dep(const char *src, const char *desc) {
+  if (!print_if_found(src, desc, 'mdep'))
+    return false;
 
+  sim_sbt dag{};
+  sim_sb_path_copy_real(&dag, src);
+  sim_sb_path_parent(&dag);
+  sim_sb_path_append(&dag, "out");
+  sim_sb_path_append(&dag, target);
+  sim_sb_path_append(&dag, sim_path_filename(src));
+  sim_sb_path_set_extension(&dag, "dag");
+  output('mdag', dag.buffer);
+  return true;
+}
+static void add_mod_dep(char *p, const char *desc) {
   sim_sbt mm{};
   if (*p == ':') {
     sim_sb_copy(&mm, mod_name.buffer);
@@ -202,7 +215,7 @@ static void add_mod_dep(char *p, const char *desc) {
     sim_sb_path_copy_parent(&dep, source.buffer);
     sim_sb_path_append(&dep, pp.buffer);
     sim_sb_concat(&dep, ".cppm");
-    if (print_if_found(dep.buffer, desc, code))
+    if (print_mod_dep(dep.buffer, desc))
       return;
   }
 
@@ -211,7 +224,7 @@ static void add_mod_dep(char *p, const char *desc) {
   sim_sb_path_copy_parent(&dep, source.buffer);
   sim_sb_path_append(&dep, mm.buffer);
   sim_sb_concat(&dep, ".cppm");
-  if (print_if_found(dep.buffer, desc, code))
+  if (print_mod_dep(dep.buffer, desc))
     return;
 
   // Module in sibling folder
@@ -220,7 +233,7 @@ static void add_mod_dep(char *p, const char *desc) {
   sim_sb_path_append(&dep, mm.buffer);
   sim_sb_path_append(&dep, mm.buffer);
   sim_sb_concat(&dep, ".cppm");
-  if (print_if_found(dep.buffer, desc, code))
+  if (print_mod_dep(dep.buffer, desc))
     return;
 
   // Module in sibling folder with "-" instead of "_"
@@ -232,7 +245,10 @@ static void add_mod_dep(char *p, const char *desc) {
   sim_sb_path_append(&dep, pp.buffer);
   sim_sb_path_append(&dep, mm.buffer);
   sim_sb_concat(&dep, ".cppm");
-  print_found(dep.buffer, desc, code);
+  if (print_mod_dep(dep.buffer, desc))
+    return;
+
+  die("%s:%d: could not find %s\n", source.buffer, line, desc);
 }
 
 static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
@@ -258,7 +274,6 @@ static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
 
 void run(int argc, char **argv) {
   bool dump_errors{};
-  const char *target{HOST_TARGET};
   f::open fout{};
 
   argv0 = argv[0];
