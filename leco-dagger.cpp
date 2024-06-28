@@ -188,6 +188,8 @@ static bool print_mod_dep(const char *src, const char *desc) {
   sim_sb_path_append(&dag, sim_path_filename(src));
   sim_sb_path_set_extension(&dag, "dag");
   output('mdag', dag.buffer);
+
+  // TODO: merge dags from deps (also recursing?)
   return true;
 }
 static void add_mod_dep(char *p, const char *desc) {
