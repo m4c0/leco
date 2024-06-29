@@ -140,6 +140,11 @@ static bool create_deplist(const char *out) {
 
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, dag.buffer);
+
+  sim_sb_concat(&cmd, " -o ");
+  sim_sb_concat(&cmd, dag.buffer);
+  sim_sb_path_set_extension(&cmd, "deps");
+
   run(cmd.buffer);
   return true;
 }

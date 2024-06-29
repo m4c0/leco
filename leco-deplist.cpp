@@ -13,7 +13,7 @@
 import gopt;
 import strset;
 
-static FILE *out{};
+static FILE *out{stdout};
 static const char *target{};
 static const char *argv0{};
 
@@ -21,10 +21,11 @@ static str::set added{};
 
 static void usage() {
   die(R"(
-Usage: %s -i <input>
+Usage: %s -i <input> [-o <output>]
 
 Where:
         -i: input DAG file (must be inside the "out" folder)
+        -o: output file (defaults to stdout)
 )",
       argv0);
 }
@@ -72,10 +73,14 @@ void run(int argc, char **argv) {
   argv0 = argv[0];
 
   const char *input{};
-  auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
+  const char *output{};
+  auto opts = gopt_parse(argc, argv, "i:o:", [&](auto ch, auto val) {
     switch (ch) {
     case 'i':
       input = val;
+      break;
+    case 'o':
+      output = val;
       break;
     default:
       usage();
@@ -88,18 +93,17 @@ void run(int argc, char **argv) {
   if (!strstr(input, SIM_PATHSEP_S "out" SIM_PATHSEP_S))
     usage();
 
-  sim_sbt output{};
-  sim_sb_copy(&output, input);
-  sim_sb_path_set_extension(&output, "deps");
-
-  f::open f{output.buffer, "wb"};
-  out = *f;
-
   sim_sbt path{};
-  sim_sb_path_copy_parent(&path, output.buffer);
+  sim_sb_path_copy_parent(&path, input);
   target = sim_sb_path_filename(&path);
 
-  read_dag(input);
+  if (output) {
+    f::open f{output, "wb"};
+    out = *f;
+    read_dag(input);
+  } else {
+    read_dag(input);
+  }
 }
 
 int main(int argc, char **argv) {
