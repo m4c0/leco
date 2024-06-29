@@ -35,7 +35,7 @@ inline void log(const char *verb, const char *msg) {
 
 void link(const char *src, const char *dst) {
 #ifdef _WIN32
-  if (!CreateHardLink(src, dst, nullptr))
+  if (!CreateHardLink(dst, src, nullptr))
     die("could not create hard-link");
 #else
   if (::link(src, dst) != 0) {
