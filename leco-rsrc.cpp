@@ -12,7 +12,7 @@ import mtime;
 import strset;
 import sys;
 
-static strset added{};
+static str::set added{};
 
 static const char *target{};
 static const char *resdir{};

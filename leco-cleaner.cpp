@@ -52,7 +52,7 @@ static void rm_rf(sim_sb *path) {
 #endif
 }
 
-static strset temp{};
+static str::set temp{};
 static void remove_with_deps(sim_sb *path) {
   if (!temp.insert(path->buffer))
     return;

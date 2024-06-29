@@ -55,7 +55,7 @@ static void copy_bdep(const char *src) {
   });
 }
 
-static strset added{};
+static str::set added{};
 static void read_dag(const char *dag) {
   if (!added.insert(dag))
     return;

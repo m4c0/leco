@@ -4,7 +4,9 @@ module;
 
 export module strset;
 
-export class strset {
+// "strset" conflicts in Windows
+namespace str {
+export class set {
   std::set<std::string> m_data{};
 
 public:
@@ -16,3 +18,4 @@ public:
   [[nodiscard]] auto begin() { return m_data.begin(); }
   [[nodiscard]] auto end() { return m_data.end(); }
 };
+} // namespace str

@@ -9,6 +9,8 @@
 #include "sim.hpp"
 #include "targets.hpp"
 
+#include <stdint.h>
+
 import gopt;
 import mtime;
 

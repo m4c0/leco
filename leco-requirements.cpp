@@ -13,7 +13,7 @@ import strset;
 static const char *target{HOST_TARGET};
 static const char *argv0;
 
-static strset collected{};
+static str::set collected{};
 
 void collect_deps(sim_sb *path) {
   if (!collected.insert(path->buffer))

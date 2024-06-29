@@ -14,9 +14,9 @@ import strset;
 static const char *target{HOST_TARGET};
 static const char *argv0;
 
-static strset unique_parents{};
+static str::set unique_parents{};
 
-static strset added{};
+static str::set added{};
 static void read_dag(const char *dag) {
   if (!added.insert(dag))
     return;

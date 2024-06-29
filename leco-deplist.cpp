@@ -17,7 +17,7 @@ static FILE *out{};
 static const char *target{};
 static const char *argv0{};
 
-static strset added{};
+static str::set added{};
 
 static void usage() {
   die(R"(

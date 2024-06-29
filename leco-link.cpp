@@ -13,7 +13,7 @@ import strset;
 
 static const char *target{};
 static FILE *out{};
-static strset added{};
+static str::set added{};
 static const char *argv0{};
 
 static void usage() {
