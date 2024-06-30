@@ -111,6 +111,23 @@ static void print_found(const char *rel_path, const char *desc, uint32_t code) {
 static void print_asis(const char *rel_path, const char *desc, uint32_t code) {
   output(code, rel_path);
 }
+static bool print_dag_if_found(const char *src, const char *desc, uint32_t code,
+                               uint32_t dag_code) {
+  if (!print_if_found(src, desc, code))
+    return false;
+
+  sim_sbt dag{};
+  sim_sb_path_copy_real(&dag, src);
+  sim_sb_path_parent(&dag);
+  sim_sb_path_append(&dag, "out");
+  sim_sb_path_append(&dag, target);
+  sim_sb_path_append(&dag, sim_path_filename(src));
+  sim_sb_path_set_extension(&dag, "dag");
+  output(dag_code, dag.buffer);
+
+  // TODO: merge dags from deps (also recursing?)
+  return true;
+}
 
 using printer_t = void (*)(const char *, const char *, uint32_t);
 static void read_file_list(const char *str, const char *desc, uint32_t code,
@@ -181,22 +198,6 @@ static void find_header(const char *l) {
 
   print_found(hdr.buffer, "header", 'head');
 }
-static bool print_mod_dep(const char *src, const char *desc) {
-  if (!print_if_found(src, desc, 'mdep'))
-    return false;
-
-  sim_sbt dag{};
-  sim_sb_path_copy_real(&dag, src);
-  sim_sb_path_parent(&dag);
-  sim_sb_path_append(&dag, "out");
-  sim_sb_path_append(&dag, target);
-  sim_sb_path_append(&dag, sim_path_filename(src));
-  sim_sb_path_set_extension(&dag, "dag");
-  output('mdag', dag.buffer);
-
-  // TODO: merge dags from deps (also recursing?)
-  return true;
-}
 static void add_mod_dep(char *p, const char *desc) {
   sim_sbt mm{};
   if (*p == ':') {
@@ -222,7 +223,7 @@ static void add_mod_dep(char *p, const char *desc) {
     sim_sb_path_copy_parent(&dep, source.buffer);
     sim_sb_path_append(&dep, pp.buffer);
     sim_sb_concat(&dep, ".cppm");
-    if (print_mod_dep(dep.buffer, desc))
+    if (print_dag_if_found(dep.buffer, desc, 'mdep', 'mdag'))
       return;
   }
 
@@ -231,7 +232,7 @@ static void add_mod_dep(char *p, const char *desc) {
   sim_sb_path_copy_parent(&dep, source.buffer);
   sim_sb_path_append(&dep, mm.buffer);
   sim_sb_concat(&dep, ".cppm");
-  if (print_mod_dep(dep.buffer, desc))
+  if (print_dag_if_found(dep.buffer, desc, 'mdep', 'mdag'))
     return;
 
   // Module in sibling folder
@@ -240,7 +241,7 @@ static void add_mod_dep(char *p, const char *desc) {
   sim_sb_path_append(&dep, mm.buffer);
   sim_sb_path_append(&dep, mm.buffer);
   sim_sb_concat(&dep, ".cppm");
-  if (print_mod_dep(dep.buffer, desc))
+  if (print_dag_if_found(dep.buffer, desc, 'mdep', 'mdag'))
     return;
 
   // Module in sibling folder with "-" instead of "_"
@@ -252,47 +253,31 @@ static void add_mod_dep(char *p, const char *desc) {
   sim_sb_path_append(&dep, pp.buffer);
   sim_sb_path_append(&dep, mm.buffer);
   sim_sb_concat(&dep, ".cppm");
-  if (print_mod_dep(dep.buffer, desc))
+  if (print_dag_if_found(dep.buffer, desc, 'mdep', 'mdag'))
     return;
 
   missing_file(desc);
 }
 
-static bool print_mod_impl(const char *src, const char *desc) {
-  if (!print_if_found(src, desc, 'impl'))
-    return false;
-
-  sim_sbt dag{};
-  sim_sb_path_copy_real(&dag, src);
-  sim_sb_path_parent(&dag);
-  sim_sb_path_append(&dag, "out");
-  sim_sb_path_append(&dag, target);
-  sim_sb_path_append(&dag, sim_path_filename(src));
-  sim_sb_path_set_extension(&dag, "dag");
-  output('idag', dag.buffer);
-
-  // TODO: merge dags from deps (also recursing?)
-  return true;
-}
 static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
   sim_sbt mi{};
   sim_sb_path_copy_parent(&mi, source.buffer);
   sim_sb_path_append(&mi, mod_impl);
 
   sim_sb_path_set_extension(&mi, "cpp");
-  if (print_mod_impl(mi.buffer, desc))
+  if (print_dag_if_found(mi.buffer, desc, 'impl', 'idag'))
     return;
 
   sim_sb_path_set_extension(&mi, "c");
-  if (print_mod_impl(mi.buffer, desc))
+  if (print_dag_if_found(mi.buffer, desc, 'impl', 'idag'))
     return;
 
   sim_sb_path_set_extension(&mi, "mm");
-  if (print_mod_impl(mi.buffer, desc))
+  if (print_dag_if_found(mi.buffer, desc, 'impl', 'idag'))
     return;
 
   sim_sb_path_set_extension(&mi, "m");
-  if (print_mod_impl(mi.buffer, desc))
+  if (print_dag_if_found(mi.buffer, desc, 'impl', 'idag'))
     return;
 
   missing_file(desc);
