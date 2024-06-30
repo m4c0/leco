@@ -255,25 +255,44 @@ static void add_mod_dep(char *p, const char *desc) {
   die("%s:%d: could not find %s\n", source.buffer, line, desc);
 }
 
+static bool print_mod_impl(const char *src, const char *desc) {
+  if (!print_if_found(src, desc, 'impl'))
+    return false;
+
+  sim_sbt dag{};
+  sim_sb_path_copy_real(&dag, src);
+  sim_sb_path_parent(&dag);
+  sim_sb_path_append(&dag, "out");
+  sim_sb_path_append(&dag, target);
+  sim_sb_path_append(&dag, sim_path_filename(src));
+  sim_sb_path_set_extension(&dag, "dag");
+  output('idag', dag.buffer);
+
+  // TODO: merge dags from deps (also recursing?)
+  return true;
+}
 static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
   sim_sbt mi{};
   sim_sb_path_copy_parent(&mi, source.buffer);
   sim_sb_path_append(&mi, mod_impl);
 
   sim_sb_path_set_extension(&mi, "cpp");
-  if (print_if_found(mi.buffer, desc, code))
+  if (print_mod_impl(mi.buffer, desc))
     return;
 
   sim_sb_path_set_extension(&mi, "c");
-  if (print_if_found(mi.buffer, desc, code))
+  if (print_mod_impl(mi.buffer, desc))
     return;
 
   sim_sb_path_set_extension(&mi, "mm");
-  if (print_if_found(mi.buffer, desc, code))
+  if (print_mod_impl(mi.buffer, desc))
     return;
 
   sim_sb_path_set_extension(&mi, "m");
-  print_found(mi.buffer, desc, code);
+  if (print_mod_impl(mi.buffer, desc))
+    return;
+
+  die("%s:%d: could not find %s\n", source.buffer, line, desc);
 }
 
 void run(int argc, char **argv) {
