@@ -54,6 +54,9 @@ Where:
 static void error(const char *msg) {
   die("%s:%d: %s\n", source.buffer, line, msg);
 }
+static void missing_file(const char *desc) {
+  die("%s:%d: could not find %s\n", source.buffer, line, desc);
+}
 
 static void output(uint32_t code, const char *msg) {
   fwrite(&code, sizeof(uint32_t), 1, out);
@@ -103,7 +106,7 @@ static void print_found(const char *rel_path, const char *desc, uint32_t code) {
   if (print_if_found(rel_path, desc, code))
     return;
 
-  die("%s:%d: could not find %s\n", source.buffer, line, desc);
+  missing_file(desc);
 }
 static void print_asis(const char *rel_path, const char *desc, uint32_t code) {
   output(code, rel_path);
@@ -252,7 +255,7 @@ static void add_mod_dep(char *p, const char *desc) {
   if (print_mod_dep(dep.buffer, desc))
     return;
 
-  die("%s:%d: could not find %s\n", source.buffer, line, desc);
+  missing_file(desc);
 }
 
 static bool print_mod_impl(const char *src, const char *desc) {
@@ -292,7 +295,7 @@ static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
   if (print_mod_impl(mi.buffer, desc))
     return;
 
-  die("%s:%d: could not find %s\n", source.buffer, line, desc);
+  missing_file(desc);
 }
 
 void run(int argc, char **argv) {
