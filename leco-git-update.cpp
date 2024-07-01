@@ -3,7 +3,6 @@
 
 #include "dag2.hpp"
 #include "die.hpp"
-#include "in2out.hpp"
 #include "sim.hpp"
 #include "targets.hpp"
 
@@ -23,11 +22,9 @@ static void read_dag(const char *dag) {
 
   dag_read(dag, [](auto id, auto file) {
     switch (id) {
-    case 'impl':
-    case 'mdep': {
-      sim_sbt ddag{};
-      in2out(file, &ddag, "dag", target);
-      read_dag(ddag.buffer);
+    case 'idag':
+    case 'mdag': {
+      read_dag(file);
       break;
     }
     default:
