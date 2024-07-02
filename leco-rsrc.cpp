@@ -2,7 +2,6 @@
 #define SIM_IMPLEMENTATION
 
 #include "dag2.hpp"
-#include "in2out.hpp"
 #include "sim.hpp"
 
 #include <stdint.h>
@@ -54,11 +53,9 @@ static void read_dag(const char *dag) {
     case 'shdr':
       copy_shader(file);
       break;
-    case 'impl':
-    case 'mdep': {
-      sim_sbt ddag{};
-      in2out(file, &ddag, "dag", target);
-      read_dag(ddag.buffer);
+    case 'idag':
+    case 'mdag': {
+      read_dag(file);
       break;
     }
     default:
