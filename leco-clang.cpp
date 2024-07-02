@@ -253,6 +253,12 @@ int main(int argc, char **argv) try {
     sim_sb_concat(&args, " -fmodules -fobjc-arc");
   }
 
+#ifdef __linux__
+  if (cpp) {
+    sim_sb_concat(&args, " -stdlib=libc++");
+  }
+#endif
+
   if (debug) {
     sim_sb_concat(&args, " -g");
   }
