@@ -68,11 +68,9 @@ static void read_dag(const char *dag) {
     case 'dlls':
       copy_exe(file);
       break;
-    case 'impl':
-    case 'mdep': {
-      sim_sbt ddag{};
-      in2out(file, &ddag, "dag", target);
-      read_dag(ddag.buffer);
+    case 'idag':
+    case 'mdag': {
+      read_dag(file);
       break;
     }
     default:
