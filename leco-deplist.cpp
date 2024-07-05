@@ -49,7 +49,6 @@ static void print_dep(const char *dag) {
   fprintf(out, "-fmodule-file=%s=%s\n", stem.buffer, pcm.buffer);
 }
 
-// TODO: use this idiom in most tools
 static void read_dag(const char *dag) {
   if (!added.insert(dag))
     return;
