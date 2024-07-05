@@ -67,7 +67,6 @@ static void read_dag(const char *dag) {
   });
 }
 
-// TODO: support for output to stdout
 void run(int argc, char **argv) {
   argv0 = argv[0];
 
