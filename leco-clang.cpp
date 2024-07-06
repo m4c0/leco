@@ -130,7 +130,6 @@ static bool create_deplist(const char *out) {
   if (mtime_of(dag.buffer) == 0)
     return false;
 
-  // TODO: merge deplist here
   sim_sb cmd{};
   sim_sb_new(&cmd, 10240);
   sim_sb_path_copy_parent(&cmd, argv0);
