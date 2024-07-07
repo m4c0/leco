@@ -15,7 +15,7 @@ int main(int argc, char **argv) try {
     if (sim_path_extension(file) != nullptr)
       continue;
 
-    printf("-=-=-=-=-=-=-=-=-=- %s -=-=-=-=-=-=-=-=-=-\n", file);
+    fprintf(stderr, "-=-=-=-=-=-=-=-=-=- %s -=-=-=-=-=-=-=-=-=-\n", file);
 
     sim_sbt cmd{};
     sim_sb_printf(&cmd, "git -C ../%s status", file);
