@@ -60,8 +60,7 @@ static void cleaner(const char *target) {
 
   sim_sbt cmd{};
   prep(&cmd, "leco-cleaner.exe");
-  sim_sb_concat(&cmd, " -t ");
-  sim_sb_concat(&cmd, target);
+  sim_sb_printf(&cmd, " -t %s", target);
   if (clean_level > 1) {
     sim_sb_concat(&cmd, " -a");
   }
@@ -76,15 +75,14 @@ static void run_target(const char *target) {
     if (ext == nullptr)
       continue;
 
-    if (strcmp(ext, ".cppm") != 0 && strcmp(ext, ".cpp") != 0)
+    if (strcmp(ext, ".cppm") != 0 && strcmp(ext, ".cpp") != 0 &&
+        strcmp(ext, ".c") != 0)
       continue;
 
     sim_sbt cmd{};
     prep(&cmd, "leco-recurse.exe");
-    sim_sb_concat(&cmd, " -t ");
-    sim_sb_concat(&cmd, target);
-    sim_sb_concat(&cmd, " -i ");
-    sim_sb_concat(&cmd, file);
+    sim_sb_printf(&cmd, " -t %s", target);
+    sim_sb_printf(&cmd, " -i %s ", file);
     sim_sb_concat(&cmd, common_flags);
     run(cmd.buffer);
 
