@@ -2,6 +2,7 @@
 #include "pathmax.h"
 #include "sim.h"
 
+// TODO: modularise
 struct sim_sbt : sim_sb {
   sim_sbt() { sim_sb_new(this, PATH_MAX); }
   sim_sbt(unsigned sz) { sim_sb_new(this, sz); }
