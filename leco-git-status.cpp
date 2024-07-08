@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 
+import mtime;
 import pprent;
 
 int main(int argc, char **argv) try {
@@ -13,6 +14,11 @@ int main(int argc, char **argv) try {
       continue;
 
     if (sim_path_extension(file) != nullptr)
+      continue;
+
+    sim_sbt path{};
+    sim_sb_printf(&path, "../%s/.git/config", file);
+    if (mtime::of(path.buffer) == 0)
       continue;
 
     fprintf(stderr, "-=-=-=-=-=-=-=-=-=- %s -=-=-=-=-=-=-=-=-=-\n", file);
