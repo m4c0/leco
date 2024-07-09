@@ -1,5 +1,7 @@
 #pragma leco tool
+#define POPEN_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
+#include "../popen/popen.h"
 #include "die.hpp"
 #include "sim.hpp"
 
@@ -23,9 +25,33 @@ int main(int argc, char **argv) try {
 
     fprintf(stderr, "-=-=-=-=-=-=-=-=-=- %s -=-=-=-=-=-=-=-=-=-\n", file);
 
-    sim_sbt cmd{};
-    sim_sb_printf(&cmd, "git -C ../%s status", file);
-    run(cmd.buffer);
+    sim_sbt pwd{};
+    sim_sb_printf(&pwd, "../%s", file);
+
+    char *args[7]{};
+    args[0] = strdup("git");
+    args[1] = strdup("-C");
+    args[2] = pwd.buffer;
+    args[3] = strdup("status");
+    args[4] = strdup("--porcelain=v2");
+    args[5] = strdup("--branch");
+
+    FILE *out;
+    FILE *err;
+
+    int res = proc_open(args, &out, &err);
+    if (res != 0) {
+      fprintf(stderr, "failed to get git status of [%s]", pwd.buffer);
+      return 1;
+    }
+
+    char buf[1024];
+    while (fgets(buf, sizeof(buf), out)) {
+      printf("> %s", buf);
+    }
+
+    fclose(out);
+    fclose(err);
   }
 } catch (...) {
   return 1;
