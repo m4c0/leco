@@ -10,6 +10,11 @@
 import mtime;
 import pprent;
 
+template <unsigned N>
+static auto starts_with(const char *str, const char (&prefix)[N]) {
+  return 0 == strncmp(str, prefix, N - 1);
+}
+
 int main(int argc, char **argv) try {
   for (auto file : pprent::list("..")) {
     if (file[0] == '.')
@@ -47,7 +52,13 @@ int main(int argc, char **argv) try {
 
     char buf[1024];
     while (fgets(buf, sizeof(buf), out)) {
-      printf("> %s", buf);
+      if (0 == strcmp(buf, "# branch.ab +0 -0\n")) {
+      } else if (starts_with(buf, "# branch.ab")) {
+        printf("%s", buf);
+      } else if (buf[0] == '#') {
+      } else {
+        printf("%s", buf);
+      }
     }
 
     fclose(out);
