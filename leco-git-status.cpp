@@ -54,10 +54,10 @@ int main(int argc, char **argv) try {
     while (fgets(buf, sizeof(buf), out)) {
       if (0 == strcmp(buf, "# branch.ab +0 -0\n")) {
       } else if (starts_with(buf, "# branch.ab")) {
-        printf("%s", buf);
+        fprintf(stderr, "%s", buf);
       } else if (buf[0] == '#') {
       } else {
-        printf("%s", buf);
+        fprintf(stderr, "%s", buf);
       }
     }
 
