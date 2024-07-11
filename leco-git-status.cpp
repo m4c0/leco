@@ -10,6 +10,10 @@
 import mtime;
 import pprent;
 
+#ifdef _WIN32
+#define strdup _strdup
+#endif
+
 template <unsigned N>
 static auto starts_with(const char *str, const char (&prefix)[N]) {
   return 0 == strncmp(str, prefix, N - 1);
