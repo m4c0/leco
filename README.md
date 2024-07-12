@@ -22,9 +22,23 @@ Some rules:
 Roughly:
 
 ```sh
-clang++ -std=c+20 -o build.exe build.cppm
+clang++ -std=c+20 -o build.exe build.cpp
 build.exe
 ```
 
-`build.exe` only requires a clang++ installed to be built, but it requires
-LLVM/Clang include/libs to build LECO itself.
+`build.exe` only requires a clang++ installed to be built. It does not require
+LECO to be installed afterwards.
+
+## Running LECO
+
+For running it on Windows and linux, `clang++` must be at least v17 and
+available on PATH. On MacOS, it must be installed via HomeBrew.
+
+LECO can be run from any LECO-based repo in the workspace (even on LECO repo
+itself). A command like this is enough to build a project:
+
+```sh
+../leco/leco.exe
+```
+
+On Windows CMD, you need to use the reverse slash.
