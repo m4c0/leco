@@ -32,8 +32,6 @@ int main(int argc, char **argv) try {
     if (mtime::of(path.buffer) == 0)
       continue;
 
-    fprintf(stderr, "-=-=-=-=-=-=-=-=-=- %s -=-=-=-=-=-=-=-=-=-\n", file);
-
     sim_sbt pwd{};
     sim_sb_printf(&pwd, "../%s", file);
 
@@ -70,6 +68,7 @@ int main(int argc, char **argv) try {
     fclose(err);
 
     if (outbuf.len > 0) {
+      fprintf(stderr, "-=-=-=-=-=-=-=-=-=- %s -=-=-=-=-=-=-=-=-=-\n", file);
       fprintf(stderr, "%s", outbuf.buffer);
     }
   }
