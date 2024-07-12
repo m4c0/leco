@@ -34,6 +34,7 @@ inline void log(const char *verb, const char *msg) {
 }
 
 void link(const char *src, const char *dst) {
+  // TODO: remove if existing
 #ifdef _WIN32
   if (!CreateHardLink(dst, src, nullptr))
     die("could not create hard-link");
