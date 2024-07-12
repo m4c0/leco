@@ -54,19 +54,24 @@ int main(int argc, char **argv) try {
       return 1;
     }
 
+    sim_sbt outbuf{10240};
     char buf[1024];
     while (fgets(buf, sizeof(buf), out)) {
       if (0 == strcmp(buf, "# branch.ab +0 -0\n")) {
       } else if (starts_with(buf, "# branch.ab")) {
-        fprintf(stderr, "%s", buf);
+        sim_sb_concat(&outbuf, buf);
       } else if (buf[0] == '#') {
       } else {
-        fprintf(stderr, "%s", buf);
+        sim_sb_concat(&outbuf, buf);
       }
     }
 
     fclose(out);
     fclose(err);
+
+    if (outbuf.len > 0) {
+      fprintf(stderr, "%s", outbuf.buffer);
+    }
   }
 } catch (...) {
   return 1;
