@@ -24,7 +24,8 @@
 #define TOOL(name)                                                             \
   puts("Building " name);                                                      \
   run(CLANG " -i leco-" name ".cpp -o out/" HOST_TARGET "/leco-" name ".exe "  \
-            "--" MARG("gopt") MARG("mtime") MARG("pprent") LMARG("strset"))
+            "--" MARG("gopt") MARG("mtime") MARG("popen") MARG("pprent")       \
+                LMARG("strset"))
 
 int try_main(int argc, char **argv) {
   // TODO: self-rebuild this cpp
@@ -36,6 +37,7 @@ int try_main(int argc, char **argv) {
   puts("Building core modules");
   MODULE("gopt");
   MODULE("mtime");
+  MODULE("popen");
   MODULE("pprent");
   LOCAL_MODULE("strset");
 

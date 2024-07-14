@@ -1,8 +1,6 @@
 #pragma leco tool
-#define POPEN_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 
-#include "../popen/popen.h"
 #include "die.hpp"
 #include "fopen.hpp"
 #include "mkdir.h"
@@ -13,6 +11,7 @@
 
 import gopt;
 import mtime;
+import popen;
 
 enum class exe_t {
   none,
@@ -64,11 +63,22 @@ static void output(uint32_t code, const char *msg) {
   fputc('\n', out);
 }
 
-static char *cmp(char *str, const char *prefix) {
+static const char *cmp(const char *str, const char *prefix) {
   auto len = strlen(prefix);
   if (strncmp(str, prefix, len) != 0)
     return nullptr;
   return str + len;
+}
+static const char *chomp(const char *str, const char *prefix) {
+  static sim_sbt buf{};
+
+  auto ptr = cmp(str, prefix);
+  if (!ptr)
+    return ptr;
+
+  sim_sb_copy(&buf, ptr);
+  strchr(buf.buffer, ';')[0] = 0;
+  return buf.buffer;
 }
 
 static void stamp(sim_sb *args, char **&argp, const char *arg) {
@@ -198,7 +208,7 @@ static void find_header(const char *l) {
 
   print_found(hdr.buffer, "header", 'head');
 }
-static void add_mod_dep(char *p, const char *desc) {
+static void add_mod_dep(const char *p, const char *desc) {
   sim_sbt mm{};
   if (*p == ':') {
     sim_sb_copy(&mm, mod_name.buffer);
@@ -245,8 +255,9 @@ static void add_mod_dep(char *p, const char *desc) {
     return;
 
   // Module in sibling folder with "-" instead of "_"
-  while ((p = strchr(pp.buffer, '_')) != nullptr) {
-    *p = '-';
+  char *u;
+  while ((u = strchr(pp.buffer, '_')) != nullptr) {
+    *u = '-';
   }
   sim_sb_path_parent(&dep);
   sim_sb_path_parent(&dep);
@@ -335,16 +346,12 @@ void run(int argc, char **argv) {
     (*p)[-1] = 0;
   }
 
-  FILE *f;
-  FILE *ferr;
-  if (0 != proc_open(clang_argv, &f, &ferr))
-    throw 1;
+  p::proc proc{clang_argv};
 
   line = 0;
 
-  char buf[1024];
-  while (!feof(f) && fgets(buf, 1024, f) != nullptr) {
-    char *p = buf;
+  while (proc.gets()) {
+    const char *p = proc.last_line_read();
     while (*p == ' ') {
       p++;
     }
@@ -380,14 +387,12 @@ void run(int argc, char **argv) {
       auto l = atoi(pp);
       if (l != 0)
         line = l - 1;
-    } else if (auto pp = cmp(p, "module ")) {
-      strchr(pp, ';')[0] = 0;
+    } else if (auto pp = chomp(p, "module ")) {
       if (0 != strcmp(pp, ":private")) {
         sim_sb_copy(&mod_name, pp);
         add_mod_dep(pp, "main module dependency");
       }
-    } else if (auto pp = cmp(p, "export module ")) {
-      strchr(pp, ';')[0] = 0;
+    } else if (auto pp = chomp(p, "export module ")) {
       sim_sb_copy(&mod_name, pp);
       if (strchr(mod_name.buffer, ':') == nullptr) {
         sim_sbt fn{};
@@ -396,18 +401,16 @@ void run(int argc, char **argv) {
         if (0 == strcmp(dir, mod_name.buffer) && exe_type == exe_t::none)
           exe_type = exe_t::main_mod;
       }
-    } else if (auto pp = cmp(p, "export import ")) {
-      strchr(p, ';')[0] = 0;
+    } else if (auto pp = chomp(p, "export import ")) {
       add_mod_dep(pp, "exported dependency");
-    } else if (auto pp = cmp(p, "import ")) {
-      strchr(p, ';')[0] = 0;
+    } else if (auto pp = chomp(p, "import ")) {
       add_mod_dep(pp, "dependency");
     }
   }
 
   if (dump_errors) {
-    while (!feof(ferr) && fgets(buf, 1024, ferr) != nullptr) {
-      fputs(buf, stderr);
+    while (proc.gets_err()) {
+      fputs(proc.last_line_read(), stderr);
     }
   }
 
@@ -444,9 +447,6 @@ void run(int argc, char **argv) {
     }
     break;
   }
-
-  fclose(f);
-  fclose(ferr);
 }
 
 int main(int argc, char **argv) try {
