@@ -42,7 +42,7 @@ int try_main(int argc, char **argv) {
   LOCAL_MODULE("strset");
 
   puts("Building meta runner");
-  run(CLANG " -i leco.cpp -o leco.exe --" MARG("mtime"));
+  run(CLANG " -i leco.cpp -o leco.exe --" MARG("gopt") MARG("mtime"));
 
   TOOL("deplist");
   TOOL("dagger");

@@ -4,10 +4,19 @@
 #include "sim.h"
 #include "targets.hpp"
 
+#ifdef _WIN32
+#include <direct.h>
+#define chdir _chdir
+#else
+#include <unistd.h>
+#endif
+
 #include <stdlib.h>
 
+import gopt;
 import mtime;
 
+// TODO: migrate -C option to here
 int main(int argc, char **argv) try {
 #ifdef _WIN32
   system(""); // enable ANSI colours
@@ -20,24 +29,41 @@ int main(int argc, char **argv) try {
   sim_sb_path_append(&cmd, "out");
   sim_sb_path_append(&cmd, HOST_TARGET);
 
-  auto argi = 1;
-  if (argc < 2) {
-    sim_sb_path_append(&cmd, "leco-driver.exe");
-  } else {
-    sim_sb_path_append(&cmd, "leco-");
-    sim_sb_concat(&cmd, argv[1]);
-    sim_sb_concat(&cmd, ".exe");
-    if (mtime::of(cmd.buffer) > 0) {
-      argi++;
-    } else {
-      sim_sb_path_parent(&cmd);
-      sim_sb_path_append(&cmd, "leco-driver.exe");
+  auto opts = gopt_parse(argc, argv, "C:", [&](auto ch, auto val) {
+    switch (ch) {
+    case 'C':
+      if (0 != chdir(val)) {
+        die("Directory not found: [%s]\n", val);
+      }
+      break;
+    default:
+      printf("[%c][%s]\n", ch, val);
+      break;
     }
+  });
+
+  if (opts.argc == 0) {
+    sim_sb_path_append(&cmd, "leco-driver.exe");
+    run(cmd.buffer);
+    return 0;
   }
 
-  for (auto i = argi; i < argc; i++) {
+  sim_sb_path_append(&cmd, "leco-");
+  sim_sb_concat(&cmd, opts.argv[0]);
+  sim_sb_concat(&cmd, ".exe");
+
+  if (mtime::of(cmd.buffer) > 0) {
+    opts.argc--;
+    opts.argv++;
+  } else {
+    sim_sb_path_parent(&cmd);
+    sim_sb_path_append(&cmd, "leco-driver.exe");
+  }
+
+  // TODO: escape arguments
+  for (auto i = 0; i < opts.argc; i++) {
     sim_sb_concat(&cmd, " ");
-    sim_sb_concat(&cmd, argv[i]);
+    sim_sb_concat(&cmd, opts.argv[i]);
   }
 
   run(cmd.buffer);
