@@ -24,7 +24,7 @@ static void copy_res(const char *file) {
   if (mtime::of(path.buffer) >= mtime::of(file))
     return;
 
-  log("hard-linking resource", file);
+  log("hard-linking", file);
   sys::link(file, path.buffer);
 }
 

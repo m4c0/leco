@@ -36,9 +36,11 @@ inline void log(const char *verb, const char *msg) {
 void link(const char *src, const char *dst) {
   // TODO: remove if existing
 #ifdef _WIN32
+  DeleteFile(dst);
   if (!CreateHardLink(dst, src, nullptr))
     die("could not create hard-link");
 #else
+  ::unlink(dst);
   if (::link(src, dst) != 0) {
     perror("could not create hard-link");
     throw death{};
