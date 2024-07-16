@@ -151,15 +151,10 @@ extern "C" int main(int argc, char **argv) try {
 
   const char *target{"host"};
   sim_sbt flags{};
-  auto opts = gopt_parse(argc, argv, "C:cgOt:", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "cgOt:", [&](auto ch, auto val) {
     switch (ch) {
     case 'c':
       clean_level++;
-      break;
-    case 'C':
-      if (0 != chdir(val)) {
-        die("Directory not found: [%s]\n", val);
-      }
       break;
     case 'g':
       sim_sb_concat(&flags, " -g");

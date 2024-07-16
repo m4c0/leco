@@ -16,7 +16,6 @@
 import gopt;
 import mtime;
 
-// TODO: migrate -C option to here
 int main(int argc, char **argv) try {
 #ifdef _WIN32
   system(""); // enable ANSI colours
