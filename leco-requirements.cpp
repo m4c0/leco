@@ -2,13 +2,13 @@
 #define SIM_IMPLEMENTATION
 
 #include "dag2.hpp"
-#include "die.hpp"
 #include "sim.hpp"
 #include "targets.hpp"
 
 import gopt;
 import pprent;
 import strset;
+import sys;
 
 static const char *target{HOST_TARGET};
 static const char *argv0;

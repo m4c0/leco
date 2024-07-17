@@ -2,13 +2,13 @@
 #define POPEN_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 #include "../popen/popen.h"
-#include "die.hpp"
 #include "sim.hpp"
 
 #include <stdio.h>
 
 import mtime;
 import pprent;
+import sys;
 
 #ifdef _WIN32
 #define strdup _strdup

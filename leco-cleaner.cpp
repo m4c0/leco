@@ -2,7 +2,6 @@
 #define SIM_IMPLEMENTATION
 
 #include "dag2.hpp"
-#include "die.hpp"
 #include "sim.hpp"
 #include "targets.hpp"
 
@@ -16,6 +15,7 @@
 
 import gopt;
 import pprent;
+import sys;
 import strset;
 
 static bool log_all{};

@@ -1,12 +1,12 @@
 #pragma leco tool
 #define SIM_IMPLEMENTATION
 
-#include "die.hpp"
 #include "sim.hpp"
 
 import gopt;
+import sys;
 
-void usage() { die("invalid usage"); }
+void usage() { sys::die("invalid usage"); }
 
 static const char *build_path{};
 
@@ -18,7 +18,7 @@ static void export_archive() {
                 " -exportPath %s/export"
                 " -exportOptionsPlist %s/export.plist",
                 build_path, build_path, build_path);
-  run(cmd.buffer);
+  sys::run(cmd.buffer);
 }
 
 int main(int argc, char **argv) try {

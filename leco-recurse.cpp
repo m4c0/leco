@@ -2,7 +2,6 @@
 #define SIM_IMPLEMENTATION
 
 #include "dag2.hpp"
-#include "die.hpp"
 #include "in2out.hpp"
 #include "sim.hpp"
 
@@ -12,6 +11,7 @@
 
 import gopt;
 import mtime;
+import sys;
 
 static const char *common_flags;
 static const char *target;

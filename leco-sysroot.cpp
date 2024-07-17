@@ -1,7 +1,6 @@
 #pragma leco tool
 #define SIM_IMPLEMENTATION
 
-#include "die.hpp"
 #include "fopen.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
@@ -12,6 +11,7 @@
 import gopt;
 import mtime;
 import pprent;
+import sys;
 
 #ifdef _WIN32
 static constexpr const auto dupenv = [](auto name) {
