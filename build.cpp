@@ -25,7 +25,7 @@
   puts("Building " name);                                                      \
   run(CLANG " -i leco-" name ".cpp -o out/" HOST_TARGET "/leco-" name ".exe "  \
             "--" MARG("gopt") MARG("mtime") MARG("popen") MARG("pprent")       \
-                LMARG("strset"))
+                LMARG("strset") LMARG("sys"))
 
 int try_main(int argc, char **argv) {
   // TODO: self-rebuild this cpp
@@ -40,6 +40,7 @@ int try_main(int argc, char **argv) {
   MODULE("popen");
   MODULE("pprent");
   LOCAL_MODULE("strset");
+  LOCAL_MODULE("sys");
 
   puts("Building meta runner");
   run(CLANG " -i leco.cpp -o leco.exe --" MARG("gopt") MARG("mtime"));
