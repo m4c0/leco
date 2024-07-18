@@ -3,6 +3,8 @@
 #include <fstream>
 #include <string>
 
+import sys;
+
 namespace plist {
 class dict {
   std::ostream &o;
@@ -85,7 +87,7 @@ void common_app_plist(dict &d, const char *name, const char *sdk) {
 } // namespace plist
 
 [[nodiscard]] static const char *env(const char *key, const char *def = "TBD") {
-  const auto v = getenv(key);
+  const auto v = sys::env(key);
   return (v == nullptr) ? def : v;
 }
 [[nodiscard]] static const char *team_id() { return env("LECO_IOS_TEAM"); }

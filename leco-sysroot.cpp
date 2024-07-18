@@ -13,22 +13,12 @@ import mtime;
 import pprent;
 import sys;
 
-#ifdef _WIN32
-static constexpr const auto dupenv = [](auto name) {
-  char *buf;
-  size_t sz;
-  _dupenv_s(&buf, &sz, name);
-  return buf;
-};
-#define getenv dupenv
-#endif
-
 void usage() { die("invalid usage"); }
 
 static bool exists(const sim_sb *path) { return mtime::of(path->buffer) > 0; }
 
 static void find_android_llvm(sim_sb *res) {
-  const auto sdk = getenv("ANDROID_SDK_ROOT");
+  const auto sdk = sys::env("ANDROID_SDK_ROOT");
   if (sdk == nullptr)
     die("undefined ANDROID_SDK_ROOT");
 

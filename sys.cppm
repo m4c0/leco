@@ -2,6 +2,7 @@ module;
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef _WIN32
 #define WIN32_MEAN_AND_LEAN
@@ -45,6 +46,17 @@ void link(const char *src, const char *dst) {
     perror("could not create hard-link");
     throw death{};
   }
+#endif
+}
+
+const char *env(const char *name) {
+#ifdef _WIN32
+  char *buf;
+  size_t sz;
+  _dupenv_s(&buf, &sz, name);
+  return buf;
+#else
+  return strdup(getenv(name));
 #endif
 }
 } // namespace sys
