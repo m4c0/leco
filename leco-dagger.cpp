@@ -1,7 +1,6 @@
 #pragma leco tool
 #define SIM_IMPLEMENTATION
 
-#include "die.hpp"
 #include "fopen.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
@@ -12,6 +11,7 @@
 import gopt;
 import mtime;
 import popen;
+import sys;
 
 enum class exe_t {
   none,
@@ -31,7 +31,7 @@ static const char *out_filename{};
 static const char *target{HOST_TARGET};
 
 static void usage() {
-  die(R"(
+  sys::die(R"(
 LECO tool responsible for preprocessing C++ files containing leco pragmas and
 storing dependencies in a DAG-like file.
 
@@ -47,14 +47,14 @@ Where:
         -t: Target triple. Defaults to host target.
 
 )",
-      argv0);
+           argv0);
 }
 
 static void error(const char *msg) {
-  die("%s:%d: %s\n", source.buffer, line, msg);
+  sys::die("%s:%d: %s\n", source.buffer, line, msg);
 }
 static void missing_file(const char *desc) {
-  die("%s:%d: could not find %s\n", source.buffer, line, desc);
+  sys::die("%s:%d: could not find %s\n", source.buffer, line, desc);
 }
 
 static void output(uint32_t code, const char *msg) {

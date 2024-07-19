@@ -2,7 +2,6 @@
 #define SIM_IMPLEMENTATION
 
 #include "dag2.hpp"
-#include "die.hpp"
 #include "fopen.hpp"
 #include "sim.hpp"
 
@@ -12,6 +11,7 @@
 
 import gopt;
 import strset;
+import sys;
 
 static FILE *out{stdout};
 static const char *target{};
@@ -20,14 +20,14 @@ static const char *argv0{};
 static str::set added{};
 
 static void usage() {
-  die(R"(
+  sys::die(R"(
 Usage: %s -i <input> [-o <output>]
 
 Where:
         -i: input DAG file (must be inside the "out" folder)
         -o: output file (defaults to stdout)
 )",
-      argv0);
+           argv0);
 }
 
 static void print_dep(const char *dag) {
