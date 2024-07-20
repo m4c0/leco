@@ -2,13 +2,13 @@
 #define SIM_IMPLEMENTATION
 
 #include "dag2.hpp"
-#include "die.hpp"
 #include "fopen.hpp"
 #include "sim.hpp"
 #include "targets.hpp"
 
 import gopt;
 import strset;
+import sys;
 
 static const char *target{};
 static FILE *out{};
@@ -139,7 +139,7 @@ int main(int argc, char **argv) try {
   remove(prev.buffer);
 #endif
 
-  sim_sbt cmd{};
+  sim_sbt cmd{10240};
   sim_sb_path_copy_parent(&cmd, argv[0]);
   sim_sb_path_append(&cmd, "leco-clang.exe");
   if (debug)
@@ -172,5 +172,6 @@ int main(int argc, char **argv) try {
 
   return 0;
 } catch (...) {
+  fprintf(stderr, "err\n");
   return 1;
 }
