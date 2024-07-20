@@ -2,12 +2,12 @@
 #pragma leco add_impl plist
 #define SIM_IMPLEMENTATION
 
-#include "die.hpp"
 #include "mkdir.h"
 #include "sim.hpp"
 #include "targets.hpp"
 
 import gopt;
+import sys;
 
 static const char *tool_dir;
 
@@ -18,7 +18,7 @@ static void ipa(const char *dag) {
   sim_sb_path_copy_append(&cmd, tool_dir, "leco-ipa.exe");
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, dag);
-  run(cmd.buffer);
+  sys::run(cmd.buffer);
 }
 
 static void xcassets(const char *dag, const char *app_path) {
@@ -28,7 +28,7 @@ static void xcassets(const char *dag, const char *app_path) {
   sim_sb_concat(&cmd, dag);
   sim_sb_concat(&cmd, " -a ");
   sim_sb_concat(&cmd, app_path);
-  run(cmd.buffer);
+  sys::run(cmd.buffer);
 }
 
 static void copy(const char *with, const char *dag, const char *to) {
@@ -38,7 +38,7 @@ static void copy(const char *with, const char *dag, const char *to) {
   sim_sb_concat(&cmd, dag);
   sim_sb_concat(&cmd, " -o ");
   sim_sb_concat(&cmd, to);
-  run(cmd.buffer);
+  sys::run(cmd.buffer);
 }
 
 static void dir_bundle(const char *dag) {
@@ -103,7 +103,7 @@ static void bundle(const char *dag) {
   }
 }
 
-static void usage() { die("invalid usage"); }
+static void usage() { sys::die("invalid usage"); }
 
 int main(int argc, char **argv) try {
   const char *input{};
