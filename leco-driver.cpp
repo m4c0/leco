@@ -1,6 +1,5 @@
 #pragma leco tool
 #define SIM_IMPLEMENTATION
-#include "die.hpp"
 #include "sim.hpp"
 #include "targets.hpp"
 
@@ -16,6 +15,7 @@
 
 import gopt;
 import pprent;
+import sys;
 
 const char *leco_argv0;
 const char *common_flags;
@@ -64,7 +64,7 @@ static void cleaner(const char *target) {
   if (clean_level > 1) {
     sim_sb_concat(&cmd, " -a");
   }
-  run(cmd.buffer);
+  sys::run(cmd.buffer);
 }
 
 static void run_target(const char *target) {
@@ -84,7 +84,7 @@ static void run_target(const char *target) {
     sim_sb_printf(&cmd, " -t %s", target);
     sim_sb_printf(&cmd, " -i %s ", file);
     sim_sb_concat(&cmd, common_flags);
-    run(cmd.buffer);
+    sys::run(cmd.buffer);
 
     errno = 0;
   }
@@ -143,7 +143,7 @@ static void run_targets(const char *target) {
     return;
   }
 
-  die("unknown target: %s", target);
+  sys::die("unknown target: %s", target);
 }
 
 extern "C" int main(int argc, char **argv) try {
