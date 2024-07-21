@@ -358,9 +358,15 @@ void run(int argc, char **argv) {
     line++;
     if (0 == strcmp(p, "#pragma leco tool\n")) {
       set_exe_type(exe_t::tool);
+    } else if (0 == strcmp(p, "#pragma leco tool\r")) {
+      set_exe_type(exe_t::tool);
     } else if (cmp(p, "#pragma leco app\n")) {
       set_exe_type(exe_t::app);
+    } else if (cmp(p, "#pragma leco app\r")) {
+      set_exe_type(exe_t::app);
     } else if (cmp(p, "#pragma leco dll\n")) {
+      set_exe_type(exe_t::dll);
+    } else if (cmp(p, "#pragma leco dll\r")) {
       set_exe_type(exe_t::dll);
     } else if (auto pp = cmp(p, "#pragma leco add_build_dep ")) {
       read_file_list(pp, "build dependency", 'bdep');
