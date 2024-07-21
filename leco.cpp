@@ -17,6 +17,8 @@
 // TODO: leco driver calling format after a successful compilation
 // TODO: add clang-format config to leco-format
 
+// TODO: recursing is not catching new impls
+
 import gopt;
 import mtime;
 
