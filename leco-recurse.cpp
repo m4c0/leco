@@ -116,6 +116,7 @@ static auto build_dag(const char *src) {
   });
   if (mtime > mtime::of(out.buffer)) {
     compile(src, dag.buffer);
+    mtime = mtime::of(out.buffer);
   }
 
   dag_read(dag.buffer, [&](auto id, auto file) {
