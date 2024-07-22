@@ -145,11 +145,6 @@ static auto compile_with_deps(const char *src, const char *dag) {
 
   return build_dag(src);
 }
-static auto compile_and_link(const char *src, const char *dag,
-                             const char *exe) {
-  auto mtime = compile_with_deps(src, dag);
-  link(dag, exe, mtime);
-}
 
 static void bounce(const char *path) {
   cached.clear();
@@ -164,12 +159,12 @@ static void bounce(const char *path) {
   dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
     case 'tapp':
-      compile_and_link(path, dag.buffer, file);
+      link(dag.buffer, file, compile_with_deps(path, dag.buffer));
       bundle(dag.buffer);
       break;
     case 'tdll':
     case 'tool':
-      compile_and_link(path, dag.buffer, file);
+      link(dag.buffer, file, compile_with_deps(path, dag.buffer));
       break;
     case 'tmmd':
       compile_with_deps(path, dag.buffer);
