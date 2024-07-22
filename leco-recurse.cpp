@@ -85,15 +85,22 @@ static void dagger(const char *src, const char *dag) {
   run(args.buffer);
 }
 
-static auto max(auto a, auto b) { return a > b ? a : b; }
+struct mtime_pair {
+  uint64_t spec{};
+  uint64_t impl{};
+};
+static auto max(uint64_t a, uint64_t b) { return a > b ? a : b; }
+static auto max(mtime_pair a, mtime_pair b) {
+  return mtime_pair{max(a.spec, b.spec), max(a.impl, b.impl)};
+}
 
-static std::map<std::string, uint64_t> cached{};
+static std::map<std::string, mtime_pair> cached{};
 static auto build_dag(const char *src) {
   auto &mtime = cached[src];
-  if (mtime != 0)
+  if (mtime.spec != 0)
     return mtime;
 
-  mtime = mtime::of(src);
+  mtime.spec = mtime::of(src);
 
   sim_sbt dag{};
   in2out(src, &dag, "dag", target);
@@ -104,7 +111,7 @@ static auto build_dag(const char *src) {
   dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
     case 'head':
-      mtime = max(mtime, mtime::of(file));
+      mtime.spec = max(mtime.spec, mtime::of(file));
       break;
     case 'bdep':
     case 'mdep':
@@ -114,15 +121,15 @@ static auto build_dag(const char *src) {
       break;
     }
   });
-  if (mtime > mtime::of(out.buffer)) {
+  if (mtime.spec > mtime::of(out.buffer)) {
     compile(src, dag.buffer);
-    mtime = mtime::of(out.buffer);
+    mtime.impl = mtime::of(out.buffer);
   }
 
   dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
     case 'impl':
-      mtime = max(mtime, build_dag(file));
+      mtime.impl = max(mtime.impl, build_dag(file).impl);
       break;
     default:
       break;
@@ -160,12 +167,12 @@ static void bounce(const char *path) {
   dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
     case 'tapp':
-      link(dag.buffer, file, compile_with_deps(path, dag.buffer));
+      link(dag.buffer, file, compile_with_deps(path, dag.buffer).impl);
       bundle(dag.buffer);
       break;
     case 'tdll':
     case 'tool':
-      link(dag.buffer, file, compile_with_deps(path, dag.buffer));
+      link(dag.buffer, file, compile_with_deps(path, dag.buffer).impl);
       break;
     case 'tmmd':
       compile_with_deps(path, dag.buffer);
