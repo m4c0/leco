@@ -22,6 +22,18 @@ void prep(sim_sb *cmd, const char *tool) {
   sim_sb_path_append(cmd, tool);
 }
 
+static void format(const char *cpp) {
+  sim_sbt cmd{};
+  prep(&cmd, "leco-format.exe");
+  if (mtime::of(cmd.buffer) == 0)
+    return;
+
+  sim_sb_concat(&cmd, " -i ");
+  sim_sb_concat(&cmd, cpp);
+  // TODO: suppress failures and output
+  sys::run(cmd.buffer);
+}
+
 static void compile(const char *src, const char *dag) {
   log("compiling", src);
 
@@ -31,6 +43,10 @@ static void compile(const char *src, const char *dag) {
   sim_sb_concat(&cmd, src);
   sim_sb_concat(&cmd, common_flags);
   run(cmd.buffer);
+
+  // TODO: add an option to suppress formatting
+  // ^---- maybe by not allowing recursive formatting
+  format(src);
 
   if (0 != strcmp(".cppm", sim_path_extension(src)))
     return;
