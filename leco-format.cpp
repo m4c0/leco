@@ -18,6 +18,10 @@ static const char *fmt_cmd() {
 int main(int argc, char **argv) try {
   sim_sbt cmd{10240};
   sim_sb_copy(&cmd, fmt_cmd());
+  
+// TODO: reformat based on `git status`
+// ^---  this might be a better "no-arg" behaviour
+
   sim_sb_concat(&cmd, " -i");
 
   for (auto i = 1; i < argc; i++) {
