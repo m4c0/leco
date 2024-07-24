@@ -16,6 +16,7 @@ import sys;
 static const char *common_flags;
 static const char *target;
 static const char *argv0;
+static bool reformat;
 
 void prep(sim_sb *cmd, const char *tool) {
   sim_sb_path_copy_parent(cmd, argv0);
@@ -23,6 +24,9 @@ void prep(sim_sb *cmd, const char *tool) {
 }
 
 static void format(const char *cpp) {
+  if (!reformat)
+    return;
+
   sim_sbt cmd{};
   prep(&cmd, "leco-format.exe");
   if (mtime::of(cmd.buffer) == 0)
@@ -205,8 +209,11 @@ int main(int argc, char **argv) try {
   sim_sbt flags{};
   sim_sbt rpath{};
 
-  auto opts = gopt_parse(argc, argv, "t:i:gO", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "ft:i:gO", [&](auto ch, auto val) {
     switch (ch) {
+    case 'f':
+      reformat = true;
+      break;
     case 'i':
       sim_sb_path_copy_real(&rpath, val);
       break;
