@@ -3,7 +3,12 @@
 #include "sim.hpp"
 
 import mtime;
+import popen;
 import sys;
+
+#ifdef _WIN32
+#define strdup _strdup
+#endif
 
 static const char *fmt_cmd() {
 #if __APPLE__
@@ -15,13 +20,35 @@ static const char *fmt_cmd() {
 #endif
 }
 
-int main(int argc, char **argv) try {
+static void work_from_git() {
+  char *args[5]{};
+  args[0] = strdup("git");
+  args[1] = strdup("status");
+  args[2] = strdup("--porcelain=v2");
+  args[3] = strdup("-z");
+
   sim_sbt cmd{10240};
   sim_sb_copy(&cmd, fmt_cmd());
-  
-// TODO: reformat based on `git status`
-// ^---  this might be a better "no-arg" behaviour
+  sim_sb_concat(&cmd, " -i");
 
+  p::proc p{args};
+  while (p.gets()) {
+    auto line = p.last_line_read();
+    auto file = strrchr(line, ' ') + 1;
+    sim_sb_printf(&cmd, " %s", file);
+  }
+
+  sys::run(cmd.buffer);
+}
+
+int main(int argc, char **argv) try {
+  if (argc == 1) {
+    work_from_git();
+    return 0;
+  }
+
+  sim_sbt cmd{10240};
+  sim_sb_copy(&cmd, fmt_cmd());
   sim_sb_concat(&cmd, " -i");
 
   for (auto i = 1; i < argc; i++) {
