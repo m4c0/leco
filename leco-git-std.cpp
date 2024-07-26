@@ -97,7 +97,7 @@ int main(int argc, char **argv) try {
   sim_sb_path_append(&name, "hooks");
   sim_sb_path_append(&name, "pre-commit");
   if (mtime::of(name.buffer) > 0) {
-    fprintf(stderr, "pre-commit hook exists... bailing out...");
+    fprintf(stderr, "pre-commit hook exists... bailing out...\n");
   } else {
     setup_precommit(&name);
   }
