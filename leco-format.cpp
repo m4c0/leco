@@ -2,6 +2,7 @@
 #define SIM_IMPLEMENTATION
 #include "sim.hpp"
 
+import gopt;
 import mtime;
 import popen;
 import sys;
@@ -20,6 +21,8 @@ static const char *fmt_cmd() {
 #endif
 }
 
+static bool dry_run{};
+
 static void work_from_git() {
   char *args[5]{};
   args[0] = strdup("git");
@@ -30,6 +33,9 @@ static void work_from_git() {
   sim_sbt cmd{10240};
   sim_sb_copy(&cmd, fmt_cmd());
   sim_sb_concat(&cmd, " -i");
+  if (dry_run) {
+    sim_sb_concat(&cmd, " -n --Werror");
+  }
 
   unsigned count{};
   p::proc p{args};
@@ -48,7 +54,16 @@ static void work_from_git() {
 }
 
 int main(int argc, char **argv) try {
-  if (argc == 1) {
+  auto opts = gopt_parse(argc, argv, "n", [](auto ch, auto val) {
+    switch (ch) {
+
+    case 'n':
+      dry_run = true;
+      break;
+    }
+  });
+
+  if (opts.argc == 0) {
     work_from_git();
     return 0;
   }
@@ -56,13 +71,16 @@ int main(int argc, char **argv) try {
   sim_sbt cmd{10240};
   sim_sb_copy(&cmd, fmt_cmd());
   sim_sb_concat(&cmd, " -i");
+  if (dry_run) {
+    sim_sb_concat(&cmd, " -n --Werror");
+  }
 
-  for (auto i = 1; i < argc; i++) {
-    if (mtime::of(argv[i]) == 0) {
-      sys::die("file not found: %s", argv[i]);
+  for (auto i = 0; i < opts.argc; i++) {
+    if (mtime::of(opts.argv[i]) == 0) {
+      sys::die("file not found: %s", opts.argv[i]);
     }
 
-    sim_sb_printf(&cmd, " %s", argv[i]);
+    sim_sb_printf(&cmd, " %s", opts.argv[i]);
   }
 
   sys::run(cmd.buffer);
