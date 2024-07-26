@@ -50,24 +50,10 @@ static void set_email(const sim_sb *name) {
 
 static void setup_precommit(const sim_sb *name) {
   f::open f{name->buffer, "w"};
+  fprintf(*f, R"(#!/bin/sh
 
-#ifdef _WIN32
-  fprintf(*f, R"(
-git-clang-format -q --staged --diffstat
+../leco/leco.exe format -n
 )");
-#elif __APPLE__
-  fprintf(*f, R"(
-#!/bin/sh
-
-/usr/local/opt/llvm/bin/git-clang-format -q --staged --diffstat
-)");
-#else
-  fprintf(*f, R"(
-#!/bin/sh
-
-git-clang-format -q --staged --diffstat
-)");
-#endif
 }
 
 int main(int argc, char **argv) try {
