@@ -31,11 +31,17 @@ static void work_from_git() {
   sim_sb_copy(&cmd, fmt_cmd());
   sim_sb_concat(&cmd, " -i");
 
+  unsigned count{};
   p::proc p{args};
   while (p.gets()) {
     auto line = p.last_line_read();
     auto file = strrchr(line, ' ') + 1;
     sim_sb_printf(&cmd, " %s", file);
+    count++;
+  }
+
+  if (count == 0) {
+    sys::die("missing input files");
   }
 
   sys::run(cmd.buffer);
