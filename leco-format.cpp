@@ -24,11 +24,12 @@ static const char *fmt_cmd() {
 static bool dry_run{};
 
 static void work_from_git() {
-  char *args[5]{};
-  args[0] = strdup("git");
-  args[1] = strdup("status");
-  args[2] = strdup("--porcelain=v2");
-  args[3] = strdup("-z");
+  char *args[]{
+      strdup("git"),
+      strdup("status"),
+      strdup("--porcelain=v2"),
+      0,
+  };
 
   sim_sbt cmd{10240};
   sim_sb_copy(&cmd, fmt_cmd());
@@ -42,7 +43,9 @@ static void work_from_git() {
   while (p.gets()) {
     auto line = p.last_line_read();
     auto file = strrchr(line, ' ') + 1;
-    sim_sb_printf(&cmd, " %s", file);
+    auto sep = strchr(file, '\t');
+    int len = sep ? (sep - file) : strlen(file) - 1;
+    sim_sb_printf(&cmd, " %.*s", len, file);
     count++;
   }
 
