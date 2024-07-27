@@ -1,12 +1,11 @@
 #pragma leco tool
-#define POPEN_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
-#include "../popen/popen.h"
 #include "sim.hpp"
 
 #include <stdio.h>
 
 import mtime;
+import popen;
 import pprent;
 import sys;
 
@@ -43,34 +42,32 @@ int main(int argc, char **argv) try {
     args[4] = strdup("--porcelain=v2");
     args[5] = strdup("--branch");
 
-    FILE *out;
-    FILE *err;
+    p::proc gs{args};
 
-    int res = proc_open(args, &out, &err);
-    if (res != 0) {
-      fprintf(stderr, "failed to get git status of [%s]", pwd.buffer);
-      return 1;
-    }
+    bool printing{};
+    const auto enable_printer = [&] {
+      if (printing)
+        return;
+      fprintf(stderr, "-=-=-=-=-=-=-=-=-=- %s -=-=-=-=-=-=-=-=-=-\n", file);
+      printing = true;
+    };
 
-    sim_sbt outbuf{10240};
-    char buf[1024];
-    while (fgets(buf, sizeof(buf), out)) {
+    while (gs.gets()) {
+      auto buf = gs.last_line_read();
       if (0 == strcmp(buf, "# branch.ab +0 -0\n")) {
       } else if (starts_with(buf, "# branch.ab")) {
-        // TODO: list commit names, like "fugitive" does
-        sim_sb_concat(&outbuf, buf);
+        enable_printer();
+
+        sim_sbt cmd{};
+        sim_sb_printf(
+            &cmd, "git -C %s log --branches --not --remotes --format=oneline",
+            pwd.buffer);
+        sys::run(cmd.buffer);
       } else if (buf[0] == '#') {
       } else {
-        sim_sb_concat(&outbuf, buf);
+        enable_printer();
+        fputs(buf, stderr);
       }
-    }
-
-    fclose(out);
-    fclose(err);
-
-    if (outbuf.len > 0) {
-      fprintf(stderr, "-=-=-=-=-=-=-=-=-=- %s -=-=-=-=-=-=-=-=-=-\n", file);
-      fprintf(stderr, "%s", outbuf.buffer);
     }
   }
 } catch (...) {
