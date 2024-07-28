@@ -46,10 +46,13 @@ static void work_from_git() {
       count++;
       continue;
     }
+    if (strstr(line, ".cpp") == nullptr && strstr(line, ".mm") == nullptr)
+      continue;
 
     auto file = strrchr(line, ' ') + 1;
     auto sep = strchr(file, '\t');
     int len = sep ? (sep - file) : strlen(file) - 1;
+
     sim_sb_printf(&cmd, " %.*s", len, file);
     count++;
   }
