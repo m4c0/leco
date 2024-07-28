@@ -58,6 +58,9 @@ static void work_from_git() {
   }
 
   if (count == 0) {
+    if (dry_run)
+      return;
+
     sys::die("missing input files");
   }
 
