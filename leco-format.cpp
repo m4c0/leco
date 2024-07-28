@@ -42,6 +42,11 @@ static void work_from_git() {
   p::proc p{args};
   while (p.gets()) {
     auto line = p.last_line_read();
+    if (strncmp(line, "1 D. ", 5) == 0) {
+      count++;
+      continue;
+    }
+
     auto file = strrchr(line, ' ') + 1;
     auto sep = strchr(file, '\t');
     int len = sep ? (sep - file) : strlen(file) - 1;
