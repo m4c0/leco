@@ -14,6 +14,7 @@
 #endif
 
 import gopt;
+import popen;
 import pprent;
 import sys;
 
@@ -67,8 +68,19 @@ static void cleaner(const char *target) {
   sys::run(cmd.buffer);
 }
 
+static void sysroot(const char *target) {
+  if (0 == strcmp(target, HOST_TARGET))
+    return;
+
+  sim_sbt cmd{};
+  prep(&cmd, "leco-sysroot.exe");
+  sim_sb_printf(&cmd, " -q -t %s", target);
+  sys::run(cmd.buffer);
+}
+
 static void run_target(const char *target) {
   cleaner(target);
+  sysroot(target);
 
   for (auto file : pprent::list(".")) {
     auto ext = sim_path_extension(file);
