@@ -93,6 +93,10 @@ static void add_sysroot(sim_sb *args, const char *target) {
   sim_sb_path_append(&sra, "sysroot");
 
   if (mtime_of(sra.buffer) > 0) {
+    auto f = fopen(sra.buffer, "r");
+    fgets(sra.buffer, sra.size, f);
+    fclose(f);
+
     sim_sb_printf(args, " --sysroot %s", sra.buffer);
   }
 }
