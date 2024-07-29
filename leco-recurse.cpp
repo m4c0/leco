@@ -43,8 +43,7 @@ static void compile(const char *src, const char *dag) {
 
   sim_sbt cmd{};
   prep(&cmd, "leco-clang.exe");
-  sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, src);
+  sim_sb_printf(&cmd, " -i %s -t %s", src, target);
   sim_sb_concat(&cmd, common_flags);
   run(cmd.buffer);
 
@@ -60,8 +59,7 @@ static void compile(const char *src, const char *dag) {
   sim_sb_path_set_extension(&pcm, "pcm");
 
   prep(&cmd, "leco-clang.exe");
-  sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, pcm.buffer);
+  sim_sb_printf(&cmd, " -i %s -t %s", pcm.buffer, target);
   sim_sb_concat(&cmd, common_flags);
   run(cmd.buffer);
 }
