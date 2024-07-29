@@ -84,42 +84,17 @@ static void add_target_defs(sim_sb *buf, const char *tgt) {
   }
 }
 
-static void stamp(sim_sb *args, char **&argp, const char *arg) {
-  sim_sb_concat(args, " ");
-  *argp++ = args->buffer + args->len;
-  sim_sb_concat(args, arg);
-}
 static void add_sysroot(sim_sb *args, const char *target) {
   sim_sb sra{};
   sim_sb_new(&sra, 10240);
-
-  char *argv[10]{};
-  char **argp = argv;
-
-  *argp++ = sra.buffer;
   sim_sb_path_copy_parent(&sra, argv0);
-  sim_sb_path_append(&sra, "leco-sysroot.exe");
-  stamp(&sra, argp, "-t");
-  stamp(&sra, argp, target);
+  sim_sb_path_parent(&sra);
+  sim_sb_path_append(&sra, target);
+  sim_sb_path_append(&sra, "sysroot");
 
-  FILE *f;
-  FILE *ferr;
-  if (0 != proc_open(argv, &f, &ferr))
-    die("could not infer sysroot");
-
-  sim_sb sysroot{};
-  sim_sb_new(&sysroot, 10240);
-  if (!fgets(sysroot.buffer, sysroot.size, f))
-    die("failed to infer sysroot");
-
-  sim_sb_concat(args, sysroot.buffer);
-
-  while (!feof(ferr) && fgets(sra.buffer, sra.size, ferr) != nullptr) {
-    fputs(sra.buffer, stderr);
+  if (mtime_of(sra.buffer) > 0) {
+    sim_sb_printf(args, "--sysroot %s", sra.buffer);
   }
-
-  fclose(f);
-  fclose(ferr);
 }
 
 static bool create_deplist(const char *out) {
