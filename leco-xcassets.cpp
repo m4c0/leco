@@ -68,6 +68,8 @@ static void create_icon_contents(const char *path) {
 }
 
 static void copy_icon(const char *path) {
+  sys::log("copying", "icon.png");
+
   sim_sbt file{};
   sim_sb_path_copy_append(&file, path, "icon.png");
   sys::link("icon.png", file.buffer);
@@ -75,6 +77,8 @@ static void copy_icon(const char *path) {
 
 static void run_actool(const char *plist, const char *app_path,
                        const char *xcassets) {
+  sys::log("running", "actool");
+
   sim_sbt cmd{10240};
   sim_sb_printf(&cmd,
                 "actool "
