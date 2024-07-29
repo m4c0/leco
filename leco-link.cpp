@@ -142,6 +142,7 @@ int main(int argc, char **argv) try {
   sim_sbt cmd{10240};
   sim_sb_path_copy_parent(&cmd, argv[0]);
   sim_sb_path_append(&cmd, "leco-clang.exe");
+  sim_sb_printf(&cmd, " -t %s", target);
   if (debug)
     sim_sb_concat(&cmd, " -g");
   if (opt)
