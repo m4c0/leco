@@ -105,10 +105,14 @@ static const char *sysroot_for_target(const char *target) {
 
 int main(int argc, char **argv) try {
   const char *target{HOST_TARGET};
-  auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
+  bool quiet{};
+  auto opts = gopt_parse(argc, argv, "qt:", [&](auto ch, auto val) {
     switch (ch) {
     case 't':
       target = val;
+      break;
+    case 'q':
+      quiet = true;
       break;
     default:
       usage();
@@ -129,14 +133,16 @@ int main(int argc, char **argv) try {
     f::open f{cf.buffer, "r"};
     sim_sbt buf{};
     if (fgets(buf.buffer, buf.size, *f) != nullptr) {
-      fwrite(buf.buffer, 1, buf.size, stdout);
+      if (!quiet)
+        fwrite(buf.buffer, 1, buf.size, stdout);
       return 0;
     }
   }
 
   auto sysroot = sysroot_for_target(target);
   if (sysroot) {
-    puts(sysroot);
+    if (!quiet)
+      puts(sysroot);
 
     f::open f{cf.buffer, "w"};
     fputs(sysroot, *f);
