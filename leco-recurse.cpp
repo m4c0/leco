@@ -126,6 +126,9 @@ static auto build_dag(const char *src) {
   in2out(src, &out, "o", target);
 
   dagger(src, dag.buffer);
+  if (mtime::of(dag.buffer) == 0)
+    die("failed to preprocess [%s]", src);
+
   dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
     case 'head':
