@@ -19,7 +19,6 @@ Where:
 )");
 }
 
-static const char *build_path{};
 static const char *tool_dir;
 
 void gen_iphone_ipa(const char *exe_path);
@@ -44,7 +43,9 @@ static void xcassets(const char *dag, const char *app_path) {
   sys::run(cmd.buffer);
 }
 
-static void export_archive() {
+static void export_archive(const char *build_path) {
+  sys::log("exporting from", build_path);
+
   sim_sbt cmd{1024};
   sim_sb_printf(&cmd,
                 "xcodebuild -exportArchive"
@@ -74,8 +75,11 @@ int main(int argc, char **argv) try {
   sim_sb_path_copy_parent(&argv0, argv[0]);
   tool_dir = argv0.buffer;
 
+  sim_sbt build_path{};
+  sim_sb_path_copy_parent(&build_path, input);
+
   sim_sbt path{};
-  sim_sb_path_copy_parent(&path, input);
+  sim_sb_copy(&path, build_path.buffer);
   sim_sb_path_append(&path, "export.xcarchive");
   sim_sb_path_append(&path, "Products");
   sim_sb_path_append(&path, "Applications");
@@ -93,13 +97,7 @@ int main(int argc, char **argv) try {
   sim_sb_path_set_extension(&path, "exe");
   gen_iphone_ipa(path.buffer);
 
-  sim_sbt build_path{};
-  sim_sb_path_copy_parent(&build_path, input);
-  ::build_path = build_path.buffer;
-
-  sys::log("exporting from", build_path.buffer);
-
-  export_archive();
+  export_archive(build_path.buffer);
 
   return 0;
 } catch (...) {
