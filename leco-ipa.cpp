@@ -81,10 +81,8 @@ int main(int argc, char **argv) try {
   mkdirs(path.buffer);
 
   copy("leco-exs.exe", input, path.buffer);
-  xcassets(input, path.buffer);
-
-  sim_sb_path_parent(&path);
   copy("leco-rsrc.exe", input, path.buffer);
+  xcassets(input, path.buffer);
 
   sim_sb_path_append(&path, sim_path_filename(input));
   sim_sb_path_set_extension(&path, "exe");
