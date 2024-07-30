@@ -115,6 +115,8 @@ void gen_info_plist(const char *exe_path, const char *name,
   sim_sbt path{};
   sim_sb_path_copy_append(&path, exe_path, "Info.plist");
 
+  sys::log("generating", path.buffer);
+
   std::ofstream o{path.buffer};
   plist::gen(o, [&](auto &&d) {
     common_app_plist(d, name, "iphoneos");
@@ -142,6 +144,8 @@ void gen_archive_plist(const char *xca_path, const char *name) {
   sim_sbt app_path{};
   sim_sb_printf(&app_path, "Applications/%s.app", name);
 
+  sys::log("generating", path.buffer);
+
   std::ofstream o{path.buffer};
   plist::gen(o, [&](auto &&d) {
     d.dictionary("ApplicationProperties", [&](auto &&dd) {
@@ -166,6 +170,8 @@ void gen_export_plist(const char *build_path, const char *name) {
   sim_sbt id{};
   sim_sb_printf(&id, "br.com.tpk.%s", name);
 
+  sys::log("generating", path.buffer);
+
   std::ofstream o{path.buffer};
   plist::gen(o, [&](auto &&d) {
     d.string("method", env("LECO_IOS_METHOD", "ad-hoc"));
@@ -178,6 +184,8 @@ void gen_export_plist(const char *build_path, const char *name) {
 }
 
 static bool compile_launch(const char *bundle_path) {
+  sys::log("ibtool", bundle_path);
+
   sim_sbt cmd{};
   sim_sb_printf(&cmd,
                 "ibtool ../leco/launch.storyboard "
@@ -187,6 +195,8 @@ static bool compile_launch(const char *bundle_path) {
   return 0 == std::system(cmd.buffer);
 }
 static bool code_sign(const char *bundle_path) {
+  sys::log("codesign", bundle_path);
+
   sim_sbt cmd{};
   sim_sb_printf(&cmd, "codesign -f -s %s %s", team_id(), bundle_path);
   // TODO: improve error
