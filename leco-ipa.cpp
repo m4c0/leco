@@ -44,15 +44,8 @@ static void xcassets(const char *dag, const char *app_path) {
 }
 
 static void export_archive(const char *build_path) {
-  sys::log("exporting from", build_path);
-
   sim_sbt cmd{1024};
-  sim_sb_printf(&cmd,
-                "xcodebuild -exportArchive"
-                " -archivePath %s/export.xcarchive"
-                " -exportPath %s/export"
-                " -exportOptionsPlist %s/export.plist",
-                build_path, build_path, build_path);
+  sim_sb_path_copy_append(&cmd, tool_dir, "leco-ipa-export.exe");
   sys::run(cmd.buffer);
 }
 
