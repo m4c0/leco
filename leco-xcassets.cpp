@@ -67,6 +67,10 @@ static void create_icon_contents(const char *path) {
   });
 }
 
+static void create_colour_contents(const char *path) {
+  json::gen(path, [](auto &&d) {});
+}
+
 static void copy_icon(const char *path) {
   sys::log("copying", "icon.png");
 
@@ -112,6 +116,12 @@ static void gen_assets(const char *build_path, sim_sb *xcassets) {
   mkdirs(appiconset.buffer);
   create_icon_contents(appiconset.buffer);
   copy_icon(appiconset.buffer);
+
+  sim_sbt colourset{};
+  sim_sb_path_copy_append(&colourset, xcassets->buffer, "AccentColor.colorset");
+
+  mkdirs(colourset.buffer);
+  create_colour_contents(colourset.buffer);
 }
 
 static void usage() {
