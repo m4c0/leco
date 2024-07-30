@@ -183,7 +183,7 @@ void gen_export_plist(const char *build_path, const char *name) {
   });
 }
 
-static bool compile_launch(const char *bundle_path) {
+static void compile_launch(const char *bundle_path) {
   sys::log("ibtool", bundle_path);
 
   sim_sbt cmd{};
@@ -191,16 +191,14 @@ static bool compile_launch(const char *bundle_path) {
                 "ibtool ../leco/launch.storyboard "
                 "--compile %s/Base.lproj/launch.storyboard",
                 bundle_path);
-  // TODO: improve error
-  return 0 == std::system(cmd.buffer);
+  sys::run(cmd.buffer);
 }
-static bool code_sign(const char *bundle_path) {
+static void code_sign(const char *bundle_path) {
   sys::log("codesign", bundle_path);
 
   sim_sbt cmd{};
   sim_sb_printf(&cmd, "codesign -f -s %s %s", team_id(), bundle_path);
-  // TODO: improve error
-  return 0 == std::system(cmd.buffer);
+  sys::run(cmd.buffer);
 }
 void gen_iphone_ipa(const char *exe) {
   sim_sbt name{};
@@ -218,10 +216,8 @@ void gen_iphone_ipa(const char *exe) {
   sim_sb_path_copy_parent(&build_path, exca.buffer);
 
   gen_info_plist(app_path.buffer, name.buffer, build_path.buffer);
-  if (!compile_launch(app_path.buffer))
-    return;
-  if (!code_sign(app_path.buffer))
-    return;
+  compile_launch(app_path.buffer);
+  code_sign(app_path.buffer);
 
   gen_archive_plist(exca.buffer, name.buffer);
   gen_export_plist(build_path.buffer, name.buffer);
