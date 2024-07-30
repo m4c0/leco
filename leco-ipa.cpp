@@ -6,7 +6,14 @@
 import gopt;
 import sys;
 
-void usage() { sys::die("invalid usage"); }
+void usage() {
+  sys::die(R"(
+Usage: ../leco/leco.exe ipa -i <input.dag>
+
+Where:
+        -i: Application DAG
+)");
+}
 
 static const char *build_path{};
 

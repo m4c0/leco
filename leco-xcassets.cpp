@@ -114,7 +114,15 @@ static void gen_assets(const char *build_path, sim_sb *xcassets) {
   copy_icon(appiconset.buffer);
 }
 
-static void usage() { die("invalid usage"); }
+static void usage() {
+  sys::die(R"(
+Usage: ../leco/leco.exe xcassets -i <input.dag> -a <app-path>
+
+Where:
+        -i: Application DAG
+        -a: Target application folder
+)");
+}
 
 int main(int argc, char **argv) try {
   const char *input{};
