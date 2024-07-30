@@ -1,5 +1,4 @@
 #pragma leco tool
-#pragma leco add_impl plist
 #define SIM_IMPLEMENTATION
 
 #include "mkdir.h"
@@ -10,26 +9,6 @@ import gopt;
 import sys;
 
 static const char *tool_dir;
-
-void gen_iphone_ipa(const char *exe_path);
-
-static void ipa(const char *dag) {
-  sim_sbt cmd{};
-  sim_sb_path_copy_append(&cmd, tool_dir, "leco-ipa.exe");
-  sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, dag);
-  sys::run(cmd.buffer);
-}
-
-static void xcassets(const char *dag, const char *app_path) {
-  sim_sbt cmd{};
-  sim_sb_path_copy_append(&cmd, tool_dir, "leco-xcassets.exe");
-  sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, dag);
-  sim_sb_concat(&cmd, " -a ");
-  sim_sb_concat(&cmd, app_path);
-  sys::run(cmd.buffer);
-}
 
 static void copy(const char *with, const char *dag, const char *to) {
   sim_sbt cmd{};
@@ -67,26 +46,11 @@ static void osx_bundle(const char *dag) {
 }
 
 static void ios_bundle(const char *dag) {
-  sim_sbt path{};
-  sim_sb_path_copy_parent(&path, dag);
-  sim_sb_path_append(&path, "export.xcarchive");
-  sim_sb_path_append(&path, "Products");
-  sim_sb_path_append(&path, "Applications");
-  sim_sb_path_append(&path, sim_path_filename(dag));
-  sim_sb_path_set_extension(&path, "app");
-  mkdirs(path.buffer);
-
-  copy("leco-exs.exe", dag, path.buffer);
-  xcassets(dag, path.buffer);
-
-  sim_sb_path_parent(&path);
-  copy("leco-rsrc.exe", dag, path.buffer);
-
-  sim_sb_path_append(&path, sim_path_filename(dag));
-  sim_sb_path_set_extension(&path, "exe");
-  gen_iphone_ipa(path.buffer);
-
-  ipa(dag);
+  sim_sbt cmd{};
+  sim_sb_path_copy_append(&cmd, tool_dir, "leco-ipa.exe");
+  sim_sb_concat(&cmd, " -i ");
+  sim_sb_concat(&cmd, dag);
+  sys::run(cmd.buffer);
 }
 
 static void bundle(const char *dag) {
