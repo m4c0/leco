@@ -144,8 +144,8 @@ static auto build_dag(const char *src) {
   });
   if (mtime.spec > mtime::of(out.buffer)) {
     compile(src, dag.buffer);
-    mtime.impl = mtime::of(out.buffer);
   }
+  mtime.impl = max(mtime.impl, mtime::of(out.buffer));
 
   dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
