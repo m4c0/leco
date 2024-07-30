@@ -116,6 +116,10 @@ static void gen_assets(const char *build_path, sim_sb *xcassets) {
 
 static void usage() {
   sys::die(R"(
+Generates assets required for iOS bundling. Expects a 1024x1024 PNG icon named
+`icon.png` in the source root and assumes you don't want to mess with accent
+colours etc etc.
+
 Usage: ../leco/leco.exe xcassets -i <input.dag> -a <app-path>
 
 Where:

@@ -8,6 +8,8 @@ import sys;
 
 void usage() {
   sys::die(R"(
+Exports an iOS application - i.e. generates an uploadable IPA.
+
 Usage: ../leco/leco.exe ipa -i <input.dag>
 
 Where:
