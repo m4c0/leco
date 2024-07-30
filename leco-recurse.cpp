@@ -175,6 +175,23 @@ static auto compile_with_deps(const char *src, const char *dag) {
   return build_dag(src);
 }
 
+static void build_rc(const char *path) {
+#if _WIN32
+  sim_sbt rc{};
+  sim_sb_copy(&rc, path);
+  sim_sb_path_set_extension(&rc, "rc");
+  if (mtime::of(rc.buffer) == 0)
+    return;
+
+  sim_sbt res{};
+  in2out(rc.buffer, &res, "res", target);
+
+  sim_sbt cmd{10240};
+  sim_sb_printf(&cmd, "llvm-rc.exe /FO %s %s", res.buffer, rc.buffer);
+  sys::run(cmd.buffer);
+#endif
+}
+
 static void bounce(const char *path) {
   cached.clear();
 
@@ -188,6 +205,7 @@ static void bounce(const char *path) {
   dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
     case 'tapp':
+      build_rc(path);
       link(dag.buffer, file, compile_with_deps(path, dag.buffer).impl);
       bundle(dag.buffer);
       break;
