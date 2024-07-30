@@ -7,6 +7,7 @@
 #include "targets.hpp"
 
 import gopt;
+import mtime;
 import strset;
 import sys;
 
@@ -154,6 +155,13 @@ int main(int argc, char **argv) try {
   sim_sb_concat(&cmd, next.buffer);
   // otherwise, face LNK1107 errors from MSVC
   sim_sb_concat(&cmd, " -fuse-ld=lld");
+
+  sim_sbt rc{};
+  sim_sb_copy(&rc, input);
+  sim_sb_path_set_extension(&rc, "res");
+  if (mtime::of(rc.buffer) > 0) {
+    sim_sb_printf(&cmd, " %s", rc.buffer);
+  }
 #else
   sim_sb_concat(&cmd, output);
 #endif
