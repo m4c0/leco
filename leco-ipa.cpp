@@ -49,6 +49,8 @@ int main(int argc, char **argv) try {
   sim_sb_path_copy_parent(&build_path, input);
   ::build_path = build_path.buffer;
 
+  sys::log("exporting from", build_path.buffer);
+
   export_archive();
 
   return 0;
