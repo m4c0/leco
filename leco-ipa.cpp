@@ -12,6 +12,11 @@ void usage() {
   sys::die(R"(
 Exports an iOS application - i.e. generates an uploadable IPA.
 
+If you see werid messages from XCode about missing iOS Simulator stuff, you
+need to download the iOS SDK. This command might help:
+
+        xcodebuild -downloadPlatform iOS
+
 Usage: ../leco/leco.exe ipa -i <input.dag>
 
 Where:

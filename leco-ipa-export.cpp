@@ -14,7 +14,13 @@ signed, etc.
 
 Must be run from the root of the source repository.
 
-It only support iPhoneOS exports.
+It only support iPhoneOS exports. No support for other Apple OSs like WatchOS,
+etc.
+
+If you see werid messages from XCode about missing iOS Simulator stuff, you
+need to download the iOS SDK. This command might help:
+
+        xcodebuild -downloadPlatform iOS
 
 Usage: ../leco/leco.exe ipa-export
 

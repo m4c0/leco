@@ -130,6 +130,11 @@ Generates assets required for iOS bundling. Expects a 1024x1024 PNG icon named
 `icon.png` in the source root and assumes you don't want to mess with accent
 colours etc etc.
 
+If you see werid messages from XCode about missing iOS Simulator stuff, you
+need to download the iOS SDK. This command might help:
+
+        xcodebuild -downloadPlatform iOS
+
 Usage: ../leco/leco.exe xcassets -i <input.dag> -a <app-path>
 
 Where:
