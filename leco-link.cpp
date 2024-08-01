@@ -148,9 +148,7 @@ int main(int argc, char **argv) try {
     sim_sb_concat(&cmd, " -g");
   if (opt)
     sim_sb_concat(&cmd, " -O");
-  sim_sb_concat(&cmd, " -- @");
-  sim_sb_concat(&cmd, args.buffer);
-  sim_sb_concat(&cmd, " -o ");
+  sim_sb_printf(&cmd, " -- @%s -o ", args.buffer);
 #ifdef _WIN32
   sim_sb_concat(&cmd, next.buffer);
   // otherwise, face LNK1107 errors from MSVC

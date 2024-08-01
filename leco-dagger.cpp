@@ -270,25 +270,18 @@ static void add_mod_dep(const char *p, const char *desc) {
   missing_file(desc);
 }
 
+static bool check_extension(sim_sb *mi, const char *desc, const char *ext) {
+  sim_sb_path_set_extension(mi, ext);
+  return print_dag_if_found(mi->buffer, desc, 'impl', 'idag');
+}
+
 static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
   sim_sbt mi{};
   sim_sb_path_copy_parent(&mi, source.buffer);
   sim_sb_path_append(&mi, mod_impl);
 
-  sim_sb_path_set_extension(&mi, "cpp");
-  if (print_dag_if_found(mi.buffer, desc, 'impl', 'idag'))
-    return;
-
-  sim_sb_path_set_extension(&mi, "c");
-  if (print_dag_if_found(mi.buffer, desc, 'impl', 'idag'))
-    return;
-
-  sim_sb_path_set_extension(&mi, "mm");
-  if (print_dag_if_found(mi.buffer, desc, 'impl', 'idag'))
-    return;
-
-  sim_sb_path_set_extension(&mi, "m");
-  if (print_dag_if_found(mi.buffer, desc, 'impl', 'idag'))
+  if (check_extension(&mi, desc, "cpp") || check_extension(&mi, desc, "c") ||
+      check_extension(&mi, desc, "mm") || check_extension(&mi, desc, "m"))
     return;
 
   missing_file(desc);
