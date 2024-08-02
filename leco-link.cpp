@@ -175,7 +175,8 @@ int main(int argc, char **argv) try {
     fgets(sra.buffer, sra.size, f);
     fclose(f);
 
-    sim_sb_printf(&cmd, " -resource-dir %s", sra.buffer);
+    sim_sb_printf(&cmd, " -Xlinker --export-table -resource-dir %s",
+                  sra.buffer);
   }
 
   run(cmd.buffer);
