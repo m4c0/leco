@@ -10,23 +10,25 @@ import sys;
 
 static const char *tool_dir;
 
-static void copy(const char *with, const char *dag, const char *to) {
+static void copy(const char *with, const char *dag, const char *to,
+                 const char *extra = "") {
   sim_sbt cmd{};
   sim_sb_path_copy_append(&cmd, tool_dir, with);
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, dag);
   sim_sb_concat(&cmd, " -o ");
   sim_sb_concat(&cmd, to);
+  sim_sb_concat(&cmd, extra);
   sys::run(cmd.buffer);
 }
 
-static void dir_bundle(const char *dag) {
+static void dir_bundle(const char *dag, const char *extra = "") {
   sim_sbt path{};
   sim_sb_copy(&path, dag);
   sim_sb_path_set_extension(&path, "app");
   mkdirs(path.buffer);
 
-  copy("leco-exs.exe", dag, path.buffer);
+  copy("leco-exs.exe", dag, path.buffer, extra);
   copy("leco-rsrc.exe", dag, path.buffer);
 }
 
@@ -53,6 +55,8 @@ static void ios_bundle(const char *dag) {
   sys::run(cmd.buffer);
 }
 
+static void wasm_bundle(const char *dag) { dir_bundle(dag, " -e wasm"); }
+
 static void bundle(const char *dag) {
   sim_sbt path{};
   sim_sb_path_copy_parent(&path, dag);
@@ -62,6 +66,8 @@ static void bundle(const char *dag) {
     ios_bundle(dag);
   } else if (IS_TGT(target, TGT_OSX)) {
     osx_bundle(dag);
+  } else if (IS_TGT(target, TGT_WASM)) {
+    wasm_bundle(dag);
   } else {
     dir_bundle(dag);
   }

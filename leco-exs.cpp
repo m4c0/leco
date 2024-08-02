@@ -13,6 +13,7 @@ import sys;
 
 static const char *exedir{};
 static const char *target{};
+static const char *ext{"exe"};
 
 static void usage() { die("invalid usage"); }
 
@@ -20,6 +21,7 @@ static void copy_exe(const char *input) {
   sim_sbt path{};
   sim_sb_copy(&path, exedir);
   sim_sb_path_append(&path, sim_path_filename(input));
+  sim_sb_path_set_extension(&path, ext);
 
   if (mtime::of(path.buffer) >= mtime::of(input))
     return;
@@ -82,8 +84,11 @@ static void read_dag(const char *dag) {
 int main(int argc, char **argv) try {
   const char *input{};
 
-  auto opts = gopt_parse(argc, argv, "i:o:", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "e:i:o:", [&](auto ch, auto val) {
     switch (ch) {
+    case 'e':
+      ext = val;
+      break;
     case 'i':
       input = val;
       break;
