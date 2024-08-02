@@ -4,6 +4,7 @@
     <script type="text/javascript">
       (function() {
         var leco_buffer;
+        var leco_table;
         function leco_dump(fn, iovs, iovs_len, nwritten) {
           const view = new DataView(leco_buffer);
           const decoder = new TextDecoder()
@@ -23,7 +24,9 @@
           return 0;
         }
 
-        const env = {};
+        const leco = {
+          set_timeout : (fn, timeout) => setTimeout(leco_table.get(fn), timeout),
+        };
         const wasi_snapshot_preview1 = new Proxy({
           clock_time_get : (id, precision, out) => {
             if (id != 0) console.log("Unsupported clock type", id);
@@ -48,12 +51,13 @@
             };
           },
         });
-        const imp = { env, wasi_snapshot_preview1 };
+        const imp = { leco, wasi_snapshot_preview1 };
         const loc = location.pathname.replace(/^.*[/]/, "").replace(/[.].*$/, "");
         fetch(loc + ".wasm")
           .then(response => response.arrayBuffer())
           .then(bytes => WebAssembly.instantiate(bytes, imp))
           .then(obj => {
+            leco_table = obj.instance.exports.__indirect_function_table;
             leco_buffer = obj.instance.exports.memory.buffer;
             obj.instance.exports._start();
           });
