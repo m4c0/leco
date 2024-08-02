@@ -87,6 +87,14 @@ static const char *android_sysroot() {
   return nullptr;
 }
 
+static const char *wasm_sysroot() {
+  const auto sdk = sys::env("WASI_SYSROOT");
+  if (sdk == nullptr)
+    sys::die("undefined WASI_SYSROOT");
+
+  return sdk;
+}
+
 static const char *sysroot_for_target(const char *target) {
   if (IS_TGT(target, TGT_OSX)) {
     return apple_sysroot("macosx");
@@ -98,6 +106,9 @@ static const char *sysroot_for_target(const char *target) {
 
   if (IS_TGT_DROID(target)) {
     return android_sysroot();
+  }
+  if (IS_TGT(target, TGT_WASM)) {
+    return wasm_sysroot();
   }
 
   return nullptr;
