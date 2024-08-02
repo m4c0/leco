@@ -16,7 +16,7 @@ static const char *argv0;
 
 static void clang_cmd(sim_sb *buf, const char *exe) {
 #if __APPLE__
-  sim_sb_copy(buf, "/usr/local/opt/llvm@16/bin");
+  sim_sb_copy(buf, "/usr/local/opt/llvm/bin");
   sim_sb_path_append(buf, exe);
 #elif _WIN32
   sim_sb_copy(buf, exe);
