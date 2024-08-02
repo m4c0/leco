@@ -168,6 +168,14 @@ int main(int argc, char **argv) try {
     sim_sb_concat(&cmd, " -rpath @executable_path");
   } else if (IS_TGT_IOS(target)) {
     sim_sb_concat(&cmd, " -rpath @executable_path/Frameworks");
+  } else if (IS_TGT(target, TGT_WASM)) {
+    sim_sbt sra{};
+
+    auto f = fopen("../leco/out/wasm32-wasi/sysroot", "r");
+    fgets(sra.buffer, sra.size, f);
+    fclose(f);
+
+    sim_sb_printf(&cmd, " -resource-dir %s", sra.buffer);
   }
 
   run(cmd.buffer);
