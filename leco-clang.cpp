@@ -79,6 +79,8 @@ static void add_target_defs(sim_sb *buf, const char *tgt) {
     sim_sb_concat(buf, " -D_C99_SOURCE");
   } else if (IS_TGT_DROID(tgt)) {
     sim_sb_concat(buf, " -DLECO_TARGET_ANDROID");
+  } else if (IS_TGT(tgt, TGT_WASM)) {
+    sim_sb_concat(buf, " -DLECO_TARGET_WASM");
   } else {
     die("invalid target: [%s]", tgt);
   }

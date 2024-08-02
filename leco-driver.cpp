@@ -147,11 +147,15 @@ static void run_targets(const char *target) {
   }
 #endif
 
-  if (0 == strcmp(target, "ios")) {
+  if (0 == strcmp(target, "android")) {
     run_target(TGT_DROID_AARCH64);
     run_target(TGT_DROID_ARMV7);
     run_target(TGT_DROID_X86);
     run_target(TGT_DROID_X86_64);
+    return;
+  }
+  if (0 == strcmp(target, "wasm")) {
+    run_target(TGT_WASM);
     return;
   }
 

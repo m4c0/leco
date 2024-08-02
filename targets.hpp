@@ -8,6 +8,7 @@
 #define TGT_DROID_ARMV7 "armv7-none-linux-androideabi26"
 #define TGT_DROID_X86 "i686-none-linux-android26"
 #define TGT_DROID_X86_64 "x86_64-none-linux-android26"
+#define TGT_WASM "wasm32-wasi"
 
 #if _WIN32
 #define HOST_TARGET TGT_WINDOWS
