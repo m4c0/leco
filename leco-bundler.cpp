@@ -22,13 +22,13 @@ static void copy(const char *with, const char *dag, const char *to,
   sys::run(cmd.buffer);
 }
 
-static void dir_bundle(const char *dag, const char *extra = "") {
+static void dir_bundle(const char *dag) {
   sim_sbt path{};
   sim_sb_copy(&path, dag);
   sim_sb_path_set_extension(&path, "app");
   mkdirs(path.buffer);
 
-  copy("leco-exs.exe", dag, path.buffer, extra);
+  copy("leco-exs.exe", dag, path.buffer);
   copy("leco-rsrc.exe", dag, path.buffer);
 }
 
@@ -55,7 +55,20 @@ static void ios_bundle(const char *dag) {
   sys::run(cmd.buffer);
 }
 
-static void wasm_bundle(const char *dag) { dir_bundle(dag, " -e wasm"); }
+static void wasm_bundle(const char *dag) {
+  sim_sbt path{};
+  sim_sb_copy(&path, dag);
+  sim_sb_path_set_extension(&path, "app");
+  mkdirs(path.buffer);
+
+  copy("leco-exs.exe", dag, path.buffer, " -e wasm");
+  copy("leco-rsrc.exe", dag, path.buffer);
+
+  sim_sb_path_append(&path, sim_path_filename(dag));
+  sim_sb_path_set_extension(&path, "html");
+  sys::log("copying", path.buffer);
+  sys::link("../leco/wasm.html", path.buffer);
+}
 
 static void bundle(const char *dag) {
   sim_sbt path{};
