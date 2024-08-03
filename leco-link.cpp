@@ -101,7 +101,7 @@ int main(int argc, char **argv) try {
       usage();
     }
   });
-  if (!input || !output || opts.argc != 0)
+  if (!input || !output)
     usage();
 
   sim_sbt path{};
