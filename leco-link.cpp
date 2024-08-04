@@ -153,13 +153,6 @@ int main(int argc, char **argv) try {
   sim_sb_concat(&cmd, next.buffer);
   // otherwise, face LNK1107 errors from MSVC
   sim_sb_concat(&cmd, " -fuse-ld=lld");
-
-  sim_sbt rc{};
-  sim_sb_copy(&rc, input);
-  sim_sb_path_set_extension(&rc, "res");
-  if (mtime::of(rc.buffer) > 0) {
-    sim_sb_printf(&cmd, " %s", rc.buffer);
-  }
 #else
   sim_sb_concat(&cmd, output);
 #endif
@@ -168,6 +161,13 @@ int main(int argc, char **argv) try {
     sim_sb_concat(&cmd, " -rpath @executable_path");
   } else if (IS_TGT_IOS(target)) {
     sim_sb_concat(&cmd, " -rpath @executable_path/Frameworks");
+  } else if (IS_TGT(target, TGT_WINDOWS)) {
+    sim_sbt rc{};
+    sim_sb_copy(&rc, input);
+    sim_sb_path_set_extension(&rc, "res");
+    if (mtime::of(rc.buffer) > 0) {
+      sim_sb_printf(&cmd, " %s", rc.buffer);
+    }
   } else if (IS_TGT(target, TGT_WASM)) {
     sim_sbt sra{};
 
