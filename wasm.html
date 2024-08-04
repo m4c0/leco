@@ -34,7 +34,16 @@
             arr[0] = BigInt(Date.now() * 1000000);
           }, 
           fd_close : (fd) => 0,
-          fd_fdstat_get : (fd, stat) => 0,
+          fd_fdstat_get : (fd, stat) => {
+            if (fd != 1 && fd != 2) return 24;
+
+            const view = new DataView(leco_buffer);
+            view.setUint8(stat, 2);
+            view.setUint32(stat + 2, 1, true);
+            view.setBigUint64(stat + 8, 64n, true);
+            view.setBigUint64(stat + 16, 64n, true);
+            return 0;
+          },
           fd_write : (fd, iovs, iovs_len, nwritten) => {
             switch (fd) {
               case 1: return leco_dump(console.log, iovs, iovs_len, nwritten);
