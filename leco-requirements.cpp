@@ -6,9 +6,14 @@
 #include "targets.hpp"
 
 import gopt;
+import popen;
 import pprent;
 import strset;
 import sys;
+
+#if _WIN32
+#define strdup _strdup
+#endif
 
 static const char *target{HOST_TARGET};
 static const char *argv0;
@@ -48,19 +53,39 @@ void collect_deps(sim_sb *path) {
 
 static void usage() {
   die(R"(
-Usage: %s -t <target>
+Usage: %s -t <target> [-g]
 
 Where:
         -t: Target triple to scan. The list might vary based on target
             depending on the platform-specifics of each dependency.
+        -g: Print the git commit hash alongside each dep
 )",
       argv0);
 }
 
+static void run_git(const char *path) {
+  char *cmd[6]{
+      strdup("git"),       strdup("-C"),   strdup(path),
+      strdup("rev-parse"), strdup("HEAD"),
+  };
+  p::proc p{cmd};
+  if (!p.gets())
+    sys::die("failed to get git status");
+
+  const char *line = p.last_line_read();
+  int len = strlen(line);
+  printf("%.*s ", len - 1, line);
+}
+
 int main(int argc, char **argv) try {
+  bool git{};
+
   argv0 = argv[0];
-  auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "gt:", [&](auto ch, auto val) {
     switch (ch) {
+    case 'g':
+      git = true;
+      break;
     case 't':
       target = val;
       break;
@@ -76,6 +101,9 @@ int main(int argc, char **argv) try {
   collect_deps(&cwd);
 
   for (const auto &s : collected) {
+    if (git)
+      run_git(s.c_str());
+
     puts(sim_path_filename(s.c_str()));
   }
 } catch (...) {
