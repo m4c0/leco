@@ -175,8 +175,12 @@ int main(int argc, char **argv) try {
     fgets(sra.buffer, sra.size, f);
     fclose(f);
 
-    sim_sb_printf(&cmd, " -Xlinker --export-table -resource-dir %s",
-                  sra.buffer);
+    // export-table: allows passing lambdas to JS
+    // exec-model: without it, we could use "main" but _start calls the global
+    //             dtor after "main" returns
+    sim_sb_printf(
+        &cmd, " -Xlinker --export-table -mexec-model=reactor -resource-dir %s",
+        sra.buffer);
   }
 
   run(cmd.buffer);

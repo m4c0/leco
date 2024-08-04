@@ -68,7 +68,7 @@
           .then(obj => {
             leco_table = obj.instance.exports.__indirect_function_table;
             leco_buffer = obj.instance.exports.memory.buffer;
-            obj.instance.exports._start();
+            obj.instance.exports._initialize();
           });
       })();
     </script>
