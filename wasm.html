@@ -25,6 +25,7 @@
         }
 
         const leco = {
+          request_animation_frame : (fn) => window.requestAnimationFrame(leco_table.get(fn)),
           set_timeout : (fn, timeout) => setTimeout(leco_table.get(fn), timeout),
         };
         const wasi_snapshot_preview1 = new Proxy({
