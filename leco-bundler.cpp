@@ -70,9 +70,11 @@ static void wasm_bundle(const char *dag) {
   sys::link("../leco/wasm.html", path.buffer);
 
   sim_sb_path_parent(&path);
-  sim_sb_path_append(&path, "leco.js");
-  sys::log("copying", path.buffer);
-  sys::link("../leco/wasm.js", path.buffer);
+
+  sim_sbt cmd{};
+  sim_sb_path_copy_append(&cmd, tool_dir, "leco-wasm-js.exe");
+  sim_sb_printf(&cmd, " -i %s -a %s", dag, path.buffer);
+  sys::run(cmd.buffer);
 }
 
 static void bundle(const char *dag) {
