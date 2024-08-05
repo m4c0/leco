@@ -413,6 +413,8 @@ void run(int argc, char **argv) {
     }
   }
 
+  output('srcf', source.buffer);
+
   sim_sbt path{};
   sim_sb_path_copy_parent(&path, source.buffer);
   sim_sb_path_append(&path, "out");
