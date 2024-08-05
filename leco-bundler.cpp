@@ -68,6 +68,11 @@ static void wasm_bundle(const char *dag) {
   sim_sb_path_set_extension(&path, "html");
   sys::log("copying", path.buffer);
   sys::link("../leco/wasm.html", path.buffer);
+
+  sim_sb_path_parent(&path);
+  sim_sb_path_append(&path, "leco.js");
+  sys::log("copying", path.buffer);
+  sys::link("../leco/wasm.js", path.buffer);
 }
 
 static void bundle(const char *dag) {
