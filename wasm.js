@@ -1,3 +1,5 @@
+var leco_exports;
+
 (function() {
   var leco_buffer;
   var leco_table;
@@ -63,6 +65,7 @@
     .then(response => response.arrayBuffer())
     .then(bytes => WebAssembly.instantiate(bytes, imp))
     .then(obj => {
+      leco_exports = obj.instance.exports;
       leco_table = obj.instance.exports.__indirect_function_table;
       leco_buffer = obj.instance.exports.memory.buffer;
       obj.instance.exports._initialize();
