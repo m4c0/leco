@@ -1,11 +1,22 @@
 #pragma leco tool
 #define SIM_IMPLEMENTATION
+#include "fopen.hpp"
 #include "sim.hpp"
 
 import gopt;
 import sys;
 
 static void usage() { sys::die("invalid usage"); }
+
+static void concat(FILE *out, const char *in_file) {
+  f::open in{in_file, "rb"};
+
+  char buf[10240];
+  int got{};
+  while ((got = fread(buf, 1, sizeof(buf), *in)) > 0) {
+    fwrite(buf, 1, got, out);
+  }
+}
 
 int main(int argc, char **argv) {
   const char *input;
@@ -28,6 +39,11 @@ int main(int argc, char **argv) {
     usage();
 
   sim_sb_path_append(&appdir, "leco.js");
-  sys::log("copying", appdir.buffer);
-  sys::link("../leco/wasm.js", appdir.buffer);
+  sys::log("generating", appdir.buffer);
+
+  f::open f{appdir.buffer, "wb"};
+  fprintf(*f, "var leco_exports;\n");
+  fprintf(*f, "var leco_imports = {};\n");
+
+  concat(*f, "../leco/wasm.js");
 }
