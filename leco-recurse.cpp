@@ -34,7 +34,6 @@ static void format(const char *cpp) {
 
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, cpp);
-  // TODO: suppress failures and output
   sys::run(cmd.buffer);
 }
 
