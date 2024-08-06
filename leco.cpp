@@ -13,8 +13,6 @@
 
 #include <stdlib.h>
 
-// TODO: leco-format calling clang-format
-// TODO: leco driver calling format after a successful compilation
 // TODO: add clang-format config to leco-format
 
 import gopt;
