@@ -46,8 +46,6 @@ static void compile(const char *src, const char *dag) {
   sim_sb_concat(&cmd, common_flags);
   run(cmd.buffer);
 
-  // TODO: add an option to suppress formatting
-  // ^---- maybe by not allowing recursive formatting
   format(src);
 
   if (0 != strcmp(".cppm", sim_path_extension(src)))
