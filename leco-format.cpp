@@ -23,6 +23,14 @@ static const char *fmt_cmd() {
 
 static bool dry_run{};
 
+static void setup_cmd(sim_sb *cmd) {
+  sim_sb_copy(cmd, fmt_cmd());
+  sim_sb_printf(cmd, " -i");
+  if (dry_run) {
+    sim_sb_concat(cmd, " -n --Werror");
+  }
+}
+
 static void work_from_git() {
   char *args[]{
       strdup("git"),
@@ -32,11 +40,7 @@ static void work_from_git() {
   };
 
   sim_sbt cmd{10240};
-  sim_sb_copy(&cmd, fmt_cmd());
-  sim_sb_concat(&cmd, " -i");
-  if (dry_run) {
-    sim_sb_concat(&cmd, " -n --Werror");
-  }
+  setup_cmd(&cmd);
 
   unsigned count{};
   p::proc p{args};
@@ -83,11 +87,7 @@ int main(int argc, char **argv) try {
   }
 
   sim_sbt cmd{10240};
-  sim_sb_copy(&cmd, fmt_cmd());
-  sim_sb_concat(&cmd, " -i");
-  if (dry_run) {
-    sim_sb_concat(&cmd, " -n --Werror");
-  }
+  setup_cmd(&cmd);
 
   for (auto i = 0; i < opts.argc; i++) {
     if (mtime::of(opts.argv[i]) == 0) {
