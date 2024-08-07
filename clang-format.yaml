@@ -1,4 +1,7 @@
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
 BasedOnStyle: LLVM
 BreakConstructorInitializers: BeforeComma 
 ColumnLimit: 120
+Cpp11BracedListStyle: false
 PackConstructorInitializers: CurrentLine

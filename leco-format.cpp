@@ -33,25 +33,24 @@ static void setup_cmd(sim_sb *cmd) {
 
 static void work_from_git() {
   char *args[]{
-      strdup("git"),
-      strdup("status"),
-      strdup("--porcelain=v2"),
-      0,
+    strdup("git"),
+    strdup("status"),
+    strdup("--porcelain=v2"),
+    0,
   };
 
-  sim_sbt cmd{10240};
+  sim_sbt cmd{ 10240 };
   setup_cmd(&cmd);
 
   unsigned count{};
-  p::proc p{args};
+  p::proc p{ args };
   while (p.gets()) {
     auto line = p.last_line_read();
     if (strncmp(line, "1 D. ", 5) == 0) {
       count++;
       continue;
     }
-    if (strstr(line, ".cpp") == nullptr && strstr(line, ".mm") == nullptr)
-      continue;
+    if (strstr(line, ".cpp") == nullptr && strstr(line, ".mm") == nullptr) continue;
 
     auto file = strrchr(line, ' ') + 1;
     auto sep = strchr(file, '\t');
@@ -62,8 +61,7 @@ static void work_from_git() {
   }
 
   if (count == 0) {
-    if (dry_run)
-      return;
+    if (dry_run) return;
 
     sys::die("missing input files");
   }
@@ -74,10 +72,7 @@ static void work_from_git() {
 int main(int argc, char **argv) try {
   auto opts = gopt_parse(argc, argv, "n", [](auto ch, auto val) {
     switch (ch) {
-
-    case 'n':
-      dry_run = true;
-      break;
+    case 'n': dry_run = true; break;
     }
   });
 
@@ -86,7 +81,7 @@ int main(int argc, char **argv) try {
     return 0;
   }
 
-  sim_sbt cmd{10240};
+  sim_sbt cmd{ 10240 };
   setup_cmd(&cmd);
 
   for (auto i = 0; i < opts.argc; i++) {
