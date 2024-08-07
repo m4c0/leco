@@ -25,7 +25,7 @@ static bool dry_run{};
 
 static void setup_cmd(sim_sb *cmd) {
   sim_sb_copy(cmd, fmt_cmd());
-  sim_sb_printf(cmd, " -i");
+  sim_sb_printf(cmd, " -i --style=file:../leco/clang-format.yaml");
   if (dry_run) {
     sim_sb_concat(cmd, " -n --Werror");
   }

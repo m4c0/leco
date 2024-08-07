@@ -1,0 +1,3 @@
+BasedOnStyle: LLVM
+BreakConstructorInitializers: BeforeComma 
+PackConstructorInitializers: CurrentLine
