@@ -1,11 +1,15 @@
+AlignOperands: AlignAfterOperator
 AllowShortCaseLabelsOnASingleLine: true
 AllowShortFunctionsOnASingleLine: All
 AllowShortIfStatementsOnASingleLine: AllIfsAndElse
 AllowShortLoopsOnASingleLine: true
 BasedOnStyle: LLVM
+BreakBeforeBinaryOperators: NonAssignment
 BreakConstructorInitializers: BeforeComma 
 ColumnLimit: 120
 Cpp11BracedListStyle: false
 NamespaceIndentation: All
+ObjCSpaceBeforeProtocolList: false
 PackConstructorInitializers: CurrentLine
+PointerAlignment: Middle
 SpaceBeforeCpp11BracedList: true

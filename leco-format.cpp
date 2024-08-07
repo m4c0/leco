@@ -11,7 +11,7 @@ import sys;
 #define strdup _strdup
 #endif
 
-static const char *fmt_cmd() {
+static const char * fmt_cmd() {
 #if __APPLE__
   return "/usr/local/opt/llvm@16/bin/clang-format";
 #elif _WIN32
@@ -21,9 +21,9 @@ static const char *fmt_cmd() {
 #endif
 }
 
-static bool dry_run{};
+static bool dry_run {};
 
-static void setup_cmd(sim_sb *cmd) {
+static void setup_cmd(sim_sb * cmd) {
   sim_sb_copy(cmd, fmt_cmd());
   sim_sb_printf(cmd, " -i --style=file:../leco/clang-format.yaml");
   if (dry_run) {
@@ -32,18 +32,18 @@ static void setup_cmd(sim_sb *cmd) {
 }
 
 static void work_from_git() {
-  char *args[]{
+  char * args[] {
     strdup("git"),
     strdup("status"),
     strdup("--porcelain=v2"),
     0,
   };
 
-  sim_sbt cmd{ 10240 };
+  sim_sbt cmd { 10240 };
   setup_cmd(&cmd);
 
-  unsigned count{};
-  p::proc p{ args };
+  unsigned count {};
+  p::proc p { args };
   while (p.gets()) {
     auto line = p.last_line_read();
     if (strncmp(line, "1 D. ", 5) == 0) {
@@ -69,7 +69,7 @@ static void work_from_git() {
   sys::run(cmd.buffer);
 }
 
-int main(int argc, char **argv) try {
+int main(int argc, char ** argv) try {
   auto opts = gopt_parse(argc, argv, "n", [](auto ch, auto val) {
     switch (ch) {
     case 'n': dry_run = true; break;
@@ -81,7 +81,7 @@ int main(int argc, char **argv) try {
     return 0;
   }
 
-  sim_sbt cmd{ 10240 };
+  sim_sbt cmd { 10240 };
   setup_cmd(&cmd);
 
   for (auto i = 0; i < opts.argc; i++) {
