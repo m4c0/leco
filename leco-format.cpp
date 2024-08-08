@@ -71,9 +71,7 @@ static void work_from_git() {
 
 int main(int argc, char ** argv) try {
   auto opts = gopt_parse(argc, argv, "n", [](auto ch, auto val) {
-    switch (ch) {
-    case 'n': dry_run = true; break;
-    }
+    if (ch == n) dry_run = true;
   });
 
   if (opts.argc == 0) {
@@ -85,9 +83,7 @@ int main(int argc, char ** argv) try {
   setup_cmd(&cmd);
 
   for (auto i = 0; i < opts.argc; i++) {
-    if (mtime::of(opts.argv[i]) == 0) {
-      sys::die("file not found: %s", opts.argv[i]);
-    }
+    if (mtime::of(opts.argv[i]) == 0) sys::die("file not found: %s", opts.argv[i]);
 
     sim_sb_printf(&cmd, " %s", opts.argv[i]);
   }
