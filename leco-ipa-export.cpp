@@ -27,10 +27,10 @@ Usage: ../leco/leco.exe ipa-export
 )");
 }
 
-static void export_archive(const char *build_path) {
+static void export_archive(const char * build_path) {
   sys::log("exporting from", build_path);
 
-  sim_sbt cmd{1024};
+  sim_sbt cmd { 1024 };
   sim_sb_printf(&cmd,
                 "xcodebuild -exportArchive"
                 " -archivePath %s/export.xcarchive"
@@ -40,8 +40,8 @@ static void export_archive(const char *build_path) {
   sys::run(cmd.buffer);
 }
 
-int main(int argc, char **argv) try {
-  sim_sbt path{};
+int main(int argc, char ** argv) try {
+  sim_sbt path {};
   sim_sb_path_copy_real(&path, ".");
   sim_sb_path_append(&path, "out");
   sim_sb_path_append(&path, TGT_IPHONEOS);
