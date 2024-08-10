@@ -71,7 +71,7 @@ static void work_from_git() {
 
 int main(int argc, char ** argv) try {
   auto opts = gopt_parse(argc, argv, "n", [](auto ch, auto val) {
-    if (ch == n) dry_run = true;
+    if (ch == 'n') dry_run = true;
   });
 
   if (opts.argc == 0) {
