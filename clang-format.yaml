@@ -8,6 +8,7 @@ BreakBeforeBinaryOperators: NonAssignment
 BreakConstructorInitializers: BeforeComma 
 ColumnLimit: 120
 Cpp11BracedListStyle: false
+IndentCaseLabels: true
 NamespaceIndentation: All
 ObjCSpaceBeforeProtocolList: false
 PackConstructorInitializers: CurrentLine
