@@ -43,8 +43,9 @@ int try_main(int argc, char **argv) {
   LOCAL_MODULE("sys");
 
   puts("Building meta runner");
-  run(CLANG " -i leco.cpp -o leco.exe --" MARG("gopt") MARG("mtime"));
+  run(CLANG " -i leco.cpp -o leco.exe");
 
+  TOOL("meta");
   TOOL("deplist");
   TOOL("dagger");
   TOOL("link");
