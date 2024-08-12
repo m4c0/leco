@@ -13,8 +13,6 @@
 
 #include <stdlib.h>
 
-// TODO: add clang-format config to leco-format
-
 import gopt;
 import mtime;
 
