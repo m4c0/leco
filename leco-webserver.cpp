@@ -16,5 +16,5 @@ int main(int argc, char ** argv) {
   }
 
   sys::run(cmd.buffer);
-  sys::run("python3 -mhttp.server");
+  sys::run("python3 ../leco/webserver.py");
 }
