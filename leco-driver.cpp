@@ -159,6 +159,12 @@ static void run_targets(const char *target) {
     return;
   }
 
+  if (IS_TGT_DROID(target) || IS_TGT_APPLE(target) || IS_TGT(target, TGT_WINDOWS) || IS_TGT(target, TGT_LINUX)
+      || IS_TGT(target, TGT_WASM)) {
+    run_target(target);
+    return;
+  }
+
   sys::die("unknown target: %s", target);
 }
 
