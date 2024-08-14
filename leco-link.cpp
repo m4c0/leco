@@ -176,11 +176,16 @@ int main(int argc, char **argv) try {
     fclose(f);
 
     // export-table: allows passing lambdas to JS
+    sim_sb_concat(&cmd, " -Xlinker --export-table");
     // exec-model: without it, we could use "main" but _start calls the global
     //             dtor after "main" returns
-    sim_sb_printf(
-        &cmd, " -Xlinker --export-table -mexec-model=reactor -resource-dir %s",
-        sra.buffer);
+    sim_sb_concat(&cmd, " -mexec-model=reactor");
+    // no-check-features: allows using shared-memory without atomics/etc
+    //                    https://stackoverflow.com/a/70186219
+    //                    Only works because we won't be using malloc in threads
+    sim_sb_concat(&cmd, " -Xlinker --shared-memory -Xlinker --no-check-features");
+
+    sim_sb_printf(&cmd, " -resource-dir %s", sra.buffer);
   }
 
   run(cmd.buffer);
