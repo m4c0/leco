@@ -2,6 +2,13 @@
 #define SIM_IMPLEMENTATION
 #include "sim.hpp"
 
+#if _WIN32
+#include <process.h>
+#define execv _execv
+#else
+#include <unistd.h>
+#endif
+
 import sys;
 
 int main(int argc, char ** argv) {
@@ -16,5 +23,9 @@ int main(int argc, char ** argv) {
   }
 
   sys::run(cmd.buffer);
-  sys::run("python3 ../leco/webserver.py");
+
+  // We need to execlp instead of "system" because Python does weird stuff to
+  // signals. Using Ctrl-C to stop the process sometimes leaves python running
+  // in the background.
+  return execlp("python3", "python3", "../leco/webserver.py", nullptr);
 }
