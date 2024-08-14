@@ -183,7 +183,7 @@ int main(int argc, char **argv) try {
     // no-check-features: allows using shared-memory without atomics/etc
     //                    https://stackoverflow.com/a/70186219
     //                    Only works because we won't be using malloc in threads
-    sim_sb_concat(&cmd, " -Xlinker --shared-memory -Xlinker --no-check-features");
+    // sim_sb_concat(&cmd, " -Xlinker --shared-memory -Xlinker --no-check-features");
 
     sim_sb_printf(&cmd, " -resource-dir %s", sra.buffer);
   }
