@@ -2,7 +2,6 @@
 #define SIM_IMPLEMENTATION
 
 #include "fopen.hpp"
-#include "mkdir.h"
 #include "sim.hpp"
 
 #include <stdio.h>
@@ -107,20 +106,20 @@ static void run_actool(const char *plist, const char *app_path,
 static void gen_assets(const char *build_path, sim_sb *xcassets) {
   sim_sb_path_copy_append(xcassets, build_path, "Assets.xcassets");
 
-  mkdirs(xcassets->buffer);
+  sys::mkdirs(xcassets->buffer);
   create_xca_contents(xcassets->buffer);
 
   sim_sbt appiconset{};
   sim_sb_path_copy_append(&appiconset, xcassets->buffer, "AppIcon.appiconset");
 
-  mkdirs(appiconset.buffer);
+  sys::mkdirs(appiconset.buffer);
   create_icon_contents(appiconset.buffer);
   copy_icon(appiconset.buffer);
 
   sim_sbt colourset{};
   sim_sb_path_copy_append(&colourset, xcassets->buffer, "AccentColor.colorset");
 
-  mkdirs(colourset.buffer);
+  sys::mkdirs(colourset.buffer);
   create_colour_contents(colourset.buffer);
 }
 

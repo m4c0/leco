@@ -1,4 +1,8 @@
 module;
+#include "pathmax.h"
+#include "sim.h"
+
+#include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,9 +10,12 @@ module;
 
 #ifdef _WIN32
 #define WIN32_MEAN_AND_LEAN
+#include <direct.h>
 #include <windows.h>
 #else
+#include <sys/stat.h>
 #include <unistd.h>
+#define _mkdir(x) mkdir((x), 0777)
 #endif
 
 export module sys;
@@ -58,5 +65,20 @@ const char *env(const char *name) {
 #else
   return strdup(getenv(name));
 #endif
+}
+
+void mkdirs(const char *path) {
+  if (0 == _mkdir(path))
+    return;
+  if (errno == EEXIST)
+    return;
+
+  sim_sb p = {0};
+  sim_sb_new(&p, PATH_MAX);
+  sim_sb_path_copy_parent(&p, path);
+  mkdirs(p.buffer);
+  sim_sb_delete(&p);
+
+  _mkdir(path);
 }
 } // namespace sys

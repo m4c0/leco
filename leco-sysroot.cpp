@@ -2,7 +2,6 @@
 #define SIM_IMPLEMENTATION
 
 #include "fopen.hpp"
-#include "mkdir.h"
 #include "sim.hpp"
 #include "targets.hpp"
 
@@ -138,7 +137,7 @@ int main(int argc, char **argv) try {
   sim_sb_path_parent(&cf);
   sim_sb_path_parent(&cf);
   sim_sb_path_append(&cf, target);
-  mkdirs(cf.buffer);
+  sys::mkdirs(cf.buffer);
   sim_sb_path_append(&cf, "sysroot");
   if (mtime::of(cf.buffer) > 0) {
     f::open f{cf.buffer, "r"};

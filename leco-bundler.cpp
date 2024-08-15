@@ -1,7 +1,6 @@
 #pragma leco tool
 #define SIM_IMPLEMENTATION
 
-#include "mkdir.h"
 #include "sim.hpp"
 #include "targets.hpp"
 
@@ -26,7 +25,7 @@ static void dir_bundle(const char *dag) {
   sim_sbt path{};
   sim_sb_copy(&path, dag);
   sim_sb_path_set_extension(&path, "app");
-  mkdirs(path.buffer);
+  sys::mkdirs(path.buffer);
 
   copy("leco-exs.exe", dag, path.buffer);
   copy("leco-rsrc.exe", dag, path.buffer);
@@ -38,12 +37,12 @@ static void osx_bundle(const char *dag) {
   sim_sb_path_set_extension(&path, "app");
   sim_sb_path_append(&path, "Contents");
   sim_sb_path_append(&path, "MacOS");
-  mkdirs(path.buffer);
+  sys::mkdirs(path.buffer);
   copy("leco-exs.exe", dag, path.buffer);
 
   sim_sb_path_parent(&path);
   sim_sb_path_append(&path, "Resources");
-  mkdirs(path.buffer);
+  sys::mkdirs(path.buffer);
   copy("leco-rsrc.exe", dag, path.buffer);
 }
 
@@ -59,7 +58,7 @@ static void wasm_bundle(const char *dag) {
   sim_sbt path{};
   sim_sb_copy(&path, dag);
   sim_sb_path_set_extension(&path, "app");
-  mkdirs(path.buffer);
+  sys::mkdirs(path.buffer);
 
   copy("leco-exs.exe", dag, path.buffer, " -e wasm");
   copy("leco-rsrc.exe", dag, path.buffer);

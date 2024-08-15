@@ -2,7 +2,6 @@
 #pragma leco add_impl plist
 #define SIM_IMPLEMENTATION
 
-#include "mkdir.h"
 #include "sim.hpp"
 
 import gopt;
@@ -83,7 +82,7 @@ int main(int argc, char **argv) try {
   sim_sb_path_append(&path, "Applications");
   sim_sb_path_append(&path, sim_path_filename(input));
   sim_sb_path_set_extension(&path, "app");
-  mkdirs(path.buffer);
+  sys::mkdirs(path.buffer);
 
   copy("leco-exs.exe", input, path.buffer);
   copy("leco-rsrc.exe", input, path.buffer);

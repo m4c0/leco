@@ -2,7 +2,6 @@
 #define SIM_IMPLEMENTATION
 
 #include "fopen.hpp"
-#include "mkdir.h"
 #include "sim.hpp"
 #include "targets.hpp"
 
@@ -304,7 +303,7 @@ void run(int argc, char **argv) {
     case 'o': {
       sim_sbt parent{};
       sim_sb_path_copy_parent(&parent, val);
-      mkdirs(parent.buffer);
+      sys::mkdirs(parent.buffer);
       fout = f::open{val, "w"};
       out = *fout;
       out_filename = val;
