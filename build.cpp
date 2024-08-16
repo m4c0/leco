@@ -1,6 +1,5 @@
 #define SIM_IMPLEMENTATION
 #include "die.hpp"
-#include "mkdir.h"
 #include "targets.hpp"
 
 #include <stdio.h>
@@ -29,7 +28,8 @@
 
 int try_main(int argc, char **argv) {
   // TODO: self-rebuild this cpp
-  mkdirs("out" SEP HOST_TARGET);
+  _mkdir("out");
+  _mkdir("out" SEP HOST_TARGET);
 
   puts("Building clang runner");
   run("clang++ -Wall -Wno-unknown-pragmas -std=c++20 leco-clang.cpp -o " CLANG);

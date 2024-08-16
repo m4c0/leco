@@ -8,7 +8,6 @@
 #include "../mtime/mtime.h"
 #include "../popen/popen.h"
 #include "die.hpp"
-#include "mkdir.h"
 #include "sim.h"
 #include "targets.hpp"
 
@@ -139,7 +138,9 @@ static void infer_output(sim_sb *args, const char *input, const char *target) {
   } else {
     sim_sb_path_copy_parent(&out, input);
     sim_sb_path_append(&out, "out");
+    _mkdir(out.buffer);
     sim_sb_path_append(&out, target);
+    _mkdir(out.buffer);
     sim_sb_path_append(&out, sim_path_filename(input));
   }
 
@@ -150,11 +151,6 @@ static void infer_output(sim_sb *args, const char *input, const char *target) {
     sim_sb_concat(args, " -c -o ");
     sim_sb_path_set_extension(&out, "o");
   }
-
-  sim_sb path{};
-  sim_sb_new(&path, 10240);
-  sim_sb_path_copy_parent(&path, out.buffer);
-  mkdirs(path.buffer);
 
   sim_sb_concat(args, out.buffer);
 
