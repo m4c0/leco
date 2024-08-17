@@ -1,6 +1,14 @@
 #pragma once
-#include "pathmax.h"
 #include "sim.h"
+
+#ifdef __linux__
+#include <linux/limits.h>
+#elif _WIN32
+#include <stdlib.h>
+#define PATH_MAX _MAX_PATH
+#else
+#include <limits.h>
+#endif
 
 // TODO: modularise
 struct sim_sbt : sim_sb {

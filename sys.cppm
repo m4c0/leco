@@ -1,6 +1,5 @@
 module;
-#include "pathmax.h"
-#include "sim.h"
+#include "sim.hpp"
 
 #include <errno.h>
 #include <stdarg.h>
