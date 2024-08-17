@@ -46,7 +46,6 @@ const char *sim_path_extension(const char *src);
 #endif //__cplusplus
 
 #ifdef SIM_IMPLEMENTATION
-#include "pathmax.h"
 
 #include <assert.h>
 #include <stdarg.h>
@@ -240,8 +239,6 @@ void sim_sb_path_copy_real(sim_sb *dst, const char *path) {
 #ifdef _WIN32
   _fullpath(dst->buffer, path, dst->size);
 #else
-  assert(dst->size >= PATH_MAX &&
-         "destination buffer should have PATH_MAX in size");
   [[maybe_unused]] auto _ = realpath(path, dst->buffer);
 #endif
   dst->len = strlen(dst->buffer);
