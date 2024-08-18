@@ -80,4 +80,15 @@ void mkdirs(const char *path) {
 
   _mkdir(path);
 }
+
+FILE * fopen(const char * name, const char * mode) {
+  FILE * res {};
+#ifdef _WIN32
+  if (0 != fopen_s(&res, name, mode)) die("could not open file [%s]", name);
+#else
+  res = fopen(name, mode);
+  if (res == nullptr) die("could not open file [%s]", name);
+#endif
+  return res;
+}
 } // namespace sys
