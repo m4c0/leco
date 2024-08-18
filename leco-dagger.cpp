@@ -1,7 +1,6 @@
 #pragma leco tool
 #define SIM_IMPLEMENTATION
 
-#include "fopen.hpp"
 #include "sim.hpp"
 #include "targets.hpp"
 
@@ -288,7 +287,6 @@ static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
 
 void run(int argc, char **argv) {
   bool dump_errors{};
-  f::open fout{};
 
   argv0 = argv[0];
 
@@ -304,8 +302,7 @@ void run(int argc, char **argv) {
       sim_sbt parent{};
       sim_sb_path_copy_parent(&parent, val);
       sys::mkdirs(parent.buffer);
-      fout = f::open{val, "w"};
-      out = *fout;
+      out = sys::fopen(val, "w");
       out_filename = val;
       break;
     }
@@ -453,8 +450,7 @@ int main(int argc, char **argv) try {
   run(argc, argv);
   return 0;
 } catch (...) {
-  if (out_filename != nullptr) {
-    remove(out_filename);
-  }
+  if (out != nullptr) fclose(out);
+  if (out_filename != nullptr) remove(out_filename);
   return 1;
 }
