@@ -1,15 +1,16 @@
 #pragma once
 #include "die.hpp"
-#include "fopen.hpp"
 
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 void dag_read(const char *dag, auto &&fn) {
-  f::open f{dag, "r"};
+  auto f = fopen(dag, "r");
+  if (!f) die("could not open dag file");
 
   char buf[10240];
-  while (!feof(*f) && fgets(buf, sizeof(buf), *f) != nullptr) {
+  while (!feof(f) && fgets(buf, sizeof(buf), f) != nullptr) {
     if (strlen(buf) < 5)
       die("invalid line in dag file");
 
@@ -19,4 +20,6 @@ void dag_read(const char *dag, auto &&fn) {
 
     fn(*id, file);
   }
+
+  fclose(f);
 }
