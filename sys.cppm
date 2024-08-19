@@ -86,7 +86,7 @@ FILE * fopen(const char * name, const char * mode) {
 #ifdef _WIN32
   if (0 != fopen_s(&res, name, mode)) die("could not open file [%s]", name);
 #else
-  res = fopen(name, mode);
+  res = ::fopen(name, mode);
   if (res == nullptr) die("could not open file [%s]", name);
 #endif
   return res;
