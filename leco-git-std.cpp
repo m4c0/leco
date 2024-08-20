@@ -1,7 +1,5 @@
 #pragma leco tool
 #define SIM_IMPLEMENTATION
-
-#include "fopen.hpp"
 #include "sim.hpp"
 
 #include <stdio.h>
@@ -49,11 +47,12 @@ static void set_email(const sim_sb *name) {
 }
 
 static void setup_precommit(const sim_sb *name) {
-  f::open f{name->buffer, "w"};
-  fprintf(*f, R"(#!/bin/sh
+  auto f = sys::fopen(name->buffer, "w");
+  fprintf(f, R"(#!/bin/sh
 
 ../leco/leco.exe format -n
 )");
+  fclose(f);
 }
 
 int main(int argc, char **argv) try {
