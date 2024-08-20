@@ -169,7 +169,7 @@ static auto compile_with_deps(const char *src, const char *dag) {
     }
   });
 
-  return build_dag(src);
+  return build_dag(src).impl;
 }
 
 static void build_rc(const char *path) {
@@ -203,12 +203,12 @@ static void bounce(const char *path) {
     switch (id) {
     case 'tapp':
       build_rc(path);
-      link(dag.buffer, file, compile_with_deps(path, dag.buffer).impl);
+      link(dag.buffer, file, compile_with_deps(path, dag.buffer));
       bundle(dag.buffer);
       break;
     case 'tdll':
     case 'tool':
-      link(dag.buffer, file, compile_with_deps(path, dag.buffer).impl);
+      link(dag.buffer, file, compile_with_deps(path, dag.buffer));
       break;
     case 'tmmd':
       compile_with_deps(path, dag.buffer);
