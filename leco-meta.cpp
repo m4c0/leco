@@ -1,7 +1,4 @@
 #pragma leco tool
-#define SIM_IMPLEMENTATION
-
-#include "die.hpp"
 #include "sim.h"
 #include "targets.hpp"
 
@@ -16,6 +13,7 @@
 
 import gopt;
 import mtime;
+import sys;
 
 int main(int argc, char ** argv) try {
 #ifdef _WIN32
@@ -31,7 +29,7 @@ int main(int argc, char ** argv) try {
     switch (ch) {
       case 'C':
         if (0 != chdir(val)) {
-          die("Directory not found: [%s]\n", val);
+          sys::die("Directory not found: [%s]\n", val);
         }
         break;
       default: break;
@@ -40,7 +38,7 @@ int main(int argc, char ** argv) try {
 
   if (opts.argc == 0) {
     sim_sb_path_append(&cmd, "leco-driver.exe");
-    run(cmd.buffer);
+    sys::run(cmd.buffer);
     return 0;
   }
 
@@ -62,7 +60,7 @@ int main(int argc, char ** argv) try {
     sim_sb_concat(&cmd, opts.argv[i]);
   }
 
-  run(cmd.buffer);
+  sys::run(cmd.buffer);
 } catch (...) {
   return 1;
 }

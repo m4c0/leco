@@ -1,6 +1,5 @@
 #pragma leco tool
 #pragma leco add_impl plist
-#define SIM_IMPLEMENTATION
 
 #include "sim.hpp"
 

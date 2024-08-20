@@ -1,5 +1,4 @@
 #pragma leco tool
-#define SIM_IMPLEMENTATION
 
 #include "fopen.hpp"
 #include "sim.hpp"

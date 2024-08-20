@@ -1,6 +1,7 @@
 #pragma leco tool
-#define SIM_IMPLEMENTATION
 #include "sim.hpp"
+
+#include <string.h>
 
 import gopt;
 import mtime;

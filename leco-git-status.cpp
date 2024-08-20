@@ -1,8 +1,8 @@
 #pragma leco tool
-#define SIM_IMPLEMENTATION
 #include "sim.hpp"
 
 #include <stdio.h>
+#include <string.h>
 
 import mtime;
 import popen;
