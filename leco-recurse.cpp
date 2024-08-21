@@ -35,6 +35,16 @@ static void format(const char *cpp) {
   sys::run(cmd.buffer);
 }
 
+static void sawblade(const char * src) {
+  sim_sbt cmd {};
+  prep(&cmd, "leco-sawblade.exe");
+  sim_sb_concat(&cmd, " -i ");
+  sim_sb_concat(&cmd, src);
+  sim_sb_concat(&cmd, " -t ");
+  sim_sb_concat(&cmd, target);
+  run(cmd.buffer);
+}
+
 static void compile(const char *src, const char *dag) {
   log("compiling", src);
 
@@ -83,21 +93,6 @@ static void bundle(const char *dag) {
   run(cmd.buffer);
 }
 
-static void dagger(const char *src, const char *dag) {
-  if (mtime::of(src) < mtime::of(dag))
-    return;
-
-  sim_sbt args{10240};
-  prep(&args, "leco-dagger.exe");
-  sim_sb_concat(&args, " -t ");
-  sim_sb_concat(&args, target);
-  sim_sb_concat(&args, " -i ");
-  sim_sb_concat(&args, src);
-  sim_sb_concat(&args, " -o ");
-  sim_sb_concat(&args, dag);
-  run(args.buffer);
-}
-
 struct mtime_pair {
   uint64_t spec{};
   uint64_t impl{};
@@ -119,10 +114,6 @@ static auto build_dag(const char *src) {
   in2out(src, &dag, "dag", target);
   sim_sbt out{};
   in2out(src, &out, "o", target);
-
-  dagger(src, dag.buffer);
-  if (mtime::of(dag.buffer) == 0)
-    die("failed to preprocess [%s]", src);
 
   dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
@@ -196,7 +187,8 @@ static void bounce(const char *path) {
   sim_sbt dag{};
   in2out(path, &dag, "dag", target);
 
-  dagger(src.buffer, dag.buffer);
+  sawblade(src.buffer);
+
   dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
     case 'tapp':

@@ -40,6 +40,9 @@ static void dagger(const char * src, const char * dag) {
   sim_sb_concat(&cmd, " -o ");
   sim_sb_concat(&cmd, dag);
   sys::run(cmd.buffer);
+
+  if (mtime::of(dag) == 0)
+    sys::die("failed to preprocess [%s]", src);
 }
 
 static str::set done {};
