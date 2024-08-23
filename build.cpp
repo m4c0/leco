@@ -48,6 +48,7 @@ int try_main(int argc, char **argv) {
   TOOL("meta");
   TOOL("deplist");
   TOOL("dagger");
+  TOOL("sawblade");
   TOOL("link");
   TOOL("recurse");
   TOOL("driver");
