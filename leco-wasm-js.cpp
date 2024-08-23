@@ -1,6 +1,5 @@
 #pragma leco tool
 #include "dag2.hpp"
-#include "fopen.hpp"
 #include "sim.hpp"
 
 import gopt;
@@ -11,13 +10,15 @@ import sys;
 static void usage() { sys::die("invalid usage"); }
 
 static void concat(FILE *out, const char *in_file) {
-  f::open in{in_file, "rb"};
+  auto in = sys::fopen(in_file, "rb");
 
   char buf[10240];
   int got{};
-  while ((got = fread(buf, 1, sizeof(buf), *in)) > 0) {
+  while ((got = fread(buf, 1, sizeof(buf), in)) > 0) {
     fwrite(buf, 1, got, out);
   }
+
+  fclose(in);
 }
 
 static str::set added{};
@@ -68,11 +69,12 @@ int main(int argc, char **argv) {
   sim_sb_path_append(&appdir, "leco.js");
   sys::log("generating", appdir.buffer);
 
-  f::open f{appdir.buffer, "wb"};
-  fprintf(*f, "var leco_exports;\n");
-  fprintf(*f, "var leco_imports = {};\n");
+  auto f = sys::fopen(appdir.buffer, "wb");
+  fprintf(f, "var leco_exports;\n");
+  fprintf(f, "var leco_imports = {};\n");
 
-  concat_all(*f, input);
+  concat_all(f, input);
 
-  concat(*f, "../leco/wasm.js");
+  concat(f, "../leco/wasm.js");
+  fclose(f);
 }
