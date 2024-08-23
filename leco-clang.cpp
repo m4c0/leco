@@ -236,7 +236,11 @@ int main(int argc, char **argv) try {
 #endif
 
   if (debug) {
+#ifdef _WIN32
+    sim_sb_concat(&args, " -gdwarf");
+#else
     sim_sb_concat(&args, " -g");
+#endif
   }
   if (opt) {
     sim_sb_concat(&args, " -O3 -flto -fvisibility=hidden");
