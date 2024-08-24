@@ -1,6 +1,5 @@
 #pragma leco tool
 
-#include "fopen.hpp"
 #include "sim.hpp"
 
 #include <stdio.h>
@@ -43,10 +42,11 @@ void gen(const char *path, auto &&fn) {
   sim_sbt file{};
   sim_sb_path_copy_append(&file, path, "Contents.json");
 
-  f::open f{file.buffer, "w"};
-  fprintf(*f, "{");
-  fn(dict{*f});
-  fprintf(*f, "}");
+  auto f = sys::fopen(file.buffer, "w");
+  fprintf(f, "{");
+  fn(dict{f});
+  fprintf(f, "}");
+  fclose(f);
 }
 } // namespace json
 
@@ -99,7 +99,7 @@ static void run_actool(const char *plist, const char *app_path,
                 "--compile %s "
                 "%s",
                 plist, app_path, xcassets);
-  run(cmd.buffer);
+  sys::run(cmd.buffer);
 }
 
 static void gen_assets(const char *build_path, sim_sb *xcassets) {
