@@ -56,7 +56,7 @@ static auto process_spec(const char * dag) {
     }
   });
 
-  if (src.len == 0) sys::die("unexpected");
+  if (src.len == 0) sys::die("missing source for [%s]", dag);
 
   if (0 != strcmp(".cppm", sim_sb_path_extension(&src))) return mtime;
 
