@@ -1,11 +1,14 @@
 #pragma leco tool
-#include "dag2.hpp"
 #include "sim.hpp"
+
+#include <stdio.h>
 
 import gopt;
 import mtime;
 import strset;
 import sys;
+
+// TODO: check if files actually need regen
 
 static void usage() { sys::die("invalid usage"); }
 
@@ -26,7 +29,7 @@ static void concat_all(FILE *out, const char *dag) {
   if (!added.insert(dag))
     return;
 
-  dag_read(dag, [=](auto id, auto file) {
+  sys::dag_read(dag, [=](auto id, auto file) {
     switch (id) {
     case 'srcf': {
       sim_sbt js{};
