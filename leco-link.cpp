@@ -1,8 +1,9 @@
 #pragma leco tool
-#include "dag2.hpp"
-#include "fopen.hpp"
 #include "sim.hpp"
 #include "targets.hpp"
+
+#include <stdio.h>
+#include <string.h>
 
 import gopt;
 import mtime;
@@ -11,11 +12,10 @@ import sys;
 
 static const char *target{};
 static FILE *out{};
-static str::set added{};
 static const char *argv0{};
 
 static void usage() {
-  die(R"(
+  sys::die(R"(
 Usage: %s -i <input.dag> -o <output.exe> [-g] [-O]
 
 Where:
@@ -39,11 +39,14 @@ static void put(const char *a) {
   fputc('\n', out);
 }
 
-static void read_dag(const char *dag) {
-  if (!added.insert(dag))
-    return;
+static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 
-  dag_read(dag, [](auto id, auto file) {
+static str::map cache{};
+static auto read_dag(const char *dag) {
+  auto & mtime = cache[dag];
+  if (mtime != 0) return mtime;
+
+  sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
     case 'tdll':
       fprintf(out, "-shared\n");
@@ -58,12 +61,8 @@ static void read_dag(const char *dag) {
       fprintf(out, "-L%s\n", file);
       break;
     case 'idag':
-    case 'mdag': {
-      read_dag(file);
-      break;
-    }
-    default:
-      break;
+    case 'mdag': mtime = max(mtime, read_dag(file)); break;
+    default: break;
     }
   });
 
@@ -72,6 +71,9 @@ static void read_dag(const char *dag) {
   sim_sb_copy(&obj, dag);
   sim_sb_path_set_extension(&obj, "o");
   put(obj.buffer);
+
+  mtime = max(mtime, mtime::of(obj.buffer));
+  return mtime;
 }
 
 int main(int argc, char **argv) try {
@@ -110,16 +112,12 @@ int main(int argc, char **argv) try {
   sim_sb_copy(&args, input);
   sim_sb_path_set_extension(&args, "link");
 
-  {
-    f::open f{args.buffer, "wb"};
-    out = *f;
-
-    for (auto i = 0; i < opts.argc; i++) {
-      fprintf(out, "%s\n", opts.argv[i]);
-    }
-
-    read_dag(input);
+  out = sys::fopen(args.buffer, "wb");
+  for (auto i = 0; i < opts.argc; i++) {
+    fprintf(out, "%s\n", opts.argv[i]);
   }
+  read_dag(input);
+  fclose(out);
 
 #ifdef _WIN32
   // We can rename but we can't overwrite an open executable.
@@ -169,7 +167,7 @@ int main(int argc, char **argv) try {
   } else if (IS_TGT(target, TGT_WASM)) {
     sim_sbt sra{};
 
-    auto f = fopen("../leco/out/wasm32-wasi/sysroot", "r");
+    auto f = sys::fopen("../leco/out/wasm32-wasi/sysroot", "r");
     fgets(sra.buffer, sra.size, f);
     fclose(f);
 
@@ -187,7 +185,7 @@ int main(int argc, char **argv) try {
   }
 
   sys::log("linking", output);
-  run(cmd.buffer);
+  sys::run(cmd.buffer);
 
 #ifdef _WIN32
   rename(output, prev.buffer);
