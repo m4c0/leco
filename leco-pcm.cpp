@@ -60,7 +60,7 @@ static auto process_spec(const char * dag) {
 
   if (0 != strcmp(".cppm", sim_sb_path_extension(&src))) return mtime;
 
-  mtime = mtime::of(src.buffer);
+  mtime = max(mtime, mtime::of(src.buffer));
 
   sim_sbt pcm {};
   sim_sb_copy(&pcm, dag);
