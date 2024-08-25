@@ -38,18 +38,37 @@ static void compile(const char *src) {
   sys::run(cmd.buffer);
 }
 
-static str::map cached {};
-static auto process(const char * dag) {
-  auto &mtime = cached[dag];
-  if (mtime != 0) return mtime;
+static str::set done {};
+static void process(const char * dag) {
+  if (!done.insert(dag)) return;
+
+  auto mtime = 0ULL;
 
   sim_sbt src {};
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
+      case 'head': mtime = max(mtime, mtime::of(file)); break;
+      case 'mdag': {
+        process(file);
+
+        sim_sbt pcm {};
+        sim_sb_copy(&pcm, dag);
+        sim_sb_path_set_extension(&pcm, "pcm");
+        mtime = max(mtime, mtime::of(pcm.buffer));
+        break;
+      }
       case 'bdag':
-      case 'mdag':
-      case 'idag': mtime = max(mtime, process(file)); break;
-      case 'srcf': sim_sb_copy(&src, file); break;
+      case 'idag': process(file); break;
+      case 'srcf': {
+        if (0 == strcmp(".cppm", sim_path_extension(file))) {
+          sim_sb_copy(&src, dag);
+          sim_sb_path_set_extension(&src, "pcm");
+        } else {
+          sim_sb_copy(&src, file);
+        }
+        mtime = max(mtime, mtime::of(src.buffer));
+        break;
+      }
       default: break;
     }
   });
@@ -60,18 +79,9 @@ static auto process(const char * dag) {
   sim_sb_copy(&obj, dag);
   sim_sb_path_set_extension(&obj, "o");
 
-  if (0 == strcmp(".cppm", sim_sb_path_extension(&src))) {
-    sim_sb_copy(&src, dag);
-    sim_sb_path_set_extension(&src, "pcm");
-  }
-
-  mtime = max(mtime, mtime::of(src.buffer));
   if (mtime > mtime::of(obj.buffer)) {
     compile(src.buffer);
-    mtime = mtime::of(obj.buffer);
   }
-
-  return mtime;
 }
 
 int main(int argc, char ** argv) try {
