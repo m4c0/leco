@@ -35,10 +35,7 @@ static void concat_all(FILE *out, const char *dag) {
       sim_sbt js{};
       sim_sb_copy(&js, file);
       sim_sb_path_set_extension(&js, "js");
-      if (mtime::of(js.buffer) > 0) {
-        sys::log("merging", js.buffer);
-        concat(out, js.buffer);
-      }
+      if (mtime::of(js.buffer) > 0) concat(out, js.buffer);
       break;
     }
     case 'idag':
