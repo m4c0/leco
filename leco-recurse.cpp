@@ -1,5 +1,4 @@
 #pragma leco tool
-#include "dag2.hpp"
 #include "in2out.hpp"
 #include "sim.hpp"
 
@@ -27,17 +26,17 @@ static void sawblade(const char * src) {
   sim_sb_concat(&cmd, src);
   sim_sb_concat(&cmd, " -t ");
   sim_sb_concat(&cmd, target);
-  run(cmd.buffer);
+  sys::run(cmd.buffer);
 }
 
 static void compile(const char *src, const char *dag) {
-  log("compiling", src);
+  sys::log("compiling", src);
 
   sim_sbt cmd{};
   prep(&cmd, "leco-clang.exe");
   sim_sb_printf(&cmd, " -i %s -t %s", src, target);
   sim_sb_concat(&cmd, common_flags);
-  run(cmd.buffer);
+  sys::run(cmd.buffer);
 
   if (0 != strcmp(".cppm", sim_path_extension(src)))
     return;
@@ -49,14 +48,14 @@ static void compile(const char *src, const char *dag) {
   prep(&cmd, "leco-clang.exe");
   sim_sb_printf(&cmd, " -i %s -t %s", pcm.buffer, target);
   sim_sb_concat(&cmd, common_flags);
-  run(cmd.buffer);
+  sys::run(cmd.buffer);
 }
 
 static void link(const char *dag, const char *exe, uint64_t mtime) {
   if (mtime <= mtime::of(exe))
     return;
 
-  log("linking", exe);
+  sys::log("linking", exe);
 
   sim_sbt cmd{};
   prep(&cmd, "leco-link.exe");
@@ -65,7 +64,7 @@ static void link(const char *dag, const char *exe, uint64_t mtime) {
   sim_sb_concat(&cmd, " -o ");
   sim_sb_concat(&cmd, exe);
   sim_sb_concat(&cmd, common_flags);
-  run(cmd.buffer);
+  sys::run(cmd.buffer);
 }
 
 static void bundle(const char *dag) {
@@ -73,7 +72,7 @@ static void bundle(const char *dag) {
   prep(&cmd, "leco-bundler.exe");
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, dag);
-  run(cmd.buffer);
+  sys::run(cmd.buffer);
 }
 
 struct mtime_pair {
@@ -98,7 +97,7 @@ static auto build_dag(const char *src) {
   sim_sbt out{};
   in2out(src, &out, "o", target);
 
-  dag_read(dag.buffer, [&](auto id, auto file) {
+  sys::dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
     case 'head':
       mtime.spec = max(mtime.spec, mtime::of(file));
@@ -116,7 +115,7 @@ static auto build_dag(const char *src) {
   }
   mtime.impl = max(mtime.impl, mtime::of(out.buffer));
 
-  dag_read(dag.buffer, [&](auto id, auto file) {
+  sys::dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
     case 'impl':
       mtime.impl = max(mtime.impl, build_dag(file).impl);
@@ -131,7 +130,7 @@ static auto build_dag(const char *src) {
 
 static void bounce(const char *path);
 static auto compile_with_deps(const char *src, const char *dag) {
-  dag_read(dag, [](auto id, auto file) {
+  sys::dag_read(dag, [](auto id, auto file) {
     switch (id) {
     case 'bdep':
       bounce(file);
@@ -172,7 +171,7 @@ static void bounce(const char *path) {
 
   sawblade(src.buffer);
 
-  dag_read(dag.buffer, [&](auto id, auto file) {
+  sys::dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
     case 'tapp':
       build_rc(path);
@@ -192,7 +191,7 @@ static void bounce(const char *path) {
   });
 }
 
-static void usage() { die("invalid usage"); }
+static void usage() { sys::die("invalid usage"); }
 
 int main(int argc, char **argv) try {
   sim_sbt flags{};
