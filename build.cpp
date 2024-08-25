@@ -50,6 +50,8 @@ int try_main(int argc, char **argv) {
   TOOL("dagger");
   TOOL("sawblade");
   TOOL("link");
+  TOOL("pcm");
+  TOOL("obj");
   TOOL("recurse");
   TOOL("driver");
 
