@@ -14,25 +14,10 @@ import sys;
 static const char *common_flags;
 static const char *target;
 static const char *argv0;
-static bool reformat;
 
 void prep(sim_sb *cmd, const char *tool) {
   sim_sb_path_copy_parent(cmd, argv0);
   sim_sb_path_append(cmd, tool);
-}
-
-static void format(const char *cpp) {
-  if (!reformat)
-    return;
-
-  sim_sbt cmd{};
-  prep(&cmd, "leco-format.exe");
-  if (mtime::of(cmd.buffer) == 0)
-    return;
-
-  sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, cpp);
-  sys::run(cmd.buffer);
 }
 
 static void sawblade(const char * src) {
@@ -53,8 +38,6 @@ static void compile(const char *src, const char *dag) {
   sim_sb_printf(&cmd, " -i %s -t %s", src, target);
   sim_sb_concat(&cmd, common_flags);
   run(cmd.buffer);
-
-  format(src);
 
   if (0 != strcmp(".cppm", sim_path_extension(src)))
     return;
@@ -215,11 +198,8 @@ int main(int argc, char **argv) try {
   sim_sbt flags{};
   sim_sbt rpath{};
 
-  auto opts = gopt_parse(argc, argv, "ft:i:gO", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "t:i:gO", [&](auto ch, auto val) {
     switch (ch) {
-    case 'f':
-      reformat = true;
-      break;
     case 'i':
       sim_sb_path_copy_real(&rpath, val);
       break;
