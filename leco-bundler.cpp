@@ -6,6 +6,7 @@
 #include <string.h>
 
 import gopt;
+import mtime;
 import sys;
 
 static const char *tool_dir;
@@ -66,8 +67,10 @@ static void wasm_bundle(const char *dag) {
 
   sim_sb_path_append(&path, sim_path_filename(dag));
   sim_sb_path_set_extension(&path, "html");
-  sys::log("copying", path.buffer);
-  sys::link("../leco/wasm.html", path.buffer);
+  if (mtime::of("../leco/wasm.html") > mtime::of(path.buffer)) {
+    sys::log("copying", path.buffer);
+    sys::link("../leco/wasm.html", path.buffer);
+  }
 
   sim_sb_path_parent(&path);
 
