@@ -116,8 +116,10 @@ int main(int argc, char **argv) try {
   for (auto i = 0; i < opts.argc; i++) {
     fprintf(out, "%s\n", opts.argv[i]);
   }
-  read_dag(input);
+  auto mtime = read_dag(input);
   fclose(out);
+
+  if (mtime <= mtime::of(output)) return 0;
 
 #ifdef _WIN32
   // We can rename but we can't overwrite an open executable.
