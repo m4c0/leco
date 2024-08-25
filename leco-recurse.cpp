@@ -2,9 +2,7 @@
 #include "in2out.hpp"
 #include "sim.hpp"
 
-#include <map>
-#include <string.h>
-#include <string>
+#include <stdint.h>
 
 import gopt;
 import mtime;
@@ -28,35 +26,15 @@ static void sawblade(const char * src) {
   sim_sb_concat(&cmd, target);
   sys::run(cmd.buffer);
 }
-
-static void compile(const char *src, const char *dag) {
-  sys::log("compiling", src);
-
-  sim_sbt cmd{};
-  prep(&cmd, "leco-clang.exe");
-  sim_sb_printf(&cmd, " -i %s -t %s", src, target);
-  sim_sb_concat(&cmd, common_flags);
-  sys::run(cmd.buffer);
-
-  if (0 != strcmp(".cppm", sim_path_extension(src)))
-    return;
-
-  sim_sbt pcm{};
-  sim_sb_copy(&pcm, dag);
-  sim_sb_path_set_extension(&pcm, "pcm");
-
-  prep(&cmd, "leco-clang.exe");
-  sim_sb_printf(&cmd, " -i %s -t %s", pcm.buffer, target);
+static void comp(const char * tool, const char * dag) {
+  sim_sbt cmd {};
+  prep(&cmd, tool);
+  sim_sb_printf(&cmd, " -i %s", dag);
   sim_sb_concat(&cmd, common_flags);
   sys::run(cmd.buffer);
 }
 
-static void link(const char *dag, const char *exe, uint64_t mtime) {
-  if (mtime <= mtime::of(exe))
-    return;
-
-  sys::log("linking", exe);
-
+static void link(const char *dag, const char *exe) {
   sim_sbt cmd{};
   prep(&cmd, "leco-link.exe");
   sim_sb_concat(&cmd, " -i ");
@@ -73,74 +51,6 @@ static void bundle(const char *dag) {
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, dag);
   sys::run(cmd.buffer);
-}
-
-struct mtime_pair {
-  uint64_t spec{};
-  uint64_t impl{};
-};
-static auto max(uint64_t a, uint64_t b) { return a > b ? a : b; }
-static auto max(mtime_pair a, mtime_pair b) {
-  return mtime_pair{max(a.spec, b.spec), max(a.impl, b.impl)};
-}
-
-static std::map<std::string, mtime_pair> cached{};
-static auto build_dag(const char *src) {
-  auto &mtime = cached[src];
-  if (mtime.spec != 0)
-    return mtime;
-
-  mtime.spec = mtime::of(src);
-
-  sim_sbt dag{};
-  in2out(src, &dag, "dag", target);
-  sim_sbt out{};
-  in2out(src, &out, "o", target);
-
-  sys::dag_read(dag.buffer, [&](auto id, auto file) {
-    switch (id) {
-    case 'head':
-      mtime.spec = max(mtime.spec, mtime::of(file));
-      break;
-    case 'bdep':
-    case 'mdep':
-      mtime = max(mtime, build_dag(file));
-      break;
-    default:
-      break;
-    }
-  });
-  if (mtime.spec > mtime::of(out.buffer)) {
-    compile(src, dag.buffer);
-  }
-  mtime.impl = max(mtime.impl, mtime::of(out.buffer));
-
-  sys::dag_read(dag.buffer, [&](auto id, auto file) {
-    switch (id) {
-    case 'impl':
-      mtime.impl = max(mtime.impl, build_dag(file).impl);
-      break;
-    default:
-      break;
-    }
-  });
-
-  return mtime;
-}
-
-static void bounce(const char *path);
-static auto compile_with_deps(const char *src, const char *dag) {
-  sys::dag_read(dag, [](auto id, auto file) {
-    switch (id) {
-    case 'bdep':
-      bounce(file);
-      break;
-    default:
-      break;
-    }
-  });
-
-  return build_dag(src).impl;
 }
 
 static void build_rc(const char *path) {
@@ -160,9 +70,32 @@ static void build_rc(const char *path) {
 #endif
 }
 
-static void bounce(const char *path) {
-  cached.clear();
+static void compile(const char * src, const char * dag) {
+  sys::dag_read(dag, [&](auto id, auto file) {
+    switch (id) {
+    case 'tapp':
+    case 'tdll':
+    case 'tool':
+    case 'tmmd':
+      comp("leco-pcm.exe", dag);
+      comp("leco-obj.exe", dag);
+      break;
+    default: break;
+    }
+  });
+}
 
+static void bounce(const char * path);
+static void build_bdeps(const char * dag) {
+  sys::dag_read(dag, [](auto id, auto file) {
+    switch (id) {
+      case 'bdep': bounce(file); break;
+      default: break;
+    }
+  });
+}
+
+static void bounce(const char *path) {
   sim_sbt src{};
   sim_sb_path_copy_real(&src, path);
 
@@ -170,23 +103,22 @@ static void bounce(const char *path) {
   in2out(path, &dag, "dag", target);
 
   sawblade(src.buffer);
+  compile(src.buffer, dag.buffer);
 
   sys::dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
     case 'tapp':
+      build_bdeps(dag.buffer);
       build_rc(path);
-      link(dag.buffer, file, compile_with_deps(path, dag.buffer));
+      link(dag.buffer, file);
       bundle(dag.buffer);
       break;
     case 'tdll':
     case 'tool':
-      link(dag.buffer, file, compile_with_deps(path, dag.buffer));
+      link(dag.buffer, file);
       break;
-    case 'tmmd':
-      compile_with_deps(path, dag.buffer);
-      break;
-    default:
-      break;
+    case 'tmmd': break;
+    default: break;
     }
   });
 }

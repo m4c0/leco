@@ -186,6 +186,7 @@ int main(int argc, char **argv) try {
     sim_sb_printf(&cmd, " -resource-dir %s", sra.buffer);
   }
 
+  sys::log("linking", output);
   run(cmd.buffer);
 
 #ifdef _WIN32
