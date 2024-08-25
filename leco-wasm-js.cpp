@@ -49,6 +49,32 @@ static void concat_all(FILE *out, const char *dag) {
   });
 }
 
+static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
+static str::map mtime_cache {};
+static auto mtime_rec(const char * dag) {
+  auto & mtime = mtime_cache[dag];
+  if (mtime != 0) return mtime;
+  mtime = 1;
+
+  sys::dag_read(dag, [&](auto id, auto file) {
+    switch (id) {
+      case 'srcf': {
+        sim_sbt js {};
+        sim_sb_copy(&js, file);
+        sim_sb_path_set_extension(&js, "js");
+        mtime = max(mtime, mtime::of(js.buffer));
+        break;
+      }
+      case 'idag':
+      case 'mdag':
+        mtime = max(mtime, mtime_rec(file));
+        break;
+    }
+  });
+
+  return mtime;
+}
+
 int main(int argc, char **argv) {
   const char *input;
   sim_sbt appdir{};
@@ -70,6 +96,8 @@ int main(int argc, char **argv) {
     usage();
 
   sim_sb_path_append(&appdir, "leco.js");
+  if (mtime::of(appdir.buffer) >= mtime_rec(input)) return 0;
+
   sys::log("generating", appdir.buffer);
 
   auto f = sys::fopen(appdir.buffer, "wb");
