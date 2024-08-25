@@ -38,28 +38,20 @@ static void compile(const char *src) {
   sys::run(cmd.buffer);
 }
 
-static std::map<std::string, uint64_t> cached {};
-
-static uint64_t process(const char * dag) {
-  auto &mtime = cached[dag];
+static std::map<std::string, uint64_t> spec_cache {};
+static uint64_t process_spec(const char * dag) {
+  auto &mtime = spec_cache[dag];
   if (mtime != 0) return mtime;
 
   sim_sbt src {};
 
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
-      case 'head':
-        mtime = max(mtime, mtime::of(file));
-        break;
+      case 'head': mtime = max(mtime, mtime::of(file)); break;
       case 'bdag':
-      case 'mdag':
-        mtime = max(mtime, process(file));
-        break;
-      case 'srcf':
-        sim_sb_copy(&src, file);
-        break;
-      default:
-        break;
+      case 'mdag': mtime = max(mtime, process_spec(file)); break;
+      case 'srcf': sim_sb_copy(&src, file); break;
+      default: break;
     }
   });
 
@@ -79,6 +71,27 @@ static uint64_t process(const char * dag) {
   }
 
   return mtime;
+}
+
+static std::map<std::string, uint64_t> impl_cache {};
+static void process_impl(const char * dag) {
+  auto &done = impl_cache[dag];
+  if (done != 0) return;
+  done = 1;
+
+  sys::dag_read(dag, [&](auto id, auto file) {
+    switch (id) {
+      case 'bdag':
+      case 'mdag':
+        process_spec(file);
+        process_impl(file);
+        break;
+      case 'idag': process_impl(file); break;
+      default: break;
+    }
+  });
+
+  return;
 }
 
 int main(int argc, char ** argv) try {
@@ -102,7 +115,8 @@ int main(int argc, char ** argv) try {
   sim_sb_path_copy_parent(&d, input.buffer);
   target = sim_sb_path_filename(&d);
 
-  process(input.buffer);
+  process_spec(input.buffer);
+  process_impl(input.buffer);
 } catch (...) {
   return 1;
 }
