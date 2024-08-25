@@ -112,6 +112,8 @@ int main(int argc, char **argv) try {
   sim_sb_copy(&args, input);
   sim_sb_path_set_extension(&args, "link");
 
+  // TODO: move argument build (and mtime check) somewhere else
+  //       just in case we want to force a link for any reason
   out = sys::fopen(args.buffer, "wb");
   for (auto i = 0; i < opts.argc; i++) {
     fprintf(out, "%s\n", opts.argv[i]);
