@@ -45,6 +45,7 @@ static str::map cache{};
 static auto read_dag(const char *dag) {
   auto & mtime = cache[dag];
   if (mtime != 0) return mtime;
+  mtime = 1;
 
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
