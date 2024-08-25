@@ -1,4 +1,5 @@
 module;
+#include <map>
 #include <set>
 #include <string>
 
@@ -17,5 +18,12 @@ public:
 
   [[nodiscard]] auto begin() { return m_data.begin(); }
   [[nodiscard]] auto end() { return m_data.end(); }
+};
+
+export class map {
+  std::map<std::string, uint64_t> m_data{};
+
+public:
+  constexpr auto & operator[](std::string key) { return m_data[key]; }
 };
 } // namespace str

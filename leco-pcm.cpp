@@ -1,11 +1,11 @@
 #pragma leco tool
 #include "sim.hpp"
 
-#include <map>
-#include <string>
+#include <string.h>
 
 import gopt;
 import mtime;
+import strset;
 import sys;
 
 static void usage() {
@@ -25,7 +25,7 @@ static const char * common_flags;
 static const char * argv0;
 static const char * target;
 
-static constexpr auto max(uint64_t a, uint64_t b) { return a > b ? a : b; }
+static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 
 static void compile(const char *src) {
   sys::log("compiling module", src);
@@ -38,10 +38,11 @@ static void compile(const char *src) {
   sys::run(cmd.buffer);
 }
 
-static std::map<std::string, uint64_t> spec_cache {};
-static uint64_t process_spec(const char * dag) {
+static str::map spec_cache {};
+static auto process_spec(const char * dag) {
   auto &mtime = spec_cache[dag];
   if (mtime != 0) return mtime;
+  mtime = 1;
 
   sim_sbt src {};
 
@@ -57,7 +58,7 @@ static uint64_t process_spec(const char * dag) {
 
   if (src.len == 0) sys::die("unexpected");
 
-  if (0 != strcmp(".cppm", sim_sb_path_extension(&src))) return 1;
+  if (0 != strcmp(".cppm", sim_sb_path_extension(&src))) return mtime;
 
   mtime = mtime::of(src.buffer);
 
@@ -73,11 +74,9 @@ static uint64_t process_spec(const char * dag) {
   return mtime;
 }
 
-static std::map<std::string, uint64_t> impl_cache {};
+static str::set impl_cache {};
 static void process_impl(const char * dag) {
-  auto &done = impl_cache[dag];
-  if (done != 0) return;
-  done = 1;
+  if (!impl_cache.insert(dag)) return;
 
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
