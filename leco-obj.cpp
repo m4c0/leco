@@ -73,7 +73,7 @@ static void process(const char * dag) {
     }
   });
 
-  if (src.len == 0) sys::die("unexpected");
+  if (src.len == 0) sys::die("dag without source info: [%s]", dag);
 
   sim_sbt obj {};
   sim_sb_copy(&obj, dag);
