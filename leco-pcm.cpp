@@ -96,7 +96,7 @@ static void process_impl(const char * dag) {
 int main(int argc, char ** argv) try {
   sim_sbt flags {};
   sim_sbt input {};
-  auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "i:gO", [&](auto ch, auto val) {
     switch (ch) {
       case 'i': sim_sb_path_copy_real(&input, val); break;
       case 'g': sim_sb_concat(&flags, " -g"); break;
