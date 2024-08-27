@@ -1,10 +1,10 @@
 #pragma leco tool
 
-#include "dag2.hpp"
 #include "sim.hpp"
 #include "targets.hpp"
 
 #include <stdio.h>
+#include <string.h>
 
 #ifdef _WIN32
 #define unlink _unlink
@@ -43,7 +43,7 @@ static void rm_rf(sim_sb *path) {
     sim_sb_path_parent(path);
   }
   if (log_all)
-    log("removing", path->buffer);
+    sys::log("removing", path->buffer);
 
   unlink(path->buffer);
 #ifndef _WIN32
@@ -65,7 +65,7 @@ static void remove_with_deps(sim_sb *path) {
 
     sim_sb_path_append(path, entry);
 
-    dag_read(path->buffer, [](auto id, auto file) {
+    sys::dag_read(path->buffer, [](auto id, auto file) {
       switch (id) {
       case 'impl':
       case 'mdep': {
@@ -83,7 +83,7 @@ static void remove_with_deps(sim_sb *path) {
   }
 
   if (!log_all)
-    log("removing", path->buffer);
+    sys::log("removing", path->buffer);
 
   rm_rf(path);
 }
@@ -117,7 +117,7 @@ int main(int argc, char **argv) try {
     sim_sb_path_append(&cwd, "out");
     sim_sb_path_append(&cwd, target);
     if (!log_all)
-      log("removing", cwd.buffer);
+      sys::log("removing", cwd.buffer);
     rm_rf(&cwd);
   }
 
