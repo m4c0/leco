@@ -1,5 +1,4 @@
 #pragma leco tool
-#include "dag2.hpp"
 #include "fopen.hpp"
 #include "sim.hpp"
 
@@ -53,7 +52,7 @@ static void read_dag(const char *dag) {
 
   print_dep(dag);
 
-  dag_read(dag, [](auto id, auto file) {
+  sys::dag_read(dag, [](auto id, auto file) {
     switch (id) {
     case 'mdag': {
       read_dag(file);
