@@ -52,7 +52,7 @@ static void process(const char * dag) {
         process(file);
 
         sim_sbt pcm {};
-        sim_sb_copy(&pcm, dag);
+        sim_sb_copy(&pcm, file);
         sim_sb_path_set_extension(&pcm, "pcm");
         mtime = max(mtime, mtime::of(pcm.buffer));
         break;
