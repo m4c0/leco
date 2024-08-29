@@ -1,8 +1,9 @@
 #pragma leco tool
 
-#include "dag2.hpp"
 #include "in2out.hpp"
 #include "sim.hpp"
+
+#include <stdio.h>
 
 import gopt;
 import mtime;
@@ -13,7 +14,7 @@ static const char *exedir{};
 static const char *target{};
 static const char *ext{"exe"};
 
-static void usage() { die("invalid usage"); }
+static void usage() { sys::die("invalid usage"); }
 
 static void copy_exe(const char *input) {
   sim_sbt path{};
@@ -24,7 +25,7 @@ static void copy_exe(const char *input) {
   if (mtime::of(path.buffer) >= mtime::of(input))
     return;
 
-  log("copying", path.buffer);
+  sys::log("copying", path.buffer);
 
   if (0 != remove(path.buffer)) {
     // Rename original file. This is a "Windows-approved" way of modifying an
@@ -42,7 +43,7 @@ static void copy_bdep(const char *src) {
   sim_sbt dag{};
   in2out(src, &dag, "dag", target);
 
-  dag_read(dag.buffer, [&](auto id, auto file) {
+  sys::dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
     case 'tdll':
     case 'tool':
@@ -60,7 +61,7 @@ static void read_dag(const char *dag) {
   if (!added.insert(dag))
     return;
 
-  dag_read(dag, [](auto id, auto file) {
+  sys::dag_read(dag, [](auto id, auto file) {
     switch (id) {
     case 'bdep':
       copy_bdep(file);
