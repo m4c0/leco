@@ -1,8 +1,9 @@
 #pragma leco tool
 
-#include "dag2.hpp"
 #include "sim.hpp"
 #include "targets.hpp"
+
+#include <string.h>
 
 import gopt;
 import pprent;
@@ -19,7 +20,7 @@ static void read_dag(const char *dag) {
   if (!added.insert(dag))
     return;
 
-  dag_read(dag, [](auto id, auto file) {
+  sys::dag_read(dag, [](auto id, auto file) {
     switch (id) {
     case 'idag':
     case 'mdag': {
@@ -39,7 +40,7 @@ static void read_dag(const char *dag) {
 }
 
 static void usage() {
-  die(R"(
+  sys::die(R"(
 Usage: %s -t <target>
 
 Where:
@@ -81,7 +82,7 @@ int main(int argc, char **argv) try {
     sim_sb_copy(&cmd, "git -C ../");
     sim_sb_concat(&cmd, sim_path_filename(parent.c_str()));
     sim_sb_concat(&cmd, " pull");
-    run(cmd.buffer);
+    sys::run(cmd.buffer);
   }
 } catch (...) {
   return 1;
