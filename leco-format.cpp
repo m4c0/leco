@@ -13,7 +13,9 @@ import sys;
 #endif
 
 static const char * fmt_cmd() {
-#if __APPLE__
+#if __APPLE__ && __arm64__
+  return "/opt/homebrew/opt/llvm/bin/clang-format";
+#elif __APPLE__
   return "/usr/local/opt/llvm@16/bin/clang-format";
 #elif _WIN32
   return "clang-format.exe";
