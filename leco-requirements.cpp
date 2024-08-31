@@ -1,7 +1,9 @@
 #pragma leco tool
-#include "dag2.hpp"
 #include "sim.hpp"
 #include "targets.hpp"
+
+#include <stdio.h>
+#include <string.h>
 
 import gopt;
 import popen;
@@ -31,7 +33,7 @@ void collect_deps(sim_sb *path) {
 
     sim_sb_path_append(path, entry);
 
-    dag_read(path->buffer, [](auto id, auto file) {
+    sys::dag_read(path->buffer, [](auto id, auto file) {
       switch (id) {
       case 'impl':
       case 'mdep': {
@@ -50,7 +52,7 @@ void collect_deps(sim_sb *path) {
 }
 
 static void usage() {
-  die(R"(
+  sys::die(R"(
 Usage: %s -t <target> [-g]
 
 Where:
