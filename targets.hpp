@@ -1,5 +1,9 @@
 #pragma once
+#ifdef __arm64__
+#define TGT_OSX "arm64-apple-macosx11"
+#else
 #define TGT_OSX "x86_64-apple-macosx11.6.0"
+#endif
 #define TGT_IPHONEOS "arm64-apple-ios16.1"
 #define TGT_IOS_SIMULATOR "x86_64-apple-ios16.1-simulator"
 #define TGT_WINDOWS "x86_64-pc-windows-msvc"
