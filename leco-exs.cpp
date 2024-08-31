@@ -12,7 +12,7 @@ import sys;
 
 static const char *exedir{};
 static const char *target{};
-static const char *ext{"exe"};
+static const char * ext {};
 
 static void usage() { sys::die("invalid usage"); }
 
@@ -20,7 +20,7 @@ static void copy_exe(const char *input) {
   sim_sbt path{};
   sim_sb_copy(&path, exedir);
   sim_sb_path_append(&path, sim_path_filename(input));
-  sim_sb_path_set_extension(&path, ext);
+  if (ext) sim_sb_path_set_extension(&path, ext);
 
   if (mtime::of(path.buffer) >= mtime::of(input))
     return;
