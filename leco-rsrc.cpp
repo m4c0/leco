@@ -1,6 +1,5 @@
 #pragma leco tool
 
-#include "dag2.hpp"
 #include "sim.hpp"
 
 #include <stdint.h>
@@ -23,7 +22,7 @@ static void copy_res(const char *file) {
   if (mtime::of(path.buffer) >= mtime::of(file))
     return;
 
-  log("hard-linking", file);
+  sys::log("hard-linking", file);
   sys::link(file, path.buffer);
 }
 
@@ -34,17 +33,17 @@ static void copy_shader(const char *file) {
   if (mtime::of(out.buffer) > mtime::of(file))
     return;
 
-  log("compiling shader", file);
+  sys::log("compiling shader", file);
   sim_sbt cmd{10240};
   sim_sb_printf(&cmd, "glslangValidator -V -o %s %s", out.buffer, file);
-  run(cmd.buffer);
+  sys::run(cmd.buffer);
 }
 
 static void read_dag(const char *dag) {
   if (!added.insert(dag))
     return;
 
-  dag_read(dag, [](auto id, auto file) {
+  sys::dag_read(dag, [](auto id, auto file) {
     switch (id) {
     case 'rsrc':
       copy_res(file);
