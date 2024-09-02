@@ -1,9 +1,9 @@
 #pragma leco tool
 
-#include "fopen.hpp"
 #include "sim.hpp"
 #include "targets.hpp"
 
+#include <stdio.h>
 #include <string.h>
 
 import gopt;
@@ -11,14 +11,14 @@ import mtime;
 import pprent;
 import sys;
 
-void usage() { die("invalid usage"); }
+void usage() { sys::die("invalid usage"); }
 
 static bool exists(const sim_sb *path) { return mtime::of(path->buffer) > 0; }
 
 static void find_android_llvm(sim_sb *res) {
   const auto sdk = sys::env("ANDROID_SDK_ROOT");
   if (sdk == nullptr)
-    die("undefined ANDROID_SDK_ROOT");
+    sys::die("undefined ANDROID_SDK_ROOT");
 
   sim_sb_path_copy_append(res, sdk, "ndk-bundle");
   if (exists(res))
@@ -26,7 +26,7 @@ static void find_android_llvm(sim_sb *res) {
 
   sim_sb_path_copy_append(res, sdk, "ndk");
   if (!exists(res))
-    die("ANDROID_SDK_ROOT path does not contain a folder named 'sdk': [%s]",
+    sys::die("ANDROID_SDK_ROOT path does not contain a folder named 'sdk': [%s]",
         res->buffer);
 
   sim_sbt max{};
@@ -44,7 +44,7 @@ static void find_android_llvm(sim_sb *res) {
   sim_sb_path_append(res, "llvm");
   sim_sb_path_append(res, "prebuilt");
   if (!exists(res))
-    die("prebuilt path isn't a directory: [%s]", res->buffer);
+    sys::die("prebuilt path isn't a directory: [%s]", res->buffer);
 
   for (auto e : pprent::list(res->buffer)) {
     if (e[0] == '.')
@@ -53,7 +53,7 @@ static void find_android_llvm(sim_sb *res) {
     sim_sb_path_append(res, e);
     return;
   }
-  die("no LLVM inside prebuilt dir: [%s]", res->buffer);
+  sys::die("no LLVM inside prebuilt dir: [%s]", res->buffer);
 }
 
 static const char *apple_sysroot(const char *sdk) {
@@ -139,13 +139,14 @@ int main(int argc, char **argv) try {
   sys::mkdirs(cf.buffer);
   sim_sb_path_append(&cf, "sysroot");
   if (mtime::of(cf.buffer) > 0) {
-    f::open f{cf.buffer, "r"};
+    auto f = sys::fopen(cf.buffer, "r");
     sim_sbt buf{};
-    if (fgets(buf.buffer, buf.size, *f) != nullptr) {
+    if (fgets(buf.buffer, buf.size, f) != nullptr) {
       if (!quiet)
         fwrite(buf.buffer, 1, buf.size, stdout);
       return 0;
     }
+    fclose(f);
   }
 
   auto sysroot = sysroot_for_target(target);
@@ -153,8 +154,9 @@ int main(int argc, char **argv) try {
     if (!quiet)
       puts(sysroot);
 
-    f::open f{cf.buffer, "w"};
-    fputs(sysroot, *f);
+    auto f = sys::fopen(cf.buffer, "w");
+    fputs(sysroot, f);
+    fclose(f);
   }
 } catch (...) {
   return 1;
