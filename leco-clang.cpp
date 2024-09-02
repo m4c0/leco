@@ -6,7 +6,6 @@
 
 #include "../gopt/gopt.h"
 #include "../mtime/mtime.h"
-#include "../popen/popen.h"
 #include "die.hpp"
 #include "sim.h"
 #include "targets.hpp"

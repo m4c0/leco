@@ -14,7 +14,6 @@
 #endif
 
 import gopt;
-import popen;
 import pprent;
 import sys;
 
