@@ -1,5 +1,4 @@
 #pragma leco tool
-#include "fopen.hpp"
 #include "sim.hpp"
 
 #include <stdint.h>
@@ -93,9 +92,9 @@ void run(int argc, char **argv) {
   target = sim_sb_path_filename(&path);
 
   if (output) {
-    f::open f{output, "wb"};
-    out = *f;
+    out = sys::fopen(output, "wb");
     read_dag(input);
+    fclose(out);
   } else {
     read_dag(input);
   }
