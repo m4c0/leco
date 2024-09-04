@@ -1,5 +1,4 @@
 #pragma leco tool
-#include "dag2.hpp"
 #include "in2out.hpp"
 #include "sim.hpp"
 
@@ -54,7 +53,7 @@ static void process(const char * src) {
 
   dagger(src, dag.buffer);
 
-  dag_read(dag.buffer, [](auto id, auto file) {
+  sys::dag_read(dag.buffer, [](auto id, auto file) {
     switch (id) {
       case 'bdep':
       case 'impl':
