@@ -1,6 +1,5 @@
 #pragma leco tool
 
-#include "in2out.hpp"
 #include "sim.hpp"
 
 #include <stdio.h>
@@ -38,11 +37,8 @@ static void copy_exe(const char * input) {
   sys::link(input, path.buffer);
 }
 
-static void copy_bdep(const char * src) {
-  sim_sbt dag {};
-  in2out(src, &dag, "dag", target);
-
-  sys::dag_read(dag.buffer, [&](auto id, auto file) {
+static void copy_bdep(const char * dag) {
+  sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
       case 'tdll':
       case 'tool':
@@ -58,7 +54,7 @@ static void read_dag(const char * dag) {
 
   sys::dag_read(dag, [](auto id, auto file) {
     switch (id) {
-      case 'bdep': copy_bdep(file); break;
+      case 'bdag': copy_bdep(file); break;
       case 'dlls': copy_exe(file); break;
       case 'idag':
       case 'mdag': {
