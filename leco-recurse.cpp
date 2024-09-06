@@ -75,7 +75,7 @@ static void compile(const char * dag) {
   comp("leco-obj.exe", dag);
 }
 
-static void bounce(const char * path);
+static void bounce(const char * src);
 static void build_bdeps(const char * dag) {
   sys::dag_read(dag, [](auto id, auto file) {
     switch (id) {
@@ -85,21 +85,18 @@ static void build_bdeps(const char * dag) {
   });
 }
 
-static void bounce(const char *path) {
-  sim_sbt src{};
-  sim_sb_path_copy_real(&src, path);
-
+static void bounce(const char * src) {
   sim_sbt dag{};
-  in2out(path, &dag, "dag", target);
+  in2out(src, &dag, "dag", target);
 
-  sawblade(src.buffer);
+  sawblade(src);
 
   sys::dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
     case 'tapp':
       compile(dag.buffer);
       build_bdeps(dag.buffer);
-      build_rc(path);
+      build_rc(src);
       link(dag.buffer, file);
       bundle(dag.buffer);
       break;
