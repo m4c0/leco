@@ -70,19 +70,9 @@ static void build_rc(const char *path) {
 #endif
 }
 
-static void compile(const char * src, const char * dag) {
-  sys::dag_read(dag, [&](auto id, auto file) {
-    switch (id) {
-    case 'tapp':
-    case 'tdll':
-    case 'tool':
-    case 'tmmd':
-      comp("leco-pcm.exe", dag);
-      comp("leco-obj.exe", dag);
-      break;
-    default: break;
-    }
-  });
+static void compile(const char * dag) {
+  comp("leco-pcm.exe", dag);
+  comp("leco-obj.exe", dag);
 }
 
 static void bounce(const char * path);
@@ -103,11 +93,11 @@ static void bounce(const char *path) {
   in2out(path, &dag, "dag", target);
 
   sawblade(src.buffer);
-  compile(src.buffer, dag.buffer);
 
   sys::dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
     case 'tapp':
+      compile(dag.buffer);
       build_bdeps(dag.buffer);
       build_rc(path);
       link(dag.buffer, file);
@@ -115,9 +105,12 @@ static void bounce(const char *path) {
       break;
     case 'tdll':
     case 'tool':
+      compile(dag.buffer);
       link(dag.buffer, file);
       break;
-    case 'tmmd': break;
+    case 'tmmd': 
+      compile(dag.buffer);
+      break;
     default: break;
     }
   });
