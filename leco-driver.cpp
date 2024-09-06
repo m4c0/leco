@@ -77,6 +77,15 @@ static void sysroot(const char *target) {
   sys::run(cmd.buffer);
 }
 
+static void recurse(const char * target, const char *file) {
+  sim_sbt cmd{};
+  prep(&cmd, "leco-recurse.exe");
+  sim_sb_printf(&cmd, " -t %s", target);
+  sim_sb_printf(&cmd, " -i %s ", file);
+  sim_sb_concat(&cmd, common_flags);
+  sys::run(cmd.buffer);
+}
+
 static void run_target(const char *target) {
   cleaner(target);
   sysroot(target);
@@ -90,12 +99,7 @@ static void run_target(const char *target) {
         strcmp(ext, ".c") != 0)
       continue;
 
-    sim_sbt cmd{};
-    prep(&cmd, "leco-recurse.exe");
-    sim_sb_printf(&cmd, " -t %s", target);
-    sim_sb_printf(&cmd, " -i %s ", file);
-    sim_sb_concat(&cmd, common_flags);
-    sys::run(cmd.buffer);
+    recurse(target, file);
 
     errno = 0;
   }
