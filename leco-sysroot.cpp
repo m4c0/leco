@@ -58,7 +58,7 @@ static void find_android_llvm(sim_sb *res) {
 
 static const char *apple_sysroot(const char *sdk) {
 #ifndef __APPLE__
-  die("apple targets not supported when host isn't osx");
+  sys::die("apple targets not supported when host isn't osx");
   return nullptr;
 #else
   sim_sbt cmd{};
