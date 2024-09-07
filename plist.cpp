@@ -86,10 +86,6 @@ void common_app_plist(dict &d, const char *name, const char *sdk) {
 }
 } // namespace plist
 
-[[nodiscard]] static const char *env(const char * key, const char * def) {
-  const auto v = sys::env(key);
-  return (v == nullptr) ? def : v;
-}
 [[nodiscard]] static const char *env(const char * key) {
   const auto v = sys::env(key);
   if (v == nullptr) sys::die("Missing %s environment", key);
@@ -179,7 +175,7 @@ void gen_export_plist(const char *build_path, const char *name) {
 
   std::ofstream o{path.buffer};
   plist::gen(o, [&](auto &&d) {
-    d.string("method", env("LECO_IOS_METHOD", "ad-hoc"));
+    d.string("method", env("LECO_IOS_METHOD"));
     d.string("teamID", team_id());
     d.string("thinning", "&lt;none&gt;");
     d.dictionary("provisioningProfiles", [&](auto &&dd) {
