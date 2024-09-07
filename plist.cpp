@@ -86,9 +86,14 @@ void common_app_plist(dict &d, const char *name, const char *sdk) {
 }
 } // namespace plist
 
-[[nodiscard]] static const char *env(const char *key, const char *def = "TBD") {
+[[nodiscard]] static const char *env(const char * key, const char * def) {
   const auto v = sys::env(key);
   return (v == nullptr) ? def : v;
+}
+[[nodiscard]] static const char *env(const char * key) {
+  const auto v = sys::env(key);
+  if (v == nullptr) sys::die("Missing %s environment", key);
+  return v;
 }
 [[nodiscard]] static const char *team_id() { return env("LECO_IOS_TEAM"); }
 
