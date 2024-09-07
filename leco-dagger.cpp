@@ -377,6 +377,8 @@ void run(int argc, char **argv) {
       read_file_list(pp, "library dir", 'ldir');
     } else if (auto pp = cmp(p, "#pragma leco add_resource ")) {
       read_file_list(pp, "resource", 'rsrc');
+    } else if (auto pp = cmp(p, "#pragma leco add_static ")) {
+      read_file_list(pp, "static library", 'slib');
     } else if (auto pp = cmp(p, "#pragma leco add_shader ")) {
       read_file_list(pp, "shader", 'shdr');
     } else if (cmp(p, "#pragma leco ")) {

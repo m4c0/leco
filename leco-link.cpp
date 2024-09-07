@@ -61,6 +61,9 @@ static auto read_dag(const char *dag) {
     case 'ldir':
       fprintf(out, "-L%s\n", file);
       break;
+    case 'slib':
+      fprintf(out, "%s\n", file);
+      break;
     case 'idag':
     case 'mdag': mtime = max(mtime, read_dag(file)); break;
     default: break;
