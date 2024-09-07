@@ -70,7 +70,7 @@ void common_app_plist(dict &d, const char *name, const char *sdk) {
   sim_sbt id{};
   sim_sb_printf(&id, "br.com.tpk.%s", name);
   sim_sbt exe{};
-  sim_sb_printf(&id, "%s.exe", name);
+  sim_sb_printf(&exe, "%s.exe", name);
 
   d.string("CFBundleDevelopmentRegion", "en");
   d.string("CFBundleDisplayName", name);
