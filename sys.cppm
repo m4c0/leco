@@ -64,7 +64,8 @@ const char *env(const char *name) {
   _dupenv_s(&buf, &sz, name);
   return buf;
 #else
-  return strdup(getenv(name));
+  auto e = getenv(name);
+  return e ? strdup(e) : nullptr;
 #endif
 }
 
