@@ -77,6 +77,7 @@ void common_app_plist(dict &d, const char *name, const char *sdk) {
   d.string("CFBundleExecutable", exe.buffer);
   d.string("CFBundleIdentifier", id.buffer);
   d.string("CFBundleInfoDictionaryVersion", "6.0");
+  d.string("CFBundleName", name);
   d.string("CFBundlePackageType", "APPL");
   d.string("CFBundleShortVersionString", "1.0.0");
   d.string("CFBundleVersion", "1.0.0");
