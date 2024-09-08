@@ -178,6 +178,7 @@ void gen_export_plist(const char *build_path, const char *name) {
     d.string("method", env("LECO_IOS_METHOD"));
     d.string("teamID", team_id());
     d.string("thinning", "&lt;none&gt;");
+    d.boolean("uploadSymbols", false);
     d.dictionary("provisioningProfiles", [&](auto &&dd) {
       dd.string(id.buffer, env("LECO_IOS_PROV_PROF"));
     });
