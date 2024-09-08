@@ -15,11 +15,7 @@ static void copy(const char *with, const char *dag, const char *to,
                  const char *extra = "") {
   sim_sbt cmd{};
   sim_sb_path_copy_append(&cmd, tool_dir, with);
-  sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, dag);
-  sim_sb_concat(&cmd, " -o ");
-  sim_sb_concat(&cmd, to);
-  sim_sb_concat(&cmd, extra);
+  sim_sb_printf(&cmd, " -i %s -o %s %s", dag, to, extra);
   sys::run(cmd.buffer);
 }
 
@@ -51,8 +47,7 @@ static void osx_bundle(const char *dag) {
 static void ios_bundle(const char *dag) {
   sim_sbt cmd{};
   sim_sb_path_copy_append(&cmd, tool_dir, "leco-ipa.exe");
-  sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, dag);
+  sim_sb_printf(&cmd, " -i %s", dag);
   sys::run(cmd.buffer);
 }
 
