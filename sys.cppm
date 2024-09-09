@@ -24,7 +24,7 @@ export module sys;
 export namespace sys {
 struct death {};
 
-__attribute__((format(printf, 1, 2))) inline void die(const char *msg, ...) {
+[[noreturn]] __attribute__((format(printf, 1, 2))) inline void die(const char *msg, ...) {
   va_list arg;
   va_start(arg, msg);
   vfprintf(stderr, msg, arg);
@@ -61,12 +61,12 @@ const char *env(const char *name) {
 #ifdef _WIN32
   char *buf;
   size_t sz;
-  _dupenv_s(&buf, &sz, name);
-  return buf;
+  if (0 == _dupenv_s(&buf, &sz, name)) return buf;
 #else
   auto e = getenv(name);
-  return e ? strdup(e) : nullptr;
+  if (e) return strdup(e);
 #endif
+  sys::die("missing environment variable [%s]", name);
 }
 
 void mkdirs(const char *path) {

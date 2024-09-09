@@ -87,12 +87,7 @@ void common_app_plist(dict &d, const char *name, const char *sdk) {
 }
 } // namespace plist
 
-[[nodiscard]] static const char *env(const char * key) {
-  const auto v = sys::env(key);
-  if (v == nullptr) sys::die("Missing %s environment", key);
-  return v;
-}
-[[nodiscard]] static const char *team_id() { return env("LECO_IOS_TEAM"); }
+[[nodiscard]] static const char *team_id() { return sys::env("LECO_IOS_TEAM"); }
 
 void merge_icon_partial(const char *build_path, std::ostream &o) {
   sim_sbt plist{};
@@ -156,7 +151,7 @@ void gen_archive_plist(const char *xca_path, const char *name) {
       dd.string("CFBundleIdentifier", id.buffer);
       dd.string("CFBundleShortVersionString", "1.0.0");
       dd.string("CFBundleVersion", "0");
-      dd.string("SigningIdentity", env("LECO_IOS_SIGN_ID"));
+      dd.string("SigningIdentity", sys::env("LECO_IOS_SIGN_ID"));
       dd.string("Team", team_id());
     });
     d.integer("ArchiveVersion", 1);
@@ -176,12 +171,12 @@ void gen_export_plist(const char *build_path, const char *name) {
 
   std::ofstream o{path.buffer};
   plist::gen(o, [&](auto &&d) {
-    d.string("method", env("LECO_IOS_METHOD"));
+    d.string("method", sys::env("LECO_IOS_METHOD"));
     d.string("teamID", team_id());
     d.string("thinning", "&lt;none&gt;");
     d.boolean("uploadSymbols", false);
     d.dictionary("provisioningProfiles", [&](auto &&dd) {
-      dd.string(id.buffer, env("LECO_IOS_PROV_PROF"));
+      dd.string(id.buffer, sys::env("LECO_IOS_PROV_PROF"));
     });
   });
 }

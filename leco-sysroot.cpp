@@ -17,8 +17,6 @@ static bool exists(const sim_sb *path) { return mtime::of(path->buffer) > 0; }
 
 static void find_android_llvm(sim_sb *res) {
   const auto sdk = sys::env("ANDROID_SDK_ROOT");
-  if (sdk == nullptr)
-    sys::die("undefined ANDROID_SDK_ROOT");
 
   sim_sb_path_copy_append(res, sdk, "ndk-bundle");
   if (exists(res))
@@ -87,8 +85,6 @@ static const char *android_sysroot() {
 
 static const char *wasm_sysroot() {
   const auto sdk = sys::env("WASI_SYSROOT");
-  if (sdk == nullptr)
-    sys::die("undefined WASI_SYSROOT");
 
   return sdk;
 }
