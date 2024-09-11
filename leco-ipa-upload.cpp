@@ -3,6 +3,8 @@
 #include "sim.hpp"
 #include "targets.hpp"
 
+#include <string.h>
+
 import gopt;
 import sys;
 
@@ -33,6 +35,9 @@ int main(int argc, char ** argv) try {
 
   sim_sbt ipa {};
   sim_sb_path_copy_parent(&ipa, input);
+  if (!IS_TGT(TGT_IPHONEOS, sim_sb_path_filename(&ipa)))
+    sys::die("only iPhone target is supported");
+
   sim_sb_path_append(&ipa, "export");
   sim_sb_path_append(&ipa, sim_path_filename(input));
   sim_sb_path_set_extension(&ipa, "ipa");
