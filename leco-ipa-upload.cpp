@@ -3,6 +3,7 @@
 #include "sim.hpp"
 #include "targets.hpp"
 
+import gopt;
 import sys;
 
 void usage() {
@@ -21,9 +22,26 @@ Usage: ../leco/leco.exe ipa-upload -i <input-dag>
 }
 
 int main(int argc, char ** argv) try {
-  sys::run("xcrun altool");
+  const char * input {};
+  auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
+    switch (ch) {
+      case 'i': input = val; break;
+      default: usage();
+    }
+  });
+  if (opts.argc != 0 || !input) usage();
 
-  return 0;
+  sim_sbt ipa {};
+  sim_sb_path_copy_parent(&ipa, input);
+  sim_sb_path_append(&ipa, "export");
+  sim_sb_path_append(&ipa, sim_path_filename(input));
+  sim_sb_path_set_extension(&ipa, "ipa");
+
+  sim_sbt cmd { 10240 };
+  sim_sb_printf(&cmd, 
+      "xcrun altool --validate-app -t iphoneos -f %s --apiKey %s --apiIssuer %s",
+      ipa.buffer, sys::env("LECO_IOS_API_KEY"), sys::env("LECO_IOS_API_ISSUER"));
+  sys::run(cmd.buffer);
 } catch (...) {
   return 1;
 }
