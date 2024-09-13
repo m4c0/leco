@@ -5,6 +5,10 @@
 
 import sys;
 
+static constexpr const auto minimum_os_version = "17.0";
+static constexpr const auto platform_build = "21F77";
+static constexpr const auto xcode_build = "15F31d";
+
 namespace plist {
 class dict {
   std::ostream &o;
@@ -82,8 +86,8 @@ void common_app_plist(dict &d, const char *name, const char *sdk) {
   d.string("CFBundleShortVersionString", "1.0.0");
   d.string("CFBundleVersion", "1.0.0");
   d.string("DTPlatformName", sdk);
-  d.string("DTPlatformBuild", "21A325");
-  d.string("DTXcodeBuild", "15A240d");
+  d.string("DTPlatformBuild", platform_build);
+  d.string("DTXcodeBuild", xcode_build);
 }
 } // namespace plist
 
@@ -118,7 +122,7 @@ void gen_info_plist(const char *exe_path, const char *name,
   plist::gen(o, [&](auto &&d) {
     common_app_plist(d, name, "iphoneos");
     d.array("CFBundleSupportedPlatforms", "iPhoneOS");
-    d.string("MinimumOSVersion", "16.1");
+    d.string("MinimumOSVersion", minimum_os_version);
     d.boolean("LSRequiresIPhoneOS", true);
     d.array("UIDeviceFamily", 1); // iPhone
     d.string("UILaunchStoryboardName", "launch.storyboard");
