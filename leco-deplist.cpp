@@ -53,12 +53,8 @@ static void read_dag(const char *dag) {
 
   sys::dag_read(dag, [](auto id, auto file) {
     switch (id) {
-    case 'mdag': {
-      read_dag(file);
-      break;
-    }
-    default:
-      break;
+    case 'mdag': read_dag(file); break;
+    default: break;
     }
   });
 }
@@ -70,22 +66,14 @@ void run(int argc, char **argv) {
   const char *output{};
   auto opts = gopt_parse(argc, argv, "i:o:", [&](auto ch, auto val) {
     switch (ch) {
-    case 'i':
-      input = val;
-      break;
-    case 'o':
-      output = val;
-      break;
-    default:
-      usage();
+    case 'i': input = val; break;
+    case 'o': output = val; break;
+    default: usage();
     }
   });
-  if (opts.argc != 0)
-    usage();
-  if (!*input)
-    usage();
-  if (!strstr(input, SIM_PATHSEP_S "out" SIM_PATHSEP_S))
-    usage();
+  if (opts.argc != 0) usage();
+  if (!*input) usage();
+  if (!strstr(input, SIM_PATHSEP_S "out" SIM_PATHSEP_S)) usage();
 
   sim_sbt path{};
   sim_sb_path_copy_parent(&path, input);
