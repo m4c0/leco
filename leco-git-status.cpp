@@ -20,21 +20,18 @@ static auto starts_with(const char *str, const char (&prefix)[N]) {
 
 int main(int argc, char **argv) try {
   for (auto file : pprent::list("..")) {
-    if (file[0] == '.')
-      continue;
+    if (file[0] == '.') continue;
 
-    if (sim_path_extension(file) != nullptr)
-      continue;
+    if (sim_path_extension(file) != nullptr) continue;
 
     sim_sbt path{};
     sim_sb_printf(&path, "../%s/.git/config", file);
-    if (mtime::of(path.buffer) == 0)
-      continue;
+    if (mtime::of(path.buffer) == 0) continue;
 
     sim_sbt pwd{};
     sim_sb_printf(&pwd, "../%s", file);
 
-    char *args[7]{};
+    char *args[7] {};
     args[0] = strdup("git");
     args[1] = strdup("-C");
     args[2] = pwd.buffer;
@@ -46,8 +43,7 @@ int main(int argc, char **argv) try {
 
     bool printing{};
     const auto enable_printer = [&] {
-      if (printing)
-        return;
+      if (printing) return;
       fprintf(stderr, "-=-=-=-=-=-=-=-=-=- %s -=-=-=-=-=-=-=-=-=-\n", file);
       printing = true;
     };
