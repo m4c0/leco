@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <string>
+#include <time.h>
 
 import popen;
 import sys;
@@ -206,14 +207,10 @@ static void code_sign(const char *bundle_path) {
   sys::run(cmd.buffer);
 }
 void gen_iphone_ipa(const char *exe) {
-  char * args[] {
-    strdup("date"),
-    strdup("+%s"),
-    0,
-  };
-  p::proc p { args };
-  if (!p.gets()) sys::die("failed to get current date");
-  bundle_version = p.last_line_read();
+  char buf[256];
+  auto t = time(nullptr);
+  snprintf(buf, sizeof(buf) - 1, "%ld", t);
+  bundle_version = buf;
 
   sim_sbt name{};
   sim_sb_path_copy_stem(&name, exe);
