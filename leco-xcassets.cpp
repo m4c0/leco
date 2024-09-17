@@ -89,6 +89,7 @@ static void run_actool(const char *plist, const char *app_path,
                 "--app-icon AppIcon "
                 "--accent-color AccentColor "
                 "--compress-pngs "
+                "--enable-on-demand-resources YES "
                 "--target-device iphone "
                 "--target-device ipad "
                 "--platform iphoneos "
