@@ -3,11 +3,14 @@
 #include <fstream>
 #include <string>
 
+import popen;
 import sys;
 
 static constexpr const auto minimum_os_version = "17.0";
 static constexpr const auto platform_build = "21F77";
 static constexpr const auto xcode_build = "15F31d";
+
+static const char * bundle_version;
 
 namespace plist {
 class dict {
@@ -84,7 +87,7 @@ void common_app_plist(dict &d, const char *name, const char *sdk) {
   d.string("CFBundleName", name);
   d.string("CFBundlePackageType", "APPL");
   d.string("CFBundleShortVersionString", "1.0.0");
-  d.string("CFBundleVersion", "1.0.0");
+  d.string("CFBundleVersion", bundle_version);
   d.string("DTPlatformName", sdk);
   d.string("DTPlatformBuild", platform_build);
   d.string("DTXcodeBuild", xcode_build);
@@ -154,7 +157,7 @@ void gen_archive_plist(const char *xca_path, const char *name) {
       dd.array("Architectures", "arm64");
       dd.string("CFBundleIdentifier", id.buffer);
       dd.string("CFBundleShortVersionString", "1.0.0");
-      dd.string("CFBundleVersion", "0");
+      dd.string("CFBundleVersion", bundle_version);
       dd.string("SigningIdentity", sys::env("LECO_IOS_SIGN_ID"));
       dd.string("Team", team_id());
     });
@@ -203,6 +206,15 @@ static void code_sign(const char *bundle_path) {
   sys::run(cmd.buffer);
 }
 void gen_iphone_ipa(const char *exe) {
+  char * args[] {
+    strdup("date"),
+    strdup("+%s"),
+    0,
+  };
+  p::proc p { args };
+  if (!p.gets()) sys::die("failed to get current date");
+  bundle_version = p.last_line_read();
+
   sim_sbt name{};
   sim_sb_path_copy_stem(&name, exe);
 
