@@ -7,66 +7,44 @@
 import gopt;
 import sys;
 
-namespace json {
-class dict {
-  FILE *f;
+// TODO: detect alpha in PNG - otherwise submit fails
+//       with a bizarre "A 1024 x 1024 pixel app icon for your app must be
+//       added to the asset catalog in Xcode." error
 
-  void array_elements() {}
-  void array_elements(auto &&v) {
-    fprintf(f, "{");
-    v(*this);
-    fprintf(f, "}");
-  }
-  void array_elements(auto &&v1, auto &&v2, auto &&...vs) {
-    array_elements(v1);
-    fprintf(f, ",");
-    array_elements(v2, vs...);
-  }
 
-public:
-  explicit constexpr dict(FILE *f) : f{f} {}
-
-  void array(const char *key, auto &&...v) {
-    fprintf(f, R"("%s": [)", key);
-    array_elements(v...);
-    fprintf(f, "]");
-  }
-
-  void string(const char *key, const char *value, bool last = false) {
-    fprintf(f, R"("%s": "%s")", key, value);
-    if (!last)
-      fprintf(f, ",");
-  }
-};
-void gen(const char *path, auto &&fn) {
+static void create_xca_contents(const char *path) {
   sim_sbt file{};
   sim_sb_path_copy_append(&file, path, "Contents.json");
 
   auto f = sys::fopen(file.buffer, "w");
-  fprintf(f, "{");
-  fn(dict{f});
-  fprintf(f, "}");
+  fprintf(f, "{}");
   fclose(f);
-}
-} // namespace json
-
-static void create_xca_contents(const char *path) {
-  json::gen(path, [](auto &&) {});
 }
 
 static void create_icon_contents(const char *path) {
-  json::gen(path, [](auto &&d) {
-    d.array("images", [](auto &&dd) {
-      dd.string("filename", "icon.png");
-      dd.string("idiom", "universal");
-      dd.string("platform", "ios");
-      dd.string("size", "1024x1024", true);
-    });
-  });
+  sim_sbt file{};
+  sim_sb_path_copy_append(&file, path, "Contents.json");
+
+  auto f = sys::fopen(file.buffer, "w");
+  fprintf(f, R"({
+  "images": [{
+    "filename": "icon.png",
+    "idiom": "universal",
+    "platform": "ios",
+    "size": "1024x1024"
+  }],
+  "info": {"version": 1}
+})");
+  fclose(f);
 }
 
 static void create_colour_contents(const char *path) {
-  json::gen(path, [](auto &&d) {});
+  sim_sbt file{};
+  sim_sb_path_copy_append(&file, path, "Contents.json");
+
+  auto f = sys::fopen(file.buffer, "w");
+  fprintf(f, "{}");
+  fclose(f);
 }
 
 static void copy_icon(const char *path) {
