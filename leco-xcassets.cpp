@@ -17,7 +17,7 @@ static void create_xca_contents(const char *path) {
   sim_sb_path_copy_append(&file, path, "Contents.json");
 
   auto f = sys::fopen(file.buffer, "w");
-  fprintf(f, "{}");
+  fprintf(f, R"({ "info": {"version": 1} })");
   fclose(f);
 }
 
@@ -43,7 +43,7 @@ static void create_colour_contents(const char *path) {
   sim_sb_path_copy_append(&file, path, "Contents.json");
 
   auto f = sys::fopen(file.buffer, "w");
-  fprintf(f, "{}");
+  fprintf(f, R"({ "info": {"version": 1} })");
   fclose(f);
 }
 
