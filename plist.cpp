@@ -10,6 +10,7 @@ import sys;
 static constexpr const auto minimum_os_version = "17.0";
 static constexpr const auto platform_build = "21F77";
 static constexpr const auto xcode_build = "15F31d";
+static constexpr const auto xcode_version = "1540";
 
 static const char * bundle_version;
 
@@ -91,7 +92,9 @@ void common_app_plist(dict &d, const char *name, const char *sdk) {
   d.string("CFBundleVersion", bundle_version);
   d.string("DTPlatformName", sdk);
   d.string("DTPlatformBuild", platform_build);
+  d.string("DTSDKBuild", platform_build);
   d.string("DTXcodeBuild", xcode_build);
+  d.string("DTXcode", xcode_version);
 }
 } // namespace plist
 
