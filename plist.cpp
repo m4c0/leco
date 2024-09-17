@@ -128,6 +128,7 @@ void gen_info_plist(const char *exe_path, const char *name,
     d.array("CFBundleSupportedPlatforms", "iPhoneOS");
     d.string("MinimumOSVersion", minimum_os_version);
     d.boolean("LSRequiresIPhoneOS", true);
+    d.boolean("ITSAppUsesNonExemptEncryption", false);
     d.array("UIDeviceFamily", 1); // iPhone
     d.string("UILaunchStoryboardName", "launch.storyboard");
     d.dictionary("UIRequiredDeviceCapabilities", [](auto &&dd) {
