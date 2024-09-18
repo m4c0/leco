@@ -28,7 +28,7 @@ static void create_icon_contents(const char *path) {
   auto f = sys::fopen(file.buffer, "w");
   fprintf(f, R"({
   "images": [{
-    "filename": "icon.png",
+    "filename": "Icon-1024.png",
     "idiom": "universal",
     "platform": "ios",
     "size": "1024x1024"
@@ -51,7 +51,7 @@ static void copy_icon(const char *path) {
   sys::log("copying", "icon.png");
 
   sim_sbt file{};
-  sim_sb_path_copy_append(&file, path, "icon.png");
+  sim_sb_path_copy_append(&file, path, "Icon-1024.png");
   sys::link("icon.png", file.buffer);
 }
 
