@@ -166,7 +166,7 @@ void gen_archive_plist(const char *xca_path, const char *name) {
       dd.string("SigningIdentity", sys::env("LECO_IOS_SIGN_ID"));
       dd.string("Team", team_id());
     });
-    d.integer("ArchiveVersion", 1);
+    d.integer("ArchiveVersion", 2);
     d.date("CreationDate");
     d.string("Name", name);
     d.string("SchemeName", name);

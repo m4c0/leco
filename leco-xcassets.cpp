@@ -71,9 +71,10 @@ static void run_actool(const char *plist, const char *app_path,
                 "--target-device iphone "
                 "--target-device ipad "
                 "--platform iphoneos "
-                "--filter-for-thinning-device-configuration iPhone16,1 "
-                "--filter-for-device-os-version 17.0 "
-                "--minimum-deployment-target 17.0 "
+                //"--filter-for-thinning-device-configuration iPhone16,1 "
+                //"--filter-for-device-os-version 17.0 "
+                "--development-region en "
+                "--minimum-deployment-target 17.5 "
                 "--output-partial-info-plist %s "
                 "--compile %s "
                 "%s",
