@@ -65,4 +65,23 @@ itself). A command like this is enough to build a project:
 ../leco/leco.exe
 ```
 
-On Windows CMD, you need to use the reverse slash.
+On Windows CMD, you need to use the reverse slash. On non-Windows, an `.exe`
+extension is added to all executables created by LECO. This simplifies any
+cross-platform automations (like LECO itself). It might be weird for Linux or
+Mac-exclusive users, but it definitely helps for anyone working on different
+platforms.
+
+The main `leco.exe` tool is a facade for other smaller tools - similar to how
+`git` supports multiple subcommands. The default action is to build the code in
+the current directory. It's equivalent to call:
+
+```sh
+../leco/leco.exe driver
+```
+
+Other subcommands are documented via the `help` tool:
+
+```sh
+../leco/leco.exe help
+```
+
