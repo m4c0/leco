@@ -1,8 +1,10 @@
 #pragma leco tool
 
 #include "sim.hpp"
+#include "targets.hpp"
 
 #include <stdio.h>
+#include <string.h>
 
 import gopt;
 import mtime;
@@ -15,9 +17,13 @@ static const char * ext {};
 
 static void usage() { sys::die("invalid usage"); }
 
-static void copy_exe(const char * input) {
+static void copy_exe(const char * input, bool dll = false) {
   sim_sbt path {};
   sim_sb_copy(&path, exedir);
+  if (dll && IS_TGT_IOS(target)) {
+    sim_sb_path_append(&path, "Frameworks");
+    sys::mkdirs(path.buffer);
+  }
   sim_sb_path_append(&path, sim_path_filename(input));
   if (ext) sim_sb_path_set_extension(&path, ext);
 
@@ -55,12 +61,9 @@ static void read_dag(const char * dag) {
   sys::dag_read(dag, [](auto id, auto file) {
     switch (id) {
       case 'bdag': copy_bdep(file); break;
-      case 'dlls': copy_exe(file); break;
+      case 'dlls': copy_exe(file, true); break;
       case 'idag':
-      case 'mdag': {
-        read_dag(file);
-        break;
-      }
+      case 'mdag': read_dag(file); break;
       default: break;
     }
   });
