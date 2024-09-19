@@ -18,37 +18,26 @@ import sys;
 static const char *target{HOST_TARGET};
 static const char *argv0;
 
+static str::set all_deps{};
 static str::set collected{};
 
-void collect_deps(sim_sb *path) {
-  if (!collected.insert(path->buffer))
-    return;
+void recurse(const char * dag) {
+  if (!all_deps.insert(dag)) return;
 
-  sim_sb_path_append(path, "out");
-  sim_sb_path_append(path, target);
+  sim_sbt path {};
+  sim_sb_path_copy_parent(&path, dag);
+  sim_sb_path_parent(&path);
+  sim_sb_path_parent(&path);
+  collected.insert(path.buffer);
 
-  for (auto entry : pprent::list(path->buffer)) {
-    if (0 != strcmp(".dag", sim_path_extension(entry)))
-      continue;
-
-    sim_sb_path_append(path, entry);
-
-    sys::dag_read(path->buffer, [](auto id, auto file) {
-      switch (id) {
-      case 'impl':
-      case 'mdep': {
-        sim_sbt p{};
-        sim_sb_path_copy_parent(&p, file);
-        collect_deps(&p);
-        break;
-      }
-      default:
-        break;
-      }
-    });
-
-    sim_sb_path_parent(path);
-  }
+  sys::dag_read(dag, [](auto id, auto file) {
+    switch (id) {
+      case 'bdag':
+      case 'idag':
+      case 'mdag': recurse(file); break;
+      default: break;
+    }
+  });
 }
 
 static void usage() {
@@ -83,22 +72,26 @@ int main(int argc, char **argv) try {
   argv0 = argv[0];
   auto opts = gopt_parse(argc, argv, "gt:", [&](auto ch, auto val) {
     switch (ch) {
-    case 'g':
-      git = true;
-      break;
-    case 't':
-      target = val;
-      break;
-    default:
-      usage();
+    case 'g': git = true; break;
+    case 't': target = val; break;
+    default: usage(); break;
     }
   });
-  if (opts.argc != 0)
-    usage();
+  if (opts.argc != 0) usage();
 
   sim_sbt cwd{};
   sim_sb_path_copy_real(&cwd, ".");
-  collect_deps(&cwd);
+  sim_sb_path_append(&cwd, "out");
+  sim_sb_path_append(&cwd, target);
+
+  for (auto entry : pprent::list(cwd.buffer)) {
+    auto ext = sim_path_extension(entry);
+    if (!ext || 0 != strcmp(ext, ".dag")) continue;
+
+    sim_sb_path_append(&cwd, entry);
+    recurse(cwd.buffer);
+    sim_sb_path_parent(&cwd);
+  }
 
   for (const auto &s : collected) {
     if (git)
