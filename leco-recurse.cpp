@@ -58,8 +58,7 @@ static void build_rc(const char *path) {
   sim_sbt rc{};
   sim_sb_copy(&rc, path);
   sim_sb_path_set_extension(&rc, "rc");
-  if (mtime::of(rc.buffer) == 0)
-    return;
+  if (mtime::of(rc.buffer) == 0) return;
 
   sim_sbt res{};
   in2out(rc.buffer, &res, "res", target);
@@ -121,24 +120,14 @@ int main(int argc, char **argv) try {
 
   auto opts = gopt_parse(argc, argv, "t:i:gO", [&](auto ch, auto val) {
     switch (ch) {
-    case 'i':
-      sim_sb_path_copy_real(&rpath, val);
-      break;
-    case 't':
-      target = val;
-      break;
-    case 'g':
-      sim_sb_concat(&flags, " -g");
-      break;
-    case 'O':
-      sim_sb_concat(&flags, " -O");
-      break;
-    default:
-      usage();
+    case 'i': sim_sb_path_copy_real(&rpath, val); break;
+    case 't': target = val; break;
+    case 'g': sim_sb_concat(&flags, " -g"); break;
+    case 'O': sim_sb_concat(&flags, " -O"); break;
+    default: usage(); break;
     }
   });
-  if (opts.argc != 0 || rpath.len == 0)
-    usage();
+  if (opts.argc != 0 || rpath.len == 0) usage();
 
   argv0 = argv[0];
   common_flags = flags.buffer;

@@ -178,25 +178,14 @@ extern "C" int main(int argc, char **argv) try {
   sim_sbt flags{};
   auto opts = gopt_parse(argc, argv, "cgOt:", [&](auto ch, auto val) {
     switch (ch) {
-    case 'c':
-      clean_level++;
-      break;
-    case 'g':
-      sim_sb_concat(&flags, " -g");
-      break;
-    case 'O':
-      sim_sb_concat(&flags, " -O");
-      break;
-    case 't':
-      target = val;
-      break;
-    default:
-      usage();
-      break;
+    case 'c': clean_level++; break;
+    case 'g': sim_sb_concat(&flags, " -g"); break;
+    case 'O': sim_sb_concat(&flags, " -O"); break;
+    case 't': target = val; break;
+    default: usage(); break;
     }
   });
-  if (opts.argc != 0)
-    usage();
+  if (opts.argc != 0) usage();
 
   common_flags = flags.buffer;
   run_targets(target);
