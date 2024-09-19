@@ -92,6 +92,7 @@ void common_app_plist(dict &d, const char *name, const char *sdk) {
   d.string("CFBundleVersion", bundle_version);
   d.string("DTPlatformName", sdk);
   d.string("DTPlatformBuild", platform_build);
+  d.string("DTPlatformVersion", "17.5");
   d.string("DTSDKBuild", platform_build);
   d.string("DTXcodeBuild", xcode_build);
   d.string("DTXcode", xcode_version);
@@ -187,6 +188,7 @@ void gen_export_plist(const char *build_path, const char *name) {
     d.string("teamID", team_id());
     d.string("thinning", "&lt;none&gt;");
     d.boolean("uploadSymbols", false);
+    d.boolean("generateAppStoreInformation", true);
     d.dictionary("provisioningProfiles", [&](auto &&dd) {
       dd.string(id.buffer, sys::env("LECO_IOS_PROV_PROF"));
     });
