@@ -173,6 +173,20 @@ static void read_file_list(const char *str, const char *desc, uint32_t code,
     throw 1;
 }
 
+static void add_xcfw(const char * str, const char * desc, uint32_t code) {
+  sim_sbt path{};
+  sim_sb_copy(&path, str);
+
+  if (IS_TGT_IOS(target)) sim_sb_path_append(&path, "ios-arm64");
+  else if (IS_TGT(target, TGT_OSX)) sim_sb_path_append(&path, "macos-arm64_x86_64");
+  else sys::die("xcframework is only supported in apple platforms");
+
+  sim_sb_path_append(&path, sim_path_filename(str));
+  sim_sb_path_set_extension(&path, "framework");
+
+  print_found(path.buffer, desc, code);
+}
+
 static void find_header(const char *l) {
   auto s = strchr(l, '"');
   if (!s)
@@ -382,7 +396,7 @@ void run(int argc, char **argv) {
     } else if (auto pp = cmp(p, "#pragma leco add_shader ")) {
       read_file_list(pp, "shader", 'shdr');
     } else if (auto pp = cmp(p, "#pragma leco add_xcframework ")) {
-      read_file_list(pp, "xcframework", 'xcfw');
+      read_file_list(pp, "xcframework", 'xcfw', add_xcfw);
     } else if (cmp(p, "#pragma leco ")) {
       error("unknown pragma");
     } else if (auto pp = cmp(p, "# ")) {
