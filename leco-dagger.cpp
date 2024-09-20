@@ -381,6 +381,8 @@ void run(int argc, char **argv) {
       read_file_list(pp, "static library", 'slib');
     } else if (auto pp = cmp(p, "#pragma leco add_shader ")) {
       read_file_list(pp, "shader", 'shdr');
+    } else if (auto pp = cmp(p, "#pragma leco add_xcframework ")) {
+      read_file_list(pp, "xcframework", 'xcfw');
     } else if (cmp(p, "#pragma leco ")) {
       error("unknown pragma");
     } else if (auto pp = cmp(p, "# ")) {
