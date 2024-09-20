@@ -17,15 +17,6 @@ void prep(sim_sb *cmd, const char *tool) {
   sim_sb_path_append(cmd, tool);
 }
 
-static void sawblade(const char * src) {
-  sim_sbt cmd {};
-  prep(&cmd, "leco-sawblade.exe");
-  sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, src);
-  sim_sb_concat(&cmd, " -t ");
-  sim_sb_concat(&cmd, target);
-  sys::run(cmd.buffer);
-}
 static void comp(const char * tool, const char * dag) {
   sim_sbt cmd {};
   prep(&cmd, tool);
@@ -87,8 +78,6 @@ static void build_bdeps(const char * dag) {
 static void bounce(const char * src) {
   sim_sbt dag{};
   in2out(src, &dag, "dag", target);
-
-  sawblade(src);
 
   sys::dag_read(dag.buffer, [&](auto id, auto file) {
     switch (id) {
