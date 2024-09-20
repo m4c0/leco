@@ -41,6 +41,16 @@ static void put(const char *a) {
 
 static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 
+static void add_local_fw(const char * fw) {
+  sim_sbt stem {};
+  sim_sb_path_copy_stem(&stem, fw);
+  
+  sim_sbt path {};
+  sim_sb_path_copy_parent(&path, fw);
+
+  fprintf(out, "-F%s\n-framework\n%s\n", path.buffer, stem.buffer);
+}
+
 static str::map cache{};
 static auto read_dag(const char *dag) {
   auto & mtime = cache[dag];
@@ -64,6 +74,7 @@ static auto read_dag(const char *dag) {
     case 'slib':
       fprintf(out, "%s\n", file);
       break;
+    case 'xcfw': add_local_fw(file); break;
     case 'idag':
     case 'mdag': mtime = max(mtime, read_dag(file)); break;
     default: break;
