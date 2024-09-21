@@ -4,100 +4,11 @@
 #include <string>
 #include <time.h>
 
+import plist;
 import popen;
 import sys;
 
-static constexpr const auto minimum_os_version = "17.0";
-static constexpr const auto platform_build = "21F77";
-static constexpr const auto xcode_build = "15F31d";
-static constexpr const auto xcode_version = "1540";
-
 static const char * bundle_version;
-
-namespace plist {
-class dict {
-  std::ostream &o;
-
-  void array_element(const char *t) {
-    o << "<string>";
-    o << t;
-    o << "</string>";
-  }
-  void array_element(int i) { o << "<integer>" << i << "</integer>"; }
-
-public:
-  explicit constexpr dict(std::ostream &o) : o{o} {}
-
-  void array(const char *key, auto &&...v) {
-    o << "<key>" << key << "</key><array>\n";
-    (array_element(v), ...);
-    o << "</array>\n";
-  }
-  void boolean(const char *key, bool v) {
-    o << "<key>" << key << "</key>";
-    o << (v ? "<true/>" : "<false/>");
-    o << "\n";
-  }
-  void date(const char *key) {
-    time_t now;
-    time(&now);
-    char buf[128];
-    strftime(buf, sizeof(buf), "%FT%TZ", gmtime(&now));
-    o << "<key>" << key << "</key><date>" << buf << "</date>\n";
-  }
-  void dictionary(const char *key, auto &&fn) {
-    o << "<key>" << key << "</key><dict>\n";
-    fn(dict{o});
-    o << "</dict>\n";
-  }
-  void integer(const char *key, int value) {
-    o << "<key>" << key << "</key><integer>" << value << "</integer>\n";
-  }
-  void string(const char *key, const char *value) {
-    o << "<key>";
-    o << key;
-    o << "</key><string>";
-    o << value;
-    o << "</string>\n";
-  }
-};
-
-void gen(std::ostream &o, auto &&fn) {
-  // https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html
-  o << R"(<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-)";
-  fn(plist::dict{o});
-  o << R"(</dict>
-</plist>
-)";
-}
-
-void common_app_plist(dict &d, const char *name, const char *sdk) {
-  sim_sbt id{};
-  sim_sb_printf(&id, "br.com.tpk.%s", name);
-  sim_sbt exe{};
-  sim_sb_printf(&exe, "%s.exe", name);
-
-  d.string("CFBundleDevelopmentRegion", "en");
-  d.string("CFBundleDisplayName", name);
-  d.string("CFBundleExecutable", exe.buffer);
-  d.string("CFBundleIdentifier", id.buffer);
-  d.string("CFBundleInfoDictionaryVersion", "6.0");
-  d.string("CFBundleName", name);
-  d.string("CFBundlePackageType", "APPL");
-  d.string("CFBundleShortVersionString", "1.0.0");
-  d.string("CFBundleVersion", bundle_version);
-  d.string("DTPlatformName", sdk);
-  d.string("DTPlatformBuild", platform_build);
-  d.string("DTPlatformVersion", "17.5");
-  d.string("DTSDKBuild", platform_build);
-  d.string("DTXcodeBuild", xcode_build);
-  d.string("DTXcode", xcode_version);
-}
-} // namespace plist
 
 [[nodiscard]] static const char *team_id() { return sys::env("LECO_IOS_TEAM"); }
 
@@ -128,9 +39,9 @@ void gen_info_plist(const char *exe_path, const char *name,
 
   std::ofstream o{path.buffer};
   plist::gen(o, [&](auto &&d) {
-    common_app_plist(d, name, "iphoneos");
+    common_app_plist(d, name, "iphoneos", "1.0.0", bundle_version);
     d.array("CFBundleSupportedPlatforms", "iPhoneOS");
-    d.string("MinimumOSVersion", minimum_os_version);
+    d.string("MinimumOSVersion", plist::minimum_os_version);
     d.boolean("LSRequiresIPhoneOS", true);
     d.boolean("ITSAppUsesNonExemptEncryption", false);
     d.array("UIDeviceFamily", 1); // iPhone

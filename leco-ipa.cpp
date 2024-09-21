@@ -1,5 +1,5 @@
 #pragma leco tool
-#pragma leco add_impl plist
+#pragma leco add_impl "leco-ipa_plist"
 
 #include "sim.hpp"
 
