@@ -17,13 +17,9 @@ static const char * ext {};
 
 static void usage() { sys::die("invalid usage"); }
 
-static void copy_exe(const char * input, bool dll = false) {
+static void copy_exe(const char * input) {
   sim_sbt path {};
   sim_sb_copy(&path, exedir);
-  if (dll && IS_TGT_IOS(target)) {
-    sim_sb_path_append(&path, "Frameworks");
-    sys::mkdirs(path.buffer);
-  }
   sim_sb_path_append(&path, sim_path_filename(input));
   if (ext) sim_sb_path_set_extension(&path, ext);
 
@@ -41,6 +37,15 @@ static void copy_exe(const char * input, bool dll = false) {
     rename(path.buffer, bkp.buffer);
   }
   sys::link(input, path.buffer);
+}
+
+static void copy_xcfw(const char * xcfw_path) {
+  sim_sbt path {};
+  sim_sb_copy(&path, exedir);
+  if (!IS_TGT_IOS(target)) sim_sb_path_parent(&path);
+  sim_sb_path_append(&path, "Frameworks");
+
+  sys::log("xcfw", path.buffer);
 }
 
 static void copy_bdep(const char * dag) {
@@ -61,7 +66,8 @@ static void read_dag(const char * dag) {
   sys::dag_read(dag, [](auto id, auto file) {
     switch (id) {
       case 'bdag': copy_bdep(file); break;
-      case 'dlls': copy_exe(file, true); break;
+      case 'dlls': copy_exe(file); break;
+      case 'xcfw': copy_xcfw(file); break;
       case 'idag':
       case 'mdag': read_dag(file); break;
       default: break;
