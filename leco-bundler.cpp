@@ -30,9 +30,12 @@ static void dir_bundle(const char *dag) {
 }
 
 static void osx_bundle(const char *dag) {
+  sim_sbt app_path {};
+  sim_sb_copy(&app_path, dag);
+  sim_sb_path_set_extension(&app_path, "app");
+
   sim_sbt path{};
-  sim_sb_copy(&path, dag);
-  sim_sb_path_set_extension(&path, "app");
+  sim_sb_copy(&path, app_path.buffer);
   sim_sb_path_append(&path, "Contents");
   sim_sb_path_append(&path, "MacOS");
   sys::mkdirs(path.buffer);
@@ -42,6 +45,11 @@ static void osx_bundle(const char *dag) {
   sim_sb_path_append(&path, "Resources");
   sys::mkdirs(path.buffer);
   copy("leco-rsrc.exe", dag, path.buffer);
+
+  sys::log("codesign", app_path.buffer);
+  sim_sbt cmd{};
+  sim_sb_printf(&cmd, "codesign -f -s %s %s", sys::env("LECO_IOS_TEAM"), app_path.buffer);
+  sys::run(cmd.buffer);
 }
 
 static void ios_bundle(const char *dag) {
