@@ -173,7 +173,7 @@ int main(int argc, char **argv) try {
 #endif
 
   if (IS_TGT(target, TGT_OSX)) {
-    sim_sb_concat(&cmd, " -rpath @executable_path");
+    sim_sb_concat(&cmd, " -rpath @executable_path/../Frameworks");
   } else if (IS_TGT_IOS(target)) {
     sim_sb_concat(&cmd, " -rpath @executable_path/Frameworks");
   } else if (IS_TGT(target, TGT_WINDOWS)) {
