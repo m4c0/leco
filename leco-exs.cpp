@@ -40,12 +40,18 @@ static void copy_exe(const char * input) {
 }
 
 static void copy_xcfw(const char * xcfw_path) {
-  sim_sbt path {};
-  sim_sb_copy(&path, exedir);
-  if (!IS_TGT_IOS(target)) sim_sb_path_parent(&path);
-  sim_sb_path_append(&path, "Frameworks");
+  sim_sbt tgt {};
+  sim_sb_copy(&tgt, exedir);
+  if (!IS_TGT_IOS(target)) sim_sb_path_parent(&tgt);
+  sim_sb_path_append(&tgt, "Frameworks");
 
-  sys::log("xcfw", path.buffer);
+  sim_sbt cmd {};
+  sim_sb_printf(&cmd, "rsync -rav %s %s", xcfw_path, tgt.buffer);
+
+  sim_sb_path_append(&tgt, sim_path_filename(xcfw_path));
+  if (mtime::of(tgt.buffer)) return;
+
+  sys::run(cmd.buffer);
 }
 
 static void copy_bdep(const char * dag) {
