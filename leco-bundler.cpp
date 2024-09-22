@@ -7,6 +7,7 @@
 
 import gopt;
 import mtime;
+import plist;
 import sys;
 
 static const char *tool_dir;
@@ -37,6 +38,16 @@ static void osx_bundle(const char *dag) {
   sim_sbt path{};
   sim_sb_copy(&path, app_path.buffer);
   sim_sb_path_append(&path, "Contents");
+  sys::mkdirs(path.buffer);
+
+  {
+    sim_sbt info{};
+    sim_sb_path_copy_append(&info, path.buffer, "Info.plist");
+    plist::gen(info.buffer, [&](auto &&d) {
+      common_app_plist(d, "app", "macosx", "1.0.0", "0");
+    });
+  }
+
   sim_sb_path_append(&path, "MacOS");
   sys::mkdirs(path.buffer);
   copy("leco-exs.exe", dag, path.buffer);
