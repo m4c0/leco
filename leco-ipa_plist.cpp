@@ -1,7 +1,6 @@
 #include "sim.hpp"
 
-#include <fstream>
-#include <string>
+#include <stdio.h>
 #include <time.h>
 
 import plist;
@@ -12,33 +11,12 @@ static const char * bundle_version;
 
 [[nodiscard]] static const char *team_id() { return sys::env("LECO_IOS_TEAM"); }
 
-void merge_icon_partial(const char *build_path, std::ostream &o) {
-  sim_sbt plist{};
-  sim_sb_path_copy_append(&plist, build_path, "icon-partial.plist");
-
-  auto i = std::ifstream{plist.buffer};
-  std::string line;
-  std::getline(i, line); // xml
-  std::getline(i, line); // doctype
-  std::getline(i, line); // plist
-  std::getline(i, line); // dict
-  while (i) {
-    std::getline(i, line);
-    if (line == "</dict>")
-      break;
-    o << line << "\n";
-  }
-}
-
 void gen_info_plist(const char *exe_path, const char *name,
                     const char *build_path) {
   sim_sbt path{};
   sim_sb_path_copy_append(&path, exe_path, "Info.plist");
 
-  sys::log("generating", path.buffer);
-
-  std::ofstream o{path.buffer};
-  plist::gen(o, [&](auto &&d) {
+  plist::gen(path.buffer, [&](auto &&d) {
     common_app_plist(d, name, "iphoneos", "1.0.0", bundle_version);
     d.array("CFBundleSupportedPlatforms", "iPhoneOS");
     d.string("MinimumOSVersion", plist::minimum_os_version);
@@ -52,7 +30,10 @@ void gen_info_plist(const char *exe_path, const char *name,
     });
     d.array("UISupportedInterfaceOrientations",
             "UIInterfaceOrientationPortrait");
-    merge_icon_partial(build_path, o);
+
+    sim_sbt plist{};
+    sim_sb_path_copy_append(&plist, build_path, "icon-partial.plist");
+    d.merge(plist.buffer);
   });
 }
 void gen_archive_plist(const char *xca_path, const char *name) {
@@ -65,10 +46,7 @@ void gen_archive_plist(const char *xca_path, const char *name) {
   sim_sbt app_path{};
   sim_sb_printf(&app_path, "Applications/%s.app", name);
 
-  sys::log("generating", path.buffer);
-
-  std::ofstream o{path.buffer};
-  plist::gen(o, [&](auto &&d) {
+  plist::gen(path.buffer, [&](auto &&d) {
     d.dictionary("ApplicationProperties", [&](auto &&dd) {
       dd.string("ApplicationPath", app_path.buffer);
       dd.array("Architectures", "arm64");
@@ -91,10 +69,7 @@ void gen_export_plist(const char *build_path, const char *name) {
   sim_sbt id{};
   sim_sb_printf(&id, "br.com.tpk.%s", name);
 
-  sys::log("generating", path.buffer);
-
-  std::ofstream o{path.buffer};
-  plist::gen(o, [&](auto &&d) {
+  plist::gen(path.buffer, [&](auto &&d) {
     d.string("method", sys::env("LECO_IOS_METHOD"));
     d.string("teamID", team_id());
     d.string("thinning", "&lt;none&gt;");

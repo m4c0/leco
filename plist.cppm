@@ -2,8 +2,8 @@ module;
 
 #include "sim.hpp"
 
-#include <fstream>
-#include <string>
+#include <stdio.h>
+#include <string.h>
 #include <time.h>
 
 export module plist;
@@ -18,63 +18,74 @@ constexpr const auto xcode_build = "15F31d";
 constexpr const auto xcode_version = "1540";
 
 class dict {
-  std::ostream &o;
+  FILE * m_f;
 
-  void array_element(const char *t) {
-    o << "<string>";
-    o << t;
-    o << "</string>";
-  }
-  void array_element(int i) { o << "<integer>" << i << "</integer>"; }
+  void array_element(const char *t) { fprintf(m_f, "  <string>%s</string>\n", t); }
+  void array_element(int i) { fprintf(m_f, "  <integer>%d</integer>\n", i); }
 
 public:
-  explicit constexpr dict(std::ostream &o) : o{o} {}
+  explicit constexpr dict(FILE * o) : m_f { o } {}
 
   void array(const char *key, auto &&...v) {
-    o << "<key>" << key << "</key><array>\n";
+    fprintf(m_f, "<key>%s</key><array>\n", key);
     (array_element(v), ...);
-    o << "</array>\n";
+    fprintf(m_f, "</array>\n");
   }
   void boolean(const char *key, bool v) {
-    o << "<key>" << key << "</key>";
-    o << (v ? "<true/>" : "<false/>");
-    o << "\n";
+    auto val = v ? "true" : "false";
+    fprintf(m_f, "<key>%s</key><%s/>\n", key, val);
   }
   void date(const char *key) {
     time_t now;
     time(&now);
     char buf[128];
     strftime(buf, sizeof(buf), "%FT%TZ", gmtime(&now));
-    o << "<key>" << key << "</key><date>" << buf << "</date>\n";
+    fprintf(m_f, "<key>%s</key><date>%s</date>\n", key, buf);
   }
   void dictionary(const char *key, auto &&fn) {
-    o << "<key>" << key << "</key><dict>\n";
-    fn(dict{o});
-    o << "</dict>\n";
+    fprintf(m_f, "<key>%s</key><dict>\n", key);
+    fn(dict { m_f });
+    fprintf(m_f, "</dict>\n");
   }
   void integer(const char *key, int value) {
-    o << "<key>" << key << "</key><integer>" << value << "</integer>\n";
+    fprintf(m_f, "<key>%s</key><integer>%d</integer>\n", key, value);
   }
   void string(const char *key, const char *value) {
-    o << "<key>";
-    o << key;
-    o << "</key><string>";
-    o << value;
-    o << "</string>\n";
+    fprintf(m_f, "<key>%s</key><string>%s</string>\n", key, value);
+  }
+
+  void merge(const char * fname) {
+    auto f = sys::fopen(fname, "rb");
+
+    char buf[10240];
+    fgets(buf, sizeof(buf), f); // xml
+    fgets(buf, sizeof(buf), f); // doctype
+    fgets(buf, sizeof(buf), f); // plist
+    fgets(buf, sizeof(buf), f); // dict
+ 
+    while (!feof(f) && fgets(buf, sizeof(buf), f) != nullptr) {
+      if (0 == strcmp("</dict>", buf)) break;
+      fwrite(buf, 1, strlen(buf), m_f);
+    }
   }
 };
 
-void gen(std::ostream &o, auto &&fn) {
+void gen(FILE * f, auto && fn) {
   // https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Introduction/Introduction.html
-  o << R"(<?xml version="1.0" encoding="UTF-8"?>
+  fprintf(f, R"(<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-)";
-  fn(plist::dict{o});
-  o << R"(</dict>
-</plist>
-)";
+)");
+  fn(plist::dict { f });
+  fprintf(f, "</dict>\n</plist>");
+}
+void gen(const char * fname, auto && fn) {
+  sys::log("generating", fname);
+
+  auto f = sys::fopen(fname, "wb");
+  gen(f, fn);
+  fclose(f);
 }
 
 void common_app_plist(dict &d, const char *name, const char *sdk, const char * short_ver, const char * ver) {
