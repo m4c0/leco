@@ -73,7 +73,7 @@ void gen_export_plist(const char *build_path, const char *name) {
     d.string("method", sys::env("LECO_IOS_METHOD"));
     d.string("teamID", team_id());
     d.string("thinning", "&lt;none&gt;");
-    d.boolean("uploadSymbols", false);
+    d.boolean("uploadSymbols", true);
     d.boolean("generateAppStoreInformation", true);
     d.dictionary("provisioningProfiles", [&](auto &&dd) {
       dd.string(id.buffer, sys::env("LECO_IOS_PROV_PROF"));
@@ -96,6 +96,19 @@ static void code_sign(const char *bundle_path) {
 
   sim_sbt cmd{};
   sim_sb_printf(&cmd, "codesign -f -s %s %s", team_id(), bundle_path);
+  sys::run(cmd.buffer);
+}
+static void dump_symbols(const char * exe, const char * exca) {
+  sys::log("dump symbols", exe);
+
+  sim_sbt path {};
+  sim_sb_path_copy_append(&path, exca, "dSYMs");
+  sys::mkdirs(path.buffer);
+  sim_sb_path_append(&path, sim_path_filename(exe));
+  sim_sb_path_set_extension(&path, ".app.dSYM");
+
+  sim_sbt cmd {};
+  sim_sb_printf(&cmd, "dsymutil %s -o %s", exe, path.buffer);
   sys::run(cmd.buffer);
 }
 void gen_iphone_ipa(const char *exe) {
@@ -121,6 +134,7 @@ void gen_iphone_ipa(const char *exe) {
   gen_info_plist(app_path.buffer, name.buffer, build_path.buffer);
   compile_launch(app_path.buffer);
   code_sign(app_path.buffer);
+  dump_symbols(exe, exca.buffer);
 
   gen_archive_plist(exca.buffer, name.buffer);
   gen_export_plist(build_path.buffer, name.buffer);
