@@ -9,6 +9,10 @@ module;
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef __APPLE__
+#include <sys/clonefile.h>
+#endif
+
 #ifdef _WIN32
 #define WIN32_MEAN_AND_LEAN
 #include <direct.h>
@@ -43,11 +47,13 @@ inline void log(const char *verb, const char *msg) {
 }
 
 void link(const char *src, const char *dst) {
-  // TODO: remove if existing
 #ifdef _WIN32
   DeleteFile(dst);
   if (!CreateHardLink(dst, src, nullptr))
     die("could not create hard-link");
+#elif __APPLE__
+  ::unlink(dst);
+  if (0 != clonefile(src, dst, 0)) die("could not clone file");
 #else
   ::unlink(dst);
   if (::link(src, dst) != 0) {
