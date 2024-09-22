@@ -52,6 +52,11 @@ static void copy_xcfw(const char * xcfw_path) {
   if (mtime::of(tgt.buffer)) return;
 
   sys::run(cmd.buffer);
+
+  sys::log("codesign", tgt.buffer);
+  sim_sb_copy(&cmd, "");
+  sim_sb_printf(&cmd, "codesign -f -s %s %s", sys::env("LECO_IOS_TEAM"), tgt.buffer);
+  sys::run(cmd.buffer);
 }
 
 static void copy_bdep(const char * dag) {
