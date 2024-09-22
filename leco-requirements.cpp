@@ -84,6 +84,7 @@ int main(int argc, char **argv) try {
   sim_sb_path_append(&cwd, "out");
   sim_sb_path_append(&cwd, target);
 
+  collected.insert("../leco");
   for (auto entry : pprent::list(cwd.buffer)) {
     auto ext = sim_path_extension(entry);
     if (!ext || 0 != strcmp(ext, ".dag")) continue;
@@ -94,9 +95,7 @@ int main(int argc, char **argv) try {
   }
 
   for (const auto &s : collected) {
-    if (git)
-      run_git(s.c_str());
-
+    if (git) run_git(s.c_str());
     puts(sim_path_filename(s.c_str()));
   }
 } catch (...) {
