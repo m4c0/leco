@@ -2,8 +2,12 @@
 #include "in2out.hpp"
 #include "sim.hpp"
 
+#include <errno.h>
+#include <stdio.h>
+
 import gopt;
 import mtime;
+import pprent;
 import strset;
 import sys;
 
@@ -78,11 +82,31 @@ int main(int argc, char ** argv) try {
     }
   });
 
-  if (!input || !target || opts.argc != 0) usage();
+  if (!target || opts.argc != 0) usage();
 
-  sim_sbt in {};
-  sim_sb_path_copy_real(&in, input);
-  process(in.buffer);
+  if (input) {
+    sim_sbt in {};
+    sim_sb_path_copy_real(&in, input);
+    process(in.buffer);
+    return 0;
+  }
+
+  for (auto file : pprent::list(".")) {
+    auto ext = sim_path_extension(file);
+    if (ext == nullptr) continue;
+
+    if (strcmp(ext, ".cppm") != 0 && strcmp(ext, ".cpp") != 0 && strcmp(ext, ".c") != 0) continue;
+
+    sim_sbt in {};
+    sim_sb_path_copy_real(&in, file);
+    process(in.buffer);
+
+    errno = 0;
+  }
+  if (errno) {
+    perror("could not list current directory");
+    throw 0;
+  }
 } catch (...) {
   return 1;
 }

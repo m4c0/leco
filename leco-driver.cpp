@@ -77,11 +77,10 @@ static void sysroot(const char *target) {
   sys::run(cmd.buffer);
 }
 
-static void sawblade(const char * target, const char * file) {
+static void sawblade(const char * target) {
   sim_sbt cmd {};
   prep(&cmd, "leco-sawblade.exe");
   sim_sb_printf(&cmd, " -t %s", target);
-  sim_sb_printf(&cmd, " -i %s ", file);
   sys::run(cmd.buffer);
 }
 
@@ -97,6 +96,7 @@ static void recurse(const char * target, const char *file) {
 static void run_target(const char *target) {
   cleaner(target);
   sysroot(target);
+  sawblade(target);
 
   for (auto file : pprent::list(".")) {
     auto ext = sim_path_extension(file);
@@ -107,7 +107,6 @@ static void run_target(const char *target) {
         strcmp(ext, ".c") != 0)
       continue;
 
-    sawblade(target, file);
     recurse(target, file);
 
     errno = 0;
