@@ -70,7 +70,7 @@ static void bounce(const char * src);
 static void build_bdeps(const char * dag) {
   sys::dag_read(dag, [](auto id, auto file) {
     switch (id) {
-      case 'bdep': bounce(file); break;
+      case 'bdag': bounce(file); break;
       default: break;
     }
   });
