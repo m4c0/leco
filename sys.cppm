@@ -108,7 +108,7 @@ void dag_read(const char *dag, auto &&fn) {
   char buf[10240];
   while (!feof(f) && fgets(buf, sizeof(buf), f) != nullptr) {
     if (strlen(buf) < 5)
-      die("invalid line in dag file");
+      die("invalid line in dag file [%s]", dag);
 
     uint32_t *id = reinterpret_cast<uint32_t *>(buf);
     char *file = reinterpret_cast<char *>(id + 1);
