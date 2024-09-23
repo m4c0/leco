@@ -2,7 +2,6 @@
 #include "sim.hpp"
 #include "targets.hpp"
 
-#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -49,11 +48,6 @@ static void prep(sim_sb *cmd, const char *tool) {
   sim_sb_path_append(cmd, tool);
 }
 
-static bool error() {
-  perror("could not list current directory");
-  throw 0;
-}
-
 static void cleaner(const char *target) {
   if (clean_level == 0)
     return;
@@ -84,11 +78,10 @@ static void sawblade(const char * target) {
   sys::run(cmd.buffer);
 }
 
-static void recurse(const char * target, const char *file) {
+static void recurse(const char * target) {
   sim_sbt cmd{};
   prep(&cmd, "leco-recurse.exe");
   sim_sb_printf(&cmd, " -t %s", target);
-  sim_sb_printf(&cmd, " -i %s ", file);
   sim_sb_concat(&cmd, common_flags);
   sys::run(cmd.buffer);
 }
@@ -97,22 +90,7 @@ static void run_target(const char *target) {
   cleaner(target);
   sysroot(target);
   sawblade(target);
-
-  for (auto file : pprent::list(".")) {
-    auto ext = sim_path_extension(file);
-    if (ext == nullptr)
-      continue;
-
-    if (strcmp(ext, ".cppm") != 0 && strcmp(ext, ".cpp") != 0 &&
-        strcmp(ext, ".c") != 0)
-      continue;
-
-    recurse(target, file);
-
-    errno = 0;
-  }
-  if (errno)
-    error();
+  recurse(target);
 }
 
 static void run_targets(const char *target) {

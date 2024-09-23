@@ -1,11 +1,12 @@
 #pragma leco tool
-#include "in2out.hpp"
 #include "sim.hpp"
 
 #include <stdint.h>
+#include <string.h>
 
 import gopt;
 import mtime;
+import pprent;
 import sys;
 
 static const char *common_flags;
@@ -75,26 +76,23 @@ static void build_bdeps(const char * dag) {
   });
 }
 
-static void bounce(const char * src) {
-  sim_sbt dag{};
-  in2out(src, &dag, "dag", target);
-
-  sys::dag_read(dag.buffer, [&](auto id, auto file) {
+static void bounce(const char * dag) {
+  sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
     case 'tapp':
-      compile(dag.buffer);
-      build_bdeps(dag.buffer);
-      build_rc(src);
-      link(dag.buffer, file);
-      bundle(dag.buffer);
+      compile(dag);
+      build_bdeps(dag);
+      // build_rc(src);
+      link(dag, file);
+      bundle(dag);
       break;
     case 'tdll':
     case 'tool':
-      compile(dag.buffer);
-      link(dag.buffer, file);
+      compile(dag);
+      link(dag, file);
       break;
     case 'tmmd': 
-      compile(dag.buffer);
+      compile(dag);
       break;
     default: break;
     }
@@ -105,22 +103,39 @@ static void usage() { sys::die("invalid usage"); }
 
 int main(int argc, char **argv) try {
   sim_sbt flags{};
-  sim_sbt rpath{};
+  const char * input {};
 
   auto opts = gopt_parse(argc, argv, "t:i:gO", [&](auto ch, auto val) {
     switch (ch) {
-    case 'i': sim_sb_path_copy_real(&rpath, val); break;
+    case 'i': input = val; break;
     case 't': target = val; break;
     case 'g': sim_sb_concat(&flags, " -g"); break;
     case 'O': sim_sb_concat(&flags, " -O"); break;
     default: usage(); break;
     }
   });
-  if (opts.argc != 0 || rpath.len == 0) usage();
+  if (opts.argc != 0) usage();
+  if (!input && !target) usage();
 
   argv0 = argv[0];
   common_flags = flags.buffer;
-  bounce(rpath.buffer);
+
+  if (input) {
+    bounce(input);
+    return 0;
+  }
+
+  sim_sbt path {};
+  sim_sb_path_copy_real(&path, "out");
+  sim_sb_path_append(&path, target);
+  for (auto file : pprent::list(path.buffer)) {
+    auto ext = sim_path_extension(file);
+    if (!ext || 0 != strcmp(ext, ".dag")) continue;
+
+    sim_sb_path_append(&path, file);
+    bounce(path.buffer);
+    sim_sb_path_parent(&path);
+  }
 } catch (...) {
   return 1;
 }
