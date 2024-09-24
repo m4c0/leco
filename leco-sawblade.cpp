@@ -1,9 +1,9 @@
 #pragma leco tool
-#include "in2out.hpp"
 #include "sim.hpp"
 
 #include <errno.h>
 #include <stdio.h>
+#include <string.h>
 
 import gopt;
 import mtime;
@@ -53,7 +53,11 @@ static void process(const char * src) {
   if (!done.insert(src)) return;
 
   sim_sbt dag {};
-  in2out(src, &dag, "dag", target);
+  sim_sb_path_copy_parent(&dag, src);
+  sim_sb_path_append(&dag, "out");
+  sim_sb_path_append(&dag, target);
+  sim_sb_path_append(&dag, sim_path_filename(src));
+  sim_sb_path_set_extension(&dag, "dag");
 
   dagger(src, dag.buffer);
 
