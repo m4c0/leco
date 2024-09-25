@@ -36,12 +36,7 @@ static void dagger(const char * src, const char * dag) {
   sim_sbt cmd { 10240 };
   sim_sb_path_copy_parent(&cmd, argv0);
   sim_sb_path_append(&cmd, "leco-dagger.exe");
-  sim_sb_concat(&cmd, " -t ");
-  sim_sb_concat(&cmd, target);
-  sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, src);
-  sim_sb_concat(&cmd, " -o ");
-  sim_sb_concat(&cmd, dag);
+  sim_sb_printf(&cmd, " -t %s -i %s -o %s", target, src, dag);
   sys::run(cmd.buffer);
 
   if (mtime::of(dag) == 0)
