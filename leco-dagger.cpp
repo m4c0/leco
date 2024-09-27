@@ -397,6 +397,9 @@ void run(int argc, char **argv) {
       read_file_list(pp, "shader", 'shdr');
     } else if (auto pp = cmp(p, "#pragma leco add_xcframework ")) {
       read_file_list(pp, "xcframework", 'xcfw', add_xcfw);
+    } else if (auto pp = cmp(p, "#pragma leco display_name ")) {
+      if (exe_type != exe_t::app) error("display name is only supported for apps");
+      read_file_list(pp, "display name", 'name', print_asis);
     } else if (cmp(p, "#pragma leco ")) {
       error("unknown pragma");
     } else if (auto pp = cmp(p, "# ")) {

@@ -11,14 +11,13 @@ static const char * bundle_version;
 
 [[nodiscard]] static const char *team_id() { return sys::env("LECO_IOS_TEAM"); }
 
-static void gen_info_plist(const char *exe_path, const char *name,
-                    const char *build_path) {
+static void gen_info_plist(const char *exe_path, const char *name, const char * disp_name, const char *build_path) {
   sim_sbt path{};
   sim_sb_path_copy_append(&path, exe_path, "Info.plist");
 
   plist::gen(path.buffer, [&](auto &&d) {
     common_app_plist(d, name, "iphoneos", "1.0.0", bundle_version);
-    d.string("CFBundleDisplayName", name);
+    d.string("CFBundleDisplayName", disp_name);
     d.array("CFBundleSupportedPlatforms", "iPhoneOS");
     d.string("MinimumOSVersion", plist::minimum_os_version);
     d.boolean("LSRequiresIPhoneOS", true);
@@ -112,7 +111,7 @@ static void dump_symbols(const char * exe, const char * exca) {
   sim_sb_printf(&cmd, "dsymutil %s -o %s", exe, path.buffer);
   sys::run(cmd.buffer);
 }
-void gen_iphone_ipa(const char *exe) {
+void gen_iphone_ipa(const char * exe, const char * disp_name) {
   char buf[256];
   auto t = time(nullptr);
   snprintf(buf, sizeof(buf) - 1, "%ld", t);
@@ -132,7 +131,7 @@ void gen_iphone_ipa(const char *exe) {
   sim_sbt build_path{};
   sim_sb_path_copy_parent(&build_path, exca.buffer);
 
-  gen_info_plist(app_path.buffer, name.buffer, build_path.buffer);
+  gen_info_plist(app_path.buffer, name.buffer, disp_name, build_path.buffer);
   compile_launch(app_path.buffer);
   code_sign(app_path.buffer);
   dump_symbols(exe, exca.buffer);

@@ -24,7 +24,7 @@ Where:
 
 static const char *tool_dir;
 
-void gen_iphone_ipa(const char *exe_path);
+void gen_iphone_ipa(const char * exe_path, const char * disp_name);
 
 static void copy(const char *with, const char *dag, const char *to) {
   sim_sbt cmd{};
@@ -87,11 +87,22 @@ int main(int argc, char **argv) try {
   copy("leco-rsrc.exe", input, path.buffer);
   xcassets(input, path.buffer);
 
+  sim_sbt disp_name {};
+  sim_sb_path_copy_stem(&disp_name, input);
+  sys::dag_read(input, [&](auto id, auto val) {
+    switch (id) {
+      case 'name': sim_sb_copy(&disp_name, val); break;
+      default: break;
+    }
+  });
+
   sim_sb_path_append(&path, sim_path_filename(input));
   sim_sb_path_set_extension(&path, "exe");
-  gen_iphone_ipa(path.buffer);
+  gen_iphone_ipa(path.buffer, disp_name.buffer);
 
   export_archive(build_path.buffer);
+
+  // TODO: upload if mode is "app-store-connect"
 
   return 0;
 } catch (...) {
