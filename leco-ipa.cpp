@@ -22,12 +22,12 @@ Where:
 )");
 }
 
-static const char *tool_dir;
+static const char * tool_dir;
 
 void gen_iphone_ipa(const char * exe_path, const char * disp_name);
 
-static void copy(const char *with, const char *dag, const char *to) {
-  sim_sbt cmd{};
+static void copy(const char * with, const char * dag, const char * to) {
+  sim_sbt cmd {};
   sim_sb_path_copy_append(&cmd, tool_dir, with);
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, dag);
@@ -36,8 +36,8 @@ static void copy(const char *with, const char *dag, const char *to) {
   sys::run(cmd.buffer);
 }
 
-static void xcassets(const char *dag, const char *app_path) {
-  sim_sbt cmd{};
+static void xcassets(const char * dag, const char * app_path) {
+  sim_sbt cmd {};
   sim_sb_path_copy_append(&cmd, tool_dir, "leco-xcassets.exe");
   sim_sb_concat(&cmd, " -i ");
   sim_sb_concat(&cmd, dag);
@@ -46,35 +46,30 @@ static void xcassets(const char *dag, const char *app_path) {
   sys::run(cmd.buffer);
 }
 
-static void export_archive(const char *build_path) {
-  sim_sbt cmd{1024};
+static void export_archive(const char * build_path) {
+  sim_sbt cmd { 1024 };
   sim_sb_path_copy_append(&cmd, tool_dir, "leco-ipa-export.exe");
   sys::run(cmd.buffer);
 }
 
-int main(int argc, char **argv) try {
-  const char *input{};
+int main(int argc, char ** argv) try {
+  const char * input {};
   auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
     switch (ch) {
-    case 'i':
-      input = val;
-      break;
-    default:
-      usage();
-      break;
+      case 'i': input = val; break;
+      default: usage(); break;
     }
   });
-  if (!input || opts.argc != 0)
-    usage();
+  if (!input || opts.argc != 0) usage();
 
-  sim_sbt argv0{};
+  sim_sbt argv0 {};
   sim_sb_path_copy_parent(&argv0, argv[0]);
   tool_dir = argv0.buffer;
 
-  sim_sbt build_path{};
+  sim_sbt build_path {};
   sim_sb_path_copy_parent(&build_path, input);
 
-  sim_sbt path{};
+  sim_sbt path {};
   sim_sb_copy(&path, build_path.buffer);
   sim_sb_path_append(&path, "export.xcarchive");
   sim_sb_path_append(&path, "Products");
