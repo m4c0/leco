@@ -18,6 +18,7 @@ void gen_info_plist(const char *exe_path, const char *name,
 
   plist::gen(path.buffer, [&](auto &&d) {
     common_app_plist(d, name, "iphoneos", "1.0.0", bundle_version);
+    d.string("CFBundleDisplayName", name);
     d.array("CFBundleSupportedPlatforms", "iPhoneOS");
     d.string("MinimumOSVersion", plist::minimum_os_version);
     d.boolean("LSRequiresIPhoneOS", true);

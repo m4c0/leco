@@ -45,6 +45,7 @@ static void osx_bundle(const char *dag) {
     sim_sb_path_copy_append(&info, path.buffer, "Info.plist");
     plist::gen(info.buffer, [&](auto &&d) {
       common_app_plist(d, "app", "macosx", "1.0.0", "0");
+      d.string("CFBundleDisplayName", "app");
     });
   }
 
