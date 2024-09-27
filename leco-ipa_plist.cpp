@@ -11,7 +11,7 @@ static const char * bundle_version;
 
 [[nodiscard]] static const char *team_id() { return sys::env("LECO_IOS_TEAM"); }
 
-void gen_info_plist(const char *exe_path, const char *name,
+static void gen_info_plist(const char *exe_path, const char *name,
                     const char *build_path) {
   sim_sbt path{};
   sim_sb_path_copy_append(&path, exe_path, "Info.plist");
@@ -37,7 +37,7 @@ void gen_info_plist(const char *exe_path, const char *name,
     d.merge(plist.buffer);
   });
 }
-void gen_archive_plist(const char *xca_path, const char *name) {
+static void gen_archive_plist(const char *xca_path, const char *name) {
   sim_sbt path{};
   sim_sb_path_copy_append(&path, xca_path, "Info.plist");
 
@@ -63,7 +63,7 @@ void gen_archive_plist(const char *xca_path, const char *name) {
     d.string("SchemeName", name);
   });
 }
-void gen_export_plist(const char *build_path, const char *name) {
+static void gen_export_plist(const char *build_path, const char *name) {
   sim_sbt path{};
   sim_sb_path_copy_append(&path, build_path, "export.plist");
 
