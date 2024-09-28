@@ -3,6 +3,8 @@
 
 #include "sim.hpp"
 
+#include <string.h>
+
 import gopt;
 import sys;
 
@@ -52,6 +54,16 @@ static void export_archive(const char * build_path) {
   sys::run(cmd.buffer);
 }
 
+static void upload_archive(const char * dag) {
+  auto method = sys::env("LECO_IOS_METHOD");
+  if (0 != strcmp("app-store-connect", method)) return;
+
+  sim_sbt cmd {};
+  sim_sb_path_copy_append(&cmd, tool_dir, "leco-ipa-upload.exe");
+  sim_sb_printf(&cmd, " -i %s -s", dag);
+  sys::run(cmd.buffer);
+}
+
 int main(int argc, char ** argv) try {
   const char * input {};
   auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
@@ -96,8 +108,7 @@ int main(int argc, char ** argv) try {
   gen_iphone_ipa(path.buffer, disp_name.buffer);
 
   export_archive(build_path.buffer);
-
-  // TODO: upload if mode is "app-store-connect"
+  upload_archive(input);
 
   return 0;
 } catch (...) {
