@@ -64,16 +64,14 @@ static void output(uint32_t code, const char *msg) {
 
 static const char *cmp(const char *str, const char *prefix) {
   auto len = strlen(prefix);
-  if (strncmp(str, prefix, len) != 0)
-    return nullptr;
+  if (strncmp(str, prefix, len) != 0) return nullptr;
   return str + len;
 }
 static const char *chomp(const char *str, const char *prefix) {
   static sim_sbt buf{};
 
   auto ptr = cmp(str, prefix);
-  if (!ptr)
-    return ptr;
+  if (!ptr) return ptr;
 
   sim_sb_copy(&buf, ptr);
   strchr(buf.buffer, ';')[0] = 0;
@@ -87,8 +85,7 @@ static void stamp(sim_sb *args, char **&argp, const char *arg) {
 }
 
 static void set_exe_type(exe_t t) {
-  if (exe_type != exe_t::none)
-    error("multiple executable type found");
+  if (exe_type != exe_t::none) error("multiple executable type found");
   exe_type = t;
 }
 
@@ -101,9 +98,7 @@ static bool print_if_found(const char *rel_path, const char *desc,
   sim_sbt abs{};
   if (mtime::of(path.buffer) == 0) {
     sim_sb_path_copy_real(&abs, rel_path);
-    if (mtime::of(abs.buffer) == 0) {
-      return false;
-    }
+    if (mtime::of(abs.buffer) == 0) return false;
   } else {
     sim_sb_path_copy_real(&abs, path.buffer);
   }
@@ -112,8 +107,7 @@ static bool print_if_found(const char *rel_path, const char *desc,
   return true;
 }
 static void print_found(const char *rel_path, const char *desc, uint32_t code) {
-  if (print_if_found(rel_path, desc, code))
-    return;
+  if (print_if_found(rel_path, desc, code)) return;
 
   missing_file(desc);
 }
@@ -122,8 +116,7 @@ static void print_asis(const char *rel_path, const char *desc, uint32_t code) {
 }
 static bool print_dag_if_found(const char *src, const char *desc, uint32_t code,
                                uint32_t dag_code) {
-  if (!print_if_found(src, desc, code))
-    return false;
+  if (!print_if_found(src, desc, code)) return false;
 
   sim_sbt dag{};
   sim_sb_path_copy_real(&dag, src);
@@ -142,9 +135,8 @@ using printer_t = void (*)(const char *, const char *, uint32_t);
 static void read_file_list(const char *str, const char *desc, uint32_t code,
                            printer_t prfn = print_found) {
   while (*str && *str != '\n') {
-    while (*str == ' ') {
-      str++;
-    }
+    while (*str == ' ') str++;
+
     const char *e{};
     if (*str == '"') {
       str++;
@@ -158,8 +150,7 @@ static void read_file_list(const char *str, const char *desc, uint32_t code,
         e = str + strlen(str);
       }
     }
-    if (e == nullptr)
-      throw 1;
+    if (e == nullptr) throw 1;
 
     sim_sbt buf{};
     sim_sb_copy(&buf, str);
@@ -169,8 +160,7 @@ static void read_file_list(const char *str, const char *desc, uint32_t code,
 
     str = *e ? e + 1 : e;
   }
-  if (*str != 0 && *str != '\n')
-    throw 1;
+  if (*str != 0 && *str != '\n') throw 1;
 }
 
 static void add_xcfw(const char * str, const char * desc, uint32_t code) {
@@ -189,22 +179,19 @@ static void add_xcfw(const char * str, const char * desc, uint32_t code) {
 
 static void find_header(const char *l) {
   auto s = strchr(l, '"');
-  if (!s)
-    error("mismatching quote");
+  if (!s) error("mismatching quote");
 
   s++;
 
   // <build-in> and <command-line>
-  if (*s == '<')
-    return;
+  if (*s == '<') return;
 
   sim_sbt hdr{};
   sim_sb_copy(&hdr, s);
 
   // Ignore system headers
   auto e = strchr(hdr.buffer, '"');
-  if (!e)
-    return;
+  if (!e) return;
 
   *e = 0;
 
@@ -312,25 +299,18 @@ void run(int argc, char **argv) {
 
   auto opts = gopt_parse(argc, argv, "do:i:t:", [&](auto ch, auto val) {
     switch (ch) {
-    case 'd':
-      dump_errors = true;
-      break;
-    case 'i':
-      sim_sb_path_copy_real(&source, val);
-      break;
-    case 'o': {
-      sim_sbt parent{};
-      sim_sb_path_copy_parent(&parent, val);
-      sys::mkdirs(parent.buffer);
-      out = sys::fopen(val, "w");
-      out_filename = val;
-      break;
-    }
-    case 't':
-      target = val;
-      break;
-    default:
-      usage();
+      case 'd': dump_errors = true; break;
+      case 'i': sim_sb_path_copy_real(&source, val); break;
+      case 'o': {
+        sim_sbt parent{};
+        sim_sb_path_copy_parent(&parent, val);
+        sys::mkdirs(parent.buffer);
+        out = sys::fopen(val, "w");
+        out_filename = val;
+        break;
+      }
+      case 't': target = val; break;
+      default: usage();
     }
   });
 
