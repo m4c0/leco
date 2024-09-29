@@ -116,13 +116,15 @@ void common_ios_plist(dict & d, const char * name, const char * disp_name, const
   d.string("MinimumOSVersion", plist::minimum_os_version);
   d.boolean("LSRequiresIPhoneOS", true);
   d.boolean("ITSAppUsesNonExemptEncryption", false);
-  d.array("UIDeviceFamily", 1); // iPhone
+  d.array("UIDeviceFamily", 1, 2); // iPhone
   d.string("UILaunchStoryboardName", "launch.storyboard");
   d.dictionary("UIRequiredDeviceCapabilities", [](auto &&dd) {
     dd.boolean("arm64", true);
     dd.boolean("metal", true);
   });
   d.array("UISupportedInterfaceOrientations",
+          "UIInterfaceOrientationPortrait");
+  d.array("UISupportedInterfaceOrientations~ipad",
           "UIInterfaceOrientationPortrait");
 }
 } // namespace plist
