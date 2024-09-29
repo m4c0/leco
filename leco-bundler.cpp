@@ -64,7 +64,26 @@ static void osx_bundle(const char *dag) {
   sys::run(cmd.buffer);
 }
 
-static void ios_bundle(const char *dag) {
+static void iphonesim_bundle(const char * dag) {
+  sim_sbt path{};
+  sim_sb_copy(&path, dag);
+  sim_sb_path_set_extension(&path, "app");
+  sys::mkdirs(path.buffer);
+
+  copy("leco-exs.exe", dag, path.buffer);
+  copy("leco-rsrc.exe", dag, path.buffer);
+
+  sim_sbt stem {};
+  sim_sb_path_copy_stem(&stem, dag);
+
+  sim_sb_path_append(&path, "Info.plist");
+
+  plist::gen(path.buffer, [&](auto &&d) {
+    common_ios_plist(d, stem.buffer, stem.buffer, "0");
+  });
+}
+
+static void iphone_bundle(const char *dag) {
   sim_sbt cmd{};
   sim_sb_path_copy_append(&cmd, tool_dir, "leco-ipa.exe");
   sim_sb_printf(&cmd, " -i %s", dag);
@@ -100,8 +119,10 @@ static void bundle(const char *dag) {
   sim_sb_path_copy_parent(&path, dag);
   auto target = sim_sb_path_filename(&path);
 
-  if (IS_TGT_IOS(target)) {
-    ios_bundle(dag);
+  if (IS_TGT(target, TGT_IPHONEOS)) {
+    iphone_bundle(dag);
+  } else if (IS_TGT(target, TGT_IOS_SIMULATOR)) {
+    iphonesim_bundle(dag);
   } else if (IS_TGT(target, TGT_OSX)) {
     osx_bundle(dag);
   } else if (IS_TGT(target, TGT_WASM)) {
