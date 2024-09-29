@@ -76,11 +76,20 @@ static void iphonesim_bundle(const char * dag) {
   sim_sbt stem {};
   sim_sb_path_copy_stem(&stem, dag);
 
+  sim_sbt cmd {};
+  sim_sb_printf(&cmd,
+      "xcrun simctl install %s %s",
+      sys::env("LECO_IOS_SIM_TARGET"),
+      path.buffer);
+
   sim_sb_path_append(&path, "Info.plist");
 
   plist::gen(path.buffer, [&](auto &&d) {
     common_ios_plist(d, stem.buffer, stem.buffer, "0");
   });
+
+  sys::log("installing", stem.buffer);
+  sys::run(cmd.buffer);
 }
 
 static void iphone_bundle(const char *dag) {
