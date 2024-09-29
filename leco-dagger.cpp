@@ -167,7 +167,8 @@ static void add_xcfw(const char * str, const char * desc, uint32_t code) {
   sim_sbt path{};
   sim_sb_copy(&path, str);
 
-  if (IS_TGT_IOS(target)) sim_sb_path_append(&path, "ios-arm64");
+  if (IS_TGT(target, TGT_IPHONEOS)) sim_sb_path_append(&path, "ios-arm64");
+  else if (IS_TGT(target, TGT_IOS_SIMULATOR)) sim_sb_path_append(&path, "ios-arm64_x86_64-simulator");
   else if (IS_TGT(target, TGT_OSX)) sim_sb_path_append(&path, "macos-arm64_x86_64");
   else sys::die("xcframework is only supported in apple platforms");
 
