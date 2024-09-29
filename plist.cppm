@@ -116,6 +116,7 @@ void common_ios_plist(dict & d, const char * name, const char * disp_name, const
   d.string("MinimumOSVersion", plist::minimum_os_version);
   d.boolean("LSRequiresIPhoneOS", true);
   d.boolean("ITSAppUsesNonExemptEncryption", false);
+  d.boolean("UIRequiresFullScreen", true);
   d.array("UIDeviceFamily", 1, 2); // iPhone
   d.string("UILaunchStoryboardName", "launch.storyboard");
   d.dictionary("UIRequiredDeviceCapabilities", [](auto &&dd) {
