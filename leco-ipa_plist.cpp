@@ -16,20 +16,7 @@ static void gen_info_plist(const char *exe_path, const char *name, const char * 
   sim_sb_path_copy_append(&path, exe_path, "Info.plist");
 
   plist::gen(path.buffer, [&](auto &&d) {
-    common_app_plist(d, name, "iphoneos", "1.0.0", bundle_version);
-    d.string("CFBundleDisplayName", disp_name);
-    d.array("CFBundleSupportedPlatforms", "iPhoneOS");
-    d.string("MinimumOSVersion", plist::minimum_os_version);
-    d.boolean("LSRequiresIPhoneOS", true);
-    d.boolean("ITSAppUsesNonExemptEncryption", false);
-    d.array("UIDeviceFamily", 1); // iPhone
-    d.string("UILaunchStoryboardName", "launch.storyboard");
-    d.dictionary("UIRequiredDeviceCapabilities", [](auto &&dd) {
-      dd.boolean("arm64", true);
-      dd.boolean("metal", true);
-    });
-    d.array("UISupportedInterfaceOrientations",
-            "UIInterfaceOrientationPortrait");
+    common_ios_plist(d, name, disp_name, bundle_version);
 
     sim_sbt plist{};
     sim_sb_path_copy_append(&plist, build_path, "icon-partial.plist");

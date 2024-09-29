@@ -109,4 +109,20 @@ void common_app_plist(dict &d, const char *name, const char *sdk, const char * s
   d.string("DTXcodeBuild", xcode_build);
   d.string("DTXcode", xcode_version);
 }
+void common_ios_plist(dict & d, const char * name, const char * disp_name, const char * bundle_version) {
+  common_app_plist(d, name, "iphoneos", "1.0.0", bundle_version);
+  d.string("CFBundleDisplayName", disp_name);
+  d.array("CFBundleSupportedPlatforms", "iPhoneOS");
+  d.string("MinimumOSVersion", plist::minimum_os_version);
+  d.boolean("LSRequiresIPhoneOS", true);
+  d.boolean("ITSAppUsesNonExemptEncryption", false);
+  d.array("UIDeviceFamily", 1); // iPhone
+  d.string("UILaunchStoryboardName", "launch.storyboard");
+  d.dictionary("UIRequiredDeviceCapabilities", [](auto &&dd) {
+    dd.boolean("arm64", true);
+    dd.boolean("metal", true);
+  });
+  d.array("UISupportedInterfaceOrientations",
+          "UIInterfaceOrientationPortrait");
+}
 } // namespace plist
