@@ -31,20 +31,14 @@ void gen_iphone_ipa(const char * exe_path, const char * disp_name);
 static void copy(const char * with, const char * dag, const char * to) {
   sim_sbt cmd {};
   sim_sb_path_copy_append(&cmd, tool_dir, with);
-  sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, dag);
-  sim_sb_concat(&cmd, " -o ");
-  sim_sb_concat(&cmd, to);
+  sim_sb_printf(&cmd, " -i %s -o %s", dag, to);
   sys::run(cmd.buffer);
 }
 
 static void xcassets(const char * dag, const char * app_path) {
   sim_sbt cmd {};
   sim_sb_path_copy_append(&cmd, tool_dir, "leco-xcassets.exe");
-  sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, dag);
-  sim_sb_concat(&cmd, " -a ");
-  sim_sb_concat(&cmd, app_path);
+  sim_sb_printf(&cmd, " -i %s -a %s", dag, app_path);
   sys::run(cmd.buffer);
 }
 
