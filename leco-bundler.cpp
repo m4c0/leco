@@ -10,14 +10,9 @@ import mtime;
 import plist;
 import sys;
 
-static const char *tool_dir;
-
 static void copy(const char *with, const char *dag, const char *to,
                  const char *extra = "") {
-  sim_sbt cmd{};
-  sim_sb_path_copy_append(&cmd, tool_dir, with);
-  sim_sb_printf(&cmd, " -i %s -o %s %s", dag, to, extra);
-  sys::run(cmd.buffer);
+  sys::tool_run(with, " -i %s -o %s %s", dag, to, extra);
 }
 
 static void dir_bundle(const char *dag) {
@@ -26,8 +21,8 @@ static void dir_bundle(const char *dag) {
   sim_sb_path_set_extension(&path, "app");
   sys::mkdirs(path.buffer);
 
-  copy("leco-exs.exe", dag, path.buffer);
-  copy("leco-rsrc.exe", dag, path.buffer);
+  copy("exs", dag, path.buffer);
+  copy("rsrc", dag, path.buffer);
 }
 
 static void osx_bundle(const char *dag) {
@@ -51,12 +46,12 @@ static void osx_bundle(const char *dag) {
 
   sim_sb_path_append(&path, "MacOS");
   sys::mkdirs(path.buffer);
-  copy("leco-exs.exe", dag, path.buffer);
+  copy("exs", dag, path.buffer);
 
   sim_sb_path_parent(&path);
   sim_sb_path_append(&path, "Resources");
   sys::mkdirs(path.buffer);
-  copy("leco-rsrc.exe", dag, path.buffer);
+  copy("rsrc", dag, path.buffer);
 
   sys::log("codesign", app_path.buffer);
   sim_sbt cmd{};
@@ -70,8 +65,8 @@ static void iphonesim_bundle(const char * dag) {
   sim_sb_path_set_extension(&path, "app");
   sys::mkdirs(path.buffer);
 
-  copy("leco-exs.exe", dag, path.buffer);
-  copy("leco-rsrc.exe", dag, path.buffer);
+  copy("exs", dag, path.buffer);
+  copy("rsrc", dag, path.buffer);
 
   sim_sbt stem {};
   sim_sb_path_copy_stem(&stem, dag);
@@ -94,7 +89,7 @@ static void iphonesim_bundle(const char * dag) {
 
 static void iphone_bundle(const char *dag) {
   sim_sbt cmd{};
-  sim_sb_path_copy_append(&cmd, tool_dir, "leco-ipa.exe");
+  sys::tool_cmd(&cmd, "ipa");
   sim_sb_printf(&cmd, " -i %s", dag);
   sys::run(cmd.buffer);
 }
@@ -105,8 +100,8 @@ static void wasm_bundle(const char *dag) {
   sim_sb_path_set_extension(&path, "app");
   sys::mkdirs(path.buffer);
 
-  copy("leco-exs.exe", dag, path.buffer, " -e wasm");
-  copy("leco-rsrc.exe", dag, path.buffer);
+  copy("exs", dag, path.buffer, " -e wasm");
+  copy("rsrc", dag, path.buffer);
 
   sim_sb_path_append(&path, sim_path_filename(dag));
   sim_sb_path_set_extension(&path, "html");
@@ -117,10 +112,7 @@ static void wasm_bundle(const char *dag) {
 
   sim_sb_path_parent(&path);
 
-  sim_sbt cmd{};
-  sim_sb_path_copy_append(&cmd, tool_dir, "leco-wasm-js.exe");
-  sim_sb_printf(&cmd, " -i %s -a %s", dag, path.buffer);
-  sys::run(cmd.buffer);
+  sys::tool_run("wasm-js", " -i %s -a %s", dag, path.buffer);
 }
 
 static void bundle(const char *dag) {
@@ -157,10 +149,6 @@ int main(int argc, char **argv) try {
   });
   if (opts.argc != 0 || !input)
     usage();
-
-  sim_sbt argv0{};
-  sim_sb_path_copy_parent(&argv0, argv[0]);
-  tool_dir = argv0.buffer;
 
   bundle(input);
   return 0;

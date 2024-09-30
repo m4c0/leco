@@ -1,6 +1,7 @@
 module;
 #define SIM_IMPLEMENTATION
 #include "sim.hpp"
+#include "targets.hpp"
 
 #include <errno.h>
 #include <stdarg.h>
@@ -118,5 +119,20 @@ void dag_read(const char *dag, auto &&fn) {
   }
 
   fclose(f);
+}
+
+void tool_cmd(sim_sb * cmd, const char * name) {
+  sim_sb_path_copy_real(cmd, "../leco/out/" HOST_TARGET);
+  sim_sb_path_append(cmd, "leco-");
+  sim_sb_printf(cmd, "%s.exe", name);
+}
+void tool_cmd(sim_sb * cmd, const char * name, const char * args, auto &&... as) {
+  tool_cmd(cmd, name);
+  sim_sb_printf(cmd, args, as...);
+}
+void tool_run(const char * name, const char * args, auto &&... as) {
+  sim_sbt cmd {};
+  tool_cmd(&cmd, name, args, as...);
+  run(cmd.buffer);
 }
 } // namespace sys
