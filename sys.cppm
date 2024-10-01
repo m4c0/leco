@@ -128,6 +128,7 @@ void tool_cmd(sim_sb * cmd, const char * name) {
 }
 void tool_cmd(sim_sb * cmd, const char * name, const char * args, auto &&... as) {
   tool_cmd(cmd, name);
+  sim_sb_concat(cmd, " ");
   sim_sb_printf(cmd, args, as...);
 }
 void tool_run(const char * name, const char * args, auto &&... as) {
