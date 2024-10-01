@@ -11,38 +11,13 @@ import sys;
 
 static const char *common_flags;
 static const char *target;
-static const char *argv0;
-
-void prep(sim_sb *cmd, const char *tool) {
-  sim_sb_path_copy_parent(cmd, argv0);
-  sim_sb_path_append(cmd, tool);
-}
-
-static void comp(const char * tool, const char * dag) {
-  sim_sbt cmd {};
-  prep(&cmd, tool);
-  sim_sb_printf(&cmd, " -i %s", dag);
-  sim_sb_concat(&cmd, common_flags);
-  sys::run(cmd.buffer);
-}
 
 static void link(const char *dag, const char *exe) {
-  sim_sbt cmd{};
-  prep(&cmd, "leco-link.exe");
-  sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, dag);
-  sim_sb_concat(&cmd, " -o ");
-  sim_sb_concat(&cmd, exe);
-  sim_sb_concat(&cmd, common_flags);
-  sys::run(cmd.buffer);
+  sys::tool_run("link", "-i %s -o %s %s", dag, exe, common_flags);
 }
 
 static void bundle(const char *dag) {
-  sim_sbt cmd{};
-  prep(&cmd, "leco-bundler.exe");
-  sim_sb_concat(&cmd, " -i ");
-  sim_sb_concat(&cmd, dag);
-  sys::run(cmd.buffer);
+  sys::tool_run("bundler", "-i %s", dag);
 }
 
 static void build_rc(const char *path) {
@@ -62,8 +37,8 @@ static void build_rc(const char *path) {
 }
 
 static void compile(const char * dag) {
-  comp("leco-pcm.exe", dag);
-  comp("leco-obj.exe", dag);
+  sys::tool_run("pcm", "-i %s", dag);
+  sys::tool_run("obj", "-i %s", dag);
 }
 
 static void bounce(const char * src);
@@ -117,7 +92,6 @@ int main(int argc, char **argv) try {
   if (opts.argc != 0) usage();
   if (!input && !target) usage();
 
-  argv0 = argv[0];
   common_flags = flags.buffer;
 
   if (input) {
