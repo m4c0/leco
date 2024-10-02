@@ -29,10 +29,16 @@ static void osx_bundle(const char *dag) {
   sim_sb_copy(&app_path, dag);
   sim_sb_path_set_extension(&app_path, "app");
 
+  sim_sbt cnt_path {};
+  sim_sb_path_copy_append(&cnt_path, app_path.buffer, "Contents");
+
   sim_sbt path{};
-  sim_sb_copy(&path, app_path.buffer);
-  sim_sb_path_append(&path, "Contents");
-  sys::mkdirs(path.buffer);
+
+  sim_sb_path_copy_append(&path, cnt_path.buffer, "MacOS");
+  copy("exs", dag, path.buffer);
+
+  sim_sb_path_copy_append(&path, cnt_path.buffer, "Resources");
+  copy("rsrc", dag, path.buffer);
 
   {
     sim_sbt info{};
@@ -42,13 +48,6 @@ static void osx_bundle(const char *dag) {
       d.string("CFBundleDisplayName", "app");
     });
   }
-
-  sim_sb_path_append(&path, "MacOS");
-  copy("exs", dag, path.buffer);
-
-  sim_sb_path_parent(&path);
-  sim_sb_path_append(&path, "Resources");
-  copy("rsrc", dag, path.buffer);
 
   sys::log("codesign", app_path.buffer);
   sim_sbt cmd{};
