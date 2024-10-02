@@ -42,18 +42,19 @@ int try_main(int argc, char **argv) {
   LOCAL_MODULE("strset");
   LOCAL_MODULE("sys");
 
+  TOOL("dagger");
+  TOOL("deplist");
+  TOOL("link");
+  TOOL("obj");
+  TOOL("pcm");
+
+  TOOL("driver");
+  TOOL("meta");
+  TOOL("recurse");
+  TOOL("sawblade");
+
   puts("Building meta runner");
   run(CLANG " -i leco.cpp -o leco.exe");
-
-  TOOL("meta");
-  TOOL("deplist");
-  TOOL("dagger");
-  TOOL("sawblade");
-  TOOL("link");
-  TOOL("pcm");
-  TOOL("obj");
-  TOOL("recurse");
-  TOOL("driver");
 
   puts("Using LECO to build final stage");
   run("." SEP "leco.exe");
