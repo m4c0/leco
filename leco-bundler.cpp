@@ -83,10 +83,7 @@ static void iphonesim_bundle(const char * dag) {
 }
 
 static void iphone_bundle(const char *dag) {
-  sim_sbt cmd{};
-  sys::tool_cmd(&cmd, "ipa");
-  sim_sb_printf(&cmd, " -i %s", dag);
-  sys::run(cmd.buffer);
+  sys::tool_run("ipa", "-i %s", dag);
 }
 
 static void wasm_bundle(const char *dag) {
@@ -114,17 +111,11 @@ static void bundle(const char *dag) {
   sim_sb_path_copy_parent(&path, dag);
   auto target = sim_sb_path_filename(&path);
 
-  if (IS_TGT(target, TGT_IPHONEOS)) {
-    iphone_bundle(dag);
-  } else if (IS_TGT(target, TGT_IOS_SIMULATOR)) {
-    iphonesim_bundle(dag);
-  } else if (IS_TGT(target, TGT_OSX)) {
-    osx_bundle(dag);
-  } else if (IS_TGT(target, TGT_WASM)) {
-    wasm_bundle(dag);
-  } else {
-    dir_bundle(dag);
-  }
+  if (IS_TGT(target, TGT_IPHONEOS)) iphone_bundle(dag);
+  else if (IS_TGT(target, TGT_IOS_SIMULATOR)) iphonesim_bundle(dag);
+  else if (IS_TGT(target, TGT_OSX)) osx_bundle(dag);
+  else if (IS_TGT(target, TGT_WASM)) wasm_bundle(dag);
+  else dir_bundle(dag);
 }
 
 static void usage() { sys::die("invalid usage"); }
@@ -133,16 +124,11 @@ int main(int argc, char **argv) try {
   const char *input{};
   auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
     switch (ch) {
-    case 'i':
-      input = val;
-      break;
-    default:
-      usage();
-      break;
+      case 'i': input = val; break;
+      default: usage(); break;
     }
   });
-  if (opts.argc != 0 || !input)
-    usage();
+  if (opts.argc != 0 || !input) usage();
 
   bundle(input);
   return 0;
