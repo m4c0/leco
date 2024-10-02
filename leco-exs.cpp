@@ -100,6 +100,8 @@ int main(int argc, char ** argv) try {
   if (!input || !exedir) usage();
   if (opts.argc != 0) usage();
 
+  sys::mkdirs(exedir);
+
   sim_sbt path {};
   sim_sb_path_copy_parent(&path, input);
   target = sim_sb_path_filename(&path);

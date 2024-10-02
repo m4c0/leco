@@ -82,7 +82,6 @@ int main(int argc, char ** argv) try {
   sim_sb_path_append(&path, "Applications");
   sim_sb_path_append(&path, sim_path_filename(input));
   sim_sb_path_set_extension(&path, "app");
-  sys::mkdirs(path.buffer);
 
   copy("leco-exs.exe", input, path.buffer);
   copy("leco-rsrc.exe", input, path.buffer);

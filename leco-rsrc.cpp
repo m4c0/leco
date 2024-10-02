@@ -77,10 +77,10 @@ int main(int argc, char **argv) try {
     }
   });
 
-  if (!input || !resdir)
-    usage();
-  if (opts.argc != 0)
-    usage();
+  if (!input || !resdir) usage();
+  if (opts.argc != 0) usage();
+
+  sys::mkdirs(resdir);
 
   sim_sbt path{};
   sim_sb_path_copy_parent(&path, input);

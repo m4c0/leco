@@ -19,7 +19,6 @@ static void dir_bundle(const char *dag) {
   sim_sbt path{};
   sim_sb_copy(&path, dag);
   sim_sb_path_set_extension(&path, "app");
-  sys::mkdirs(path.buffer);
 
   copy("exs", dag, path.buffer);
   copy("rsrc", dag, path.buffer);
@@ -45,12 +44,10 @@ static void osx_bundle(const char *dag) {
   }
 
   sim_sb_path_append(&path, "MacOS");
-  sys::mkdirs(path.buffer);
   copy("exs", dag, path.buffer);
 
   sim_sb_path_parent(&path);
   sim_sb_path_append(&path, "Resources");
-  sys::mkdirs(path.buffer);
   copy("rsrc", dag, path.buffer);
 
   sys::log("codesign", app_path.buffer);
@@ -63,7 +60,6 @@ static void iphonesim_bundle(const char * dag) {
   sim_sbt path{};
   sim_sb_copy(&path, dag);
   sim_sb_path_set_extension(&path, "app");
-  sys::mkdirs(path.buffer);
 
   copy("exs", dag, path.buffer);
   copy("rsrc", dag, path.buffer);
@@ -98,7 +94,6 @@ static void wasm_bundle(const char *dag) {
   sim_sbt path{};
   sim_sb_copy(&path, dag);
   sim_sb_path_set_extension(&path, "app");
-  sys::mkdirs(path.buffer);
 
   copy("exs", dag, path.buffer, " -e wasm");
   copy("rsrc", dag, path.buffer);
