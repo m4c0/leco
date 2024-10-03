@@ -126,19 +126,12 @@ int main(int argc, char **argv) try {
   const char *app_path{};
   auto opts = gopt_parse(argc, argv, "i:a:", [&](auto ch, auto val) {
     switch (ch) {
-    case 'a':
-      app_path = val;
-      break;
-    case 'i':
-      input = val;
-      break;
-    default:
-      usage();
-      break;
+      case 'a': app_path = val; break;
+      case 'i': input = val; break;
+      default: usage(); break;
     }
   });
-  if (!input || !app_path || opts.argc != 0)
-    usage();
+  if (!input || !app_path || opts.argc != 0) usage();
 
   sim_sbt path{};
   sim_sb_path_copy_parent(&path, input);
