@@ -20,8 +20,8 @@ static void bundle(const char *dag) {
   sys::tool_run("bundler", "-i %s", dag);
 }
 
+#if 0 && _WIN32
 static void build_rc(const char *path) {
-#if _WIN32
   sim_sbt rc{};
   sim_sb_copy(&rc, path);
   sim_sb_path_set_extension(&rc, "rc");
@@ -33,8 +33,8 @@ static void build_rc(const char *path) {
   sim_sbt cmd{10240};
   sim_sb_printf(&cmd, "llvm-rc.exe /FO %s %s", res.buffer, rc.buffer);
   sys::run(cmd.buffer);
-#endif
 }
+#endif
 
 static void compile(const char * dag) {
   sys::tool_run("pcm", "-i %s", dag);
