@@ -12,13 +12,32 @@ module;
 
 export module sim;
 
-export struct sim_sbt : sim_sb {
-  sim_sbt() { sim_sb_new(this, PATH_MAX); }
-  sim_sbt(unsigned sz) { sim_sb_new(this, sz); }
-  ~sim_sbt() { sim_sb_delete(this); }
+export namespace sim {
+  struct sb : sim_sb {
+    sb() { sim_sb_new(this, PATH_MAX); }
+    sb(unsigned sz) { sim_sb_new(this, sz); }
+    ~sb() { sim_sb_delete(this); }
 
-  sim_sbt(const sim_sbt &) = delete;
-  sim_sbt(sim_sbt &&) = delete;
-  sim_sbt &operator=(const sim_sbt &) = delete;
-  sim_sbt &operator=(sim_sbt &&) = delete;
-};
+    sb(const sb & o) : sb() { sim_sb_copy(this, o.buffer); }
+    sb(sb && o) : sim_sb { o } { static_cast<sim_sb &>(o) = {}; }
+    sb & operator=(const sb &) = delete;
+    sb & operator=(sb &&) = delete;
+
+    const char * operator*() { return buffer; }
+
+    sb & operator+=(const char * s) {
+      sim_sb_concat(this, s);
+      return *this;
+    }
+    sb & operator/=(const char * s) {
+      sim_sb_path_append(this, s);
+      return *this;
+    }
+  };
+} // namespace sim
+
+export sim::sb operator""_real(const char * str, unsigned long sz) {
+  sim::sb res {};
+  sim_sb_path_copy_real(&res, str);
+  return res;
+}

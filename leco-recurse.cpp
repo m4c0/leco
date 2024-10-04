@@ -78,37 +78,35 @@ static void bounce(const char * dag) {
 static void usage() { sys::die("invalid usage"); }
 
 int main(int argc, char **argv) try {
-  sim_sbt flags{};
+  sim::sb flags{};
   const char * input {};
 
   auto opts = gopt_parse(argc, argv, "t:i:gO", [&](auto ch, auto val) {
     switch (ch) {
     case 'i': input = val; break;
     case 't': target = val; break;
-    case 'g': sim_sb_concat(&flags, " -g"); break;
-    case 'O': sim_sb_concat(&flags, " -O"); break;
+    case 'g': flags += " -g"; break;
+    case 'O': flags += " -O"; break;
     default: usage(); break;
     }
   });
   if (opts.argc != 0) usage();
   if (!input && !target) usage();
 
-  common_flags = flags.buffer;
+  common_flags = *flags;
 
   if (input) {
     bounce(input);
     return 0;
   }
 
-  sim_sbt path {};
-  sim_sb_path_copy_real(&path, "out");
-  sim_sb_path_append(&path, target);
-  for (auto file : pprent::list(path.buffer)) {
+  auto path = ("out"_real /= target);
+  for (auto file : pprent::list(*path)) {
     auto ext = sim_path_extension(file);
     if (!ext || 0 != strcmp(ext, ".dag")) continue;
 
-    sim_sb_path_append(&path, file);
-    bounce(path.buffer);
+    path /= file;
+    bounce(*path);
     sim_sb_path_parent(&path);
   }
 } catch (...) {
