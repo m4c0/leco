@@ -1,5 +1,5 @@
 #pragma leco tool
-#include "sim.hpp"
+#include "sim.h"
 
 #include <stdint.h>
 #include <string.h>
@@ -7,6 +7,7 @@
 import gopt;
 import mtime;
 import pprent;
+import sim;
 import sys;
 
 static const char *common_flags;
