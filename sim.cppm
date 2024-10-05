@@ -23,6 +23,8 @@ export namespace sim {
     sb & operator=(const sb &) = delete;
     sb & operator=(sb &&) = delete;
 
+    explicit sb(const char * s) : sb {} { sim_sb_copy(this, s); }
+
     const char * operator*() { return buffer; }
 
     sb & operator+=(const char * s) {

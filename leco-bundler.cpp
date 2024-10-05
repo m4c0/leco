@@ -1,6 +1,6 @@
 #pragma leco tool
 
-#include "sim.hpp"
+#include "sim.h"
 #include "targets.hpp"
 
 #include <string.h>
@@ -8,6 +8,7 @@
 import gopt;
 import mtime;
 import plist;
+import sim;
 import sys;
 
 static void copy(const char *with, const char *dag, const char *to,
@@ -16,8 +17,7 @@ static void copy(const char *with, const char *dag, const char *to,
 }
 
 static void dir_bundle(const char *dag) {
-  sim_sbt path{};
-  sim_sb_copy(&path, dag);
+  sim::sb path { dag };
   sim_sb_path_set_extension(&path, "app");
 
   copy("exs", dag, path.buffer);
@@ -25,14 +25,12 @@ static void dir_bundle(const char *dag) {
 }
 
 static void osx_bundle(const char *dag) {
-  sim_sbt app_path {};
-  sim_sb_copy(&app_path, dag);
+  sim::sb app_path { dag };
   sim_sb_path_set_extension(&app_path, "app");
 
-  sim_sbt cnt_path {};
-  sim_sb_path_copy_append(&cnt_path, app_path.buffer, "Contents");
+  sim::sb cnt_path = app_path /= "Contents";
 
-  sim_sbt path{};
+  sim::sb path {};
 
   sim_sb_path_copy_append(&path, cnt_path.buffer, "MacOS");
   copy("exs", dag, path.buffer);
@@ -41,8 +39,8 @@ static void osx_bundle(const char *dag) {
   copy("rsrc", dag, path.buffer);
 
   {
-    sim_sbt info{};
-    sim_sb_path_copy_append(&info, path.buffer, "Info.plist");
+    sim::sb info {};
+    sim_sb_path_copy_append(&info, cnt_path.buffer, "Info.plist");
     plist::gen(info.buffer, [&](auto &&d) {
       common_app_plist(d, "app", "macosx", "1.0.0", "0");
       d.string("CFBundleDisplayName", "app");
@@ -50,29 +48,28 @@ static void osx_bundle(const char *dag) {
   }
 
   sys::log("codesign", app_path.buffer);
-  sim_sbt cmd{};
+  sim::sb cmd {};
   sim_sb_printf(&cmd, "codesign -f -s %s %s", sys::env("LECO_IOS_TEAM"), app_path.buffer);
   sys::run(cmd.buffer);
 }
 
 static void iphonesim_bundle(const char * dag) {
-  sim_sbt path{};
-  sim_sb_copy(&path, dag);
+  sim::sb path { dag };
   sim_sb_path_set_extension(&path, "app");
 
   copy("exs", dag, path.buffer);
   copy("rsrc", dag, path.buffer);
 
-  sim_sbt stem {};
+  sim::sb stem {};
   sim_sb_path_copy_stem(&stem, dag);
 
-  sim_sbt cmd {};
+  sim::sb cmd {};
   sim_sb_printf(&cmd,
       "xcrun simctl install %s %s",
       sys::env("LECO_IOS_SIM_TARGET"),
       path.buffer);
 
-  sim_sb_path_append(&path, "Info.plist");
+  path /= "Info.plist";
 
   plist::gen(path.buffer, [&](auto &&d) {
     common_ios_plist(d, stem.buffer, stem.buffer, "0");
@@ -87,8 +84,7 @@ static void iphone_bundle(const char *dag) {
 }
 
 static void wasm_bundle(const char *dag) {
-  sim_sbt path{};
-  sim_sb_copy(&path, dag);
+  sim::sb path { dag };
   sim_sb_path_set_extension(&path, "app");
 
   copy("exs", dag, path.buffer, " -e wasm");
