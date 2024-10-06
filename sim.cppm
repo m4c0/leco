@@ -35,7 +35,33 @@ export namespace sim {
       sim_sb_path_append(this, s);
       return *this;
     }
+
+    sb & printf(const char * fmt, auto ... args) {
+      sim_sb_printf(this, fmt, args...);
+      return *this;
+    }
+
+    const char * path_filename() { return sim_sb_path_filename(this); }
+
+    const char * path_extension() { return sim_sb_path_extension(this); }
+    void path_extension(const char * ext) { sim_sb_path_set_extension(this, ext); }
   };
+
+  sb copy_path_stem(const char * path) {
+    sb res {};
+    sim_sb_path_copy_stem(&res, path);
+    return res;
+  }
+  sb copy_path_parent(const char * path) {
+    sb res {};
+    sim_sb_path_copy_parent(&res, path);
+    return res;
+  }
+  sb printf(const char * fmt, auto ... args) {
+    sb res {};
+    sim_sb_printf(&res, fmt, args...);
+    return res;
+  }
 } // namespace sim
 
 export sim::sb operator""_real(const char * str, unsigned long sz) {

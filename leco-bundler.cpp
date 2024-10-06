@@ -48,20 +48,18 @@ static void osx_bundle(const char *dag) {
   }
 
   sys::log("codesign", app_path.buffer);
-  sim::sb cmd {};
-  sim_sb_printf(&cmd, "codesign -f -s %s %s", sys::env("LECO_IOS_TEAM"), app_path.buffer);
+  auto cmd = sim::printf("codesign -f -s %s %s", sys::env("LECO_IOS_TEAM"), app_path.buffer);
   sys::run(cmd.buffer);
 }
 
 static void iphonesim_bundle(const char * dag) {
   sim::sb path { dag };
-  sim_sb_path_set_extension(&path, "app");
+  path.path_extension("app");
 
   copy("exs", dag, path.buffer);
   copy("rsrc", dag, path.buffer);
 
-  sim::sb stem {};
-  sim_sb_path_copy_stem(&stem, dag);
+  auto stem = sim::copy_path_stem(dag);
 
   sim::sb cmd {};
   sim_sb_printf(&cmd,
@@ -85,13 +83,13 @@ static void iphone_bundle(const char *dag) {
 
 static void wasm_bundle(const char *dag) {
   sim::sb path { dag };
-  sim_sb_path_set_extension(&path, "app");
+  path.path_extension("app");
 
   copy("exs", dag, path.buffer, " -e wasm");
   copy("rsrc", dag, path.buffer);
 
-  sim_sb_path_append(&path, sim_path_filename(dag));
-  sim_sb_path_set_extension(&path, "html");
+  path /= sim_path_filename(dag);
+  path.path_extension("html");
   if (mtime::of("../leco/wasm.html") > mtime::of(path.buffer)) {
     sys::log("copying", path.buffer);
     sys::link("../leco/wasm.html", path.buffer);
@@ -103,9 +101,8 @@ static void wasm_bundle(const char *dag) {
 }
 
 static void bundle(const char *dag) {
-  sim_sbt path{};
-  sim_sb_path_copy_parent(&path, dag);
-  auto target = sim_sb_path_filename(&path);
+  auto path = sim::copy_path_parent(dag);
+  auto target = path.path_filename();
 
   if (IS_TGT(target, TGT_IPHONEOS)) iphone_bundle(dag);
   else if (IS_TGT(target, TGT_IOS_SIMULATOR)) iphonesim_bundle(dag);
