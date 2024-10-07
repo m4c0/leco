@@ -62,6 +62,12 @@ export namespace sim {
     sim_sb_printf(&res, fmt, args...);
     return res;
   }
+
+  sb operator/(sb & a, const char * b) {
+    sb res = a;
+    sim_sb_path_append(&res, b);
+    return res;
+  }
 } // namespace sim
 
 export sim::sb operator""_real(const char * str, unsigned long sz) {

@@ -28,15 +28,10 @@ static void osx_bundle(const char *dag) {
   sim::sb app_path { dag };
   sim_sb_path_set_extension(&app_path, "app");
 
-  sim::sb cnt_path = app_path /= "Contents";
+  auto cnt_path = app_path / "Contents";
 
-  sim::sb path {};
-
-  sim_sb_path_copy_append(&path, cnt_path.buffer, "MacOS");
-  copy("exs", dag, path.buffer);
-
-  sim_sb_path_copy_append(&path, cnt_path.buffer, "Resources");
-  copy("rsrc", dag, path.buffer);
+  copy("exs", dag, *(cnt_path / "MacOS"));
+  copy("rsrc", dag, *(cnt_path / "Resources"));
 
   {
     sim::sb info {};
@@ -61,8 +56,7 @@ static void iphonesim_bundle(const char * dag) {
 
   auto stem = sim::copy_path_stem(dag);
 
-  sim::sb cmd {};
-  sim_sb_printf(&cmd,
+  auto cmd = sim::printf(
       "xcrun simctl install %s %s",
       sys::env("LECO_IOS_SIM_TARGET"),
       path.buffer);
