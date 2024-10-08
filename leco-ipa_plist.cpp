@@ -98,7 +98,7 @@ static void dump_symbols(const char * exe, const char * exca) {
   sim_sb_printf(&cmd, "dsymutil %s -o %s", exe, path.buffer);
   sys::run(cmd.buffer);
 }
-void gen_iphone_ipa(const char * exe, const char * disp_name) {
+void gen_iphone_ipa(const char * exe, const char * disp_name, bool landscape) {
   char buf[256];
   auto t = time(nullptr);
   snprintf(buf, sizeof(buf) - 1, "%ld", t);
@@ -122,6 +122,7 @@ void gen_iphone_ipa(const char * exe, const char * disp_name) {
       .name = name.buffer, 
       .disp_name = disp_name, 
       .bundle_version = bundle_version,
+      .landscape = landscape,
   });
   compile_launch(app_path.buffer);
   code_sign(app_path.buffer);

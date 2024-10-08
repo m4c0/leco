@@ -26,7 +26,7 @@ Where:
 
 static const char * tool_dir;
 
-void gen_iphone_ipa(const char * exe_path, const char * disp_name);
+void gen_iphone_ipa(const char * exe, const char * disp_name, bool landscape);
 
 static void copy(const char * with, const char * dag, const char * to) {
   sim_sbt cmd {};
@@ -87,18 +87,20 @@ int main(int argc, char ** argv) try {
   copy("leco-rsrc.exe", input, path.buffer);
   xcassets(input, path.buffer);
 
+  bool landscape {};
   sim_sbt disp_name {};
   sim_sb_path_copy_stem(&disp_name, input);
   sys::dag_read(input, [&](auto id, auto val) {
     switch (id) {
       case 'name': sim_sb_copy(&disp_name, val); break;
+      case 'land': landscape = true; break;
       default: break;
     }
   });
 
   sim_sb_path_append(&path, sim_path_filename(input));
   sim_sb_path_set_extension(&path, "exe");
-  gen_iphone_ipa(path.buffer, disp_name.buffer);
+  gen_iphone_ipa(path.buffer, disp_name.buffer, landscape);
 
   export_archive(build_path.buffer);
   upload_archive(input);

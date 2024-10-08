@@ -383,7 +383,7 @@ void run(int argc, char **argv) {
       read_file_list(pp, "display name", 'name', print_asis);
     } else if (auto pp = cmp(p, "#pragma leco landscape\n")) {
       if (exe_type != exe_t::app) error("landscape is only supported for apps");
-      output('ornt', "landscape");
+      output('land', "");
     } else if (cmp(p, "#pragma leco ")) {
       error("unknown pragma");
     } else if (auto pp = cmp(p, "# ")) {
