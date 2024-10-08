@@ -18,15 +18,15 @@ static void copy(const char *with, const char *dag, const char *to,
 
 static void dir_bundle(const char *dag) {
   sim::sb path { dag };
-  sim_sb_path_set_extension(&path, "app");
+  path.path_extension("app");
 
-  copy("exs", dag, path.buffer);
-  copy("rsrc", dag, path.buffer);
+  copy("exs", dag, *path);
+  copy("rsrc", dag, *path);
 }
 
 static void osx_bundle(const char *dag) {
   sim::sb app_path { dag };
-  sim_sb_path_set_extension(&app_path, "app");
+  app_path.path_extension("app");
 
   auto cnt_path = app_path / "Contents";
 
@@ -34,41 +34,40 @@ static void osx_bundle(const char *dag) {
   copy("rsrc", dag, *(cnt_path / "Resources"));
 
   {
-    sim::sb info {};
-    sim_sb_path_copy_append(&info, cnt_path.buffer, "Info.plist");
-    plist::gen(info.buffer, [&](auto &&d) {
+    auto info = cnt_path / "Info.plist";
+    plist::gen(*info, [&](auto &&d) {
       common_app_plist(d, "app", "macosx", "1.0.0", "0");
       d.string("CFBundleDisplayName", "app");
     });
   }
 
-  sys::log("codesign", app_path.buffer);
-  auto cmd = sim::printf("codesign -f -s %s %s", sys::env("LECO_IOS_TEAM"), app_path.buffer);
-  sys::run(cmd.buffer);
+  sys::log("codesign", *app_path);
+  auto cmd = sim::printf("codesign -f -s %s %s", sys::env("LECO_IOS_TEAM"), *app_path);
+  sys::run(*cmd);
 }
 
 static void iphonesim_bundle(const char * dag) {
   sim::sb path { dag };
   path.path_extension("app");
 
-  copy("exs", dag, path.buffer);
-  copy("rsrc", dag, path.buffer);
+  copy("exs", dag, *path);
+  copy("rsrc", dag, *path);
 
   auto stem = sim::copy_path_stem(dag);
 
   auto cmd = sim::printf(
       "xcrun simctl install %s %s",
       sys::env("LECO_IOS_SIM_TARGET"),
-      path.buffer);
+      *path);
 
   path /= "Info.plist";
 
-  plist::gen(path.buffer, [&](auto &&d) {
-    common_ios_plist(d, stem.buffer, stem.buffer, "0");
+  plist::gen(*path, [&](auto &&d) {
+    common_ios_plist(d, *stem, stem.buffer, "0");
   });
 
-  sys::log("installing", stem.buffer);
-  sys::run(cmd.buffer);
+  sys::log("installing", *stem);
+  sys::run(*cmd);
 }
 
 static void iphone_bundle(const char *dag) {
@@ -79,19 +78,19 @@ static void wasm_bundle(const char *dag) {
   sim::sb path { dag };
   path.path_extension("app");
 
-  copy("exs", dag, path.buffer, " -e wasm");
-  copy("rsrc", dag, path.buffer);
+  copy("exs", dag, *path, " -e wasm");
+  copy("rsrc", dag, *path);
 
   path /= sim_path_filename(dag);
   path.path_extension("html");
-  if (mtime::of("../leco/wasm.html") > mtime::of(path.buffer)) {
-    sys::log("copying", path.buffer);
-    sys::link("../leco/wasm.html", path.buffer);
+  if (mtime::of("../leco/wasm.html") > mtime::of(*path)) {
+    sys::log("copying", *path);
+    sys::link("../leco/wasm.html", *path);
   }
 
   sim_sb_path_parent(&path);
 
-  sys::tool_run("wasm-js", " -i %s -a %s", dag, path.buffer);
+  sys::tool_run("wasm-js", " -i %s -a %s", dag, *path);
 }
 
 static void bundle(const char *dag) {
