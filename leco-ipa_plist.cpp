@@ -11,16 +11,12 @@ static const char * bundle_version;
 
 [[nodiscard]] static const char *team_id() { return sys::env("LECO_IOS_TEAM"); }
 
-static void gen_info_plist(const char *exe_path, const char *name, const char * disp_name, const char *build_path) {
+static void gen_info_plist(const char *exe_path, const char *build_path, const plist::common_ios_plist_params & p) {
   sim_sbt path{};
   sim_sb_path_copy_append(&path, exe_path, "Info.plist");
 
   plist::gen(path.buffer, [&](auto &&d) {
-    common_ios_plist(d, {
-        .name = name, 
-        .disp_name = disp_name, 
-        .bundle_version = bundle_version,
-    });
+    common_ios_plist(d, p);
 
     sim_sbt plist{};
     sim_sb_path_copy_append(&plist, build_path, "icon-partial.plist");
@@ -122,7 +118,11 @@ void gen_iphone_ipa(const char * exe, const char * disp_name) {
   sim_sbt build_path{};
   sim_sb_path_copy_parent(&build_path, exca.buffer);
 
-  gen_info_plist(app_path.buffer, name.buffer, disp_name, build_path.buffer);
+  gen_info_plist(app_path.buffer, build_path.buffer, {
+      .name = name.buffer, 
+      .disp_name = disp_name, 
+      .bundle_version = bundle_version,
+  });
   compile_launch(app_path.buffer);
   code_sign(app_path.buffer);
   dump_symbols(exe, exca.buffer);
