@@ -130,8 +130,12 @@ void common_ios_plist(dict & d, const common_ios_plist_params & p) {
     dd.boolean("metal", true);
   });
   if (p.landscape) {
-    d.array("UISupportedInterfaceOrientations", "UIInterfaceOrientationLandscapeLeft");
-    d.array("UISupportedInterfaceOrientations~ipad", "UIInterfaceOrientationLandscapeLeft");
+    d.array("UISupportedInterfaceOrientations",
+        "UIInterfaceOrientationLandscapeLeft",
+        "UIInterfaceOrientationLandscapeRight");
+    d.array("UISupportedInterfaceOrientations~ipad",
+        "UIInterfaceOrientationLandscapeLeft"
+        "UIInterfaceOrientationLandscapeRight");
   } else {
     d.array("UISupportedInterfaceOrientations", "UIInterfaceOrientationPortrait");
     d.array("UISupportedInterfaceOrientations~ipad", "UIInterfaceOrientationPortrait");
