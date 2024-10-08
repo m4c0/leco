@@ -16,7 +16,11 @@ static void gen_info_plist(const char *exe_path, const char *name, const char * 
   sim_sb_path_copy_append(&path, exe_path, "Info.plist");
 
   plist::gen(path.buffer, [&](auto &&d) {
-    common_ios_plist(d, name, disp_name, bundle_version);
+    common_ios_plist(d, {
+        .name = name, 
+        .disp_name = disp_name, 
+        .bundle_version = bundle_version,
+    });
 
     sim_sbt plist{};
     sim_sb_path_copy_append(&plist, build_path, "icon-partial.plist");

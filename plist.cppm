@@ -109,9 +109,15 @@ void common_app_plist(dict &d, const char *name, const char *sdk, const char * s
   d.string("DTXcodeBuild", xcode_build);
   d.string("DTXcode", xcode_version);
 }
-void common_ios_plist(dict & d, const char * name, const char * disp_name, const char * bundle_version) {
-  common_app_plist(d, name, "iphoneos", "1.0.0", bundle_version);
-  d.string("CFBundleDisplayName", disp_name);
+struct common_ios_plist_params {
+  const char * name;
+  const char * disp_name;
+  const char * bundle_version;
+  bool landscape;
+};
+void common_ios_plist(dict & d, const common_ios_plist_params & p) {
+  common_app_plist(d, p.name, "iphoneos", "1.0.0", p.bundle_version);
+  d.string("CFBundleDisplayName", p.disp_name);
   d.array("CFBundleSupportedPlatforms", "iPhoneOS");
   d.string("MinimumOSVersion", plist::minimum_os_version);
   d.boolean("LSRequiresIPhoneOS", true);
@@ -123,9 +129,12 @@ void common_ios_plist(dict & d, const char * name, const char * disp_name, const
     dd.boolean("arm64", true);
     dd.boolean("metal", true);
   });
-  d.array("UISupportedInterfaceOrientations",
-          "UIInterfaceOrientationPortrait");
-  d.array("UISupportedInterfaceOrientations~ipad",
-          "UIInterfaceOrientationPortrait");
+  if (p.landscape) {
+    d.array("UISupportedInterfaceOrientations", "UIInterfaceOrientationLandscape");
+    d.array("UISupportedInterfaceOrientations~ipad", "UIInterfaceOrientationLandscape");
+  } else {
+    d.array("UISupportedInterfaceOrientations", "UIInterfaceOrientationPortrait");
+    d.array("UISupportedInterfaceOrientations~ipad", "UIInterfaceOrientationPortrait");
+  }
 }
 } // namespace plist

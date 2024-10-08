@@ -63,7 +63,11 @@ static void iphonesim_bundle(const char * dag) {
   path /= "Info.plist";
 
   plist::gen(*path, [&](auto &&d) {
-    common_ios_plist(d, *stem, stem.buffer, "0");
+    common_ios_plist(d, {
+        .name = *stem,
+        .disp_name = stem.buffer,
+        .bundle_version = "0",
+    });
   });
 
   sys::log("installing", *stem);
