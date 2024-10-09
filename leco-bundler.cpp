@@ -1,6 +1,5 @@
 #pragma leco tool
 
-#include "sim.h"
 #include "targets.hpp"
 
 #include <string.h>
@@ -85,15 +84,14 @@ static void wasm_bundle(const char *dag) {
   copy("exs", dag, *path, " -e wasm");
   copy("rsrc", dag, *path);
 
-  path /= sim_path_filename(dag);
+  path /= sim::path_filename(dag);
   path.path_extension("html");
   if (mtime::of("../leco/wasm.html") > mtime::of(*path)) {
     sys::log("copying", *path);
     sys::link("../leco/wasm.html", *path);
   }
 
-  sim_sb_path_parent(&path);
-
+  path.path_parent();
   sys::tool_run("wasm-js", " -i %s -a %s", dag, *path);
 }
 
