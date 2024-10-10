@@ -26,19 +26,15 @@ Usage: ../leco/leco.exe ipa-export
 )");
 }
 
-static void export_archive(const char * build_path) {
-  sys::log("exporting from", build_path);
+int main(int argc, char ** argv) try {
+  auto path = "."_real / "out" / TGT_IPHONEOS;
 
+  sys::log("exporting from", *path);
   sys::runf("xcodebuild -exportArchive"
             " -archivePath %s/export.xcarchive"
             " -exportPath %s/export"
             " -exportOptionsPlist %s/export.plist",
-            build_path, build_path, build_path);
-}
-
-int main(int argc, char ** argv) try {
-  auto path = "."_real / "out" / TGT_IPHONEOS;
-  export_archive(path.buffer);
+            *path, *path, *path);
   return 0;
 } catch (...) {
   return 1;
