@@ -41,8 +41,7 @@ static void osx_bundle(const char *dag) {
   }
 
   sys::log("codesign", *app_path);
-  auto cmd = sim::printf("codesign -f -s %s %s", sys::env("LECO_IOS_TEAM"), *app_path);
-  sys::run(*cmd);
+  sys::runf("codesign -f -s %s %s", sys::env("LECO_IOS_TEAM"), *app_path);
 }
 
 static void iphonesim_bundle(const char * dag) {

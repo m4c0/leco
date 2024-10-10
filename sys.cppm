@@ -39,8 +39,17 @@ struct death {};
   throw death{};
 }
 inline void run(const char *cmd) {
-  if (0 != system(cmd))
-    die("command failed: %s", cmd);
+  if (0 != system(cmd)) die("command failed: %s", cmd);
+}
+__attribute__((format(printf, 1, 2))) inline void runf(const char * cmd, ...) {
+  char buf[10240] {};
+
+  va_list arg;
+  va_start(arg, cmd);
+  vsnprintf(buf, sizeof(buf), cmd, arg);
+  va_end(arg);
+
+  run(buf);
 }
 
 inline void log(const char *verb, const char *msg) {
