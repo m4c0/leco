@@ -29,33 +29,22 @@ static const char * tool_dir;
 void gen_iphone_ipa(const char * exe, const char * disp_name, bool landscape);
 
 static void copy(const char * with, const char * dag, const char * to) {
-  sim_sbt cmd {};
-  sim_sb_path_copy_append(&cmd, tool_dir, with);
-  sim_sb_printf(&cmd, " -i %s -o %s", dag, to);
-  sys::run(cmd.buffer);
+  sys::tool_run(with, " -i %s -o %s", dag, to);
 }
 
 static void xcassets(const char * dag, const char * app_path) {
-  sim_sbt cmd {};
-  sim_sb_path_copy_append(&cmd, tool_dir, "leco-xcassets.exe");
-  sim_sb_printf(&cmd, " -i %s -a %s", dag, app_path);
-  sys::run(cmd.buffer);
+  sys::tool_run("xcassets", " -i %s -a %s", dag, app_path);
 }
 
 static void export_archive(const char * build_path) {
-  sim_sbt cmd { 1024 };
-  sim_sb_path_copy_append(&cmd, tool_dir, "leco-ipa-export.exe");
-  sys::run(cmd.buffer);
+  sys::tool_run("ipa-export");
 }
 
 static void upload_archive(const char * dag) {
   auto method = sys::env("LECO_IOS_METHOD");
   if (0 != strcmp("app-store-connect", method)) return;
 
-  sim_sbt cmd {};
-  sim_sb_path_copy_append(&cmd, tool_dir, "leco-ipa-upload.exe");
-  sim_sb_printf(&cmd, " -i %s -s", dag);
-  sys::run(cmd.buffer);
+  sys::tool_run("ipa-upload", " -i %s -s", dag);
 }
 
 int main(int argc, char ** argv) try {
@@ -83,8 +72,8 @@ int main(int argc, char ** argv) try {
   sim_sb_path_append(&path, sim_path_filename(input));
   sim_sb_path_set_extension(&path, "app");
 
-  copy("leco-exs.exe", input, path.buffer);
-  copy("leco-rsrc.exe", input, path.buffer);
+  copy("exs", input, path.buffer);
+  copy("rsrc", input, path.buffer);
   xcassets(input, path.buffer);
 
   bool landscape {};

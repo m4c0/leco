@@ -140,6 +140,11 @@ void tool_cmd(sim_sb * cmd, const char * name, const char * args, auto &&... as)
   sim_sb_concat(cmd, " ");
   sim_sb_printf(cmd, args, as...);
 }
+void tool_run(const char * name) {
+  sim_sbt cmd {};
+  tool_cmd(&cmd, name);
+  run(cmd.buffer);
+}
 void tool_run(const char * name, const char * args, auto &&... as) {
   sim_sbt cmd {};
   tool_cmd(&cmd, name, args, as...);
