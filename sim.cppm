@@ -65,7 +65,7 @@ export namespace sim {
     return res;
   }
 
-  sb operator/(sb & a, const char * b) {
+  sb operator/(const sb & a, const char * b) {
     sb res = a;
     sim_sb_path_append(&res, b);
     return res;

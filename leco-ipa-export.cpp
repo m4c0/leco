@@ -1,8 +1,8 @@
 #pragma leco tool
 
-#include "sim.hpp"
 #include "targets.hpp"
 
+import sim;
 import sys;
 
 void usage() {
@@ -29,24 +29,16 @@ Usage: ../leco/leco.exe ipa-export
 static void export_archive(const char * build_path) {
   sys::log("exporting from", build_path);
 
-  sim_sbt cmd { 1024 };
-  sim_sb_printf(&cmd,
-                "xcodebuild -exportArchive"
-                " -archivePath %s/export.xcarchive"
-                " -exportPath %s/export"
-                " -exportOptionsPlist %s/export.plist",
-                build_path, build_path, build_path);
-  sys::run(cmd.buffer);
+  sys::runf("xcodebuild -exportArchive"
+            " -archivePath %s/export.xcarchive"
+            " -exportPath %s/export"
+            " -exportOptionsPlist %s/export.plist",
+            build_path, build_path, build_path);
 }
 
 int main(int argc, char ** argv) try {
-  sim_sbt path {};
-  sim_sb_path_copy_real(&path, ".");
-  sim_sb_path_append(&path, "out");
-  sim_sb_path_append(&path, TGT_IPHONEOS);
-
+  auto path = "."_real / "out" / TGT_IPHONEOS;
   export_archive(path.buffer);
-
   return 0;
 } catch (...) {
   return 1;
