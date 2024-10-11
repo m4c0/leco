@@ -1,10 +1,9 @@
 #pragma leco tool
 
-#include "sim.hpp"
-
 #include <stdio.h>
 
 import gopt;
+import sim;
 import sys;
 
 // TODO: detect alpha in PNG - otherwise submit fails
@@ -13,19 +12,17 @@ import sys;
 
 
 static void create_xca_contents(const char *path) {
-  sim_sbt file{};
-  sim_sb_path_copy_append(&file, path, "Contents.json");
+  auto file = sim::sb { path } / "Contents.json";
 
-  auto f = sys::fopen(file.buffer, "w");
+  auto f = sys::fopen(*file, "w");
   fprintf(f, R"({ "info": {"version": 1} })");
   fclose(f);
 }
 
 static void create_icon_contents(const char *path) {
-  sim_sbt file{};
-  sim_sb_path_copy_append(&file, path, "Contents.json");
+  auto file = sim::sb { path } / "Contents.json";
 
-  auto f = sys::fopen(file.buffer, "w");
+  auto f = sys::fopen(*file, "w");
   fprintf(f, R"({
   "images": [{
     "filename": "Icon-1024.png",
@@ -39,8 +36,7 @@ static void create_icon_contents(const char *path) {
 }
 
 static void create_colour_contents(const char *path) {
-  sim_sbt file{};
-  sim_sb_path_copy_append(&file, path, "Contents.json");
+  auto file = sim::sb { path } / "Contents.json";
 
   auto f = sys::fopen(file.buffer, "w");
   fprintf(f, R"({ "info": {"version": 1} })");
@@ -50,17 +46,15 @@ static void create_colour_contents(const char *path) {
 static void copy_icon(const char *path) {
   sys::log("copying", "icon.png");
 
-  sim_sbt file{};
-  sim_sb_path_copy_append(&file, path, "Icon-1024.png");
-  sys::link("icon.png", file.buffer);
+  auto file = sim::sb { path } / "Icon-1024.png";
+  sys::link("icon.png", *file);
 }
 
 static void run_actool(const char *plist, const char *app_path,
                        const char *xcassets) {
   sys::log("running", "actool");
 
-  sim_sbt cmd{10240};
-  sim_sb_printf(&cmd,
+  auto cmd = sim::sb { 10240 }.printf(
                 "actool "
                 "--notices --warnings --errors "
                 "--output-format human-readable-text "
@@ -79,27 +73,25 @@ static void run_actool(const char *plist, const char *app_path,
                 "--compile %s "
                 "%s",
                 plist, app_path, xcassets);
-  sys::run(cmd.buffer);
+  sys::run(*cmd);
 }
 
-static void gen_assets(const char *build_path, sim_sb *xcassets) {
-  sim_sb_path_copy_append(xcassets, build_path, "Assets.xcassets");
+static auto gen_assets(const char * build_path) {
+  auto xcassets = sim::sb { build_path } / "Assets.xcassets";
 
-  sys::mkdirs(xcassets->buffer);
-  create_xca_contents(xcassets->buffer);
+  sys::mkdirs(*xcassets);
+  create_xca_contents(*xcassets);
 
-  sim_sbt appiconset{};
-  sim_sb_path_copy_append(&appiconset, xcassets->buffer, "AppIcon.appiconset");
+  auto appiconset = xcassets / "AppIcon.appiconset";
+  sys::mkdirs(*appiconset);
+  create_icon_contents(*appiconset);
+  copy_icon(*appiconset);
 
-  sys::mkdirs(appiconset.buffer);
-  create_icon_contents(appiconset.buffer);
-  copy_icon(appiconset.buffer);
+  auto colourset = xcassets / "AccentColor.colorset";
+  sys::mkdirs(*colourset);
+  create_colour_contents(*colourset);
 
-  sim_sbt colourset{};
-  sim_sb_path_copy_append(&colourset, xcassets->buffer, "AccentColor.colorset");
-
-  sys::mkdirs(colourset.buffer);
-  create_colour_contents(colourset.buffer);
+  return xcassets;
 }
 
 static void usage() {
@@ -133,16 +125,12 @@ int main(int argc, char **argv) try {
   });
   if (!input || !app_path || opts.argc != 0) usage();
 
-  sim_sbt path{};
-  sim_sb_path_copy_parent(&path, input);
+  auto path = sim::sb { input };
+  path.path_parent();
 
-  sim_sbt xcassets{};
-  gen_assets(path.buffer, &xcassets);
-
-  sim_sbt plist{};
-  sim_sb_path_copy_append(&plist, path.buffer, "icon-partial.plist");
-
-  run_actool(plist.buffer, app_path, xcassets.buffer);
+  auto plist = path / "icon-partial.plist";
+  auto xcassets = gen_assets(*path);
+  run_actool(*plist, app_path, *xcassets);
   return 0;
 } catch (...) {
   return 1;
