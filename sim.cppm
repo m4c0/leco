@@ -20,8 +20,16 @@ export namespace sim {
 
     sb(const sb & o) : sb() { sim_sb_copy(this, o.buffer); }
     sb(sb && o) : sim_sb { o } { static_cast<sim_sb &>(o) = {}; }
-    sb & operator=(const sb &) = delete;
-    sb & operator=(sb &&) = delete;
+    sb & operator=(const sb & o) {
+      sim_sb_copy(this, o.buffer);
+      return *this;
+    }
+    sb & operator=(sb && o) {
+      sim_sb_delete(this);
+      static_cast<sim_sb &>(*this) = o;
+      static_cast<sim_sb &>(o) = {};
+      return *this;
+    }
 
     explicit sb(const char * s) : sb {} { sim_sb_copy(this, s); }
 
