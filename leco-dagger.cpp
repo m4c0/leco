@@ -381,7 +381,7 @@ void run(int argc, char **argv) {
     } else if (auto pp = cmp(p, "#pragma leco display_name ")) {
       if (exe_type != exe_t::app) error("display name is only supported for apps");
       read_file_list(pp, "display name", 'name', print_asis);
-    } else if (auto pp = cmp(p, "#pragma leco landscape\n")) {
+    } else if (cmp(p, "#pragma leco landscape\n")) {
       if (exe_type != exe_t::app) error("landscape is only supported for apps");
       output('land', "");
     } else if (cmp(p, "#pragma leco ")) {
