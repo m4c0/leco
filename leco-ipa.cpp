@@ -67,7 +67,7 @@ int main(int argc, char ** argv) try {
   xcassets(input, *path);
 
   bool landscape {};
-  auto disp_name = sim::copy_path_stem(input);
+  auto disp_name = sim::path_stem(input);
   sys::dag_read(input, [&](auto id, auto val) {
     switch (id) {
       case 'name': disp_name = sim::sb { val }; break;

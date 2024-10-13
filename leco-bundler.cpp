@@ -51,7 +51,7 @@ static void iphonesim_bundle(const char * dag) {
   copy("exs", dag, *path);
   copy("rsrc", dag, *path);
 
-  auto stem = sim::copy_path_stem(dag);
+  auto stem = sim::path_stem(dag);
 
   auto cmd = sim::printf(
       "xcrun simctl install %s %s",
@@ -95,7 +95,7 @@ static void wasm_bundle(const char *dag) {
 }
 
 static void bundle(const char *dag) {
-  auto path = sim::copy_path_parent(dag);
+  auto path = sim::path_parent(dag);
   auto target = path.path_filename();
 
   if (IS_TGT(target, TGT_IPHONEOS)) iphone_bundle(dag);

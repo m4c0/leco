@@ -57,12 +57,12 @@ export namespace sim {
     void path_parent() { sim_sb_path_parent(this); }
   };
 
-  sb copy_path_stem(const char * path) {
+  sb path_stem(const char * path) {
     sb res {};
     sim_sb_path_copy_stem(&res, path);
     return res;
   }
-  sb copy_path_parent(const char * path) {
+  sb path_parent(const char * path) {
     sb res {};
     sim_sb_path_copy_parent(&res, path);
     return res;
