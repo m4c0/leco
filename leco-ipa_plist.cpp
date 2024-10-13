@@ -1,10 +1,9 @@
-#include "sim.hpp"
-
 #include <stdio.h>
 #include <time.h>
 
 import plist;
 import popen;
+import sim;
 import sys;
 
 static const char * bundle_version;
@@ -12,26 +11,19 @@ static const char * bundle_version;
 [[nodiscard]] static const char *team_id() { return sys::env("LECO_IOS_TEAM"); }
 
 static void gen_info_plist(const char *exe_path, const char *build_path, const plist::common_ios_plist_params & p) {
-  sim_sbt path{};
-  sim_sb_path_copy_append(&path, exe_path, "Info.plist");
+  auto path = sim::sb { exe_path } / "Info.plist";
 
   plist::gen(path.buffer, [&](auto &&d) {
     common_ios_plist(d, p);
 
-    sim_sbt plist{};
-    sim_sb_path_copy_append(&plist, build_path, "icon-partial.plist");
-    d.merge(plist.buffer);
+    auto plist = sim::sb { build_path } / "icon-partial.plist";
+    d.merge(*plist);
   });
 }
 static void gen_archive_plist(const char *xca_path, const char *name) {
-  sim_sbt path{};
-  sim_sb_path_copy_append(&path, xca_path, "Info.plist");
-
-  sim_sbt id{};
-  sim_sb_printf(&id, "br.com.tpk.%s", name);
-
-  sim_sbt app_path{};
-  sim_sb_printf(&app_path, "Applications/%s.app", name);
+  auto path = sim::sb { xca_path } / "Info.plist";
+  auto id = sim::printf("br.com.tpk.%s", name);
+  auto app_path = sim::printf("Applications/%s.app", name);
 
   plist::gen(path.buffer, [&](auto &&d) {
     d.dictionary("ApplicationProperties", [&](auto &&dd) {
@@ -50,11 +42,8 @@ static void gen_archive_plist(const char *xca_path, const char *name) {
   });
 }
 static void gen_export_plist(const char *build_path, const char *name) {
-  sim_sbt path{};
-  sim_sb_path_copy_append(&path, build_path, "export.plist");
-
-  sim_sbt id{};
-  sim_sb_printf(&id, "br.com.tpk.%s", name);
+  auto path = sim::sb { build_path } / "export.plist";
+  auto id = sim::printf("br.com.tpk.%s", name);
 
   plist::gen(path.buffer, [&](auto &&d) {
     d.string("method", sys::env("LECO_IOS_METHOD"));
@@ -71,32 +60,28 @@ static void gen_export_plist(const char *build_path, const char *name) {
 static void compile_launch(const char *bundle_path) {
   sys::log("ibtool", bundle_path);
 
-  sim_sbt cmd{};
-  sim_sb_printf(&cmd,
+  auto cmd = sim::printf(
                 "ibtool ../leco/launch.storyboard "
                 "--compile %s/Base.lproj/launch.storyboard",
                 bundle_path);
-  sys::run(cmd.buffer);
+  sys::run(*cmd);
 }
 static void code_sign(const char *bundle_path) {
   sys::log("codesign", bundle_path);
 
-  sim_sbt cmd{};
-  sim_sb_printf(&cmd, "codesign -f -s %s %s", team_id(), bundle_path);
-  sys::run(cmd.buffer);
+  auto cmd = sim::printf("codesign -f -s %s %s", team_id(), bundle_path);
+  sys::run(*cmd);
 }
 static void dump_symbols(const char * exe, const char * exca) {
   sys::log("dump symbols", exe);
 
-  sim_sbt path {};
-  sim_sb_path_copy_append(&path, exca, "dSYMs");
-  sys::mkdirs(path.buffer);
-  sim_sb_path_append(&path, sim_path_filename(exe));
-  sim_sb_path_set_extension(&path, ".app.dSYM");
+  auto path = sim::sb { exca } / "dSYMs";
+  sys::mkdirs(*path);
+  path /= sim::path_filename(exe);
+  path.path_extension(".app.dSYM");
 
-  sim_sbt cmd {};
-  sim_sb_printf(&cmd, "dsymutil %s -o %s", exe, path.buffer);
-  sys::run(cmd.buffer);
+  auto cmd = sim::printf("dsymutil %s -o %s", exe, *path);
+  sys::run(*cmd);
 }
 void gen_iphone_ipa(const char * exe, const char * disp_name, bool landscape) {
   char buf[256];
@@ -104,30 +89,27 @@ void gen_iphone_ipa(const char * exe, const char * disp_name, bool landscape) {
   snprintf(buf, sizeof(buf) - 1, "%ld", t);
   bundle_version = buf;
 
-  sim_sbt name{};
-  sim_sb_path_copy_stem(&name, exe);
+  auto name = sim::path_stem(exe);
+  auto app_path = sim::path_parent(exe);
+  
+  sim::sb exca = app_path;
+  exca.path_parent(); // Applications
+  exca.path_parent(); // Products
+  exca.path_parent(); // exports.xcarchive
 
-  sim_sbt app_path{};
-  sim_sb_path_copy_parent(&app_path, exe);
+  sim::sb build_path = exca;
+  build_path.path_parent();
 
-  sim_sbt exca{};
-  sim_sb_path_copy_parent(&exca, app_path.buffer); // Applications
-  sim_sb_path_parent(&exca);                       // Products
-  sim_sb_path_parent(&exca);                       // exports.xcarchive
-
-  sim_sbt build_path{};
-  sim_sb_path_copy_parent(&build_path, exca.buffer);
-
-  gen_info_plist(app_path.buffer, build_path.buffer, {
-      .name = name.buffer, 
+  gen_info_plist(*app_path, *build_path, {
+      .name = *name, 
       .disp_name = disp_name, 
       .bundle_version = bundle_version,
       .landscape = landscape,
   });
-  compile_launch(app_path.buffer);
-  code_sign(app_path.buffer);
-  dump_symbols(exe, exca.buffer);
+  compile_launch(*app_path);
+  code_sign(*app_path);
+  dump_symbols(exe, *exca);
 
-  gen_archive_plist(exca.buffer, name.buffer);
-  gen_export_plist(build_path.buffer, name.buffer);
+  gen_archive_plist(*exca, *name);
+  gen_export_plist(*build_path, *name);
 }
