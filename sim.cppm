@@ -16,7 +16,7 @@ export namespace sim {
   struct sb : sim_sb {
     sb() { sim_sb_new(this, PATH_MAX); }
     sb(unsigned sz) { sim_sb_new(this, sz); }
-    ~sb() { sim_sb_delete(this); }
+    ~sb() { if (buffer) sim_sb_delete(this); }
 
     sb(const sb & o) : sb() { sim_sb_copy(this, o.buffer); }
     sb(sb && o) : sim_sb { o } { static_cast<sim_sb &>(o) = {}; }
@@ -25,7 +25,7 @@ export namespace sim {
       return *this;
     }
     sb & operator=(sb && o) {
-      sim_sb_delete(this);
+      if (buffer) sim_sb_delete(this);
       static_cast<sim_sb &>(*this) = o;
       static_cast<sim_sb &>(o) = {};
       return *this;
