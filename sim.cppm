@@ -57,6 +57,9 @@ export namespace sim {
     void path_parent() { sim_sb_path_parent(this); }
   };
 
+  sb path_extension(const char * path) {
+    return sim::sb { sim_path_extension(path) };
+  }
   sb path_stem(const char * path) {
     sb res {};
     sim_sb_path_copy_stem(&res, path);

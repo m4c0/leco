@@ -1,6 +1,5 @@
 #pragma leco tool
 
-#include "sim.hpp"
 #include "targets.hpp"
 
 #include <stdio.h>
@@ -14,8 +13,9 @@
 
 import gopt;
 import pprent;
-import sys;
+import sim;
 import strset;
+import sys;
 
 static bool log_all{};
 static const char *target{HOST_TARGET};
@@ -34,58 +34,43 @@ where:
   throw 0;
 }
 
-static void rm_rf(sim_sb *path) {
-  for (auto entry : pprent::list(path->buffer)) {
-    if (entry[0] == '.')
-      continue;
-    sim_sb_path_append(path, entry);
-    rm_rf(path);
-    sim_sb_path_parent(path);
-  }
-  if (log_all)
-    sys::log("removing", path->buffer);
+static void rm_rf(const char * p) {
+  for (auto entry : pprent::list(p)) {
+    if (entry[0] == '.') continue;
 
-  unlink(path->buffer);
+    auto path = sim::sb { p } / entry;
+    rm_rf(*path);
+  }
+
+  if (log_all) sys::log("removing", p);
+  unlink(p);
 #ifndef _WIN32
-  rmdir(path->buffer);
+  rmdir(p);
 #endif
 }
 
 static str::set temp{};
-static void remove_with_deps(sim_sb *path) {
-  if (!temp.insert(path->buffer))
-    return;
+static void remove_with_deps(const char * p) {
+  if (!temp.insert(p)) return;
 
-  sim_sb_path_append(path, "out");
-  sim_sb_path_append(path, target);
+  auto path = sim::sb { p } / "out" / target;
 
-  for (auto entry : pprent::list(path->buffer)) {
-    if (0 != strcmp(".dag", sim_path_extension(entry)))
-      continue;
+  for (auto entry : pprent::list(*path)) {
+    auto dag = path / entry;
 
-    sim_sb_path_append(path, entry);
+    if (0 != strcmp(".dag", dag.path_extension())) continue;
 
-    sys::dag_read(path->buffer, [](auto id, auto file) {
+    sys::dag_read(*dag, [&](auto id, auto file) {
       switch (id) {
-      case 'impl':
-      case 'mdep': {
-        sim_sbt p{};
-        sim_sb_path_copy_parent(&p, file);
-        remove_with_deps(&p);
-        break;
-      }
-      default:
-        break;
+        case 'impl':
+        case 'mdep': remove_with_deps(*sim::path_parent(file)); break;
+        default: break;
       }
     });
-
-    sim_sb_path_parent(path);
   }
 
-  if (!log_all)
-    sys::log("removing", path->buffer);
-
-  rm_rf(path);
+  if (!log_all) sys::log("removing", *path);
+  rm_rf(*path);
 }
 
 int main(int argc, char **argv) try {
@@ -109,16 +94,13 @@ int main(int argc, char **argv) try {
   if (opts.argc != 0)
     usage(argv[0]);
 
-  sim_sbt cwd{};
-  sim_sb_path_copy_real(&cwd, ".");
+  auto cwd = "."_real;
   if (all) {
-    remove_with_deps(&cwd);
+    remove_with_deps(*cwd);
   } else {
-    sim_sb_path_append(&cwd, "out");
-    sim_sb_path_append(&cwd, target);
-    if (!log_all)
-      sys::log("removing", cwd.buffer);
-    rm_rf(&cwd);
+    auto tgt = cwd / "out" / target;
+    if (!log_all) sys::log("removing", *tgt);
+    rm_rf(*tgt);
   }
 
   return 0;
