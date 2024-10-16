@@ -60,6 +60,11 @@ export namespace sim {
   sb path_extension(const char * path) {
     return sim::sb { sim_path_extension(path) };
   }
+  sb path_real(const char * path) {
+    sim::sb res {};
+    sim_sb_path_copy_real(&res, path);
+    return res;
+  }
   sb path_stem(const char * path) {
     sb res {};
     sim_sb_path_copy_stem(&res, path);
@@ -85,8 +90,4 @@ export namespace sim {
   const char * path_filename(const char * path) { return sim_path_filename(path); }
 } // namespace sim
 
-export sim::sb operator""_real(const char * str, unsigned long sz) {
-  sim::sb res {};
-  sim_sb_path_copy_real(&res, str);
-  return res;
-}
+export sim::sb operator""_real(const char * str, unsigned long sz) { return sim::path_real(str); }

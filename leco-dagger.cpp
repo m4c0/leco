@@ -10,6 +10,7 @@
 import gopt;
 import mtime;
 import popen;
+import sim;
 import sys;
 
 enum class exe_t {
@@ -21,7 +22,7 @@ enum class exe_t {
 };
 
 static const char *argv0;
-static sim_sbt source{};
+static sim::sb source {};
 static unsigned line{};
 static exe_t exe_type{};
 static sim_sbt mod_name{};
@@ -50,10 +51,10 @@ Where:
 }
 
 static void error(const char *msg) {
-  sys::die("%s:%d: %s\n", source.buffer, line, msg);
+  sys::die("%s:%d: %s\n", *source, line, msg);
 }
 static void missing_file(const char *desc) {
-  sys::die("%s:%d: could not find %s\n", source.buffer, line, desc);
+  sys::die("%s:%d: could not find %s\n", *source, line, desc);
 }
 
 static void output(uint32_t code, const char *msg) {
@@ -92,7 +93,7 @@ static void set_exe_type(exe_t t) {
 static bool print_if_found(const char *rel_path, const char *desc,
                            uint32_t code) {
   sim_sbt path{};
-  sim_sb_path_copy_parent(&path, source.buffer);
+  sim_sb_path_copy_parent(&path, *source);
   sim_sb_path_append(&path, rel_path);
 
   sim_sbt abs{};
@@ -231,7 +232,7 @@ static void add_mod_dep(const char *p, const char *desc) {
     *sc = '-';
 
     sim_sbt dep{};
-    sim_sb_path_copy_parent(&dep, source.buffer);
+    sim_sb_path_copy_parent(&dep, *source);
     sim_sb_path_append(&dep, pp.buffer);
     sim_sb_concat(&dep, ".cppm");
     if (print_dag_if_found(dep.buffer, desc, 'mdep', 'mdag'))
@@ -240,7 +241,7 @@ static void add_mod_dep(const char *p, const char *desc) {
 
   // Module in the same folder
   sim_sbt dep{};
-  sim_sb_path_copy_parent(&dep, source.buffer);
+  sim_sb_path_copy_parent(&dep, *source);
   sim_sb_path_append(&dep, mm.buffer);
   sim_sb_concat(&dep, ".cppm");
   if (print_dag_if_found(dep.buffer, desc, 'mdep', 'mdag'))
@@ -283,7 +284,7 @@ static bool check_extension(sim_sb *mi, const char *desc, const char *ext) {
 
 static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
   sim_sbt mi{};
-  sim_sb_path_copy_parent(&mi, source.buffer);
+  sim_sb_path_copy_parent(&mi, *source);
   sim_sb_path_append(&mi, mod_impl);
 
   if (check_extension(&mi, desc, "cpp") || check_extension(&mi, desc, "c") ||
@@ -301,7 +302,7 @@ void run(int argc, char **argv) {
   auto opts = gopt_parse(argc, argv, "do:i:t:", [&](auto ch, auto val) {
     switch (ch) {
       case 'd': dump_errors = true; break;
-      case 'i': sim_sb_path_copy_real(&source, val); break;
+      case 'i': source = sim::path_real(val); break;
       case 'o': {
         sim_sbt parent{};
         sim_sb_path_copy_parent(&parent, val);
@@ -330,7 +331,7 @@ void run(int argc, char **argv) {
   stamp(&args, argp, target);
   stamp(&args, argp, "--");
   stamp(&args, argp, "-E");
-  stamp(&args, argp, source.buffer);
+  stamp(&args, argp, *source);
 
   for (auto p = clang_argv + 1; *p && p != argp; p++) {
     (*p)[-1] = 0;
@@ -402,7 +403,7 @@ void run(int argc, char **argv) {
       sim_sb_copy(&mod_name, pp);
       if (strchr(mod_name.buffer, ':') == nullptr) {
         sim_sbt fn{};
-        sim_sb_path_copy_parent(&fn, source.buffer);
+        sim_sb_path_copy_parent(&fn, *source);
         auto dir = sim_sb_path_filename(&fn);
         if (0 == strcmp(dir, mod_name.buffer) && exe_type == exe_t::none)
           exe_type = exe_t::main_mod;
@@ -420,13 +421,13 @@ void run(int argc, char **argv) {
     }
   }
 
-  output('srcf', source.buffer);
+  output('srcf', *source);
 
   sim_sbt path{};
-  sim_sb_path_copy_parent(&path, source.buffer);
+  sim_sb_path_copy_parent(&path, *source);
   sim_sb_path_append(&path, "out");
   sim_sb_path_append(&path, target);
-  sim_sb_path_append(&path, sim_sb_path_filename(&source));
+  sim_sb_path_append(&path, source.path_filename());
 
   switch (exe_type) {
   case exe_t::none:
