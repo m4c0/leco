@@ -137,13 +137,8 @@ int main(int argc, char **argv) try {
   // To link "clang" we need the old version, so we have to compile in a new
   // place then do the appropriate renames.
 
-  sim_sbt next{};
-  sim_sb_copy(&next, output);
-  sim_sb_concat(&next, ".new");
-
-  sim_sbt prev{};
-  sim_sb_copy(&prev, output);
-  sim_sb_concat(&prev, ".old");
+  auto next = sim::sb { output } + ".new";
+  auto prev = sim::sb { output } + ".old";
 
   remove(*next);
   remove(*prev);
