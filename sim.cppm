@@ -33,7 +33,8 @@ export namespace sim {
 
     explicit sb(const char * s) : sb {} { sim_sb_copy(this, s); }
 
-    const char * operator*() { return buffer; }
+    char * operator*() { return buffer; }
+    const char * operator*() const { return buffer; }
 
     sb & operator+=(const char * s) {
       sim_sb_concat(this, s);

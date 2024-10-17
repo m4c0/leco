@@ -69,14 +69,14 @@ static const char *cmp(const char *str, const char *prefix) {
   return str + len;
 }
 static const char *chomp(const char *str, const char *prefix) {
-  static sim_sbt buf{};
+  static sim::sb buf {};
 
   auto ptr = cmp(str, prefix);
   if (!ptr) return ptr;
 
-  sim_sb_copy(&buf, ptr);
-  strchr(buf.buffer, ';')[0] = 0;
-  return buf.buffer;
+  buf = sim::sb { ptr };
+  *strchr(*buf, ';') = 0;
+  return *buf;
 }
 
 static void stamp(sim_sb *args, char **&argp, const char *arg) {
