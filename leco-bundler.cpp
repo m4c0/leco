@@ -32,13 +32,7 @@ static void osx_bundle(const char *dag) {
   copy("exs", dag, *(cnt_path / "MacOS"));
   copy("rsrc", dag, *(cnt_path / "Resources"));
 
-  {
-    auto info = cnt_path / "Info.plist";
-    plist::gen(*info, [&](auto &&d) {
-      common_app_plist(d, "app", "macosx", "1.0.0", "0");
-      d.string("CFBundleDisplayName", "app");
-    });
-  }
+  plist::gen_osx_plist(*cnt_path);
 
   sys::log("codesign", *app_path);
   sys::runf("codesign -f -s %s %s", sys::env("LECO_IOS_TEAM"), *app_path);
@@ -52,15 +46,7 @@ static void iphonesim_bundle(const char * dag) {
   copy("rsrc", dag, *path);
 
   auto stem = sim::path_stem(dag);
-
-  auto info = path / "Info.plist";
-  plist::gen(*info, [&](auto &&d) {
-    common_ios_plist(d, {
-        .name = *stem,
-        .disp_name = stem.buffer,
-        .bundle_version = "0",
-    });
-  });
+  plist::gen_iphonesim_plist(*path, *stem);
 
   sys::log("installing", *stem);
   sys::runf(

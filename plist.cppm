@@ -9,6 +9,7 @@ module;
 export module plist;
 
 import popen;
+import sim;
 import sys;
 
 export namespace plist {
@@ -140,5 +141,23 @@ void common_ios_plist(dict & d, const common_ios_plist_params & p) {
     d.array("UISupportedInterfaceOrientations", "UIInterfaceOrientationPortrait");
     d.array("UISupportedInterfaceOrientations~ipad", "UIInterfaceOrientationPortrait");
   }
+}
+
+void gen_iphonesim_plist(const char * path, const char * stem) {
+  auto info = sim::sb { path } / "Info.plist";
+  plist::gen(*info, [&](auto &&d) {
+    plist::common_ios_plist(d, {
+        .name = stem,
+        .disp_name = stem,
+        .bundle_version = "0",
+    });
+  });
+}
+void gen_osx_plist(const char * path) {
+  auto info = sim::sb { path } / "Info.plist";
+  plist::gen(*info, [&](auto &&d) {
+    plist::common_app_plist(d, "app", "macosx", "1.0.0", "0");
+    d.string("CFBundleDisplayName", "app");
+  });
 }
 } // namespace plist
