@@ -8,6 +8,7 @@ module;
 
 export module plist;
 
+import mtime;
 import popen;
 import sim;
 import sys;
@@ -145,6 +146,7 @@ void common_ios_plist(dict & d, const common_ios_plist_params & p) {
 
 void gen_iphonesim_plist(const char * path, const char * stem) {
   auto info = sim::sb { path } / "Info.plist";
+  if (mtime::of(*info)) return;
   plist::gen(*info, [&](auto &&d) {
     plist::common_ios_plist(d, {
         .name = stem,
@@ -155,6 +157,7 @@ void gen_iphonesim_plist(const char * path, const char * stem) {
 }
 void gen_osx_plist(const char * path) {
   auto info = sim::sb { path } / "Info.plist";
+  if (mtime::of(*info)) return;
   plist::gen(*info, [&](auto &&d) {
     plist::common_app_plist(d, "app", "macosx", "1.0.0", "0");
     d.string("CFBundleDisplayName", "app");
