@@ -53,14 +53,8 @@ static void iphonesim_bundle(const char * dag) {
 
   auto stem = sim::path_stem(dag);
 
-  auto cmd = sim::printf(
-      "xcrun simctl install %s %s",
-      sys::env("LECO_IOS_SIM_TARGET"),
-      *path);
-
-  path /= "Info.plist";
-
-  plist::gen(*path, [&](auto &&d) {
+  auto info = path / "Info.plist";
+  plist::gen(*info, [&](auto &&d) {
     common_ios_plist(d, {
         .name = *stem,
         .disp_name = stem.buffer,
@@ -69,7 +63,10 @@ static void iphonesim_bundle(const char * dag) {
   });
 
   sys::log("installing", *stem);
-  sys::run(*cmd);
+  sys::runf(
+      "xcrun simctl install %s %s",
+      sys::env("LECO_IOS_SIM_TARGET"),
+      *path);
 }
 
 static void iphone_bundle(const char *dag) {
