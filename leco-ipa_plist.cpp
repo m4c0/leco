@@ -67,10 +67,7 @@ static void compile_launch(const char *bundle_path) {
   sys::run(*cmd);
 }
 static void code_sign(const char *bundle_path) {
-  sys::log("codesign", bundle_path);
-
-  auto cmd = sim::printf("codesign -f -s %s %s", team_id(), bundle_path);
-  sys::run(*cmd);
+  sys::tool_run("codesign", "-d %s", bundle_path);
 }
 static void dump_symbols(const char * exe, const char * exca) {
   sys::log("dump symbols", exe);

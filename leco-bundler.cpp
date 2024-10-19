@@ -33,9 +33,7 @@ static void osx_bundle(const char *dag) {
   copy("rsrc", dag, *(cnt_path / "Resources"));
 
   plist::gen_osx_plist(*cnt_path);
-
-  sys::log("codesign", *app_path);
-  sys::runf("codesign -f -s %s %s", sys::env("LECO_IOS_TEAM"), *app_path);
+  sys::tool_run("codesign", "-d %s", *app_path);
 }
 
 static void iphonesim_bundle(const char * dag) {
