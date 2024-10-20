@@ -109,4 +109,6 @@ void gen_iphone_ipa(const char * exe, const char * disp_name, bool landscape) {
 
   gen_archive_plist(*exca, *name);
   gen_export_plist(*build_path, *name);
+
+  sys::log("bundle version", buf);
 }
