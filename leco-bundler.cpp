@@ -6,7 +6,6 @@
 
 import gopt;
 import mtime;
-import plist;
 import sim;
 import sys;
 
@@ -21,40 +20,6 @@ static void dir_bundle(const char *dag) {
 
   copy("exs", dag, *path);
   copy("rsrc", dag, *path);
-}
-
-static void osx_bundle(const char *dag) {
-  sim::sb app_path { dag };
-  app_path.path_extension("app");
-
-  auto cnt_path = app_path / "Contents";
-
-  copy("exs", dag, *(cnt_path / "MacOS"));
-  copy("rsrc", dag, *(cnt_path / "Resources"));
-
-  plist::gen_osx_plist(*cnt_path);
-  sys::tool_run("codesign", "-d %s", *app_path);
-}
-
-static void iphonesim_bundle(const char * dag) {
-  sim::sb path { dag };
-  path.path_extension("app");
-
-  copy("exs", dag, *path);
-  copy("rsrc", dag, *path);
-
-  auto stem = sim::path_stem(dag);
-  plist::gen_iphonesim_plist(*path, *stem);
-
-  sys::log("installing", *stem);
-  sys::runf(
-      "xcrun simctl install %s %s",
-      sys::env("LECO_IOS_SIM_TARGET"),
-      *path);
-}
-
-static void iphone_bundle(const char *dag) {
-  sys::tool_run("ipa", "-i %s", dag);
 }
 
 static void wasm_bundle(const char *dag) {
@@ -79,9 +44,7 @@ static void bundle(const char *dag) {
   auto path = sim::path_parent(dag);
   auto target = path.path_filename();
 
-  if (IS_TGT(target, TGT_IPHONEOS)) iphone_bundle(dag);
-  else if (IS_TGT(target, TGT_IOS_SIMULATOR)) iphonesim_bundle(dag);
-  else if (IS_TGT(target, TGT_OSX)) osx_bundle(dag);
+  if (IS_TGT_APPLE(target)) sys::tool_run("ipa", "-i %s", dag);
   else if (IS_TGT(target, TGT_WASM)) wasm_bundle(dag);
   else dir_bundle(dag);
 }
