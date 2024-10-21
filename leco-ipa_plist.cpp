@@ -119,9 +119,8 @@ void gen_iphone_ipa(const char * exe, const char * dag) {
   code_sign(*app_path);
   dump_symbols(exe, *exca);
 
-  auto id = sim::printf("br.com.tpk.%s", *name);
-  gen_archive_plist(*exca, *name, *id);
-  gen_export_plist(*build_path, *id);
+  gen_archive_plist(*exca, *name, *app_id);
+  gen_export_plist(*build_path, *app_id);
 
   sys::log("bundle version", buf);
 }
