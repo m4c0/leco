@@ -113,6 +113,7 @@ void gen_iphone_ipa(const char * exe, const char * dag) {
       .name = *name, 
       .disp_name = *disp_name, 
       .bundle_version = bundle_version,
+      .app_id = *app_id,
       .landscape = landscape,
   });
   compile_launch(*app_path);
