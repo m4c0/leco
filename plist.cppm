@@ -107,18 +107,27 @@ void common_app_plist(dict &d, const char *name, const char *sdk, const char * v
   d.string("DTXcodeBuild", xcode_build);
   d.string("DTXcode", xcode_version);
 }
-struct common_ios_plist_params {
-  const char * name;
-  const char * disp_name;
-  const char * bundle_version;
-  const char * app_id;
-  bool landscape;
-};
-void common_ios_plist(dict & d, const common_ios_plist_params & p) {
-  common_app_plist(d, p.name, "iphoneos", p.bundle_version);
-  d.string("CFBundleIdentifier", p.app_id);
-  d.string("CFBundleDisplayName", p.disp_name);
-  d.string("CFBundleShortVersionString", "1.0.0");
+void common_ios_plist(dict & d, const char * dag, const char * bundle_version) {
+  auto name = sim::path_stem(dag);
+
+  bool landscape {};
+  sim::sb disp_name = name;
+  sim::sb app_id = sim::printf("br.com.tpk.%s", *name);
+  sim::sb app_ver { "1.0.0" };
+  sys::dag_read(dag, [&](auto id, auto val) {
+    switch (id) {
+      case 'apid': app_id = sim::sb { val }; break;
+      case 'apvr': app_ver = sim::sb { val }; break;
+      case 'name': disp_name = sim::sb { val }; break;
+      case 'land': landscape = true; break;
+      default: break;
+    }
+  });
+
+  common_app_plist(d, *name, "iphoneos", bundle_version);
+  d.string("CFBundleIdentifier", *app_id);
+  d.string("CFBundleDisplayName", *disp_name);
+  d.string("CFBundleShortVersionString", *app_ver);
   d.array("CFBundleSupportedPlatforms", "iPhoneOS");
   d.string("MinimumOSVersion", plist::minimum_os_version);
   d.boolean("LSRequiresIPhoneOS", true);
@@ -130,7 +139,7 @@ void common_ios_plist(dict & d, const common_ios_plist_params & p) {
     dd.boolean("arm64", true);
     dd.boolean("metal", true);
   });
-  if (p.landscape) {
+  if (landscape) {
     d.array("UISupportedInterfaceOrientations",
         "UIInterfaceOrientationLandscapeLeft",
         "UIInterfaceOrientationLandscapeRight");
@@ -143,15 +152,11 @@ void common_ios_plist(dict & d, const common_ios_plist_params & p) {
   }
 }
 
-void gen_iphonesim_plist(const char * path, const char * stem) {
+void gen_iphonesim_plist(const char * path, const char * dag) {
   auto info = sim::sb { path } / "Info.plist";
   if (mtime::of(*info)) return;
   plist::gen(*info, [&](auto &&d) {
-    plist::common_ios_plist(d, {
-        .name = stem,
-        .disp_name = stem,
-        .bundle_version = "0",
-    });
+    plist::common_ios_plist(d, dag, "0");
   });
 }
 void gen_osx_plist(const char * path) {

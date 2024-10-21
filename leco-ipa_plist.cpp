@@ -10,11 +10,11 @@ static const char * bundle_version;
 
 [[nodiscard]] static const char *team_id() { return sys::env("LECO_IOS_TEAM"); }
 
-static void gen_info_plist(const char *exe_path, const char *build_path, const plist::common_ios_plist_params & p) {
+static void gen_info_plist(const char * exe_path, const char * dag, const char * build_path) {
   auto path = sim::sb { exe_path } / "Info.plist";
 
   plist::gen(path.buffer, [&](auto &&d) {
-    common_ios_plist(d, p);
+    common_ios_plist(d, dag, bundle_version);
 
     auto plist = sim::sb { build_path } / "icon-partial.plist";
     d.merge(*plist);
@@ -80,20 +80,6 @@ static void dump_symbols(const char * exe, const char * exca) {
   sys::run(*cmd);
 }
 void gen_iphone_ipa(const char * exe, const char * dag) {
-  auto name = sim::path_stem(exe);
-
-  bool landscape {};
-  sim::sb disp_name = name;
-  sim::sb app_id = sim::printf("br.com.tpk.%s", *name);
-  sys::dag_read(dag, [&](auto id, auto val) {
-    switch (id) {
-      case 'apid': app_id = sim::sb { val }; break;
-      case 'name': disp_name = sim::sb { val }; break;
-      case 'land': landscape = true; break;
-      default: break;
-    }
-  });
-
   char buf[256];
   auto t = time(nullptr);
   snprintf(buf, sizeof(buf) - 1, "%ld", t);
@@ -109,18 +95,21 @@ void gen_iphone_ipa(const char * exe, const char * dag) {
   sim::sb build_path = exca;
   build_path.path_parent();
 
-  gen_info_plist(*app_path, *build_path, {
-      .name = *name, 
-      .disp_name = *disp_name, 
-      .bundle_version = bundle_version,
-      .app_id = *app_id,
-      .landscape = landscape,
-  });
+  gen_info_plist(*app_path, dag, *build_path);
   compile_launch(*app_path);
   code_sign(*app_path);
   dump_symbols(exe, *exca);
 
-  gen_archive_plist(*exca, *name, *app_id);
+  auto stem = sim::path_stem(dag);
+  auto app_id = sim::printf("br.com.tpk.%s", *stem);
+  sys::dag_read(dag, [&](auto id, auto val) {
+    switch (id) {
+      case 'apid': app_id = sim::sb { val }; break;
+      default: break;
+    }
+  });
+
+  gen_archive_plist(*exca, *stem, *app_id);
   gen_export_plist(*build_path, *app_id);
 
   sys::log("bundle version", buf);
