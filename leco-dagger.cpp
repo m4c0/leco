@@ -25,7 +25,7 @@ static const char *argv0;
 static sim::sb source {};
 static unsigned line{};
 static exe_t exe_type{};
-static sim_sbt mod_name{};
+static sim::sb mod_name {};
 static FILE *out{stdout};
 static const char *out_filename{};
 static const char *target{HOST_TARGET};
@@ -213,7 +213,7 @@ static void find_header(const char *l) {
 static void add_mod_dep(const char *p, const char *desc) {
   sim_sbt mm{};
   if (*p == ':') {
-    sim_sb_copy(&mm, mod_name.buffer);
+    sim_sb_copy(&mm, *mod_name);
     if (auto mc = strchr(mm.buffer, ':')) {
       *mc = 0;
       mm.len = strlen(mm.buffer);
@@ -396,16 +396,15 @@ void run(int argc, char **argv) {
         line = l - 1;
     } else if (auto pp = chomp(p, "module ")) {
       if (0 != strcmp(pp, ":private")) {
-        sim_sb_copy(&mod_name, pp);
+        mod_name = sim::sb { pp };
         add_mod_dep(pp, "main module dependency");
       }
     } else if (auto pp = chomp(p, "export module ")) {
-      sim_sb_copy(&mod_name, pp);
-      if (strchr(mod_name.buffer, ':') == nullptr) {
-        sim_sbt fn{};
-        sim_sb_path_copy_parent(&fn, *source);
-        auto dir = sim_sb_path_filename(&fn);
-        if (0 == strcmp(dir, mod_name.buffer) && exe_type == exe_t::none)
+      mod_name = sim::sb { pp };
+      if (strchr(*mod_name, ':') == nullptr) {
+        auto fn = sim::path_parent(*source);
+        auto dir = fn.path_filename();
+        if (0 == strcmp(dir, *mod_name) && exe_type == exe_t::none)
           exe_type = exe_t::main_mod;
       }
     } else if (auto pp = chomp(p, "export import ")) {
