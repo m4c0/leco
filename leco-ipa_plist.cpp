@@ -52,6 +52,7 @@ static void gen_export_plist(const char *build_path, const char *name) {
     d.boolean("uploadSymbols", true);
     d.boolean("generateAppStoreInformation", true);
     d.dictionary("provisioningProfiles", [&](auto &&dd) {
+      // TODO: detect based on installed profiles
       dd.string(id.buffer, sys::env("LECO_IOS_PROV_PROF"));
     });
   });
