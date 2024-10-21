@@ -90,7 +90,7 @@ void gen(const char * fname, auto && fn) {
   fclose(f);
 }
 
-void common_app_plist(dict &d, const char *name, const char *sdk, const char * short_ver, const char * ver) {
+void common_app_plist(dict &d, const char *name, const char *sdk, const char * ver) {
   sim_sbt exe{};
   sim_sb_printf(&exe, "%s.exe", name);
 
@@ -99,7 +99,6 @@ void common_app_plist(dict &d, const char *name, const char *sdk, const char * s
   d.string("CFBundleInfoDictionaryVersion", "6.0");
   d.string("CFBundleName", name);
   d.string("CFBundlePackageType", "APPL");
-  d.string("CFBundleShortVersionString", short_ver);
   d.string("CFBundleVersion", ver);
   d.string("DTPlatformName", sdk);
   d.string("DTPlatformBuild", platform_build);
@@ -116,9 +115,10 @@ struct common_ios_plist_params {
   bool landscape;
 };
 void common_ios_plist(dict & d, const common_ios_plist_params & p) {
-  common_app_plist(d, p.name, "iphoneos", "1.0.0", p.bundle_version);
+  common_app_plist(d, p.name, "iphoneos", p.bundle_version);
   d.string("CFBundleIdentifier", p.app_id);
   d.string("CFBundleDisplayName", p.disp_name);
+  d.string("CFBundleShortVersionString", "1.0.0");
   d.array("CFBundleSupportedPlatforms", "iPhoneOS");
   d.string("MinimumOSVersion", plist::minimum_os_version);
   d.boolean("LSRequiresIPhoneOS", true);
@@ -158,8 +158,9 @@ void gen_osx_plist(const char * path) {
   auto info = sim::sb { path } / "Info.plist";
   if (mtime::of(*info)) return;
   plist::gen(*info, [&](auto &&d) {
-    plist::common_app_plist(d, "app", "macosx", "1.0.0", "0");
+    plist::common_app_plist(d, "app", "macosx", "0");
     d.string("CFBundleIdentifier", "br.com.tpk.app");
+    d.string("CFBundleShortVersionString", "1.0.0");
     d.string("CFBundleDisplayName", "app");
   });
 }
