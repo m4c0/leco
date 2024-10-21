@@ -20,16 +20,15 @@ static void gen_info_plist(const char *exe_path, const char *build_path, const p
     d.merge(*plist);
   });
 }
-static void gen_archive_plist(const char *xca_path, const char *name) {
+static void gen_archive_plist(const char *xca_path, const char *name, const char * id) {
   auto path = sim::sb { xca_path } / "Info.plist";
-  auto id = sim::printf("br.com.tpk.%s", name);
   auto app_path = sim::printf("Applications/%s.app", name);
 
   plist::gen(path.buffer, [&](auto &&d) {
     d.dictionary("ApplicationProperties", [&](auto &&dd) {
       dd.string("ApplicationPath", app_path.buffer);
       dd.array("Architectures", "arm64");
-      dd.string("CFBundleIdentifier", id.buffer);
+      dd.string("CFBundleIdentifier", id);
       dd.string("CFBundleShortVersionString", "1.0.0");
       dd.string("CFBundleVersion", bundle_version);
       dd.string("SigningIdentity", sys::env("LECO_IOS_SIGN_ID"));
@@ -41,9 +40,8 @@ static void gen_archive_plist(const char *xca_path, const char *name) {
     d.string("SchemeName", name);
   });
 }
-static void gen_export_plist(const char *build_path, const char *name) {
+static void gen_export_plist(const char *build_path, const char * app_id) {
   auto path = sim::sb { build_path } / "export.plist";
-  auto id = sim::printf("br.com.tpk.%s", name);
 
   plist::gen(path.buffer, [&](auto &&d) {
     d.string("method", sys::env("LECO_IOS_METHOD"));
@@ -53,7 +51,7 @@ static void gen_export_plist(const char *build_path, const char *name) {
     d.boolean("generateAppStoreInformation", true);
     d.dictionary("provisioningProfiles", [&](auto &&dd) {
       // TODO: detect based on installed profiles
-      dd.string(id.buffer, sys::env("LECO_IOS_PROV_PROF"));
+      dd.string(app_id, sys::env("LECO_IOS_PROV_PROF"));
     });
   });
 }
@@ -108,8 +106,9 @@ void gen_iphone_ipa(const char * exe, const char * disp_name, bool landscape) {
   code_sign(*app_path);
   dump_symbols(exe, *exca);
 
-  gen_archive_plist(*exca, *name);
-  gen_export_plist(*build_path, *name);
+  auto id = sim::printf("br.com.tpk.%s", *name);
+  gen_archive_plist(*exca, *name, *id);
+  gen_export_plist(*build_path, *id);
 
   sys::log("bundle version", buf);
 }
