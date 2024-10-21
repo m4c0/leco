@@ -111,7 +111,7 @@ FILE * fopen(const char * name, const char * mode) {
   return res;
 }
 
-void dag_read(const char *dag, auto &&fn) {
+void dag_read(const char *dag, auto &&fn) try {
   auto f = fopen(dag, "r");
   if (!f) die("could not open dag file");
 
@@ -128,6 +128,9 @@ void dag_read(const char *dag, auto &&fn) {
   }
 
   fclose(f);
+} catch (...) {
+  fprintf(stderr, "whilst reading DAG node [%s]\n", dag);
+  throw;
 }
 
 void tool_cmd(sim_sb * cmd, const char * name) {
