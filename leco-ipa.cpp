@@ -27,7 +27,7 @@ Where:
 )");
 }
 
-void gen_iphone_ipa(const char * exe, const char * disp_name, bool landscape);
+void gen_iphone_ipa(const char * exe, const char * dag);
 
 static void copy(const char * with, const char * dag, const char * to) {
   sys::tool_run(with, " -i %s -o %s", dag, to);
@@ -91,23 +91,9 @@ static void iphone_bundle(const char *dag) {
   copy("rsrc", dag, *path);
   xcassets(dag, *path);
 
-  auto name = sim::path_filename(dag);
-
-  bool landscape {};
-  auto disp_name = sim::path_stem(dag);
-  sim::sb app_id = sim::printf("br.com.tpk.%s", name);
-  sys::dag_read(dag, [&](auto id, auto val) {
-    switch (id) {
-      case 'apid': app_id = sim::sb { val }; break;
-      case 'name': disp_name = sim::sb { val }; break;
-      case 'land': landscape = true; break;
-      default: break;
-    }
-  });
-
-  path /= name;
+  path /= sim::path_filename(dag);
   path.path_extension("exe");
-  gen_iphone_ipa(*path, *disp_name, landscape);
+  gen_iphone_ipa(*path, dag);
 
   export_archive();
   upload_archive(dag);

@@ -79,13 +79,26 @@ static void dump_symbols(const char * exe, const char * exca) {
   auto cmd = sim::printf("dsymutil %s -o %s", exe, *path);
   sys::run(*cmd);
 }
-void gen_iphone_ipa(const char * exe, const char * disp_name, bool landscape) {
+void gen_iphone_ipa(const char * exe, const char * dag) {
+  auto name = sim::path_stem(exe);
+
+  bool landscape {};
+  sim::sb disp_name = name;
+  sim::sb app_id = sim::printf("br.com.tpk.%s", *name);
+  sys::dag_read(dag, [&](auto id, auto val) {
+    switch (id) {
+      case 'apid': app_id = sim::sb { val }; break;
+      case 'name': disp_name = sim::sb { val }; break;
+      case 'land': landscape = true; break;
+      default: break;
+    }
+  });
+
   char buf[256];
   auto t = time(nullptr);
   snprintf(buf, sizeof(buf) - 1, "%ld", t);
   bundle_version = buf;
 
-  auto name = sim::path_stem(exe);
   auto app_path = sim::path_parent(exe);
   
   sim::sb exca = app_path;
@@ -98,7 +111,7 @@ void gen_iphone_ipa(const char * exe, const char * disp_name, bool landscape) {
 
   gen_info_plist(*app_path, *build_path, {
       .name = *name, 
-      .disp_name = disp_name, 
+      .disp_name = *disp_name, 
       .bundle_version = bundle_version,
       .landscape = landscape,
   });
