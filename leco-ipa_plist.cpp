@@ -20,7 +20,7 @@ static void gen_info_plist(const char * exe_path, const char * dag, const char *
     d.merge(*plist);
   });
 }
-static void gen_archive_plist(const char *xca_path, const char *name, const char * id) {
+static void gen_archive_plist(const char *xca_path, const char *name, const char * id, const char * app_ver) {
   auto path = sim::sb { xca_path } / "Info.plist";
   auto app_path = sim::printf("Applications/%s.app", name);
 
@@ -29,7 +29,7 @@ static void gen_archive_plist(const char *xca_path, const char *name, const char
       dd.string("ApplicationPath", app_path.buffer);
       dd.array("Architectures", "arm64");
       dd.string("CFBundleIdentifier", id);
-      dd.string("CFBundleShortVersionString", "1.0.0");
+      dd.string("CFBundleShortVersionString", app_ver);
       dd.string("CFBundleVersion", bundle_version);
       dd.string("SigningIdentity", sys::env("LECO_IOS_SIGN_ID"));
       dd.string("Team", team_id());
@@ -102,14 +102,16 @@ void gen_iphone_ipa(const char * exe, const char * dag) {
 
   auto stem = sim::path_stem(dag);
   auto app_id = sim::printf("br.com.tpk.%s", *stem);
+  sim::sb app_ver { "1.0.0" };
   sys::dag_read(dag, [&](auto id, auto val) {
     switch (id) {
       case 'apid': app_id = sim::sb { val }; break;
+      case 'apvr': app_ver = sim::sb { val }; break;
       default: break;
     }
   });
 
-  gen_archive_plist(*exca, *stem, *app_id);
+  gen_archive_plist(*exca, *stem, *app_id, *app_ver);
   gen_export_plist(*build_path, *app_id);
 
   sys::log("bundle version", buf);
