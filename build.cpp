@@ -1,6 +1,8 @@
+#define MTIME_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 #include "die.hpp"
 #include "targets.hpp"
+#include "../mtime/mtime.h"
 
 #include <stdio.h>
 
@@ -65,6 +67,15 @@ int try_main(int argc, char **argv) {
 }
 
 int main(int argc, char **argv) try {
+  if (mtime_of("build.cpp") > mtime_of("build.exe")) {
+#if !_WIN32
+    puts("Rebuilding self");
+    run("clang++ -std=c++20 build.cpp -o build.exe");
+    run("./build.exe");
+#else
+#endif
+    return 0;
+  }
   return try_main(argc, argv);
 } catch (int n) {
   fprintf(stderr, "child process failed with code %d\n", n);
