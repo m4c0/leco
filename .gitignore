@@ -5,5 +5,7 @@
 *.o
 *.pcm
 *.pdb
+*.new
+*.old
 out
 

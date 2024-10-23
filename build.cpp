@@ -68,12 +68,13 @@ int try_main(int argc, char **argv) {
 
 int main(int argc, char **argv) try {
   if (mtime_of("build.cpp") > mtime_of("build.exe")) {
-#if !_WIN32
     puts("Rebuilding self");
-    run("clang++ -std=c++20 build.cpp -o build.exe");
-    run("./build.exe");
-#else
-#endif
+    remove("build.old");
+    remove("build.new");
+    run("clang++ -std=c++20 build.cpp -o build.new");
+    rename("build.exe", "build.old");
+    rename("build.new", "build.exe");
+    run("." SEP "build.exe");
     return 0;
   }
   return try_main(argc, argv);
