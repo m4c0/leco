@@ -29,7 +29,6 @@
                 LMARG("sim") LMARG("strset") LMARG("sys"))
 
 int try_main(int argc, char **argv) {
-  // TODO: self-rebuild this cpp
   _mkdir("out");
   _mkdir("out" SEP HOST_TARGET);
 
