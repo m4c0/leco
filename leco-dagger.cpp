@@ -79,10 +79,10 @@ static const char *chomp(const char *str, const char *prefix) {
   return *buf;
 }
 
-static void stamp(sim_sb *args, char **&argp, const char *arg) {
-  sim_sb_concat(args, " ");
+static void stamp(sim::sb * args, char **& argp, const char * arg) {
+  *args += " ";
   *argp++ = args->buffer + args->len;
-  sim_sb_concat(args, arg);
+  *args += arg;
 }
 
 static void set_exe_type(exe_t t) {
@@ -92,19 +92,15 @@ static void set_exe_type(exe_t t) {
 
 static bool print_if_found(const char *rel_path, const char *desc,
                            uint32_t code) {
-  sim_sbt path{};
-  sim_sb_path_copy_parent(&path, *source);
-  sim_sb_path_append(&path, rel_path);
-
-  sim_sbt abs{};
-  if (mtime::of(path.buffer) == 0) {
-    sim_sb_path_copy_real(&abs, rel_path);
-    if (mtime::of(abs.buffer) == 0) return false;
+  sim::sb abs = sim::path_parent(*source) / rel_path;
+  if (mtime::of(*abs) != 0) {
+    abs = sim::path_real(*abs);
   } else {
-    sim_sb_path_copy_real(&abs, path.buffer);
+    abs = sim::path_real(rel_path);
+    if (mtime::of(*abs) == 0) return false;
   }
 
-  output(code, abs.buffer);
+  output(code, *abs);
   return true;
 }
 static void print_found(const char *rel_path, const char *desc, uint32_t code) {
@@ -119,14 +115,9 @@ static bool print_dag_if_found(const char *src, const char *desc, uint32_t code,
                                uint32_t dag_code) {
   if (!print_if_found(src, desc, code)) return false;
 
-  sim_sbt dag{};
-  sim_sb_path_copy_real(&dag, src);
-  sim_sb_path_parent(&dag);
-  sim_sb_path_append(&dag, "out");
-  sim_sb_path_append(&dag, target);
-  sim_sb_path_append(&dag, sim_path_filename(src));
-  sim_sb_path_set_extension(&dag, "dag");
-  output(dag_code, dag.buffer);
+  auto dag = sim::path_parent(*sim::path_real(src)) / "out" / target / sim::path_filename(src);
+  dag.path_extension("dag");
+  output(dag_code, *dag);
 
   // TODO: merge dags from deps (also recursing?)
   return true;
@@ -322,8 +313,8 @@ void run(int argc, char **argv) {
   char *clang_argv[100]{};
   char **argp = clang_argv;
 
-  sim_sbt args{};
-  *argp++ = args.buffer;
+  sim::sb args{};
+  *argp++ = *args;
 
   sim_sb_path_copy_parent(&args, argv[0]);
   sim_sb_path_append(&args, "leco-clang.exe");
