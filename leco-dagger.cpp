@@ -144,11 +144,10 @@ static void read_file_list(const char *str, const char *desc, uint32_t code,
     }
     if (e == nullptr) throw 1;
 
-    sim_sbt buf{};
-    sim_sb_copy(&buf, str);
+    auto buf = sim::sb { str };
     buf.buffer[e - str] = 0;
 
-    prfn(buf.buffer, desc, code);
+    prfn(*buf, desc, code);
 
     str = *e ? e + 1 : e;
   }
@@ -156,16 +155,15 @@ static void read_file_list(const char *str, const char *desc, uint32_t code,
 }
 
 static void add_xcfw(const char * str, const char * desc, uint32_t code) {
-  sim_sbt path{};
-  sim_sb_copy(&path, str);
+  auto path = sim::sb { str };
 
-  if (IS_TGT(target, TGT_IPHONEOS)) sim_sb_path_append(&path, "ios-arm64");
-  else if (IS_TGT(target, TGT_IOS_SIMULATOR)) sim_sb_path_append(&path, "ios-arm64_x86_64-simulator");
-  else if (IS_TGT(target, TGT_OSX)) sim_sb_path_append(&path, "macos-arm64_x86_64");
+  if (IS_TGT(target, TGT_IPHONEOS)) path /= "ios-arm64";
+  else if (IS_TGT(target, TGT_IOS_SIMULATOR)) path /= "ios-arm64_x86_64-simulator";
+  else if (IS_TGT(target, TGT_OSX)) path /= "macos-arm64_x86_64";
   else sys::die("xcframework is only supported in apple platforms");
 
-  sim_sb_path_append(&path, sim_path_filename(str));
-  sim_sb_path_set_extension(&path, "framework");
+  path /= sim::path_filename(str);
+  path.path_extension("framework");
 
   print_found(path.buffer, desc, code);
 }
@@ -179,11 +177,10 @@ static void find_header(const char *l) {
   // <build-in> and <command-line>
   if (*s == '<') return;
 
-  sim_sbt hdr{};
-  sim_sb_copy(&hdr, s);
+  auto hdr = sim::sb { s };
 
   // Ignore system headers
-  auto e = strchr(hdr.buffer, '"');
+  auto e = strchr(*hdr, '"');
   if (!e) return;
 
   *e = 0;
