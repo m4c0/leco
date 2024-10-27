@@ -1,5 +1,4 @@
 #pragma leco tool
-#include "sim.hpp"
 #include "targets.hpp"
 
 #include <stdint.h>
@@ -81,7 +80,7 @@ static const char *chomp(const char *str, const char *prefix) {
 
 static void stamp(sim::sb * args, char **& argp, const char * arg) {
   *args += " ";
-  *argp++ = args->buffer + args->len;
+  *argp++ = **args + args->len;
   *args += arg;
 }
 
@@ -145,7 +144,7 @@ static void read_file_list(const char *str, const char *desc, uint32_t code,
     if (e == nullptr) throw 1;
 
     auto buf = sim::sb { str };
-    buf.buffer[e - str] = 0;
+    (*buf)[e - str] = 0;
 
     prfn(*buf, desc, code);
 
@@ -165,7 +164,7 @@ static void add_xcfw(const char * str, const char * desc, uint32_t code) {
   path /= sim::path_filename(str);
   path.path_extension("framework");
 
-  print_found(path.buffer, desc, code);
+  print_found(*path, desc, code);
 }
 
 static void find_header(const char *l) {
@@ -196,66 +195,46 @@ static void find_header(const char *l) {
   // Other flags would be "2" meaning "leaving file" and "4" meaning "extern C"
   // block.
 
-  print_found(hdr.buffer, "header", 'head');
+  print_found(*hdr, "header", 'head');
 }
 static void add_mod_dep(const char *p, const char *desc) {
-  sim_sbt mm{};
+  sim::sb mm {};
   if (*p == ':') {
-    sim_sb_copy(&mm, *mod_name);
-    if (auto mc = strchr(mm.buffer, ':')) {
+    mm = { mod_name };
+    if (auto mc = strchr(*mm, ':')) {
       *mc = 0;
-      mm.len = strlen(mm.buffer);
+      mm.len = strlen(*mm);
     }
-    sim_sb_concat(&mm, p);
+    mm += p;
   } else {
-    sim_sb_copy(&mm, p);
+    mm = sim::sb { p };
   }
 
-  sim_sbt pp{};
-  sim_sb_copy(&pp, mm.buffer);
+  sim::sb srcdir = sim::path_parent(*source);
+  sim::sb pp { *mm };
 
   // Module parts
-  auto sc = strchr(pp.buffer, ':');
+  auto sc = strchr(*pp, ':');
   if (sc != nullptr) {
     *sc = '-';
 
-    sim_sbt dep{};
-    sim_sb_path_copy_parent(&dep, *source);
-    sim_sb_path_append(&dep, pp.buffer);
-    sim_sb_concat(&dep, ".cppm");
-    if (print_dag_if_found(dep.buffer, desc, 'mdep', 'mdag'))
-      return;
+    auto dep = srcdir / *pp + ".cppm";
+    if (print_dag_if_found(*dep, desc, 'mdep', 'mdag')) return;
   }
 
   // Module in the same folder
-  sim_sbt dep{};
-  sim_sb_path_copy_parent(&dep, *source);
-  sim_sb_path_append(&dep, mm.buffer);
-  sim_sb_concat(&dep, ".cppm");
-  if (print_dag_if_found(dep.buffer, desc, 'mdep', 'mdag'))
-    return;
+  auto dep = srcdir / *mm + ".cppm";
+  if (print_dag_if_found(*dep, desc, 'mdep', 'mdag')) return;
 
   // Module in sibling folder
-  sim_sb_path_parent(&dep);
-  sim_sb_path_parent(&dep);
-  sim_sb_path_append(&dep, mm.buffer);
-  sim_sb_path_append(&dep, mm.buffer);
-  sim_sb_concat(&dep, ".cppm");
-  if (print_dag_if_found(dep.buffer, desc, 'mdep', 'mdag'))
-    return;
+  dep = sim::path_parent(*srcdir) / *mm / *mm + ".cppm";
+  if (print_dag_if_found(*dep, desc, 'mdep', 'mdag')) return;
 
   // Module in sibling folder with "-" instead of "_"
-  char *u;
-  while ((u = strchr(pp.buffer, '_')) != nullptr) {
-    *u = '-';
-  }
-  sim_sb_path_parent(&dep);
-  sim_sb_path_parent(&dep);
-  sim_sb_path_append(&dep, pp.buffer);
-  sim_sb_path_append(&dep, mm.buffer);
-  sim_sb_concat(&dep, ".cppm");
-  if (print_dag_if_found(dep.buffer, desc, 'mdep', 'mdag'))
-    return;
+  char * u;
+  while ((u = strchr(*pp, '_')) != nullptr) *u = '-';
+  dep = sim::path_parent(*srcdir) / *pp / *mm + ".cppm";
+  if (print_dag_if_found(*dep, desc, 'mdep', 'mdag')) return;
 
   missing_file(desc);
 }
@@ -265,15 +244,13 @@ static void add_bdep(const char * src, const char * desc, uint32_t code) {
   missing_file(desc);
 }
 
-static bool check_extension(sim_sb *mi, const char *desc, const char *ext) {
-  sim_sb_path_set_extension(mi, ext);
-  return print_dag_if_found(mi->buffer, desc, 'impl', 'idag');
+static bool check_extension(sim::sb * mi, const char *desc, const char *ext) {
+  mi->path_extension(ext);
+  return print_dag_if_found(**mi, desc, 'impl', 'idag');
 }
 
 static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
-  sim_sbt mi{};
-  sim_sb_path_copy_parent(&mi, *source);
-  sim_sb_path_append(&mi, mod_impl);
+  auto mi = sim::sb { *source } / mod_impl;
 
   if (check_extension(&mi, desc, "cpp") || check_extension(&mi, desc, "c") ||
       check_extension(&mi, desc, "mm") || check_extension(&mi, desc, "m"))
@@ -291,14 +268,11 @@ void run(int argc, char **argv) {
     switch (ch) {
       case 'd': dump_errors = true; break;
       case 'i': source = sim::path_real(val); break;
-      case 'o': {
-        sim_sbt parent{};
-        sim_sb_path_copy_parent(&parent, val);
-        sys::mkdirs(parent.buffer);
+      case 'o':
+        sys::mkdirs(*sim::path_parent(val));
         out = sys::fopen(val, "w");
         out_filename = val;
         break;
-      }
       case 't': target = val; break;
       default: usage();
     }
@@ -310,11 +284,9 @@ void run(int argc, char **argv) {
   char *clang_argv[100]{};
   char **argp = clang_argv;
 
-  sim::sb args{};
+  auto args = sim::path_parent(argv[0]) / "leco-clang.exe";
   *argp++ = *args;
 
-  sim_sb_path_copy_parent(&args, argv[0]);
-  sim_sb_path_append(&args, "leco-clang.exe");
   stamp(&args, argp, "-t");
   stamp(&args, argp, target);
   stamp(&args, argp, "--");
@@ -416,11 +388,7 @@ void run(int argc, char **argv) {
 
   output('srcf', *source);
 
-  sim_sbt path{};
-  sim_sb_path_copy_parent(&path, *source);
-  sim_sb_path_append(&path, "out");
-  sim_sb_path_append(&path, target);
-  sim_sb_path_append(&path, source.path_filename());
+  auto path = sim::path_parent(*source) / "out" / target / source.path_filename();
 
   switch (exe_type) {
   case exe_t::none:
@@ -429,23 +397,20 @@ void run(int argc, char **argv) {
     output('tmmd', "");
     break;
   case exe_t::app:
-    sim_sb_path_set_extension(&path, "exe");
-    output('tapp', path.buffer);
+    path.path_extension("exe");
+    output('tapp', *path);
     break;
   case exe_t::dll:
-    if (IS_TGT(target, TGT_WINDOWS)) {
-      sim_sb_path_set_extension(&path, "dll");
-    } else if (IS_TGT_APPLE(target)) {
-      sim_sb_path_set_extension(&path, "dylib");
-    } else {
-      sim_sb_path_set_extension(&path, "so");
-    }
-    output('tdll', path.buffer);
+    if (IS_TGT(target, TGT_WINDOWS)) path.path_extension("dll");
+    else if (IS_TGT_APPLE(target)) path.path_extension("dylib");
+    else path.path_extension("so");
+
+    output('tdll', *path);
     break;
   case exe_t::tool:
     if (0 == strcmp(target, HOST_TARGET)) {
-      sim_sb_path_set_extension(&path, "exe");
-      output('tool', path.buffer);
+      path.path_extension("exe");
+      output('tool', *path);
     }
     break;
   }
