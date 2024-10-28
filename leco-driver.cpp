@@ -1,5 +1,4 @@
 #pragma leco tool
-#include "sim.hpp"
 #include "targets.hpp"
 
 #include <stdio.h>
@@ -14,9 +13,9 @@
 
 import gopt;
 import pprent;
+import sim;
 import sys;
 
-const char *leco_argv0;
 const char *common_flags;
 unsigned clean_level{};
 
@@ -43,50 +42,28 @@ static void usage() {
   throw 0;
 }
 
-static void prep(sim_sb *cmd, const char *tool) {
-  sim_sb_path_copy_parent(cmd, leco_argv0);
-  sim_sb_path_append(cmd, tool);
-}
-
 static void cleaner(const char *target) {
-  if (clean_level == 0)
-    return;
+  if (clean_level == 0) return;
 
-  sim_sbt cmd{};
-  prep(&cmd, "leco-cleaner.exe");
-  sim_sb_printf(&cmd, " -t %s", target);
-  if (clean_level > 1) {
-    sim_sb_concat(&cmd, " -a");
-  }
-  sys::run(cmd.buffer);
+  const char * lvl = (clean_level > 1) ? "-a" : "";
+  sys::tool_run("cleaner", "-t %s %s", target, lvl);
 }
 
 static void sysroot(const char *target) {
-  if (0 == strcmp(target, HOST_TARGET))
-    return;
+  if (0 == strcmp(target, HOST_TARGET)) return;
 
-  sim_sbt cmd{};
-  prep(&cmd, "leco-sysroot.exe");
-  sim_sb_printf(&cmd, " -q -t %s", target);
-  sys::run(cmd.buffer);
+  sys::tool_run("sysroot", "-q -t %s", target);
 }
 
 static void sawblade(const char * target) {
-  sim_sbt cmd {};
-  prep(&cmd, "leco-sawblade.exe");
-  sim_sb_printf(&cmd, " -t %s", target);
-  sys::run(cmd.buffer);
+  sys::tool_run("sawblade", "-t %s", target);
 }
 
 static void recurse(const char * target) {
-  sim_sbt cmd{};
-  prep(&cmd, "leco-recurse.exe");
-  sim_sb_printf(&cmd, " -t %s", target);
-  sim_sb_concat(&cmd, common_flags);
-  sys::run(cmd.buffer);
+  sys::tool_run("recurse", "-t %s %s", target, common_flags);
 }
 
-static void run_target(const char *target) {
+static void run_target(const char * target) {
   cleaner(target);
   sysroot(target);
   sawblade(target);
@@ -158,22 +135,20 @@ static void run_targets(const char *target) {
 }
 
 extern "C" int main(int argc, char **argv) try {
-  leco_argv0 = argv[0];
-
   const char *target{"host"};
-  sim_sbt flags{};
+  sim::sb flags {};
   auto opts = gopt_parse(argc, argv, "cgOt:", [&](auto ch, auto val) {
     switch (ch) {
     case 'c': clean_level++; break;
-    case 'g': sim_sb_concat(&flags, " -g"); break;
-    case 'O': sim_sb_concat(&flags, " -O"); break;
+    case 'g': flags += " -g"; break;
+    case 'O': flags += " -O"; break;
     case 't': target = val; break;
     default: usage(); break;
     }
   });
   if (opts.argc != 0) usage();
 
-  common_flags = flags.buffer;
+  common_flags = *flags;
   run_targets(target);
   return 0;
 } catch (...) {
