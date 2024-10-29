@@ -1,6 +1,5 @@
 #pragma leco tool
 
-#include "sim.hpp"
 #include "targets.hpp"
 
 #include <stdio.h>
@@ -8,6 +7,7 @@
 
 import gopt;
 import mtime;
+import sim;
 import strset;
 import sys;
 
@@ -18,41 +18,35 @@ static const char * ext {};
 static void usage() { sys::die("invalid usage"); }
 
 static void copy_exe(const char * input) {
-  sim_sbt path {};
-  sim_sb_copy(&path, exedir);
-  sim_sb_path_append(&path, sim_path_filename(input));
-  if (ext) sim_sb_path_set_extension(&path, ext);
+  auto path = sim::sb { exedir } / sim::path_filename(input);
+  if (ext) path.path_extension(ext);
 
-  if (mtime::of(path.buffer) >= mtime::of(input)) return;
+  if (mtime::of(*path) >= mtime::of(input)) return;
 
-  sys::log("copying", path.buffer);
+  sys::log("copying", *path);
 
-  if (0 != remove(path.buffer)) {
+  if (0 != remove(*path)) {
     // Rename original file. This is a "Windows-approved" way of modifying an
     // open executable.
-    sim_sbt bkp {};
-    sim_sb_copy(&bkp, path.buffer);
-    sim_sb_concat(&bkp, ".bkp");
-    remove(bkp.buffer);
-    rename(path.buffer, bkp.buffer);
+    auto bkp = path + ".bkp";
+    remove(*bkp);
+    rename(*path, *bkp);
   }
-  sys::link(input, path.buffer);
+  sys::link(input, *path);
 }
 
 static void copy_xcfw(const char * xcfw_path) {
-  sim_sbt tgt {};
-  sim_sb_copy(&tgt, exedir);
-  if (!IS_TGT_IOS(target)) sim_sb_path_parent(&tgt);
-  sim_sb_path_append(&tgt, "Frameworks");
+  auto tgt = sim::sb { exedir };
+  if (!IS_TGT_IOS(target)) tgt.path_parent();
+  tgt /= "Frameworks";
 
-  sim_sbt cmd {};
-  sim_sb_printf(&cmd, "rsync -rav %s %s", xcfw_path, tgt.buffer);
+  auto cmd = sim::printf("rsync -rav %s %s", xcfw_path, *tgt);
 
-  sim_sb_path_append(&tgt, sim_path_filename(xcfw_path));
-  if (mtime::of(tgt.buffer)) return;
+  tgt /= sim::path_filename(xcfw_path);
+  if (mtime::of(*tgt)) return;
 
-  sys::run(cmd.buffer);
-  sys::tool_run("codesign", "-d %s", tgt.buffer);
+  sys::run(*cmd);
+  sys::tool_run("codesign", "-d %s", *tgt);
 }
 
 static void copy_bdep(const char * dag) {
@@ -98,14 +92,12 @@ int main(int argc, char ** argv) try {
 
   sys::mkdirs(exedir);
 
-  sim_sbt path {};
-  sim_sb_path_copy_parent(&path, input);
-  target = sim_sb_path_filename(&path);
+  auto path = sim::path_parent(input);
+  target = path.path_filename();
 
-  sim_sbt exe {};
-  sim_sb_copy(&exe, input);
-  sim_sb_path_set_extension(&exe, "exe");
-  copy_exe(exe.buffer);
+  auto exe = sim::sb { input };
+  exe.path_extension("exe");
+  copy_exe(*exe);
 
   read_dag(input);
 } catch (...) {
