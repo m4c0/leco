@@ -250,7 +250,7 @@ static bool check_extension(sim::sb * mi, const char *desc, const char *ext) {
 }
 
 static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
-  auto mi = sim::sb { *source } / mod_impl;
+  auto mi = sim::path_parent(*source) / mod_impl;
 
   if (check_extension(&mi, desc, "cpp") || check_extension(&mi, desc, "c") ||
       check_extension(&mi, desc, "mm") || check_extension(&mi, desc, "m"))
