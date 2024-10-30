@@ -1,11 +1,11 @@
 #pragma leco tool
-#include "sim.hpp"
 
 #include <string.h>
 
 import gopt;
 import mtime;
 import popen;
+import sim;
 import sys;
 
 #ifdef _WIN32
@@ -26,12 +26,9 @@ static const char * fmt_cmd() {
 
 static bool dry_run {};
 
-static void setup_cmd(sim_sb * cmd) {
-  sim_sb_copy(cmd, fmt_cmd());
-  sim_sb_printf(cmd, " -i --style=file:../leco/clang-format.yaml");
-  if (dry_run) {
-    sim_sb_concat(cmd, " -n --Werror");
-  }
+static void setup_cmd(sim::sb * cmd) {
+  *cmd = sim::printf("%s -i --style=file:../leco/clang-format.yaml", fmt_cmd());
+  if (dry_run) *cmd += " -n --Werror";
 }
 
 static void work_from_git() {
@@ -42,7 +39,7 @@ static void work_from_git() {
     0,
   };
 
-  sim_sbt cmd { 10240 };
+  sim::sb cmd { 10240 };
   setup_cmd(&cmd);
 
   unsigned count {};
@@ -59,7 +56,7 @@ static void work_from_git() {
     auto sep = strchr(file, '\t');
     int len = sep ? (sep - file) : strlen(file) - 1;
 
-    sim_sb_printf(&cmd, " %.*s", len, file);
+    cmd.printf(" %.*s", len, file);
     count++;
   }
 
@@ -69,7 +66,7 @@ static void work_from_git() {
     sys::die("missing input files");
   }
 
-  sys::run(cmd.buffer);
+  sys::run(*cmd);
 }
 
 int main(int argc, char ** argv) try {
@@ -82,16 +79,17 @@ int main(int argc, char ** argv) try {
     return 0;
   }
 
-  sim_sbt cmd { 10240 };
+  sim::sb cmd { 10240 };
   setup_cmd(&cmd);
 
   for (auto i = 0; i < opts.argc; i++) {
     if (mtime::of(opts.argv[i]) == 0) sys::die("file not found: %s", opts.argv[i]);
 
-    sim_sb_printf(&cmd, " %s", opts.argv[i]);
+    cmd += " ";
+    cmd += opts.argv[i];
   }
 
-  sys::run(cmd.buffer);
+  sys::run(*cmd);
 } catch (...) {
   return 1;
 }
