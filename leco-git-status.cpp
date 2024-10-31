@@ -1,5 +1,4 @@
 #pragma leco tool
-#include "sim.hpp"
 
 #include <stdio.h>
 #include <string.h>
@@ -7,6 +6,7 @@
 import mtime;
 import popen;
 import pprent;
+import sim;
 import sys;
 
 #ifdef _WIN32
@@ -22,19 +22,17 @@ int main(int argc, char **argv) try {
   for (auto file : pprent::list("..")) {
     if (file[0] == '.') continue;
 
-    if (sim_path_extension(file) != nullptr) continue;
+    if (*sim::path_extension(file) != nullptr) continue;
 
-    sim_sbt path{};
-    sim_sb_printf(&path, "../%s/.git/config", file);
-    if (mtime::of(path.buffer) == 0) continue;
+    auto path = sim::printf("../%s/.git/config", file);
+    if (mtime::of(*path) == 0) continue;
 
-    sim_sbt pwd{};
-    sim_sb_printf(&pwd, "../%s", file);
+    auto pwd = sim::printf("../%s", file);
 
     char *args[7] {};
     args[0] = strdup("git");
     args[1] = strdup("-C");
-    args[2] = pwd.buffer;
+    args[2] = *pwd;
     args[3] = strdup("status");
     args[4] = strdup("--porcelain=v2");
     args[5] = strdup("--branch");
@@ -53,12 +51,7 @@ int main(int argc, char **argv) try {
       if (0 == strcmp(buf, "# branch.ab +0 -0\n")) {
       } else if (starts_with(buf, "# branch.ab")) {
         enable_printer();
-
-        sim_sbt cmd{};
-        sim_sb_printf(
-            &cmd, "git -C %s log --branches --not --remotes --format=oneline",
-            pwd.buffer);
-        sys::run(cmd.buffer);
+        sys::runf("git -C %s log --branches --not --remotes --format=oneline", *pwd);
       } else if (buf[0] == '#') {
       } else {
         enable_printer();
