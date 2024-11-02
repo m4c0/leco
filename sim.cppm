@@ -50,9 +50,9 @@ export namespace sim {
       return *this;
     }
 
-    const char * path_filename() { return sim_sb_path_filename(this); }
+    const char * path_filename() const { return sim_sb_path_filename(this); }
 
-    const char * path_extension() { return sim_sb_path_extension(this); }
+    const char * path_extension() const { return sim_sb_path_extension(this); }
     void path_extension(const char * ext) { sim_sb_path_set_extension(this, ext); }
 
     void path_parent() { sim_sb_path_parent(this); }
