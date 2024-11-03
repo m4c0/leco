@@ -1,12 +1,12 @@
 #pragma leco tool
 
-#include "sim.hpp"
 #include "targets.hpp"
 
 #include <string.h>
 
 import gopt;
 import pprent;
+import sim;
 import strset;
 import sys;
 
@@ -32,11 +32,10 @@ static void read_dag(const char *dag) {
     }
   });
 
-  sim_sbt parent{};
-  sim_sb_path_copy_parent(&parent, dag);
-  sim_sb_path_parent(&parent);
-  sim_sb_path_parent(&parent);
-  unique_parents.insert(parent.buffer);
+  auto parent = sim::path_parent(dag);
+  parent.path_parent();
+  parent.path_parent();
+  unique_parents.insert(*parent);
 }
 
 static void usage() {
@@ -64,25 +63,17 @@ int main(int argc, char **argv) try {
   if (opts.argc != 0)
     usage();
 
-  sim_sbt cwd{};
-  sim_sb_path_copy_real(&cwd, "out");
-  sim_sb_path_append(&cwd, target);
+  auto cwd = "out"_real / target;
   for (auto entry : pprent::list(cwd.buffer)) {
-    auto ext = sim_path_extension(entry);
-    if (!ext || (0 != strcmp(".dag", ext)))
+    auto ext = sim::path_extension(entry);
+    if (!ext.len || (0 != strcmp(".dag", *ext)))
       continue;
 
-    sim_sbt file{};
-    sim_sb_path_copy_append(&file, cwd.buffer, entry);
-    read_dag(file.buffer);
+    read_dag(*(cwd / entry));
   }
 
-  for (auto &parent : unique_parents) {
-    sim_sbt cmd{};
-    sim_sb_copy(&cmd, "git -C ../");
-    sim_sb_concat(&cmd, sim_path_filename(parent.c_str()));
-    sim_sb_concat(&cmd, " pull");
-    sys::run(cmd.buffer);
+  for (auto & parent : unique_parents) {
+    sys::runf("git -C %s pull", parent.c_str());
   }
 } catch (...) {
   return 1;
