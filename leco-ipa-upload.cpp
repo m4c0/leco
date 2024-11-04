@@ -1,11 +1,11 @@
 #pragma leco tool
 
-#include "sim.hpp"
 #include "targets.hpp"
 
 #include <string.h>
 
 import gopt;
+import sim;
 import sys;
 
 void usage() {
@@ -39,22 +39,18 @@ int main(int argc, char ** argv) try {
   });
   if (opts.argc != 0 || !input) usage();
 
-  sim_sbt ipa {};
-  sim_sb_path_copy_parent(&ipa, input);
-  if (!IS_TGT(TGT_IPHONEOS, sim_sb_path_filename(&ipa)))
+  auto ipa = sim::path_parent(input);
+  if (!IS_TGT(TGT_IPHONEOS, ipa.path_filename()))
     sys::die("only iPhone target is supported");
 
-  sim_sb_path_append(&ipa, "export");
-  sim_sb_path_append(&ipa, sim_path_filename(input));
-  sim_sb_path_set_extension(&ipa, "ipa");
+  ipa = ipa / "export" / sim::path_filename(input);
+  ipa.path_extension("ipa");
 
   const char * verb = upload ? "--upload-app" : "--validate-app";
 
-  sim_sbt cmd { 10240 };
-  sim_sb_printf(&cmd, 
+  sys::runf(
       "xcrun altool %s -t iphoneos -f %s --apiKey %s --apiIssuer %s",
       verb, ipa.buffer, sys::env("LECO_IOS_API_KEY"), sys::env("LECO_IOS_API_ISSUER"));
-  sys::run(cmd.buffer);
 } catch (...) {
   return 1;
 }
