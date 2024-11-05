@@ -1,5 +1,6 @@
 module;
 #include "sim.h"
+#include <string.h>
 
 #ifdef __linux__
 #include <linux/limits.h>
@@ -35,6 +36,10 @@ export namespace sim {
 
     char * operator*() { return buffer; }
     const char * operator*() const { return buffer; }
+
+    bool operator==(const char * s) {
+      return 0 == strcmp(buffer, s);
+    }
 
     sb & operator+=(const char * s) {
       sim_sb_concat(this, s);

@@ -1,10 +1,10 @@
 #pragma leco tool
-#include "sim.hpp"
 
 #include <string.h>
 
 import gopt;
 import mtime;
+import sim;
 import strset;
 import sys;
 
@@ -22,20 +22,13 @@ Where:
 }
 
 static const char * common_flags;
-static const char * argv0;
 static const char * target;
 
 static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 
 static void compile(const char *src) {
   sys::log("compiling object", src);
-
-  sim_sbt cmd{};
-  sim_sb_path_copy_parent(&cmd, argv0);
-  sim_sb_path_append(&cmd, "leco-clang.exe");
-  sim_sb_printf(&cmd, " -i %s -t %s", src, target);
-  sim_sb_concat(&cmd, common_flags);
-  sys::run(cmd.buffer);
+  sys::tool_run("clang", "-i %s -t %s %s", src, target, common_flags);
 }
 
 static str::set done {};
@@ -44,29 +37,28 @@ static void process(const char * dag) {
 
   auto mtime = 0ULL;
 
-  sim_sbt src {};
+  sim::sb src {};
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
       case 'head': mtime = max(mtime, mtime::of(file)); break;
       case 'mdag': {
         process(file);
 
-        sim_sbt pcm {};
-        sim_sb_copy(&pcm, file);
-        sim_sb_path_set_extension(&pcm, "pcm");
-        mtime = max(mtime, mtime::of(pcm.buffer));
+        sim::sb pcm { file };
+        pcm.path_extension("pcm");
+        mtime = max(mtime, mtime::of(*pcm));
         break;
       }
       case 'bdag':
       case 'idag': process(file); break;
       case 'srcf': {
-        if (0 == strcmp(".cppm", sim_path_extension(file))) {
-          sim_sb_copy(&src, dag);
-          sim_sb_path_set_extension(&src, "pcm");
+        if (".cppm" == sim::path_extension(file)) {
+          src = sim::sb { dag };
+          src.path_extension("pcm");
         } else {
-          sim_sb_copy(&src, file);
+          src = sim::sb { file };
         }
-        mtime = max(mtime, mtime::of(src.buffer));
+        mtime = max(mtime, mtime::of(*src));
         break;
       }
       default: break;
@@ -75,37 +67,32 @@ static void process(const char * dag) {
 
   if (src.len == 0) sys::die("dag without source info: [%s]", dag);
 
-  sim_sbt obj {};
-  sim_sb_copy(&obj, dag);
-  sim_sb_path_set_extension(&obj, "o");
+  auto obj = sim::sb { dag };
+  obj.path_extension("o");
 
-  if (mtime > mtime::of(obj.buffer)) {
-    compile(src.buffer);
-  }
+  if (mtime > mtime::of(*obj)) compile(*src);
 }
 
 int main(int argc, char ** argv) try {
-  sim_sbt flags {};
-  sim_sbt input {};
+  sim::sb flags {};
+  sim::sb input {};
   auto opts = gopt_parse(argc, argv, "i:gO", [&](auto ch, auto val) {
     switch (ch) {
-      case 'i': sim_sb_path_copy_real(&input, val); break;
-      case 'g': sim_sb_concat(&flags, " -g"); break;
-      case 'O': sim_sb_concat(&flags, " -O"); break;
+      case 'i': input = sim::path_real(val); break;
+      case 'g': flags += " -g"; break;
+      case 'O': flags += " -O"; break;
       default: usage();
     }
   });
 
   if (input.len == 0 || opts.argc != 0) usage();
 
-  argv0 = argv[0];
-  common_flags = flags.buffer;
+  common_flags = *flags;
 
-  sim_sbt d {};
-  sim_sb_path_copy_parent(&d, input.buffer);
-  target = sim_sb_path_filename(&d);
+  auto d = sim::path_parent(*input);
+  target = d.path_filename();
 
-  process(input.buffer);
+  process(*input);
 } catch (...) {
   return 1;
 }
