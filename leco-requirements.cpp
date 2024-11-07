@@ -1,5 +1,4 @@
 #pragma leco tool
-#include "sim.hpp"
 #include "targets.hpp"
 
 #include <stdio.h>
@@ -8,6 +7,7 @@
 import gopt;
 import popen;
 import pprent;
+import sim;
 import strset;
 import sys;
 
@@ -24,11 +24,10 @@ static str::set collected{};
 void recurse(const char * dag) {
   if (!all_deps.insert(dag)) return;
 
-  sim_sbt path {};
-  sim_sb_path_copy_parent(&path, dag);
-  sim_sb_path_parent(&path);
-  sim_sb_path_parent(&path);
-  collected.insert(path.buffer);
+  auto path = sim::path_parent(dag);
+  path.path_parent();
+  path.path_parent();
+  collected.insert(*path);
 
   sys::dag_read(dag, [](auto id, auto file) {
     switch (id) {
@@ -79,24 +78,20 @@ int main(int argc, char **argv) try {
   });
   if (opts.argc != 0) usage();
 
-  sim_sbt cwd{};
-  sim_sb_path_copy_real(&cwd, ".");
-  sim_sb_path_append(&cwd, "out");
-  sim_sb_path_append(&cwd, target);
+  auto cwd = "."_real / "out" / target;
 
   collected.insert("../leco");
-  for (auto entry : pprent::list(cwd.buffer)) {
-    auto ext = sim_path_extension(entry);
-    if (!ext || 0 != strcmp(ext, ".dag")) continue;
+  for (auto entry : pprent::list(*cwd)) {
+    auto ext = sim::path_extension(entry);
+    if (ext != ".dag") continue;
 
-    sim_sb_path_append(&cwd, entry);
-    recurse(cwd.buffer);
-    sim_sb_path_parent(&cwd);
+    auto e = cwd / entry;
+    recurse(*e);
   }
 
   for (const auto &s : collected) {
     if (git) run_git(s.c_str());
-    puts(sim_path_filename(s.c_str()));
+    puts(sim::path_filename(s.c_str()));
   }
 } catch (...) {
   return 1;
