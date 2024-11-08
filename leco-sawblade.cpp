@@ -1,5 +1,4 @@
 #pragma leco tool
-#include "sim.hpp"
 
 #include <errno.h>
 #include <stdio.h>
@@ -8,11 +7,11 @@
 import gopt;
 import mtime;
 import pprent;
+import sim;
 import strset;
 import sys;
 
 static bool verbose {};
-static const char * argv0;
 static const char * target;
 
 static void usage() {
@@ -33,12 +32,7 @@ static void dagger(const char * src, const char * dag) {
 
   if (verbose) sys::log("inspecting", src);
 
-  sim_sbt cmd { 10240 };
-  sim_sb_path_copy_parent(&cmd, argv0);
-  sim_sb_path_append(&cmd, "leco-dagger.exe");
-  sim_sb_printf(&cmd, " -t %s -i %s -o %s", target, src, dag);
-  sys::run(cmd.buffer);
-
+  sys::tool_run("dagger", "-t %s -i %s -o %s", target, src, dag);
   if (mtime::of(dag) == 0)
     sys::die("failed to preprocess [%s]", src);
 }
@@ -47,16 +41,12 @@ static str::set done {};
 static void process(const char * src) {
   if (!done.insert(src)) return;
 
-  sim_sbt dag {};
-  sim_sb_path_copy_parent(&dag, src);
-  sim_sb_path_append(&dag, "out");
-  sim_sb_path_append(&dag, target);
-  sim_sb_path_append(&dag, sim_path_filename(src));
-  sim_sb_path_set_extension(&dag, "dag");
+  auto dag = sim::path_parent(src) / "out" / target / sim::path_filename(src);
+  dag.path_extension("dag");
 
-  dagger(src, dag.buffer);
+  dagger(src, *dag);
 
-  sys::dag_read(dag.buffer, [](auto id, auto file) {
+  sys::dag_read(*dag, [](auto id, auto file) {
     switch (id) {
       case 'bdep':
       case 'impl':
@@ -68,13 +58,11 @@ static void process(const char * src) {
 }
 
 int main(int argc, char ** argv) try {
-  argv0 = argv[0];
-
-  const char * input {};
+  sim::sb input {};
 
   auto opts = gopt_parse(argc, argv, "i:t:v", [&](auto ch, auto val) {
     switch (ch) {
-      case 'i': input = val; break;
+      case 'i': input = sim::path_real(val); break;
       case 't': target = val; break;
       case 'v': verbose = true; break;
       default: usage();
@@ -83,22 +71,19 @@ int main(int argc, char ** argv) try {
 
   if (!target || opts.argc != 0) usage();
 
-  if (input) {
-    sim_sbt in {};
-    sim_sb_path_copy_real(&in, input);
-    process(in.buffer);
+  if (input.len) {
+    process(*input);
     return 0;
   }
 
   for (auto file : pprent::list(".")) {
-    auto ext = sim_path_extension(file);
-    if (ext == nullptr) continue;
+    auto ext = sim::path_extension(file);
+    if (!ext.len) continue;
 
-    if (strcmp(ext, ".cppm") != 0 && strcmp(ext, ".cpp") != 0 && strcmp(ext, ".c") != 0) continue;
+    if (ext != ".cppm" && ext != ".cpp" && ext != ".c") continue;
 
-    sim_sbt in {};
-    sim_sb_path_copy_real(&in, file);
-    process(in.buffer);
+    auto in = sim::path_real(file);
+    process(*in);
 
     errno = 0;
   }
