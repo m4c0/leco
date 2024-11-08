@@ -39,6 +39,19 @@ static bool sign_is_fresh(const char * path) {
   return f == s;
 }
 
+static void sign(const char * path) {
+  const char * team;
+  try {
+    // Only sign when we want to sign
+    team = sys::env("LECO_IOS_TEAM");
+  } catch (...) {
+    return;
+  }
+
+  sys::log("codesign", path);
+  sys::runf("codesign -f -s %s %s", team, path);
+}
+
 int main(int argc, char ** argv) try {
   const char * path {};
   auto opts = gopt_parse(argc, argv, "d:", [&](auto ch, auto val) {
@@ -51,8 +64,7 @@ int main(int argc, char ** argv) try {
 
   if (sign_is_fresh(path)) return 0;
 
-  sys::log("codesign", path);
-  sys::runf("codesign -f -s %s %s", sys::env("LECO_IOS_TEAM"), path);
+  sign(path);
 } catch (...) {
   return 1;
 }
