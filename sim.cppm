@@ -64,7 +64,8 @@ export namespace sim {
   };
 
   sb path_extension(const char * path) {
-    return sim::sb { sim_path_extension(path) };
+    auto ext = sim_path_extension(path);
+    return ext ? sim::sb { ext } : sim::sb {};
   }
   sb path_real(const char * path) {
     sim::sb res {};
