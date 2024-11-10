@@ -50,7 +50,7 @@ static sim::sb apple_sysroot(const char *sdk) {
 #else
   auto cmd = sim::printf("xcrun --show-sdk-path --sdk %s", sdk);
 
-  sim::sbt buf {};
+  sim::sb buf {};
 
   auto f = popen(*cmd, "r");
   auto path = fgets(*buf, buf.len, f);
