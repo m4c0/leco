@@ -348,6 +348,9 @@ void run(int argc, char **argv) {
     } else if (auto pp = cmp(p, "#pragma leco app_version ")) {
       if (exe_type != exe_t::app) error("application version is only supported for apps");
       read_file_list(pp, "application version", 'apvr', print_asis);
+    } else if (cmp(p, "#pragma leco portrait\n")) {
+      if (exe_type != exe_t::app) error("portrait is only supported for apps");
+      output('port', "");
     } else if (cmp(p, "#pragma leco landscape\n")) {
       if (exe_type != exe_t::app) error("landscape is only supported for apps");
       output('land', "");

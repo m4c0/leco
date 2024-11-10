@@ -110,6 +110,7 @@ void common_app_plist(dict &d, const char *name, const char *sdk, const char * v
 void common_ios_plist(dict & d, const char * dag, const char * bundle_version) {
   auto name = sim::path_stem(dag);
 
+  bool portrait {};
   bool landscape {};
   sim::sb disp_name = name;
   sim::sb app_id = sim::printf("br.com.tpk.%s", *name);
@@ -119,6 +120,7 @@ void common_ios_plist(dict & d, const char * dag, const char * bundle_version) {
       case 'apid': app_id = sim::sb { val }; break;
       case 'apvr': app_ver = sim::sb { val }; break;
       case 'name': disp_name = sim::sb { val }; break;
+      case 'port': portrait = true; break;
       case 'land': landscape = true; break;
       default: break;
     }
@@ -139,7 +141,16 @@ void common_ios_plist(dict & d, const char * dag, const char * bundle_version) {
     dd.boolean("arm64", true);
     dd.boolean("metal", true);
   });
-  if (landscape) {
+  if (portrait && landscape) {
+    d.array("UISupportedInterfaceOrientations",
+        "UIInterfaceOrientationPortrait",
+        "UIInterfaceOrientationLandscapeLeft",
+        "UIInterfaceOrientationLandscapeRight");
+    d.array("UISupportedInterfaceOrientations~ipad",
+        "UIInterfaceOrientationPortrait",
+        "UIInterfaceOrientationLandscapeLeft"
+        "UIInterfaceOrientationLandscapeRight");
+  } else if (landscape) {
     d.array("UISupportedInterfaceOrientations",
         "UIInterfaceOrientationLandscapeLeft",
         "UIInterfaceOrientationLandscapeRight");
