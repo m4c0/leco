@@ -1,10 +1,9 @@
 #pragma leco tool
-#include "sim.hpp"
-
 #include <stdio.h>
 
 import gopt;
 import mtime;
+import sim;
 import strset;
 import sys;
 
@@ -32,10 +31,9 @@ static void concat_all(FILE *out, const char *dag) {
   sys::dag_read(dag, [=](auto id, auto file) {
     switch (id) {
     case 'srcf': {
-      sim_sbt js{};
-      sim_sb_copy(&js, file);
-      sim_sb_path_set_extension(&js, "js");
-      if (mtime::of(js.buffer) > 0) concat(out, js.buffer);
+      sim::sb js { file };
+      js.path_extension("js");
+      if (mtime::of(*js) > 0) concat(out, *js);
       break;
     }
     case 'idag':
@@ -56,10 +54,9 @@ static auto mtime_rec(const char * dag) {
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
       case 'srcf': {
-        sim_sbt js {};
-        sim_sb_copy(&js, file);
-        sim_sb_path_set_extension(&js, "js");
-        mtime = max(mtime, mtime::of(js.buffer));
+        sim::sb js { file };
+        js.path_extension("js");
+        mtime = max(mtime, mtime::of(*js));
         break;
       }
       case 'idag':
@@ -74,30 +71,25 @@ static auto mtime_rec(const char * dag) {
 
 int main(int argc, char **argv) {
   const char *input;
-  sim_sbt appdir{};
+  sim::sb appdir {};
 
   auto opts = gopt_parse(argc, argv, "i:a:", [&](auto ch, auto val) {
     switch (ch) {
-    case 'a':
-      sim_sb_path_copy_real(&appdir, val);
-      break;
-    case 'i':
-      input = val;
-      break;
-    default:
-      usage();
+    case 'a': appdir = sim::path_real(val); break;
+    case 'i': input = val; break;
+    default:  usage();
     }
   });
 
   if (opts.argc != 0 || !input || !appdir.len)
     usage();
 
-  sim_sb_path_append(&appdir, "leco.js");
-  if (mtime::of(appdir.buffer) >= mtime_rec(input)) return 0;
+  appdir /= "leco.js";
+  if (mtime::of(*appdir) >= mtime_rec(input)) return 0;
 
-  sys::log("generating", appdir.buffer);
+  sys::log("generating", *appdir);
 
-  auto f = sys::fopen(appdir.buffer, "wb");
+  auto f = sys::fopen(*appdir, "wb");
   fprintf(f, "var leco_exports;\n");
   fprintf(f, "var leco_imports = {};\n");
 
