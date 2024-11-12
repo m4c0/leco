@@ -1,7 +1,5 @@
 module;
 
-#include "sim.hpp"
-
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -91,11 +89,10 @@ void gen(const char * fname, auto && fn) {
 }
 
 void common_app_plist(dict &d, const char *name, const char *sdk, const char * ver) {
-  sim_sbt exe{};
-  sim_sb_printf(&exe, "%s.exe", name);
+  auto exe = sim::sb { name } + ".exe";
 
   d.string("CFBundleDevelopmentRegion", "en");
-  d.string("CFBundleExecutable", exe.buffer);
+  d.string("CFBundleExecutable", *exe);
   d.string("CFBundleInfoDictionaryVersion", "6.0");
   d.string("CFBundleName", name);
   d.string("CFBundlePackageType", "APPL");
