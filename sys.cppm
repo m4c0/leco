@@ -25,6 +25,7 @@ module;
 #endif
 
 export module sys;
+import sim;
 
 export namespace sys {
 struct death {};
@@ -91,11 +92,8 @@ void mkdirs(const char *path) {
   if (errno == EEXIST)
     return;
 
-  sim_sb p = {0};
-  sim_sb_new(&p, PATH_MAX);
-  sim_sb_path_copy_parent(&p, path);
-  mkdirs(p.buffer);
-  sim_sb_delete(&p);
+  auto p = sim::path_parent(path);
+  mkdirs(*p);
 
   _mkdir(path);
 }
@@ -133,24 +131,19 @@ void dag_read(const char *dag, auto &&fn) try {
   throw;
 }
 
-void tool_cmd(sim_sb * cmd, const char * name) {
-  sim_sb_path_copy_real(cmd, "../leco/out/" HOST_TARGET);
-  sim_sb_path_append(cmd, "leco-");
-  sim_sb_printf(cmd, "%s.exe", name);
+auto tool_cmd(const char * name) {
+  return (sim::path_real("../leco/out/" HOST_TARGET) / "leco-") + name + ".exe";
 }
-void tool_cmd(sim_sb * cmd, const char * name, const char * args, auto &&... as) {
-  tool_cmd(cmd, name);
-  sim_sb_concat(cmd, " ");
-  sim_sb_printf(cmd, args, as...);
+auto tool_cmd(const char * name, const char * args, auto &&... as) {
+  auto cmd = tool_cmd(name) + " ";
+  return cmd.printf(args, as...);
 }
 void tool_run(const char * name) {
-  sim_sbt cmd { 10240 };
-  tool_cmd(&cmd, name);
-  run(cmd.buffer);
+  auto cmd = tool_cmd(name);
+  run(*cmd);
 }
 void tool_run(const char * name, const char * args, auto &&... as) {
-  sim_sbt cmd { 10240 };
-  tool_cmd(&cmd, name, args, as...);
-  run(cmd.buffer);
+  auto cmd = tool_cmd(name, args, as...);
+  run(*cmd);
 }
 } // namespace sys
