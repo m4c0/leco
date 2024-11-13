@@ -1,4 +1,5 @@
 module;
+#define SIM_IMPLEMENTATION
 #include "sim.h"
 #include <string.h>
 

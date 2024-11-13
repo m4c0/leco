@@ -1,6 +1,4 @@
 module;
-#define SIM_IMPLEMENTATION
-#include "sim.hpp"
 #include "targets.hpp"
 
 #include <errno.h>

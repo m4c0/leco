@@ -38,22 +38,21 @@ static auto process_spec(const char * dag) {
   mtime = 1;
 
   sim::sb src {};
-
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
       case 'head': mtime = max(mtime, mtime::of(file)); break;
       case 'bdag':
       case 'mdag': mtime = max(mtime, process_spec(file)); break;
-      case 'srcf': sim_sb_copy(&src, file); break;
+      case 'srcf': src = sim::sb { file }; break;
       default: break;
     }
   });
 
-  if (src.len == 0) sys::die("missing source for [%s]", dag);
+  if (!src.len) sys::die("missing source for [%s]", dag);
 
-  if (0 != strcmp(".cppm", src.path_extension())) return mtime;
+  if (sim::path_extension(*src) != ".cppm") return mtime;
 
-  mtime = max(mtime, mtime::of(src.buffer));
+  mtime = max(mtime, mtime::of(*src));
 
   sim::sb pcm { dag };
   pcm.path_extension("pcm");
