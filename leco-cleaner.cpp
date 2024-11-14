@@ -2,9 +2,6 @@
 
 #include "targets.hpp"
 
-#include <stdio.h>
-#include <string.h>
-
 #ifdef _WIN32
 #define unlink _unlink
 #else
@@ -21,7 +18,7 @@ static bool log_all{};
 static const char *target{HOST_TARGET};
 
 static void usage(const char *argv0) {
-  fprintf(stderr, R"(
+  sys::die(R"(
 usage: %s [-a] [-t <target>] [-v]
 
 where:
@@ -29,9 +26,7 @@ where:
       -t        set target to clean (defaults to host target)
       -v        log all removed files
 
-)",
-          argv0);
-  throw 0;
+)", argv0);
 }
 
 static void rm_rf(const char * p) {
@@ -58,7 +53,7 @@ static void remove_with_deps(const char * p) {
   for (auto entry : pprent::list(*path)) {
     auto dag = path / entry;
 
-    if (0 != strcmp(".dag", dag.path_extension())) continue;
+    if (sim::path_extension(*dag) == ".dag") continue;
 
     sys::dag_read(*dag, [&](auto id, auto file) {
       switch (id) {
