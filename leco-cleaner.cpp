@@ -2,12 +2,6 @@
 
 #include "targets.hpp"
 
-#ifdef _WIN32
-#define unlink _unlink
-#else
-#include <unistd.h>
-#endif
-
 import gopt;
 import pprent;
 import sim;
@@ -38,10 +32,7 @@ static void rm_rf(const char * p) {
   }
 
   if (log_all) sys::log("removing", p);
-  unlink(p);
-#ifndef _WIN32
-  rmdir(p);
-#endif
+  sys::unlink(p);
 }
 
 static str::set temp{};

@@ -55,16 +55,23 @@ inline void log(const char *verb, const char *msg) {
   fprintf(stderr, "%20s %s\n", verb, msg);
 }
 
-void link(const char *src, const char *dst) {
+void unlink(const char * f) {
 #ifdef _WIN32
-  DeleteFile(dst);
+  DeleteFile(f);
+#else
+  ::unlink(f);
+  rmdir(f);
+#endif
+}
+
+void link(const char *src, const char *dst) {
+  unlink(dst);
+#ifdef _WIN32
   if (!CreateHardLink(dst, src, nullptr))
     die("could not create hard-link");
 #elif __APPLE__
-  ::unlink(dst);
   if (0 != clonefile(src, dst, 0)) die("could not clone file");
 #else
-  ::unlink(dst);
   if (::link(src, dst) != 0) {
     perror("could not create hard-link");
     throw death{};
