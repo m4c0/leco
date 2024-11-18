@@ -152,6 +152,7 @@ void tool_run(const char * name, const char * args, auto &&... as) {
   run(*cmd);
 }
 
+constexpr const char * host_target() { return HOST_TARGET; }
 bool is_tgt(const char * t, const char * x) { return 0 == strcmp(t, x); }
 bool is_tgt_linux(const char * t) { return is_tgt(t, TGT_LINUX); }
 bool is_tgt_wasm(const char * t) { return is_tgt(t, TGT_WASM); }

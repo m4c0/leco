@@ -1,7 +1,5 @@
 #pragma leco tool
 
-#include "targets.hpp"
-
 import gopt;
 import pprent;
 import sim;
@@ -9,7 +7,7 @@ import strset;
 import sys;
 
 static bool log_all{};
-static const char *target{HOST_TARGET};
+static const char * target = sys::host_target();
 
 static void usage(const char *argv0) {
   sys::die(R"(
