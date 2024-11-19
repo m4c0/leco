@@ -152,19 +152,19 @@ void tool_run(const char * name, const char * args, auto &&... as) {
   run(*cmd);
 }
 
-constexpr const char * host_target() { return HOST_TARGET; }
+constexpr const char * host_target = HOST_TARGET;
 bool is_tgt(const char * t, const char * x) { return 0 == strcmp(t, x); }
-bool is_tgt_linux(const char * t) { return is_tgt(t, TGT_LINUX); }
-bool is_tgt_wasm(const char * t) { return is_tgt(t, TGT_WASM); }
-bool is_tgt_windows(const char * t) { return is_tgt(t, TGT_WINDOWS); }
+bool is_tgt_host    (const char * t) { return is_tgt(t, HOST_TARGET); }
+bool is_tgt_linux   (const char * t) { return is_tgt(t, TGT_LINUX); }
+bool is_tgt_wasm    (const char * t) { return is_tgt(t, TGT_WASM); }
+bool is_tgt_windows (const char * t) { return is_tgt(t, TGT_WINDOWS); }
+bool is_tgt_iphoneos(const char * t) { return is_tgt(t, TGT_IPHONEOS); }
+bool is_tgt_ios_sim (const char * t) { return is_tgt(t, TGT_IOS_SIMULATOR); }
+bool is_tgt_osx     (const char * t) { return is_tgt(t, TGT_OSX); }
 bool is_tgt_droid(const char * t) {
   return is_tgt(t, TGT_DROID_AARCH64) || is_tgt(t, TGT_DROID_ARMV7)
       || is_tgt(t, TGT_DROID_X86) || is_tgt(t, TGT_DROID_X86_64);
 }
-bool is_tgt_ios(const char * t) {
-  return is_tgt(t, TGT_IPHONEOS) || is_tgt(t, TGT_IOS_SIMULATOR);
-}
-bool is_tgt_apple(const char * t) {
-  return is_tgt(t, TGT_OSX) || is_tgt_ios(t);
-}
+bool is_tgt_ios(const char * t) { return is_tgt_iphoneos(t) || is_tgt_ios_sim(t); }
+bool is_tgt_apple(const char * t) { return is_tgt_ios(t) || is_tgt_ios(t); }
 } // namespace sys

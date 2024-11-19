@@ -1,5 +1,4 @@
 #pragma leco tool
-#include "targets.hpp"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -27,7 +26,7 @@ static exe_t exe_type{};
 static sim::sb mod_name {};
 static FILE *out{stdout};
 static const char *out_filename{};
-static const char *target{HOST_TARGET};
+static const char *target { sys::host_target };
 
 static void usage() {
   sys::die(R"(
@@ -156,9 +155,9 @@ static void read_file_list(const char *str, const char *desc, uint32_t code,
 static void add_xcfw(const char * str, const char * desc, uint32_t code) {
   auto path = sim::sb { str };
 
-  if (IS_TGT(target, TGT_IPHONEOS)) path /= "ios-arm64";
-  else if (IS_TGT(target, TGT_IOS_SIMULATOR)) path /= "ios-arm64_x86_64-simulator";
-  else if (IS_TGT(target, TGT_OSX)) path /= "macos-arm64_x86_64";
+  if (sys::is_tgt_iphoneos(target))     path /= "ios-arm64";
+  else if (sys::is_tgt_ios_sim(target)) path /= "ios-arm64_x86_64-simulator";
+  else if (sys::is_tgt_osx(target))     path /= "macos-arm64_x86_64";
   else sys::die("xcframework is only supported in apple platforms");
 
   path /= sim::path_filename(str);
@@ -404,14 +403,14 @@ void run(int argc, char **argv) {
     output('tapp', *path);
     break;
   case exe_t::dll:
-    if (IS_TGT(target, TGT_WINDOWS)) path.path_extension("dll");
-    else if (IS_TGT_APPLE(target)) path.path_extension("dylib");
+    if (sys::is_tgt_windows(target)) path.path_extension("dll");
+    else if (sys::is_tgt_apple(target)) path.path_extension("dylib");
     else path.path_extension("so");
 
     output('tdll', *path);
     break;
   case exe_t::tool:
-    if (0 == strcmp(target, HOST_TARGET)) {
+    if (sys::is_tgt_host(target)) {
       path.path_extension("exe");
       output('tool', *path);
     }
