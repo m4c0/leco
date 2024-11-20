@@ -306,9 +306,9 @@ void run(int argc, char **argv) {
       p++;
     }
     line++;
-    if (0 == strcmp(p, "#pragma leco tool\n")) {
+    if (cmp(p, "#pragma leco tool\n")) {
       set_exe_type(exe_t::tool);
-    } else if (0 == strcmp(p, "#pragma leco tool\r")) {
+    } else if (cmp(p, "#pragma leco tool\r")) {
       set_exe_type(exe_t::tool);
     } else if (cmp(p, "#pragma leco app\n")) {
       set_exe_type(exe_t::app);
@@ -372,7 +372,7 @@ void run(int argc, char **argv) {
       if (strchr(*mod_name, ':') == nullptr) {
         auto fn = sim::path_parent(*source);
         auto dir = fn.path_filename();
-        if (0 == strcmp(dir, *mod_name) && exe_type == exe_t::none)
+        if (mod_name == dir && exe_type == exe_t::none)
           exe_type = exe_t::main_mod;
       }
     } else if (auto pp = chomp(p, "export import ")) {
