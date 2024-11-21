@@ -22,7 +22,7 @@ int main(int argc, char **argv) try {
   for (auto file : pprent::list("..")) {
     if (file[0] == '.') continue;
 
-    if (*sim::path_extension(file) != nullptr) continue;
+    if (sim::path_extension(file).len) continue;
 
     auto path = sim::printf("../%s/.git/config", file);
     if (mtime::of(*path) == 0) continue;
