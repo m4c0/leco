@@ -50,7 +50,7 @@ static void cleaner(const char *target) {
 }
 
 static void sysroot(const char *target) {
-  if (0 == strcmp(target, HOST_TARGET)) return;
+  if (sys::is_tgt_host(target)) return;
 
   sys::tool_run("sysroot", "-q -t %s", target);
 }
