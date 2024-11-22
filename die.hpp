@@ -19,7 +19,7 @@ __attribute__((format(printf, 1, 2))) inline void die(const char *msg, ...) {
   va_end(arg);
 
   fputs("\n", stderr);
-  throw death{};
+  throw death();
 }
 inline void run(const char *cmd) {
   if (0 != system(cmd))
