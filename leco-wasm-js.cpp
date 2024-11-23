@@ -70,7 +70,7 @@ static auto mtime_rec(const char * dag) {
 }
 
 int main(int argc, char **argv) {
-  const char *input;
+  const char * input {};
   sim::sb appdir {};
 
   auto opts = gopt_parse(argc, argv, "i:a:", [&](auto ch, auto val) {
@@ -81,8 +81,7 @@ int main(int argc, char **argv) {
     }
   });
 
-  if (opts.argc != 0 || !input || !appdir.len)
-    usage();
+  if (opts.argc != 0 || !input || !appdir.len) usage();
 
   appdir /= "leco.js";
   if (mtime::of(*appdir) >= mtime_rec(input)) return 0;
