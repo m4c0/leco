@@ -20,6 +20,7 @@ enum class exe_t {
 };
 
 static const char *argv0;
+static bool dump_errors {};
 static sim::sb source {};
 static unsigned line{};
 static exe_t exe_type{};
@@ -33,7 +34,7 @@ static void usage() {
 LECO tool responsible for preprocessing C++ files containing leco pragmas and
 storing dependencies in a DAG-like file.
 
-Usage: %s [-d] -i <input.cpp> [-o <output.dag>] [-t <target>]
+Usage: %s [-d] [-r] -i <input.cpp> [-o <output.dag>] [-t <target>]
 
 Where:
         -d: Dump errors from clang if enabled
@@ -41,6 +42,9 @@ Where:
         -i: Source file name
 
         -o: Output file name. Defaults to standard output.
+
+        -r: Recurse dependencies. Sets output file names automatically. Cannot
+            be used in conjunction with `-o`.
 
         -t: Target triple. Defaults to host target.
 
@@ -258,32 +262,11 @@ static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
   missing_file(desc);
 }
 
-void run(int argc, char **argv) {
-  bool dump_errors{};
-
-  argv0 = argv[0];
-
-  auto opts = gopt_parse(argc, argv, "do:i:t:", [&](auto ch, auto val) {
-    switch (ch) {
-      case 'd': dump_errors = true; break;
-      case 'i': source = sim::path_real(val); break;
-      case 'o':
-        sys::mkdirs(*sim::path_parent(val));
-        out = sys::fopen(val, "w");
-        out_filename = val;
-        break;
-      case 't': target = val; break;
-      default: usage();
-    }
-  });
-
-  if (source.len == 0 || opts.argc != 0)
-    usage();
-
+void run() {
   char *clang_argv[100]{};
   char **argp = clang_argv;
 
-  auto args = sim::path_parent(argv[0]) / "leco-clang.exe";
+  auto args = sim::path_parent(argv0) / "leco-clang.exe";
   *argp++ = *args;
 
   stamp(&args, argp, "-t");
@@ -419,7 +402,29 @@ void run(int argc, char **argv) {
 }
 
 int main(int argc, char **argv) try {
-  run(argc, argv);
+  bool recurse {};
+
+  argv0 = argv[0];
+
+  auto opts = gopt_parse(argc, argv, "rdo:i:t:", [&](auto ch, auto val) {
+    switch (ch) {
+      case 'd': dump_errors = true; break;
+      case 'i': source = sim::path_real(val); break;
+      case 'o':
+        sys::mkdirs(*sim::path_parent(val));
+        out = sys::fopen(val, "w");
+        out_filename = val;
+        break;
+      case 'r': recurse = true; break;
+      case 't': target = val; break;
+      default: usage();
+    }
+  });
+
+  if (source.len == 0 || opts.argc != 0) usage();
+  if (recurse && out_filename != nullptr) usage();
+
+  run();
   return 0;
 } catch (...) {
   if (out != nullptr) fclose(out);
