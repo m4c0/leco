@@ -39,7 +39,7 @@ Usage: %s [-d] [-r] -i <input.cpp> [-o <output.dag>] [-t <target>]
 Where:
         -d: Dump errors from clang if enabled
 
-        -i: Source file name
+        -i: Source file name. Required if not recursing.
 
         -o: Output file name. Defaults to standard output.
 
@@ -421,10 +421,11 @@ int main(int argc, char **argv) try {
     }
   });
 
-  if (source.len == 0 || opts.argc != 0) usage();
+  if (opts.argc != 0) usage();
+  if (!recurse && source.len == 0) usage();
   if (recurse && out_filename != nullptr) usage();
 
-  run();
+  if (!recurse) run();
   return 0;
 } catch (...) {
   if (out != nullptr) fclose(out);
