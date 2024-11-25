@@ -19,15 +19,17 @@ enum class exe_t {
   app,
 };
 
-static const char *argv0;
+static const char * argv0;
 static bool dump_errors {};
+static bool verbose {};
 static sim::sb source {};
-static unsigned line{};
-static exe_t exe_type{};
+static FILE * out{stdout};
+static const char * out_filename {};
+static const char * target { sys::host_target };
+
+static unsigned line {};
+static exe_t exe_type {};
 static sim::sb mod_name {};
-static FILE *out{stdout};
-static const char *out_filename{};
-static const char *target { sys::host_target };
 
 static void usage() {
   sys::die(R"(
@@ -282,6 +284,8 @@ void run() {
   p::proc proc{clang_argv};
 
   line = 0;
+  exe_type = {};
+  mod_name = {};
 
   while (proc.gets()) {
     const char *p = proc.last_line_read();
