@@ -265,6 +265,8 @@ static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
 }
 
 void run() {
+  if (verbose) sys::log("inspecting", *source);
+
   char *clang_argv[100]{};
   char **argp = clang_argv;
 
@@ -410,7 +412,7 @@ int main(int argc, char **argv) try {
 
   argv0 = argv[0];
 
-  auto opts = gopt_parse(argc, argv, "rdo:i:t:", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "drvo:i:t:", [&](auto ch, auto val) {
     switch (ch) {
       case 'd': dump_errors = true; break;
       case 'i': source = sim::path_real(val); break;
@@ -421,6 +423,7 @@ int main(int argc, char **argv) try {
         break;
       case 'r': recurse = true; break;
       case 't': target = val; break;
+      case 'v': verbose = true; break;
       default: usage();
     }
   });
