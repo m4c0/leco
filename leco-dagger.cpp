@@ -8,6 +8,7 @@
 import gopt;
 import mtime;
 import popen;
+import pprent;
 import sim;
 import sys;
 
@@ -429,10 +430,23 @@ int main(int argc, char **argv) try {
   });
 
   if (opts.argc != 0) usage();
-  if (!recurse && source.len == 0) usage();
   if (recurse && out_filename != nullptr) usage();
 
-  if (!recurse) run();
+  if (source.len) {
+    run();
+    if (recurse) { /* TODO */ }
+  } else {
+    for (auto file : pprent::list(".")) {
+      auto ext = sim::path_extension(file);
+      if (!ext.len) continue;
+
+      if (ext != ".cppm" && ext != ".cpp" && ext != ".c") continue;
+
+      source = sim::path_real(file);
+      run();
+      if (recurse) { /* TODO */ }
+    }
+  }
   return 0;
 } catch (...) {
   if (out != nullptr) fclose(out);
