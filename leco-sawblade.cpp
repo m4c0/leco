@@ -84,12 +84,6 @@ int main(int argc, char ** argv) try {
 
     auto in = sim::path_real(file);
     process(*in);
-
-    errno = 0;
-  }
-  if (errno) {
-    perror("could not list current directory");
-    throw 0;
   }
 } catch (...) {
   return 1;
