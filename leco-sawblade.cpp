@@ -32,7 +32,7 @@ static void dagger(const char * src, const char * dag) {
 
   if (verbose) sys::log("inspecting", src);
 
-  sys::tool_run("dagger", "-t %s -i %s -o %s", target, src, dag);
+  sys::tool_run("dagger", "-t %s -i %s", target, src);
   if (mtime::of(dag) == 0)
     sys::die("failed to preprocess [%s]", src);
 }

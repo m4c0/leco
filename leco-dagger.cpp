@@ -266,6 +266,14 @@ static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
 }
 
 void run() {
+  auto parent = sim::path_parent(*source);
+  sys::mkdirs(*parent);
+
+  auto dag = parent / "out" / target / source.path_filename();
+  dag.path_extension("dag");
+  out_filename = dag.buffer;
+  out = sys::fopen(out_filename, "w");
+
   if (verbose) sys::log("inspecting", *source);
 
   char *clang_argv[100]{};
@@ -413,15 +421,10 @@ int main(int argc, char **argv) try {
 
   argv0 = argv[0];
 
-  auto opts = gopt_parse(argc, argv, "drvo:i:t:", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "drvi:t:", [&](auto ch, auto val) {
     switch (ch) {
       case 'd': dump_errors = true; break;
       case 'i': source = sim::path_real(val); break;
-      case 'o':
-        sys::mkdirs(*sim::path_parent(val));
-        out = sys::fopen(val, "w");
-        out_filename = val;
-        break;
       case 'r': recurse = true; break;
       case 't': target = val; break;
       case 'v': verbose = true; break;
@@ -430,7 +433,6 @@ int main(int argc, char **argv) try {
   });
 
   if (opts.argc != 0) usage();
-  if (recurse && out_filename != nullptr) usage();
 
   if (source.len) {
     run();
@@ -441,6 +443,8 @@ int main(int argc, char **argv) try {
       if (!ext.len) continue;
 
       if (ext != ".cppm" && ext != ".cpp" && ext != ".c") continue;
+
+      // TODO: check mtime
 
       source = sim::path_real(file);
       run();
