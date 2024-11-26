@@ -37,19 +37,16 @@ static void usage() {
 LECO tool responsible for preprocessing C++ files containing leco pragmas and
 storing dependencies in a DAG-like file.
 
-Usage: %s [-d] [-r] -i <input.cpp> [-o <output.dag>] [-t <target>]
+Usage: %s [-d] [-i <input.cpp>] [-t <target>] [-v]
 
 Where:
         -d: Dump errors from clang if enabled
 
         -i: Source file name. Required if not recursing.
 
-        -o: Output file name. Defaults to standard output.
-
-        -r: Recurse dependencies. Sets output file names automatically. Cannot
-            be used in conjunction with `-o`.
-
         -t: Target triple. Defaults to host target.
+
+        -v: Verbose. Output name of inspected files.
 
 )",
            argv0);
@@ -417,15 +414,12 @@ void run() {
 }
 
 int main(int argc, char **argv) try {
-  bool recurse {};
-
   argv0 = argv[0];
 
-  auto opts = gopt_parse(argc, argv, "drvi:t:", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "dvi:t:", [&](auto ch, auto val) {
     switch (ch) {
       case 'd': dump_errors = true; break;
       case 'i': source = sim::path_real(val); break;
-      case 'r': recurse = true; break;
       case 't': target = val; break;
       case 'v': verbose = true; break;
       default: usage();
@@ -434,9 +428,9 @@ int main(int argc, char **argv) try {
 
   if (opts.argc != 0) usage();
 
+  // TODO: remove "input"
   if (source.len) {
     run();
-    if (recurse) { /* TODO */ }
   } else {
     for (auto file : pprent::list(".")) {
       auto ext = sim::path_extension(file);
@@ -448,7 +442,6 @@ int main(int argc, char **argv) try {
 
       source = sim::path_real(file);
       run();
-      if (recurse) { /* TODO */ }
     }
   }
   return 0;
