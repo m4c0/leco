@@ -166,5 +166,5 @@ bool is_tgt_droid(const char * t) {
       || is_tgt(t, TGT_DROID_X86) || is_tgt(t, TGT_DROID_X86_64);
 }
 bool is_tgt_ios(const char * t) { return is_tgt_iphoneos(t) || is_tgt_ios_sim(t); }
-bool is_tgt_apple(const char * t) { return is_tgt_ios(t) || is_tgt_ios(t); }
+bool is_tgt_apple(const char * t) { return is_tgt_osx(t) || is_tgt_ios(t); }
 } // namespace sys
