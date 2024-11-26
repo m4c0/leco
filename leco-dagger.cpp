@@ -264,11 +264,10 @@ static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
 
 void run() {
   auto parent = sim::path_parent(*source);
-  sys::mkdirs(*parent);
-
   auto dag = parent / "out" / target / source.path_filename();
   dag.path_extension("dag");
   out_filename = dag.buffer;
+  sys::mkdirs(*sim::path_parent(*dag));
   out = sys::fopen(out_filename, "w");
 
   if (verbose) sys::log("inspecting", *source);
