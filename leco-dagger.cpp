@@ -10,6 +10,7 @@ import mtime;
 import popen;
 import pprent;
 import sim;
+import strset;
 import sys;
 
 enum class exe_t {
@@ -263,13 +264,6 @@ static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
 }
 
 void run() {
-  auto parent = sim::path_parent(*source);
-  auto dag = parent / "out" / target / source.path_filename();
-  dag.path_extension("dag");
-  out_filename = dag.buffer;
-  sys::mkdirs(*sim::path_parent(*dag));
-  out = sys::fopen(out_filename, "w");
-
   if (verbose) sys::log("inspecting", *source);
 
   char *clang_argv[100]{};
@@ -412,6 +406,31 @@ void run() {
   }
 }
 
+static str::set done {};
+static void process() {
+  if (!done.insert(*source)) return;
+
+  auto dag = sim::path_parent(*source) / "out" / target / sim::path_filename(*source);
+  dag.path_extension("dag");
+  if (mtime::of(*dag) <= mtime::of(*source)) {
+    out_filename = dag.buffer;
+    sys::mkdirs(*sim::path_parent(*dag));
+    out = sys::fopen(out_filename, "w");
+    run();
+  }
+
+  sys::dag_read(*dag, [](auto id, auto file) {
+    switch (id) {
+      case 'bdep':
+      case 'impl':
+      case 'mdep':
+        source = sim::sb { file };
+        process();
+        break;
+    }
+  });
+}
+
 int main(int argc, char **argv) try {
   argv0 = argv[0];
 
@@ -429,7 +448,7 @@ int main(int argc, char **argv) try {
 
   // TODO: remove "input"
   if (source.len) {
-    run();
+    process();
   } else {
     for (auto file : pprent::list(".")) {
       auto ext = sim::path_extension(file);
@@ -440,7 +459,7 @@ int main(int argc, char **argv) try {
       // TODO: check mtime
 
       source = sim::path_real(file);
-      run();
+      process();
     }
   }
   return 0;
