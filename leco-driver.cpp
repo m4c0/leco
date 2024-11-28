@@ -55,8 +55,8 @@ static void sysroot(const char *target) {
   sys::tool_run("sysroot", "-q -t %s", target);
 }
 
-static void sawblade(const char * target) {
-  sys::tool_run("sawblade", "-t %s", target);
+static void dagger(const char * target) {
+  sys::tool_run("dagger", "-t %s", target);
 }
 
 static void recurse(const char * target) {
@@ -66,7 +66,7 @@ static void recurse(const char * target) {
 static void run_target(const char * target) {
   cleaner(target);
   sysroot(target);
-  sawblade(target);
+  dagger(target);
   recurse(target);
 }
 
