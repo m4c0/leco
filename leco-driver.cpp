@@ -59,6 +59,27 @@ static void dagger(const char * target) {
   sys::tool_run("dagger", "-t %s", target);
 }
 
+static void compile(const char * target) {
+  auto path = ("out"_real /= target);
+  for (auto file : pprent::list(*path)) {
+    if (sim::path_extension(file) != ".dag") continue;
+
+    auto dag = path / file;
+    sys::dag_read(*dag, [&](auto id, auto file) {
+      switch (id) {
+      case 'tapp':
+      case 'tdll':
+      case 'tool':
+      case 'tmmd': 
+        sys::tool_run("pcm", "-i %s %s", *dag, common_flags);
+        sys::tool_run("obj", "-i %s %s", *dag, common_flags);
+        break;
+      default: break;
+      }
+    });
+  }
+}
+
 static void recurse(const char * target) {
   sys::tool_run("recurse", "-t %s %s", target, common_flags);
 }
@@ -67,6 +88,7 @@ static void run_target(const char * target) {
   cleaner(target);
   sysroot(target);
   dagger(target);
+  compile(target);
   recurse(target);
 }
 

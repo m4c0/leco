@@ -37,11 +37,6 @@ static void build_rc(const char *path) {
 }
 #endif
 
-static void compile(const char * dag) {
-  sys::tool_run("pcm", "-i %s", dag);
-  sys::tool_run("obj", "-i %s", dag);
-}
-
 static void bounce(const char * src);
 static void build_bdeps(const char * dag) {
   sys::dag_read(dag, [](auto id, auto file) {
@@ -56,7 +51,6 @@ static void bounce(const char * dag) {
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
     case 'tapp':
-      compile(dag);
       build_bdeps(dag);
       // build_rc(src);
       link(dag, file);
@@ -64,11 +58,7 @@ static void bounce(const char * dag) {
       break;
     case 'tdll':
     case 'tool':
-      compile(dag);
       link(dag, file);
-      break;
-    case 'tmmd': 
-      compile(dag);
       break;
     default: break;
     }
