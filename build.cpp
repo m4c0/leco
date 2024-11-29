@@ -53,7 +53,6 @@ int try_main(int argc, char **argv) {
   TOOL("driver");
   TOOL("meta");
   TOOL("recurse");
-  TOOL("sawblade");
 
   puts("Building meta runner");
   run(CLANG " -i leco.cpp -o leco.exe");
