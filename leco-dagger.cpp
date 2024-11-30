@@ -404,6 +404,8 @@ void run() {
     }
     break;
   }
+
+  fclose(out);
 }
 
 static str::set done {};
