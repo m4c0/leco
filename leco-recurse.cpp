@@ -13,10 +13,6 @@ import sys;
 static const char *common_flags;
 static const char *target;
 
-static void link(const char *dag, const char *exe) {
-  sys::tool_run("link", "-i %s -o %s %s", dag, exe, common_flags);
-}
-
 static void bundle(const char *dag) {
   sys::tool_run("bundler", "-i %s", dag);
 }
@@ -53,12 +49,7 @@ static void bounce(const char * dag) {
     case 'tapp':
       build_bdeps(dag);
       // build_rc(src);
-      link(dag, file);
       bundle(dag);
-      break;
-    case 'tdll':
-    case 'tool':
-      link(dag, file);
       break;
     default: break;
     }

@@ -86,6 +86,19 @@ static void compile(const char * target) {
   });
 }
 
+static void link(const char * target) {
+  for_each_dag(target, [](auto * dag, auto id, auto file) {
+    switch (id) {
+      case 'tapp':
+      case 'tdll':
+      case 'tool':
+        sys::tool_run("link", "-i %s -o %s %s", dag, file, common_flags);
+        break;
+      default: break;
+    }
+  });
+}
+
 static void recurse(const char * target) {
   sys::tool_run("recurse", "-t %s %s", target, common_flags);
 }
@@ -95,6 +108,7 @@ static void run_target(const char * target) {
   sysroot(target);
   dagger(target);
   compile(target);
+  link(target);
   recurse(target);
 }
 
