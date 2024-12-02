@@ -99,6 +99,17 @@ static void link(const char * target) {
   });
 }
 
+static void bundle(const char * target) {
+  for_each_dag(target, [](auto * dag, auto id, auto file) {
+    switch (id) {
+      case 'tapp':
+        sys::tool_run("bundler", "-i %s", dag);
+        break;
+      default: break;
+    }
+  });
+}
+
 static void recurse(const char * target) {
   sys::tool_run("recurse", "-t %s %s", target, common_flags);
 }
@@ -109,6 +120,7 @@ static void run_target(const char * target) {
   dagger(target);
   compile(target);
   link(target);
+  bundle(target);
   recurse(target);
 }
 

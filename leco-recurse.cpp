@@ -10,12 +10,7 @@ import pprent;
 import sim;
 import sys;
 
-static const char *common_flags;
 static const char *target;
-
-static void bundle(const char *dag) {
-  sys::tool_run("bundler", "-i %s", dag);
-}
 
 #if 0 && _WIN32
 static void build_rc(const char *path) {
@@ -49,7 +44,6 @@ static void bounce(const char * dag) {
     case 'tapp':
       build_bdeps(dag);
       // build_rc(src);
-      bundle(dag);
       break;
     default: break;
     }
@@ -62,19 +56,15 @@ int main(int argc, char **argv) try {
   sim::sb flags{};
   const char * input {};
 
-  auto opts = gopt_parse(argc, argv, "t:i:gO", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "t:i:", [&](auto ch, auto val) {
     switch (ch) {
     case 'i': input = val; break;
     case 't': target = val; break;
-    case 'g': flags += " -g"; break;
-    case 'O': flags += " -O"; break;
     default: usage(); break;
     }
   });
   if (opts.argc != 0) usage();
   if (!input && !target) usage();
-
-  common_flags = *flags;
 
   if (input) {
     bounce(input);
