@@ -75,6 +75,9 @@ static void compile(const char * target) {
   for_each_dag(target, [](auto * dag, auto id, auto file) {
     switch (id) {
       case 'tapp':
+#if _WIN32
+        sys::tool_run("rc", "-i %s", dag);
+#endif
       case 'tdll':
       case 'tool':
       case 'tmmd': 
