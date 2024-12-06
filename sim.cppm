@@ -3,20 +3,11 @@ module;
 #include "sim.h"
 #include <string.h>
 
-#ifdef __linux__
-#include <linux/limits.h>
-#elif _WIN32
-#include <stdlib.h>
-#define PATH_MAX _MAX_PATH
-#else
-#include <limits.h>
-#endif
-
 export module sim;
 
 export namespace sim {
   struct sb : sim_sb {
-    sb() { sim_sb_new(this, PATH_MAX); }
+    sb() { sim_sb_new(this, 102400); }
     sb(unsigned sz) { sim_sb_new(this, sz); }
     ~sb() { if (buffer) sim_sb_delete(this); }
 
