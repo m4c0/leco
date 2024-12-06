@@ -53,12 +53,13 @@ static sim::sb apple_sysroot(const char *sdk) {
   sim::sb buf {};
 
   auto f = popen(*cmd, "r");
-  auto path = fgets(*buf, buf.len, f);
+  auto path = fgets(*buf, buf.size, f);
   pclose(f);
 
   if (path == nullptr) return {};
 
-  (*buf)[--buf.len] = 0; // chomp "\n"
+  buf.len = strlen(path) - 1;
+  (*buf)[buf.len] = 0; // chomp "\n"
   return buf;
 #endif
 }
@@ -71,7 +72,7 @@ static sim::sb sysroot_for_target(const char *target) {
   if (IS_TGT(target, TGT_IOS_SIMULATOR)) return apple_sysroot("iphonesimulator");
   if (IS_TGT_DROID(target)) return android_sysroot();
   if (IS_TGT(target, TGT_WASM)) return wasm_sysroot();
-  return {};
+  sys::die("invalid target: %s", target);
 }
 
 int main(int argc, char **argv) try {
