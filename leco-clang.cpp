@@ -27,6 +27,17 @@ static void clang_cmd(sim_sb *buf, const char *exe) {
 #endif
 }
 
+static FILE * fopen_safe(const char * name, const char * mode) {
+  FILE * res {};
+#ifdef _WIN32
+  if (0 != fopen_s(&res, name, mode)) die("could not open file [%s]", name);
+#else
+  res = ::fopen(name, mode);
+  if (res == nullptr) die("could not open file [%s]", name);
+#endif
+  return res;
+}
+
 static int usage() {
   fprintf(stderr, R"(
 LECO's heavily-opiniated CLANG runner
@@ -96,7 +107,7 @@ static void add_sysroot(sim_sb *args, const char *target) {
   sim_sb_path_append(&sra, "sysroot");
 
   if (mtime_of(sra.buffer) > 0) {
-    auto f = fopen(sra.buffer, "r");
+    auto f = fopen_safe(sra.buffer, "r");
     fgets(sra.buffer, sra.size, f);
     fclose(f);
 
