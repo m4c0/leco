@@ -1,12 +1,12 @@
 #pragma leco tool
 #define GOPT_IMPLEMENTATION
 #define MTIME_IMPLEMENTATION
-#define POPEN_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
+#define SYSSTD_IMPLEMENTATION
 
 #include "../gopt/gopt.h"
 #include "../mtime/mtime.h"
-#include "die.hpp"
+#include "../sysstd/sysstd.h"
 #include "sim.h"
 #include "targets.hpp"
 
@@ -27,15 +27,10 @@ static void clang_cmd(sim_sb *buf, const char *exe) {
 #endif
 }
 
-static FILE * fopen_safe(const char * name, const char * mode) {
-  FILE * res {};
-#ifdef _WIN32
-  if (0 != fopen_s(&res, name, mode)) die("could not open file [%s]", name);
-#else
-  res = ::fopen(name, mode);
-  if (res == nullptr) die("could not open file [%s]", name);
-#endif
-  return res;
+static void run(const char * cmd) {
+  if (0 == system(cmd)) return;
+  fprintf(stderr, "command failed: %s", cmd);
+  throw 0;
 }
 
 static int usage() {
@@ -94,7 +89,8 @@ static void add_target_defs(sim_sb *buf, const char *tgt) {
   } else if (IS_TGT(tgt, TGT_WASM)) {
     sim_sb_concat(buf, " -DLECO_TARGET_WASM");
   } else {
-    die("invalid target: [%s]", tgt);
+    fprintf(stderr, "invalid target: [%s]\n", tgt);
+    throw 0;
   }
 }
 
@@ -107,7 +103,7 @@ static void add_sysroot(sim_sb *args, const char *target) {
   sim_sb_path_append(&sra, "sysroot");
 
   if (mtime_of(sra.buffer) > 0) {
-    auto f = fopen_safe(sra.buffer, "r");
+    auto f = sysstd_fopen(sra.buffer, "r");
     fgets(sra.buffer, sra.size, f);
     fclose(f);
 

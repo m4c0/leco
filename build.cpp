@@ -1,10 +1,11 @@
 #define MTIME_IMPLEMENTATION
-#define SIM_IMPLEMENTATION
-#include "die.hpp"
+#define SYSSTD_IMPLEMENTATION
 #include "targets.hpp"
 #include "../mtime/mtime.h"
+#include "../sysstd/sysstd.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #if _WIN32
 #define SEP "\\"
@@ -28,9 +29,15 @@
             "--" MARG("gopt") MARG("mtime") MARG("popen") MARG("pprent")       \
                 LMARG("sim") LMARG("strset") LMARG("sys"))
 
+static void run(const char * cmd) {
+  if (0 == system(cmd)) return;
+  fprintf(stderr, "command failed: %s", cmd);
+  throw 0;
+}
+
 int try_main(int argc, char **argv) {
-  _mkdir("out");
-  _mkdir("out" SEP HOST_TARGET);
+  sysstd_mkdir("out");
+  sysstd_mkdir("out" SEP HOST_TARGET);
 
   puts("Building clang runner");
   run("clang++ -Wall -Wno-unknown-pragmas -std=c++20 leco-clang.cpp -o " CLANG);
@@ -75,6 +82,6 @@ int main(int argc, char **argv) try {
     return 0;
   }
   return try_main(argc, argv);
-} catch (int n) {
-  fprintf(stderr, "child process failed with code %d\n", n);
+} catch (...) {
+  return 1;
 }
