@@ -7,11 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#if _WIN32
-#define SEP "\\"
-#else
-#define SEP "/"
-#endif
+#define SEP SYSSTD_FILE_SEP
 
 #define CLANG "out" SEP HOST_TARGET SEP "leco-clang.exe"
 
