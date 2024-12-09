@@ -147,9 +147,9 @@ static void infer_output(sim_sb *args, const char *input, const char *target) {
   } else {
     sim_sb_path_copy_parent(&out, input);
     sim_sb_path_append(&out, "out");
-    _mkdir(out.buffer);
+    sysstd_mkdir(out.buffer);
     sim_sb_path_append(&out, target);
-    _mkdir(out.buffer);
+    sysstd_mkdir(out.buffer);
     sim_sb_path_append(&out, sim_path_filename(input));
   }
 
