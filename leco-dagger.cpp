@@ -263,6 +263,35 @@ static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
   missing_file(desc);
 }
 
+static void output_root_tag() {
+  auto path = sim::path_parent(*source) / "out" / target / source.path_filename();
+
+  switch (exe_type) {
+  case exe_t::none:
+    break;
+  case exe_t::main_mod:
+    output('tmmd', "");
+    break;
+  case exe_t::app:
+    path.path_extension("exe");
+    output('tapp', *path);
+    break;
+  case exe_t::dll:
+    if (sys::is_tgt_windows(target)) path.path_extension("dll");
+    else if (sys::is_tgt_apple(target)) path.path_extension("dylib");
+    else path.path_extension("so");
+
+    output('tdll', *path);
+    break;
+  case exe_t::tool:
+    if (sys::is_tgt_host(target)) {
+      path.path_extension("exe");
+      output('tool', *path);
+    }
+    break;
+  }
+}
+
 void run() {
   if (verbose) sys::log("inspecting", *source);
 
@@ -378,32 +407,7 @@ void run() {
 
   output('srcf', *source);
 
-  auto path = sim::path_parent(*source) / "out" / target / source.path_filename();
-
-  switch (exe_type) {
-  case exe_t::none:
-    break;
-  case exe_t::main_mod:
-    output('tmmd', "");
-    break;
-  case exe_t::app:
-    path.path_extension("exe");
-    output('tapp', *path);
-    break;
-  case exe_t::dll:
-    if (sys::is_tgt_windows(target)) path.path_extension("dll");
-    else if (sys::is_tgt_apple(target)) path.path_extension("dylib");
-    else path.path_extension("so");
-
-    output('tdll', *path);
-    break;
-  case exe_t::tool:
-    if (sys::is_tgt_host(target)) {
-      path.path_extension("exe");
-      output('tool', *path);
-    }
-    break;
-  }
+  output_root_tag();
 
   fclose(out);
 }
