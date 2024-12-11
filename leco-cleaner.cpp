@@ -42,7 +42,7 @@ static void remove_with_deps(const char * p) {
   for (auto entry : pprent::list(*path)) {
     auto dag = path / entry;
 
-    if (sim::path_extension(*dag) == ".dag") continue;
+    if (sim::path_extension(*dag) != ".dag") continue;
 
     sys::dag_read(*dag, [&](auto id, auto file) {
       switch (id) {
