@@ -438,6 +438,8 @@ static void process() {
     run();
   }
 
+  // TODO: add version, check and reprocess if older
+  // Enables an easier upgrade of dag files
   sys::dag_read(*dag, [](auto id, auto file) {
     switch (id) {
       case 'bdep':
