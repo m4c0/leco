@@ -263,6 +263,18 @@ static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
   missing_file(desc);
 }
 
+static void output_file_tags() {
+  auto path = sim::path_parent(*source) / "out" / target / source.path_filename();
+
+  path.path_extension("o");
+  output('objf', *path);
+
+  if (sim::path_extension(*source) == ".cpp") {
+    path.path_extension("pcm");
+    output('pcmf', *path);
+  }
+}
+
 static void output_root_tag() {
   auto path = sim::path_parent(*source) / "out" / target / source.path_filename();
 
@@ -408,6 +420,7 @@ void run() {
   output('srcf', *source);
 
   output_root_tag();
+  output_file_tags();
 
   fclose(out);
 }

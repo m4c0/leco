@@ -38,6 +38,8 @@ static void process(const char * dag) {
   auto mtime = 0ULL;
 
   sim::sb src {};
+  sim::sb pcm {};
+  sim::sb obj {};
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
       case 'head': mtime = max(mtime, mtime::of(file)); break;
@@ -51,24 +53,19 @@ static void process(const char * dag) {
       }
       case 'bdag':
       case 'idag': process(file); break;
-      case 'srcf': {
-        if (".cppm" == sim::path_extension(file)) {
-          src = sim::sb { dag };
-          src.path_extension("pcm");
-        } else {
-          src = sim::sb { file };
-        }
-        mtime = max(mtime, mtime::of(*src));
-        break;
-      }
+
+      case 'srcf': src = sim::sb { file }; break;
+      case 'pcmf': pcm = sim::sb { file }; break;
+      case 'objf': obj = sim::sb { file }; break;
       default: break;
     }
   });
 
-  if (src.len == 0) sys::die("dag without source info: [%s]", dag);
+  if (pcm.len > 0) src = pcm;
+  mtime = max(mtime, mtime::of(*src));
 
-  auto obj = sim::sb { dag };
-  obj.path_extension("o");
+  if (src.len == 0) sys::die("dag without source info: [%s]", dag);
+  if (obj.len == 0) sys::die("dag without object info: [%s]", dag);
 
   if (mtime > mtime::of(*obj)) compile(*src);
 }

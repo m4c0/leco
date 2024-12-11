@@ -36,24 +36,25 @@ static auto process_spec(const char * dag) {
   mtime = 1;
 
   sim::sb src {};
+  sim::sb pcm {};
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
       case 'head': mtime = max(mtime, mtime::of(file)); break;
       case 'bdag':
       case 'mdag': mtime = max(mtime, process_spec(file)); break;
+
       case 'srcf': src = sim::sb { file }; break;
+      case 'pcmf': pcm = sim::sb { file }; break;
       default: break;
     }
   });
 
   if (!src.len) sys::die("missing source for [%s]", dag);
 
+  if (!pcm.len) return mtime;
   if (sim::path_extension(*src) != ".cppm") return mtime;
 
   mtime = max(mtime, mtime::of(*src));
-
-  sim::sb pcm { dag };
-  pcm.path_extension("pcm");
 
   if (mtime > mtime::of(*pcm)) {
     compile(*src);
