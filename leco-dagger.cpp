@@ -269,7 +269,7 @@ static void output_file_tags() {
   path.path_extension("o");
   output('objf', *path);
 
-  if (sim::path_extension(*source) == ".cpp") {
+  if (sim::path_extension(*source) == ".cppm") {
     path.path_extension("pcm");
     output('pcmf', *path);
   }
