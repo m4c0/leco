@@ -54,6 +54,7 @@ static auto read_dag(const char *dag) {
   if (mtime != 0) return mtime;
   mtime = 1;
 
+  sim::sb obj {};
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
     case 'tdll':
@@ -71,6 +72,7 @@ static auto read_dag(const char *dag) {
     case 'slib':
       fprintf(out, "%s\n", file);
       break;
+    case 'objf': obj = sim::sb { file }; break;
     case 'xcfw': add_local_fw(file); break;
     case 'idag':
     case 'mdag': mtime = max(mtime, read_dag(file)); break;
@@ -79,8 +81,6 @@ static auto read_dag(const char *dag) {
   });
 
   // Add object after dependencies as this kinda enforces the static init order
-  sim::sb obj { dag };
-  obj.path_extension("o");
   put(*obj);
 
   mtime = max(mtime, mtime::of(*obj));
