@@ -418,6 +418,7 @@ void run() {
   }
 
   output('srcf', *source);
+  // TODO: output mod_name
 
   output_root_tag();
   output_file_tags();
