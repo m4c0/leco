@@ -22,32 +22,27 @@ Where:
 )");
 }
 
-static void print_dep(const char *dag) {
-  auto stem = sim::path_stem(dag);
+static void print_pcm(const char * pcmf) {
+  sim::sb pcm { pcmf };
+  auto stem = sim::path_stem(*pcm);
 
   auto * c = strchr(*stem, '-');
-  if (c != nullptr)
-    *c = ':';
-
-  sim::sb pcm { dag };
-  pcm.path_extension("pcm");
+  if (c != nullptr) *c = ':';
 
   for (auto *c = *pcm; *c; c++)
     if (*c == '\\')
       *c = '/';
 
-  fprintf(out, "-fmodule-file=%s=%s\n", stem.buffer, pcm.buffer);
+  fprintf(out, "-fmodule-file=%s=%s\n", *stem, *pcm);
 }
 
 static void read_dag(const char *dag) {
-  if (!added.insert(dag))
-    return;
-
-  print_dep(dag);
+  if (!added.insert(dag)) return;
 
   sys::dag_read(dag, [](auto id, auto file) {
     switch (id) {
     case 'mdag': read_dag(file); break;
+    case 'pcmf': print_pcm(file); break;
     default: break;
     }
   });
