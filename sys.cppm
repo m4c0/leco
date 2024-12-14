@@ -14,16 +14,14 @@ module;
 
 #ifdef _WIN32
 #define WIN32_MEAN_AND_LEAN
-#include <direct.h>
 #include <windows.h>
 #else
-#include <sys/stat.h>
 #include <unistd.h>
-#define _mkdir(x) mkdir((x), 0777)
 #endif
 
 export module sys;
 import sim;
+import sysstd;
 
 export namespace sys {
 struct death {};
@@ -80,37 +78,24 @@ void link(const char *src, const char *dst) {
 }
 
 const char *env(const char *name) {
-#ifdef _WIN32
-  char *buf;
-  size_t sz;
-  if (0 == _dupenv_s(&buf, &sz, name)) return buf;
-#else
-  auto e = getenv(name);
-  if (e) return strdup(e);
-#endif
+  auto e = sysstd::env(name);
+  if (e) return e;
   sys::die("missing environment variable [%s]", name);
 }
 
 void mkdirs(const char *path) {
-  if (0 == _mkdir(path))
-    return;
-  if (errno == EEXIST)
-    return;
+  if (0 == sysstd::mkdir(path)) return;
+  if (errno == EEXIST) return;
 
   auto p = sim::path_parent(path);
   mkdirs(*p);
 
-  _mkdir(path);
+  sysstd::mkdir(path);
 }
 
 FILE * fopen(const char * name, const char * mode) {
-  FILE * res {};
-#ifdef _WIN32
-  if (0 != fopen_s(&res, name, mode)) die("could not open file [%s]", name);
-#else
-  res = ::fopen(name, mode);
+  FILE * res = sysstd::fopen(name, mode);
   if (res == nullptr) die("could not open file [%s]", name);
-#endif
   return res;
 }
 
