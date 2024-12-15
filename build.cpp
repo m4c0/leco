@@ -23,6 +23,7 @@
   puts("Building " name);                                                      \
   run(CLANG " -i leco-" name ".cpp -o out/" HOST_TARGET "/leco-" name ".exe "  \
             "--" MARG("gopt") MARG("mtime") MARG("popen") MARG("pprent")       \
+                 MARG("print") MARG("sysstd") \
                 LMARG("sim") LMARG("strset") LMARG("sys"))
 
 static void run(const char * cmd) {
@@ -43,6 +44,8 @@ int try_main(int argc, char **argv) {
   MODULE("mtime");
   MODULE("popen");
   MODULE("pprent");
+  MODULE("print");
+  MODULE("sysstd");
   LOCAL_MODULE("sim");
   LOCAL_MODULE("strset");
   LOCAL_MODULE("sys");
