@@ -43,6 +43,7 @@ static void process(const char * dag) {
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
       case 'head': mtime = max(mtime, mtime::of(file)); break;
+      case 'idag': process(file); break;
       case 'mdag': {
         process(file);
 
@@ -51,8 +52,6 @@ static void process(const char * dag) {
         mtime = max(mtime, mtime::of(*pcm));
         break;
       }
-      case 'bdag':
-      case 'idag': process(file); break;
 
       case 'srcf': src = sim::sb { file }; break;
       case 'pcmf': pcm = sim::sb { file }; break;

@@ -49,24 +49,12 @@ static void copy_xcfw(const char * xcfw_path) {
   sys::tool_run("codesign", "-d %s", *tgt);
 }
 
-static void copy_bdep(const char * dag) {
-  sys::dag_read(dag, [&](auto id, auto file) {
-    switch (id) {
-      case 'tdll':
-      case 'tool':
-      case 'tapp': copy_exe(file); break;
-      default: break;
-    }
-  });
-}
-
 static str::set added {};
 static void read_dag(const char * dag) {
   if (!added.insert(dag)) return;
 
   sys::dag_read(dag, [](auto id, auto file) {
     switch (id) {
-      case 'bdag': copy_bdep(file); break;
       case 'dlls': copy_exe(file); break;
       case 'xcfw': copy_xcfw(file); break;
       case 'idag':

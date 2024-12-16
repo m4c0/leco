@@ -243,11 +243,6 @@ static void add_mod_dep(const char *p, const char *desc) {
   missing_file(desc);
 }
 
-static void add_bdep(const char * src, const char * desc, uint32_t code) {
-  if (print_dag_if_found(src, desc, 'bdep', 'bdag')) return;
-  missing_file(desc);
-}
-
 static bool check_extension(sim::sb * mi, const char *desc, const char *ext) {
   mi->path_extension(ext);
   return print_dag_if_found(**mi, desc, 'impl', 'idag');
@@ -347,8 +342,6 @@ void run() {
       set_exe_type(exe_t::dll);
     } else if (cmp(p, "#pragma leco dll\r")) {
       set_exe_type(exe_t::dll);
-    } else if (auto pp = cmp(p, "#pragma leco add_build_dep ")) {
-      read_file_list(pp, "build dependency", 'bdep', add_bdep);
     } else if (auto pp = cmp(p, "#pragma leco add_dll ")) {
       read_file_list(pp, "dll", 'dlls');
     } else if (auto pp = cmp(p, "#pragma leco add_framework ")) {
@@ -443,7 +436,6 @@ static void process() {
   // Enables an easier upgrade of dag files
   sys::dag_read(*dag, [](auto id, auto file) {
     switch (id) {
-      case 'bdep':
       case 'impl':
       case 'mdep':
         source = sim::sb { file };

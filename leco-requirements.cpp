@@ -31,7 +31,6 @@ void recurse(const char * dag) {
 
   sys::dag_read(dag, [](auto id, auto file) {
     switch (id) {
-      case 'bdag':
       case 'idag':
       case 'mdag': recurse(file); break;
       default: break;

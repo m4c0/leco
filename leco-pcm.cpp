@@ -40,7 +40,6 @@ static auto process_spec(const char * dag) {
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
       case 'head': mtime = max(mtime, mtime::of(file)); break;
-      case 'bdag':
       case 'mdag': mtime = max(mtime, process_spec(file)); break;
 
       case 'srcf': src = sim::sb { file }; break;
@@ -70,7 +69,6 @@ static void process_impl(const char * dag) {
 
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
-      case 'bdag':
       case 'mdag':
         process_spec(file);
         process_impl(file);
