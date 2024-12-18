@@ -254,32 +254,19 @@ int main(int argc, char **argv) try {
     sim_sb_concat(&args, " -O3 -flto -fvisibility=hidden");
   }
 
-  sim_sb_concat(&args, " -target ");
-  sim_sb_concat(&args, target);
+  sim_sb_printf(&args, " -target %s", target);
   add_target_defs(&args, target);
-  if (0 != strcmp(target, HOST_TARGET))
-    add_sysroot(&args, target);
+  if (0 != strcmp(target, HOST_TARGET)) add_sysroot(&args, target);
 
-  if (input.len != 0) {
-    sim_sb_concat(&args, " ");
-    sim_sb_concat(&args, input.buffer);
-  }
-  if (output) {
-    sim_sb_concat(&args, " -o");
-    sim_sb_concat(&args, output);
-  } else if (input.len != 0) {
-    infer_output(&args, input.buffer, target);
-  }
+  if (input.len != 0) sim_sb_printf(&args, " %s", input.buffer);
 
-  for (auto i = 0; i < opts.argc; i++) {
-    // TODO: escape argv
-    sim_sb_concat(&args, " ");
-    sim_sb_concat(&args, opts.argv[i]);
-  }
+  if (output) sim_sb_printf(&args, " -o %s", output);
+  else if (input.len != 0) infer_output(&args, input.buffer, target);
 
-  if (verbose) {
-    fprintf(stderr, "%s\n", args.buffer);
-  }
+  // TODO: escape argv
+  for (auto i = 0; i < opts.argc; i++) sim_sb_printf(&args, " %s", opts.argv[i]);
+
+  if (verbose) fprintf(stderr, "%s\n", args.buffer);
 
   run(args.buffer);
   return 0;
