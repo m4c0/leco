@@ -4,13 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef _WIN32
-#include <direct.h>
-#define chdir _chdir
-#else
-#include <unistd.h>
-#endif
-
 import gopt;
 import pprent;
 import sim;

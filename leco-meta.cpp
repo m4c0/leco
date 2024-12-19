@@ -2,18 +2,12 @@
 #include "sim.h"
 #include "targets.hpp"
 
-#ifdef _WIN32
-#include <direct.h>
-#define chdir _chdir
-#else
-#include <unistd.h>
-#endif
-
 #include <stdlib.h>
 
 import gopt;
 import mtime;
 import sys;
+import sysstd;
 
 int main(int argc, char ** argv) try {
 #ifdef _WIN32
@@ -28,7 +22,7 @@ int main(int argc, char ** argv) try {
   auto opts = gopt_parse(argc, argv, "C:", [&](auto ch, auto val) {
     switch (ch) {
       case 'C':
-        if (0 != chdir(val)) {
+        if (0 != sysstd::chdir(val)) {
           sys::die("Directory not found: [%s]\n", val);
         }
         break;
