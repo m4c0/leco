@@ -149,6 +149,7 @@ int main(int argc, char **argv) try {
 
   if (IS_TGT(target, TGT_OSX)) {
     cmd += " -rpath @executable_path/../Frameworks";
+    cmd += " -rpath @executable_path";
   } else if (IS_TGT_IOS(target)) {
     cmd += " -rpath @executable_path/Frameworks";
   } else if (IS_TGT(target, TGT_WINDOWS)) {
