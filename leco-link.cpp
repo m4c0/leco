@@ -148,7 +148,9 @@ int main(int argc, char **argv) try {
 #endif
 
   if (IS_TGT(target, TGT_OSX)) {
+    // Required for custom frameworks
     cmd += " -rpath @executable_path/../Frameworks";
+    // Useful for third-party dylibs, like vulkan loader
     cmd += " -rpath @executable_path";
   } else if (IS_TGT_IOS(target)) {
     cmd += " -rpath @executable_path/Frameworks";
