@@ -7,10 +7,7 @@ import mtime;
 import popen;
 import sim;
 import sys;
-
-#ifdef _WIN32
-#define strdup _strdup
-#endif
+import sysstd;
 
 static const char * fmt_cmd() {
 #if __APPLE__ && __arm64__
@@ -33,9 +30,9 @@ static void setup_cmd(sim::sb * cmd) {
 
 static void work_from_git() {
   char * args[] {
-    strdup("git"),
-    strdup("status"),
-    strdup("--porcelain=v2"),
+    sysstd::strdup("git"),
+    sysstd::strdup("status"),
+    sysstd::strdup("--porcelain=v2"),
     0,
   };
 
