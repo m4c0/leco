@@ -8,10 +8,7 @@ import popen;
 import pprent;
 import sim;
 import sys;
-
-#ifdef _WIN32
-#define strdup _strdup
-#endif
+import sysstd;
 
 template <unsigned N>
 static auto starts_with(const char *str, const char (&prefix)[N]) {
@@ -30,12 +27,12 @@ int main(int argc, char **argv) try {
     auto pwd = sim::printf("../%s", file);
 
     char *args[7] {};
-    args[0] = strdup("git");
-    args[1] = strdup("-C");
+    args[0] = sysstd::strdup("git");
+    args[1] = sysstd::strdup("-C");
     args[2] = *pwd;
-    args[3] = strdup("status");
-    args[4] = strdup("--porcelain=v2");
-    args[5] = strdup("--branch");
+    args[3] = sysstd::strdup("status");
+    args[4] = sysstd::strdup("--porcelain=v2");
+    args[5] = sysstd::strdup("--branch");
 
     p::proc gs{args};
 
