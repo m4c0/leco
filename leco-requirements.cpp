@@ -10,10 +10,7 @@ import pprent;
 import sim;
 import strset;
 import sys;
-
-#if _WIN32
-#define strdup _strdup
-#endif
+import sysstd;
 
 static const char *target{HOST_TARGET};
 static const char *argv0;
@@ -52,8 +49,11 @@ Where:
 
 static void run_git(const char *path) {
   char *cmd[6]{
-      strdup("git"),       strdup("-C"),   strdup(path),
-      strdup("rev-parse"), strdup("HEAD"),
+    sysstd::strdup("git"),
+    sysstd::strdup("-C"),
+    sysstd::strdup(path),
+    sysstd::strdup("rev-parse"),
+    sysstd::strdup("HEAD"),
   };
   p::proc p{cmd};
   if (!p.gets())
