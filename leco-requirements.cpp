@@ -18,7 +18,7 @@ static const char *argv0;
 static str::set all_deps{};
 static str::set collected{};
 
-void recurse(const char * dag) {
+static void recurse(const char * dag) {
   if (!all_deps.insert(dag)) return;
 
   auto path = sim::path_parent(dag);
