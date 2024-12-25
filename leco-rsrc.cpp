@@ -28,7 +28,7 @@ static void copy_shader(const char *file) {
   if (mtime::of(*out) > mtime::of(file)) return;
 
   sys::log("compiling shader", file);
-  sys::runf("glslangValidator -V -o %s %s", *out, file);
+  sys::runf("glslangValidator --target-env spirv1.3 -V -o %s %s", *out, file);
 }
 
 static void read_dag(const char *dag) {
