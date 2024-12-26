@@ -7,7 +7,27 @@ import pprent;
 import sim;
 import sys;
 
-static void usage() { sys::die("invalid usage"); }
+static void usage() {
+  sys::die(R"(
+Invoke Apple's codesign utility to sign a specific directory.
+
+Usage: ../leco/leco.exe codesign -d <dir>
+
+Where:
+        -d  Directory to sign
+
+This requires an Apple environment (i.e. Apple hardware + Xcode Command Line
+Tools) to run.
+
+The team ID should be set as an environment variable named "LECO_IOS_TEAM".
+Absence of that will emit a warning and skip the execution. This allows builds
+without real signing - which is fine until you use a custom xcframework or if
+you want to bundle in an IPA.
+
+If there is an existing signature, the process will be skipped unless signed
+files are newer than the signature.
+)");
+}
 
 struct pair {
   mtime::t files {};
