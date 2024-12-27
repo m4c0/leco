@@ -12,8 +12,13 @@ static FILE *out{stdout};
 static const char *target{};
 static str::set added{};
 
+// TODO: consider merging this with leco-clang
+// TODO: consider taking flag logic from leco-clang
+
 static void usage() {
   sys::die(R"(
+Generates a argument file containing all modules required by a C++ unit.
+
 Usage: leco deplist -i <input> [-o <output>]
 
 Where:
