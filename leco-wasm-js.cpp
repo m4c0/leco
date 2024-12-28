@@ -9,7 +9,14 @@ import sys;
 
 // TODO: check if files actually need regen
 
-static void usage() { sys::die("invalid usage"); }
+static void usage() {
+  sys::die(R"(
+Merges JS files into a single file. Only useful with WASM target. Expects JS to
+have the same name as its related C++ module.
+
+Usage: ../leco/leco.exe wasm-js -a <bundle-dir> -i <input.dag>
+)");
+}
 
 static void concat(FILE *out, const char *in_file) {
   auto in = sys::fopen(in_file, "rb");
