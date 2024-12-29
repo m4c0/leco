@@ -40,6 +40,8 @@ static void read_dag(const char *dag) {
 
 static void usage() {
   sys::die(R"(
+Runs a "git pull" for each of the collected dependencies of the given target.
+
 Usage: %s -t <target>
 
 Where:
