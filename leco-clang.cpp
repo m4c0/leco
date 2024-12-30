@@ -101,14 +101,13 @@ static void add_sysroot(sim_sb *args, const char *target) {
   sim_sb_path_parent(&sra);
   sim_sb_path_append(&sra, target);
   sim_sb_path_append(&sra, "sysroot");
+  if (mtime_of(sra.buffer) == 0) return;
 
-  if (mtime_of(sra.buffer) > 0) {
-    auto f = sysstd_fopen(sra.buffer, "r");
-    fgets(sra.buffer, sra.size, f);
-    fclose(f);
+  auto f = sysstd_fopen(sra.buffer, "r");
+  fgets(sra.buffer, sra.size, f);
+  fclose(f);
 
-    sim_sb_printf(args, " --sysroot %s", sra.buffer);
-  }
+  sim_sb_printf(args, " --sysroot %s", sra.buffer);
 }
 
 static bool create_deplist(const char *out) {
@@ -116,15 +115,13 @@ static bool create_deplist(const char *out) {
   sim_sb_new(&dag, 10240);
   sim_sb_copy(&dag, out);
   sim_sb_path_set_extension(&dag, "dag");
-  if (mtime_of(dag.buffer) == 0)
-    return false;
+  if (mtime_of(dag.buffer) == 0) return false;
 
   sim_sb cmd{};
   sim_sb_new(&cmd, 10240);
   sim_sb_path_copy_parent(&cmd, argv0);
   sim_sb_path_append(&cmd, "leco-deplist.exe");
-  if (mtime_of(cmd.buffer) == 0)
-    return false;
+  if (mtime_of(cmd.buffer) == 0) return false;
 
   sim_sb_printf(&cmd, " -i %s -o %s", dag.buffer, dag.buffer);
   sim_sb_path_set_extension(&cmd, "deps");
@@ -192,9 +189,6 @@ int main(int argc, char **argv) try {
   char ch;
   while ((ch = gopt_parse(&opts, &val)) != 0) {
     switch (ch) {
-    case 'g':
-      debug = true;
-      break;
     case 'i': {
       sim_sb_new(&input, 10240);
       sim_sb_path_copy_real(&input, val);
@@ -203,20 +197,15 @@ int main(int argc, char **argv) try {
             (0 == strcmp(ext, ".mm"));
       break;
     }
-    case 'o':
-      output = val;
-      break;
-    case 'O':
-      opt = true;
-      break;
-    case 't':
-      target = val;
-      break;
-    case 'v':
-      verbose = true;
-      break;
-    default:
-      return usage();
+
+    case 'g': debug   = true; break;
+    case 'O': opt     = true; break;
+    case 'v': verbose = true; break;
+
+    case 'o': output = val; break;
+    case 't': target = val; break;
+
+    default: return usage();
     }
   }
 
@@ -224,12 +213,10 @@ int main(int argc, char **argv) try {
   sim_sb_new(&args, 10240);
   if (cpp) {
     clang_cmd(&args, "clang++");
-    if (0 != strcmp(ext, ".mm"))
-      sim_sb_concat(&args, " -std=c++2b");
+    if (0 != strcmp(ext, ".mm")) sim_sb_concat(&args, " -std=c++2b");
   } else {
     clang_cmd(&args, "clang");
-    if (0 != strcmp(ext, ".m"))
-      sim_sb_concat(&args, " -std=c11");
+    if (0 != strcmp(ext, ".m")) sim_sb_concat(&args, " -std=c11");
   }
   sim_sb_concat(&args, " -Wall -Wno-unknown-pragmas");
 
@@ -238,21 +225,16 @@ int main(int argc, char **argv) try {
   }
 
 #ifdef __linux__
-  if (cpp) {
-    sim_sb_concat(&args, " -stdlib=libc++");
-  }
+  if (cpp) sim_sb_concat(&args, " -stdlib=libc++");
 #endif
 
-  if (debug) {
 #ifdef _WIN32
-    sim_sb_concat(&args, " -gdwarf");
+  if (debug) sim_sb_concat(&args, " -gdwarf");
 #else
-    sim_sb_concat(&args, " -g");
+  if (debug) sim_sb_concat(&args, " -g");
 #endif
-  }
-  if (opt) {
-    sim_sb_concat(&args, " -O3 -flto -fvisibility=hidden");
-  }
+
+  if (opt) sim_sb_concat(&args, " -O3 -flto -fvisibility=hidden");
 
   sim_sb_printf(&args, " -target %s", target);
   add_target_defs(&args, target);
