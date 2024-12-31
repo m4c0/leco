@@ -6,9 +6,11 @@
 
 import gopt;
 import mtime;
+import popen;
 import sim;
 import strset;
 import sys;
+import sysstd;
 
 static str::set added{};
 
@@ -63,8 +65,26 @@ static void copy_shader(const char *file) {
   if (!must_recompile(file, mtime::of(*out))) return;
 
   sys::log("compiling shader", file);
-  // TODO: suppress "ERROR: " from glslangValidator's output
-  sys::runf("glslangValidator --target-env spirv1.3 -V -o %s %s", *out, file);
+
+  char * args[] {
+    sysstd::strdup("glslangValidator"),
+    sysstd::strdup("--target-env"),
+    sysstd::strdup("spirv1.3"),
+    sysstd::strdup("-V"),
+    sysstd::strdup("-o"),
+    *out,
+    sysstd::strdup(file),
+    0,
+  };
+  p::proc p { args };
+
+  while (p.gets()) {
+    auto line = p.last_line_read();
+    if (0 == strncmp(line, "ERROR: /", 8)) line += 7;
+    fputs(line, stdout);
+  }
+
+  if (p.wait() != 0) sys::die("shader compilation failed");
 }
 
 static void read_dag(const char *dag) {
