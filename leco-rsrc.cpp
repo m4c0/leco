@@ -25,8 +25,9 @@ static void copy_res(const char *file) {
   sys::link(file, *path);
 }
 
-static bool must_recompile(const char * file, auto time) {
-  if (time < mtime::of(file)) return true;
+// TODO: new utility for shader compilation
+static bool must_recompile(const char * file, auto spv_time) {
+  if (spv_time < mtime::of(file)) return true;
 
   char buf[10240];
   auto f = sys::fopen(file, "r");
@@ -44,8 +45,13 @@ static bool must_recompile(const char * file, auto time) {
 
     auto s = strchr(buf, '"');
     if (!s) fail(si, "invalid include directive");
-    auto e = strchr(s + 1, '"');
+    auto e = strchr(++s, '"');
     if (!e) fail(s, "unclosed include directive");
+
+    *e = 0;
+    auto path = sim::path_parent(file) / s;
+    if (!mtime::of(*path)) fail(s, "include file not found");
+    if (must_recompile(*path, spv_time)) return true;
   }
 
   fclose(f);
