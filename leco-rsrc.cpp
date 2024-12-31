@@ -23,9 +23,14 @@ static void copy_res(const char *file) {
   sys::link(file, *path);
 }
 
+static bool must_recompile(const char * file, auto time) {
+  if (time < mtime::of(file)) return true;
+
+  return false;
+}
 static void copy_shader(const char *file) {
   auto out = sim::sb { resdir } / sim::path_filename(file) + ".spv";
-  if (mtime::of(*out) > mtime::of(file)) return;
+  if (!must_recompile(file, mtime::of(*out))) return;
 
   sys::log("compiling shader", file);
   sys::runf("glslangValidator --target-env spirv1.3 -V -o %s %s", *out, file);
