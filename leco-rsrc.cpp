@@ -63,6 +63,7 @@ static void copy_shader(const char *file) {
   if (!must_recompile(file, mtime::of(*out))) return;
 
   sys::log("compiling shader", file);
+  // TODO: suppress "ERROR: " from glslangValidator's output
   sys::runf("glslangValidator --target-env spirv1.3 -V -o %s %s", *out, file);
 }
 
