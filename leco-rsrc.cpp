@@ -1,6 +1,8 @@
 #pragma leco tool
 
+#include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 import gopt;
 import mtime;
@@ -25,6 +27,28 @@ static void copy_res(const char *file) {
 
 static bool must_recompile(const char * file, auto time) {
   if (time < mtime::of(file)) return true;
+
+  char buf[10240];
+  auto f = sys::fopen(file, "r");
+  unsigned line { 0 };
+  while (!feof(f) && fgets(buf, sizeof(buf), f)) {
+    line++;
+
+    auto si = strstr(buf, "#include ");
+    if (!si) continue;
+
+    auto fail = [&](auto at, auto msg) {
+      int col = at - buf + 1;
+      sys::die("%s:%d:%d: %s", file, line, col, msg);
+    };
+
+    auto s = strchr(buf, '"');
+    if (!s) fail(si, "invalid include directive");
+    auto e = strchr(s + 1, '"');
+    if (!e) fail(s, "unclosed include directive");
+  }
+
+  fclose(f);
 
   return false;
 }
