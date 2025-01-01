@@ -60,8 +60,8 @@ static bool must_recompile(const char * file, auto spv_time) {
 
   return false;
 }
-static void copy_shader(const char *file) {
-  auto out = sim::sb { resdir } / sim::path_filename(file) + ".spv";
+static void build_shader(const char * dag, const char * file) {
+  auto out = sim::path_parent(dag) / sim::path_filename(file) + ".spv";
   if (!must_recompile(file, mtime::of(*out))) return;
 
   sys::log("compiling shader", file);
@@ -90,10 +90,10 @@ static void copy_shader(const char *file) {
 static void read_dag(const char *dag) {
   if (!added.insert(dag)) return;
 
-  sys::dag_read(dag, [](auto id, auto file) {
+  sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
       case 'rsrc': copy_res(file); break;
-      case 'shdr': copy_shader(file); break;
+      case 'shdr': build_shader(dag, file); break;
       case 'idag':
       case 'mdag': read_dag(file); break;
       default: break;
