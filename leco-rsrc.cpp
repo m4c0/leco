@@ -80,7 +80,10 @@ static void build_shader(const char * dag, const char * file) {
 
   while (p.gets()) {
     auto line = p.last_line_read();
-    if (0 == strncmp(line, "ERROR: /", 8)) line += 7;
+    if (0 == strncmp(line, "ERROR: ", 7))  {
+      if (line[7] == '/') line += 7;
+      else if (line[8] == ':') line += 7;
+    }
     fputs(line, stdout);
   }
 
