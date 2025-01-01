@@ -171,6 +171,13 @@ static void add_xcfw(const char * str, const char * desc, uint32_t code) {
   print_found(*path, desc, code);
 }
 
+static void add_shdr(const char * src, const char * desc, uint32_t code) {
+  print_found(src, desc, code);
+
+  auto out = sim::path_parent(*sim::path_real(src)) / "out" / target / sim::path_filename(src) + ".spv";
+  output('rsrc', *out);
+}
+
 static void find_header(const char *l) {
   auto s = strchr(l, '"');
   if (!s) error("mismatching quote");
@@ -357,7 +364,7 @@ void run() {
     } else if (auto pp = cmp(p, "#pragma leco add_static ")) {
       read_file_list(pp, "static library", 'slib');
     } else if (auto pp = cmp(p, "#pragma leco add_shader ")) {
-      read_file_list(pp, "shader", 'shdr');
+      read_file_list(pp, "shader", 'shdr', add_shdr);
     } else if (auto pp = cmp(p, "#pragma leco add_xcframework ")) {
       read_file_list(pp, "xcframework", 'xcfw', add_xcfw);
     } else if (auto pp = cmp(p, "#pragma leco display_name ")) {
