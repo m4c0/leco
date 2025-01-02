@@ -10,6 +10,7 @@ import mtime;
 import popen;
 import sim;
 import sys;
+import sysstd;
 
 export namespace plist {
 constexpr const auto minimum_os_version = "17.0";
@@ -39,7 +40,7 @@ public:
     time_t now;
     time(&now);
     char buf[128];
-    strftime(buf, sizeof(buf), "%FT%TZ", gmtime(&now));
+    strftime(buf, sizeof(buf), "%FT%TZ", sysstd::gmtime(&now));
     fprintf(m_f, "<key>%s</key><date>%s</date>\n", key, buf);
   }
   void dictionary(const char *key, auto &&fn) {
