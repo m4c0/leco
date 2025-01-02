@@ -64,6 +64,10 @@ static void dagger(const char * target) {
   sys::tool_run("dagger", "-t %s", target);
 }
 
+static void shaders(const char * target) {
+  sys::tool_run("shaders", "-t %s", target);
+}
+
 static void compile(const char * target) {
   for_each_dag(target, [](auto * dag, auto id, auto file) {
     switch (id) {
@@ -111,6 +115,7 @@ static void run_target(const char * target) {
   sysroot(target);
   dagger(target);
   compile(target);
+  shaders(target);
   link(target);
   bundle(target);
 }

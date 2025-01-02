@@ -1,0 +1,124 @@
+#pragma leco tool
+
+#include <stdio.h>
+#include <string.h>
+
+import gopt;
+import mtime;
+import popen;
+import pprent;
+import sim;
+import strset;
+import sys;
+import sysstd;
+
+static void usage() {
+  sys::die(R"(
+Compiles shaders referenced by their modules via pragmas.
+
+Usage: ../leco/leco.exe shaders [-t <target>]
+
+Where:
+        -t target triple (defaults to host target)
+
+Requires DAGs created via leco-dagger.
+)"); 
+}
+
+static bool must_recompile(const char * file, auto spv_time) {
+  if (spv_time < mtime::of(file)) return true;
+
+  char buf[10240];
+  auto f = sys::fopen(file, "r");
+  unsigned line { 0 };
+  while (!feof(f) && fgets(buf, sizeof(buf), f)) {
+    line++;
+
+    auto si = strstr(buf, "#include ");
+    if (!si) continue;
+
+    auto fail = [&](auto at, auto msg) {
+      int col = at - buf + 1;
+      sys::die("%s:%d:%d: %s", file, line, col, msg);
+    };
+
+    auto s = strchr(buf, '"');
+    if (!s) fail(si, "invalid include directive");
+    auto e = strchr(++s, '"');
+    if (!e) fail(s, "unclosed include directive");
+
+    *e = 0;
+    auto path = sim::path_parent(file) / s;
+    if (!mtime::of(*path)) fail(s, "include file not found");
+    if (must_recompile(*path, spv_time)) return true;
+  }
+
+  fclose(f);
+
+  return false;
+}
+static void build_shader(const char * dag, const char * file) {
+  auto out = sim::path_parent(dag) / sim::path_filename(file) + ".spv";
+  if (!must_recompile(file, mtime::of(*out))) return;
+
+  sys::log("compiling shader", file);
+
+  char * args[] {
+    sysstd::strdup("glslangValidator"),
+    sysstd::strdup("--target-env"),
+    sysstd::strdup("spirv1.3"),
+    sysstd::strdup("-V"),
+    sysstd::strdup("-o"),
+    *out,
+    sysstd::strdup(file),
+    0,
+  };
+  p::proc p { args };
+
+  while (p.gets()) {
+    auto line = p.last_line_read();
+    if (0 == strncmp(line, "ERROR: ", 7))  {
+      if (line[7] == '/') line += 7;
+      else if (line[8] == ':') line += 7;
+    }
+    fputs(line, stdout);
+  }
+
+  if (p.wait() != 0) sys::die("shader compilation failed");
+}
+
+static str::set done {};
+static void read_dag(const char * dag) {
+  if (!done.insert(dag)) return;
+
+  sys::dag_read(dag, [&](auto id, auto file) {
+    switch (id) {
+      case 'shdr': build_shader(dag, file); break;
+      case 'idag':
+      case 'mdag': read_dag(file); break;
+      default: break;
+    }
+  });
+}
+
+int main(int argc, char ** argv) try {
+  const char * target = sys::host_target;
+
+  auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
+    switch (ch) {
+      case 't': target = val; break;
+      default: usage();
+    }
+  });
+  if (opts.argc) usage();
+  if (!target) usage();
+
+  auto path = sim::sb { "out" } / target;
+  for (auto file : pprent::list(*path)) {
+    if (sim::path_extension(file) != ".dag") continue;
+    auto pf = path / file;
+    read_dag(*pf);
+  }
+} catch (...) {
+  return 1;
+}

@@ -1,12 +1,7 @@
 #pragma leco tool
 
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
-
 import gopt;
 import mtime;
-import popen;
 import sim;
 import strset;
 import sys;
@@ -27,76 +22,12 @@ static void copy_res(const char *file) {
   sys::link(file, *path);
 }
 
-// TODO: new utility for shader compilation
-static bool must_recompile(const char * file, auto spv_time) {
-  if (spv_time < mtime::of(file)) return true;
-
-  char buf[10240];
-  auto f = sys::fopen(file, "r");
-  unsigned line { 0 };
-  while (!feof(f) && fgets(buf, sizeof(buf), f)) {
-    line++;
-
-    auto si = strstr(buf, "#include ");
-    if (!si) continue;
-
-    auto fail = [&](auto at, auto msg) {
-      int col = at - buf + 1;
-      sys::die("%s:%d:%d: %s", file, line, col, msg);
-    };
-
-    auto s = strchr(buf, '"');
-    if (!s) fail(si, "invalid include directive");
-    auto e = strchr(++s, '"');
-    if (!e) fail(s, "unclosed include directive");
-
-    *e = 0;
-    auto path = sim::path_parent(file) / s;
-    if (!mtime::of(*path)) fail(s, "include file not found");
-    if (must_recompile(*path, spv_time)) return true;
-  }
-
-  fclose(f);
-
-  return false;
-}
-static void build_shader(const char * dag, const char * file) {
-  auto out = sim::path_parent(dag) / sim::path_filename(file) + ".spv";
-  if (!must_recompile(file, mtime::of(*out))) return;
-
-  sys::log("compiling shader", file);
-
-  char * args[] {
-    sysstd::strdup("glslangValidator"),
-    sysstd::strdup("--target-env"),
-    sysstd::strdup("spirv1.3"),
-    sysstd::strdup("-V"),
-    sysstd::strdup("-o"),
-    *out,
-    sysstd::strdup(file),
-    0,
-  };
-  p::proc p { args };
-
-  while (p.gets()) {
-    auto line = p.last_line_read();
-    if (0 == strncmp(line, "ERROR: ", 7))  {
-      if (line[7] == '/') line += 7;
-      else if (line[8] == ':') line += 7;
-    }
-    fputs(line, stdout);
-  }
-
-  if (p.wait() != 0) sys::die("shader compilation failed");
-}
-
 static void read_dag(const char *dag) {
   if (!added.insert(dag)) return;
 
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
       case 'rsrc': copy_res(file); break;
-      case 'shdr': build_shader(dag, file); break;
       case 'idag':
       case 'mdag': read_dag(file); break;
       default: break;
