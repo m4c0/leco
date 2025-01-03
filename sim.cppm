@@ -33,6 +33,8 @@ export namespace sim {
       return 0 == strcmp(buffer, s);
     }
 
+    char & operator[](unsigned idx) { return buffer[idx]; }
+
     sb & operator+=(const char * s) {
       sim_sb_concat(this, s);
       return *this;
