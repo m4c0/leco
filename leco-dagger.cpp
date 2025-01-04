@@ -21,6 +21,8 @@ enum class exe_t {
   app,
 };
 
+static const char * const dag_file_version = "2025-01-04";
+
 static const char * argv0;
 static bool dump_errors {};
 static bool verbose {};
@@ -436,6 +438,7 @@ static void process() {
     out_filename = dag.buffer;
     sys::mkdirs(*sim::path_parent(*dag));
     out = sys::fopen(out_filename, "w");
+    output('vers', dag_file_version);
     run();
   }
 
