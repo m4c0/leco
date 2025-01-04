@@ -29,7 +29,7 @@ export namespace sim {
     char * operator*() { return buffer; }
     const char * operator*() const { return buffer; }
 
-    bool operator==(const char * s) {
+    bool operator==(const char * s) const {
       return 0 == strcmp(buffer, s);
     }
 

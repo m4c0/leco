@@ -21,7 +21,7 @@ enum class exe_t {
   app,
 };
 
-static const char * const dag_file_version = "2025-01-04";
+static const sim::sb dag_file_version { "2025-01-04" };
 
 static const char * argv0;
 static bool dump_errors {};
@@ -432,18 +432,28 @@ static str::set done {};
 static void process() {
   if (!done.insert(*source)) return;
 
+  bool must_run = false;
+
   auto dag = sim::path_parent(*source) / "out" / target / sim::path_filename(*source);
   dag.path_extension("dag");
-  if (mtime::of(*dag) <= mtime::of(*source)) {
+  if (mtime::of(*dag) <= mtime::of(*source)) must_run = true;
+  else {
+    must_run = true;
+    sys::dag_read(*dag, [&](auto id, auto file) {
+      if (id != 'vers') return;
+      if (dag_file_version == file) must_run = false;
+    });
+  }
+
+
+  if (must_run) {
     out_filename = dag.buffer;
     sys::mkdirs(*sim::path_parent(*dag));
     out = sys::fopen(out_filename, "w");
-    output('vers', dag_file_version);
+    output('vers', *dag_file_version);
     run();
   }
 
-  // TODO: add version, check and reprocess if older
-  // Enables an easier upgrade of dag files
   sys::dag_read(*dag, [](auto id, auto file) {
     switch (id) {
       case 'impl':
