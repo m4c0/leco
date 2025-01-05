@@ -23,7 +23,6 @@ enum class exe_t {
 
 static const sim::sb dag_file_version { "2025-01-04" };
 
-static const char * argv0;
 static bool dump_errors {};
 static bool verbose {};
 static sim::sb source {};
@@ -40,7 +39,7 @@ static void usage() {
 LECO tool responsible for preprocessing C++ files containing leco pragmas and
 storing dependencies in a DAG-like file.
 
-Usage: %s [-d] [-i <input.cpp>] [-t <target>] [-v]
+Usage: ../leco/leco.exe dagger [-d] [-i <input.cpp>] [-t <target>] [-v]
 
 Where:
         -d: Dump errors from clang if enabled
@@ -51,8 +50,7 @@ Where:
 
         -v: Verbose. Output name of inspected files.
 
-)",
-           argv0);
+)");
 }
 
 static void error(const char *msg) {
@@ -314,7 +312,7 @@ void run() {
   char *clang_argv[100]{};
   char **argp = clang_argv;
 
-  auto args = sim::path_parent(argv0) / "leco-clang.exe";
+  auto args = sys::tool_cmd("clang");
   *argp++ = *args;
 
   stamp(&args, argp, "-t");
@@ -466,8 +464,6 @@ static void process() {
 }
 
 int main(int argc, char **argv) try {
-  argv0 = argv[0];
-
   auto opts = gopt_parse(argc, argv, "dvi:t:", [&](auto ch, auto val) {
     switch (ch) {
       case 'd': dump_errors = true; break;
@@ -477,7 +473,6 @@ int main(int argc, char **argv) try {
       default: usage();
     }
   });
-
   if (opts.argc != 0) usage();
 
   // TODO: remove "input"
