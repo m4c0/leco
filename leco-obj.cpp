@@ -27,6 +27,7 @@ static const char * target;
 static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 
 static void compile(const char *src) {
+  // TODO: stop using leco-clang's output inferring
   sys::log("compiling object", src);
   sys::tool_run("clang", "-i %s -t %s %s", src, target, common_flags);
 }
