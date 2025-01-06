@@ -211,17 +211,15 @@ int main(int argc, char **argv) try {
 
   sim_sb args{};
   sim_sb_new(&args, 10240);
-  if (cpp) {
-    clang_cmd(&args, "clang++");
-    if (0 != strcmp(ext, ".mm")) sim_sb_concat(&args, " -std=c++2b");
-  } else {
-    clang_cmd(&args, "clang");
-    if (0 != strcmp(ext, ".m")) sim_sb_concat(&args, " -std=c11");
-  }
+  clang_cmd(&args, cpp ? "clang++" : "clang");
   sim_sb_concat(&args, " -Wall -Wno-unknown-pragmas");
 
   if (0 == strcmp(ext, ".m") || 0 == strcmp(ext, ".mm")) {
     sim_sb_concat(&args, " -fmodules -fobjc-arc");
+  } else if (cpp) {
+    sim_sb_concat(&args, " -std=c++2b");
+  } else {
+    sim_sb_concat(&args, " -std=c11");
   }
 
 #ifdef __linux__
