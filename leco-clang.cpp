@@ -29,7 +29,7 @@ static void clang_cmd(sim_sb *buf, const char *exe) {
 
 static void run(const char * cmd) {
   if (0 == system(cmd)) return;
-  fprintf(stderr, "command failed: %s", cmd);
+  fprintf(stderr, "command failed: %s\n", cmd);
   throw 0;
 }
 

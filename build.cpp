@@ -28,7 +28,7 @@
 
 static void run(const char * cmd) {
   if (0 == system(cmd)) return;
-  fprintf(stderr, "command failed: %s", cmd);
+  fprintf(stderr, "command failed: %s\n", cmd);
   throw 0;
 }
 
