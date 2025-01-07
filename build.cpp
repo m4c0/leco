@@ -13,11 +13,12 @@
 
 #define PCM(name) ".." SEP name SEP "out" SEP HOST_TARGET SEP name ".pcm"
 #define LPCM(name) "out" SEP HOST_TARGET SEP name ".pcm"
+#define PARG(name) " -fmodule-file=" name "=" PCM(name)
 #define MARG(name) " -fmodule-file=" name "=" PCM(name) " " PCM(name)
 #define LMARG(name) " -fmodule-file=" name "=" LPCM(name) " " LPCM(name)
 
 #define MODULE(name) run(CLANG " -i .." SEP name SEP name ".cppm");
-#define LOCAL_MODULE(name) run(CLANG " -i " name ".cppm");
+#define LOCAL_MODULE(name, ...) run(CLANG " -i " name ".cppm" __VA_ARGS__);
 
 #define TOOL(name)                                                             \
   puts("Building " name);                                                      \
@@ -48,13 +49,14 @@ int try_main(int argc, char **argv) {
   MODULE("sysstd");
   LOCAL_MODULE("sim");
   LOCAL_MODULE("strset");
-  LOCAL_MODULE("sys");
+  LOCAL_MODULE("sys", " --" PARG("sysstd"));
 
   TOOL("dagger");
   TOOL("deplist");
   TOOL("link");
   TOOL("obj");
   TOOL("pcm");
+  TOOL("shaders");
 
   TOOL("driver");
   TOOL("meta");
