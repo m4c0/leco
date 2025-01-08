@@ -24,10 +24,14 @@ static const char * target;
 
 static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 
-static void compile(const char *src) {
+static void deplist(const char * dag, const char * deps) {
+  // TODO: check if dag is newer?
+  sys::tool_run("deplist", "-i %s -o %s", dag, deps);
+}
+static void compile(const char * src, const char * pcm, const char * deps) {
   // TODO: stop using leco-clang's output inferring
   sys::log("compiling module", src);
-  sys::tool_run("clang", "-i %s -t %s %s", src, target, common_flags);
+  sys::tool_run("clang", "-i %s -t %s %s -- @%s", src, target, common_flags, deps);
 }
 
 static str::map spec_cache {};
@@ -57,7 +61,11 @@ static auto process_spec(const char * dag) {
   mtime = max(mtime, mtime::of(*src));
 
   if (mtime > mtime::of(*pcm)) {
-    compile(*src);
+    auto deps = sim::sb { dag };
+    deps.path_extension("deps");
+
+    deplist(dag, *deps);
+    compile(*src, *pcm, *deps);
     mtime = mtime::of(*pcm);
   }
 

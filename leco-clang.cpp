@@ -110,26 +110,6 @@ static void add_sysroot(sim_sb *args, const char *target) {
   sim_sb_printf(args, " --sysroot %s", sra.buffer);
 }
 
-static bool create_deplist(const char *out) {
-  sim_sb dag{};
-  sim_sb_new(&dag, 10240);
-  sim_sb_copy(&dag, out);
-  sim_sb_path_set_extension(&dag, "dag");
-  if (mtime_of(dag.buffer) == 0) return false;
-
-  sim_sb cmd{};
-  sim_sb_new(&cmd, 10240);
-  sim_sb_path_copy_parent(&cmd, argv0);
-  sim_sb_path_append(&cmd, "leco-deplist.exe");
-  if (mtime_of(cmd.buffer) == 0) return false;
-
-  sim_sb_printf(&cmd, " -i %s -o %s", dag.buffer, dag.buffer);
-  sim_sb_path_set_extension(&cmd, "deps");
-
-  run(cmd.buffer);
-  return true;
-}
-
 static void infer_output(sim_sb *args, const char *input, const char *target) {
   auto ext = sim_path_extension(input);
 
@@ -155,15 +135,6 @@ static void infer_output(sim_sb *args, const char *input, const char *target) {
   }
 
   sim_sb_concat(args, out.buffer);
-
-  if (0 == strcmp(".cppm", ext) || 0 == strcmp(".pcm", ext) ||
-      0 == strcmp(".cpp", ext)) {
-    if (create_deplist(out.buffer)) {
-      sim_sb_concat(args, " @");
-      sim_sb_concat(args, out.buffer);
-      sim_sb_path_set_extension(args, "deps");
-    }
-  }
 }
 
 int main(int argc, char **argv) try {

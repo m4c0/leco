@@ -26,10 +26,14 @@ static const char * target;
 
 static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 
-static void compile(const char *src) {
+static void deplist(const char * dag, const char * deps) {
+  // TODO: check if dag is newer?
+  sys::tool_run("deplist", "-i %s -o %s", dag, deps);
+}
+static void compile(const char * src, const char * obj, const char * deps) {
   // TODO: stop using leco-clang's output inferring
   sys::log("compiling object", src);
-  sys::tool_run("clang", "-i %s -t %s %s", src, target, common_flags);
+  sys::tool_run("clang", "-i %s -t %s %s -- @%s", src, target, common_flags, deps);
 }
 
 static str::set done {};
@@ -67,7 +71,13 @@ static void process(const char * dag) {
   if (src.len == 0) sys::die("dag without source info: [%s]", dag);
   if (obj.len == 0) sys::die("dag without object info: [%s]", dag);
 
-  if (mtime > mtime::of(*obj)) compile(*src);
+  if (mtime > mtime::of(*obj)) {
+    auto deps = sim::sb { dag };
+    deps.path_extension("deps");
+
+    deplist(dag, *deps);
+    compile(*src, *obj, *deps);
+  }
 }
 
 int main(int argc, char ** argv) try {
