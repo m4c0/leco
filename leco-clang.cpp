@@ -162,9 +162,6 @@ static void infer_output(sim_sb *args, const char *input, const char *target) {
       sim_sb_concat(args, " @");
       sim_sb_concat(args, out.buffer);
       sim_sb_path_set_extension(args, "deps");
-    } else {
-      sim_sb_concat(args, " -fprebuilt-module-path=out");
-      sim_sb_path_append(args, target);
     }
   }
 }
