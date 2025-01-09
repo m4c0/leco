@@ -33,7 +33,7 @@ static void deplist(const char * dag, const char * deps) {
 static void compile(const char * src, const char * obj, const char * deps) {
   // TODO: stop using leco-clang's output inferring
   sys::log("compiling object", src);
-  sys::tool_run("clang", "-i %s -t %s %s -- @%s", src, target, common_flags, deps);
+  sys::tool_run("clang", "-i %s -o %s -t %s %s -- -c @%s", src, obj, target, common_flags, deps);
 }
 
 static str::set done {};

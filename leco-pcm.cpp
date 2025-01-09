@@ -31,7 +31,7 @@ static void deplist(const char * dag, const char * deps) {
 static void compile(const char * src, const char * pcm, const char * deps) {
   // TODO: stop using leco-clang's output inferring
   sys::log("compiling module", src);
-  sys::tool_run("clang", "-i %s -t %s %s -- @%s", src, target, common_flags, deps);
+  sys::tool_run("clang", "-i %s -o %s -t %s %s -- --precompile @%s", src, pcm, target, common_flags, deps);
 }
 
 static str::map spec_cache {};

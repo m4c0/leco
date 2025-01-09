@@ -110,33 +110,6 @@ static void add_sysroot(sim_sb *args, const char *target) {
   sim_sb_printf(args, " --sysroot %s", sra.buffer);
 }
 
-static void infer_output(sim_sb *args, const char *input, const char *target) {
-  auto ext = sim_path_extension(input);
-
-  sim_sb out{};
-  sim_sb_new(&out, 10240);
-  if (0 == strcmp(".pcm", ext)) {
-    sim_sb_copy(&out, input);
-  } else {
-    sim_sb_path_copy_parent(&out, input);
-    sim_sb_path_append(&out, "out");
-    sysstd_mkdir(out.buffer);
-    sim_sb_path_append(&out, target);
-    sysstd_mkdir(out.buffer);
-    sim_sb_path_append(&out, sim_path_filename(input));
-  }
-
-  if (0 == strcmp(".cppm", ext)) {
-    sim_sb_concat(args, " --precompile -o ");
-    sim_sb_path_set_extension(&out, "pcm");
-  } else {
-    sim_sb_concat(args, " -c -o ");
-    sim_sb_path_set_extension(&out, "o");
-  }
-
-  sim_sb_concat(args, out.buffer);
-}
-
 int main(int argc, char **argv) try {
   argv0 = argv[0];
 
@@ -209,7 +182,6 @@ int main(int argc, char **argv) try {
   if (input.len != 0) sim_sb_printf(&args, " %s", input.buffer);
 
   if (output) sim_sb_printf(&args, " -o %s", output);
-  else if (input.len != 0) infer_output(&args, input.buffer, target);
 
   // TODO: escape argv
   for (auto i = 0; i < opts.argc; i++) sim_sb_printf(&args, " %s", opts.argv[i]);
