@@ -24,10 +24,11 @@
 
 #define TOOL(name)                                                             \
   puts("Building " name);                                                      \
-  run(CLANG " -i leco-" name ".cpp -o out/" HOST_TARGET "/leco-" name ".exe "  \
-            "--" MARG("gopt") MARG("mtime") MARG("popen") MARG("pprent")       \
-                 MARG("print") MARG("sysstd") \
-                LMARG("sim") LMARG("strset") LMARG("sys"))
+  run(CLANG " -i leco-" name ".cpp " \
+            "-- -o out/" HOST_TARGET "/leco-" name ".exe "  \
+            MARG("gopt") MARG("mtime") MARG("popen") MARG("pprent")       \
+            MARG("print") MARG("sysstd") \
+            LMARG("sim") LMARG("strset") LMARG("sys"))
 
 static void run(const char * cmd) {
   if (0 == system(cmd)) return;
@@ -64,7 +65,7 @@ int try_main(int argc, char **argv) {
   TOOL("meta");
 
   puts("Building meta runner");
-  run(CLANG " -i leco.cpp -o leco.exe");
+  run(CLANG " -i leco.cpp -- -o leco.exe");
 
   puts("Using LECO to build final stage");
   run("." SEP "leco.exe");

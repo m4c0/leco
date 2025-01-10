@@ -37,18 +37,14 @@ static int usage() {
   fprintf(stderr, R"(
 LECO's heavily-opiniated CLANG runner
 
-Usage: %s [-i <input> [-o <output>]] [-t <target>] [-g] [-O] [-v] [-- <clang-flags>]
+Usage: %s [-i <input>] [-t <target>] [-g] [-O] [-v] [-- <clang-flags>]
 
 This tool uses the clang version available via PATH, except on MacOS where it 
 requires llvm to be installed via Homebrew.
 
 Where:
       -i <input>     input file. When used, certain flags will be automatically
-                     inferred, like compilation type ("-c" v "--precompile"),
-                     output filename, etc
-
-      -o <output>    output file. Only works as an override for the output file
-                     when the flag "-i" is also specified
+                     inferred, like C/C++ standard
 
       -t <target>    target triple (check this tool's source for list of
                      supported targets)
@@ -121,7 +117,6 @@ int main(int argc, char **argv) try {
   bool cpp = true;
   bool verbose{};
   const char *target{HOST_TARGET};
-  const char *output{};
   const char *ext{".cpp"};
 
   sim_sb input{};
@@ -143,7 +138,6 @@ int main(int argc, char **argv) try {
     case 'O': opt     = true; break;
     case 'v': verbose = true; break;
 
-    case 'o': output = val; break;
     case 't': target = val; break;
 
     default: return usage();
@@ -180,8 +174,6 @@ int main(int argc, char **argv) try {
   if (0 != strcmp(target, HOST_TARGET)) add_sysroot(&args, target);
 
   if (input.len != 0) sim_sb_printf(&args, " %s", input.buffer);
-
-  if (output) sim_sb_printf(&args, " -o %s", output);
 
   // TODO: escape argv
   for (auto i = 0; i < opts.argc; i++) sim_sb_printf(&args, " %s", opts.argv[i]);
