@@ -19,8 +19,8 @@
 #define MARG(name) " -fmodule-file=" name "=" PCM(name) " " PCM(name)
 #define LMARG(name) " -fmodule-file=" name "=" LPCM(name) " " LPCM(name)
 
-#define MODULE(name) run(CLANG " -i .." SEP name SEP name ".cppm");
-#define LOCAL_MODULE(name, ...) run(CLANG " -i " name ".cppm -- " PMP __VA_ARGS__);
+#define MODULE(name) run(CLANG " -i .." SEP name SEP name ".cppm -- --precompile -o " PCM(name));
+#define LOCAL_MODULE(name, ...) run(CLANG " -i " name ".cppm -- --precompile -o " LPCM(name) " " PMP __VA_ARGS__);
 
 #define TOOL(name)                                                             \
   puts("Building " name);                                                      \
