@@ -11,6 +11,8 @@
 
 #define CLANG "out" SEP HOST_TARGET SEP "leco-clang.exe"
 
+#define CPPSTD " -std=c++2b"
+#define PCMFL " --precompile" CPPSTD
 #define PMP " -fprebuilt-module-path=out" SEP HOST_TARGET
 
 #define PCM(name) ".." SEP name SEP "out" SEP HOST_TARGET SEP name ".pcm"
@@ -19,13 +21,13 @@
 #define MARG(name) " -fmodule-file=" name "=" PCM(name) " " PCM(name)
 #define LMARG(name) " -fmodule-file=" name "=" LPCM(name) " " LPCM(name)
 
-#define MODULE(name) run(CLANG " -i .." SEP name SEP name ".cppm -- --precompile -o " PCM(name));
-#define LOCAL_MODULE(name, ...) run(CLANG " -i " name ".cppm -- --precompile -o " LPCM(name) " " PMP __VA_ARGS__);
+#define MODULE(name) run(CLANG " -i .." SEP name SEP name ".cppm -- -o " PCM(name) PCMFL);
+#define LOCAL_MODULE(name, ...) run(CLANG " -i " name ".cppm -- -o " LPCM(name) PCMFL PMP __VA_ARGS__);
 
 #define TOOL(name)                                                             \
   puts("Building " name);                                                      \
   run(CLANG " -i leco-" name ".cpp " \
-            "-- -o out/" HOST_TARGET "/leco-" name ".exe "  \
+            "-- -o out/" HOST_TARGET "/leco-" name ".exe " CPPSTD \
             MARG("gopt") MARG("mtime") MARG("popen") MARG("pprent")       \
             MARG("print") MARG("sysstd") \
             LMARG("sim") LMARG("strset") LMARG("sys"))

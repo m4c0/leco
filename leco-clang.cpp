@@ -149,18 +149,6 @@ int main(int argc, char **argv) try {
   clang_cmd(&args, cpp ? "clang++" : "clang");
   sim_sb_concat(&args, " -Wall -Wno-unknown-pragmas");
 
-  if (0 == strcmp(ext, ".m") || 0 == strcmp(ext, ".mm")) {
-    sim_sb_concat(&args, " -fmodules -fobjc-arc");
-  } else if (cpp) {
-    sim_sb_concat(&args, " -std=c++2b");
-  } else {
-    sim_sb_concat(&args, " -std=c11");
-  }
-
-#ifdef __linux__
-  if (cpp) sim_sb_concat(&args, " -stdlib=libc++");
-#endif
-
 #ifdef _WIN32
   if (debug) sim_sb_concat(&args, " -gdwarf");
 #else
