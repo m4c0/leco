@@ -24,12 +24,12 @@
 #define MODULE(name) run(CLANG " -i .." SEP name SEP name ".cppm -- -o " PCM(name) PCMFL);
 #define LOCAL_MODULE(name, ...) run(CLANG " -i " name ".cppm -- -o " LPCM(name) PCMFL PMP __VA_ARGS__);
 
-#define TOOL(name)                                                             \
-  puts("Building " name);                                                      \
-  run(CLANG " -i leco-" name ".cpp " \
-            "-- -o out/" HOST_TARGET "/leco-" name ".exe " CPPSTD \
-            MARG("gopt") MARG("mtime") MARG("popen") MARG("pprent")       \
-            MARG("print") MARG("sysstd") \
+#define TOOL(name)                                                    \
+  puts("Building " name);                                             \
+  run(CLANG " -i leco-" name ".cpp "                                  \
+            "-- -o out/" HOST_TARGET "/leco-" name ".exe " CPPSTD     \
+            MARG("gopt") MARG("mtime") MARG("popen") MARG("pprent")   \
+            MARG("print") MARG("sysstd")                              \
             LMARG("sim") LMARG("strset") LMARG("sys"))
 
 static void run(const char * cmd) {
@@ -43,7 +43,7 @@ int try_main(int argc, char **argv) {
   sysstd_mkdir("out" SEP HOST_TARGET);
 
   puts("Building clang runner");
-  run("clang++ -Wall -Wno-unknown-pragmas -std=c++20 leco-clang.cpp -o " CLANG);
+  run("clang++ -std=c++20 leco-clang.cpp -o " CLANG);
 
   puts("Building core modules");
   MODULE("gopt");
