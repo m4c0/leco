@@ -26,9 +26,9 @@ static const char * target;
 
 static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 
-static void deplist(const char * dag, const char * deps) {
+static void deplist(const char * dag) {
   // TODO: check if dag is newer?
-  sys::tool_run("deplist", "-i %s -o %s", dag, deps);
+  sys::tool_run("deplist", "-i %s", dag);
 }
 static void compile(const char * src, const char * obj, const char * deps) {
   auto ext = sim::path_extension(src);
@@ -80,7 +80,7 @@ static void process(const char * dag) {
     auto deps = sim::sb { dag };
     deps.path_extension("deps");
 
-    deplist(dag, *deps);
+    deplist(dag);
     compile(*src, *obj, *deps);
   }
 }
