@@ -16,10 +16,10 @@ static void usage() {
   sys::die(R"(
 Compiles shaders referenced by their modules via pragmas.
 
-Usage: ../leco/leco.exe shaders [-t <target>]
+Usage: ../leco/leco.exe shaders -i <dag>
 
 Where:
-        -t target triple (defaults to host target)
+        -i  root DAG to start scanning
 
 Requires DAGs created via leco-dagger.
 )"); 
@@ -107,23 +107,18 @@ static void read_dag(const char * dag) {
 }
 
 int main(int argc, char ** argv) try {
-  const char * target = sys::host_target;
+  sim::sb input {};
 
-  auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
     switch (ch) {
-      case 't': target = val; break;
+      case 'i': input = sim::path_real(val); break;
       default: usage();
     }
   });
   if (opts.argc) usage();
-  if (!target) usage();
+  if (!input.len) usage();
 
-  auto path = sim::sb { "out" } / target;
-  for (auto file : pprent::list(*path)) {
-    if (sim::path_extension(file) != ".dag") continue;
-    auto pf = path / file;
-    read_dag(*pf);
-  }
+  read_dag(*input);
 } catch (...) {
   return 1;
 }

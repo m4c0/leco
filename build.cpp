@@ -61,7 +61,6 @@ int try_main(int argc, char **argv) {
   TOOL("link");
   TOOL("obj");
   TOOL("pcm");
-  TOOL("shaders");
 
   TOOL("driver");
   TOOL("meta");
