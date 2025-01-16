@@ -20,6 +20,7 @@ module;
 #endif
 
 export module sys;
+import pprent;
 import sim;
 import sysstd;
 
@@ -119,6 +120,17 @@ void dag_read(const char *dag, auto &&fn) try {
 } catch (...) {
   fprintf(stderr, "whilst reading DAG node [%s]\n", dag);
   throw;
+}
+void for_each_dag(const char * target, auto && fn) {
+  auto path = ("out"_real /= target);
+  for (auto file : pprent::list(*path)) {
+    if (sim::path_extension(file) != ".dag") continue;
+
+    auto dag = path / file;
+    sys::dag_read(*dag, [&](auto id, auto file) {
+      fn(*dag, id, file);
+    });
+  }
 }
 
 auto tool_cmd(const char * name) {

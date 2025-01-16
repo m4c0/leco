@@ -5,7 +5,6 @@
 #include <string.h>
 
 import gopt;
-import pprent;
 import sim;
 import sys;
 
@@ -35,18 +34,6 @@ static void usage() {
   throw 0;
 }
 
-static void for_each_dag(const char * target, auto && fn) {
-  auto path = ("out"_real /= target);
-  for (auto file : pprent::list(*path)) {
-    if (sim::path_extension(file) != ".dag") continue;
-
-    auto dag = path / file;
-    sys::dag_read(*dag, [&](auto id, auto file) {
-      fn(*dag, id, file);
-    });
-  }
-}
-
 static void cleaner(const char *target) {
   if (clean_level == 0) return;
 
@@ -65,7 +52,7 @@ static void dagger(const char * target) {
 }
 
 static void compile(const char * target) {
-  for_each_dag(target, [](auto * dag, auto id, auto file) {
+  sys::for_each_dag(target, [](auto * dag, auto id, auto file) {
     switch (id) {
       case 'tapp':
         sys::tool_run("shaders", "-i %s", dag);
@@ -84,7 +71,7 @@ static void compile(const char * target) {
 }
 
 static void link(const char * target) {
-  for_each_dag(target, [](auto * dag, auto id, auto file) {
+  sys::for_each_dag(target, [](auto * dag, auto id, auto file) {
     switch (id) {
       case 'tapp':
       case 'tdll':
@@ -97,7 +84,7 @@ static void link(const char * target) {
 }
 
 static void bundle(const char * target) {
-  for_each_dag(target, [](auto * dag, auto id, auto file) {
+  sys::for_each_dag(target, [](auto * dag, auto id, auto file) {
     switch (id) {
       case 'tapp':
         sys::tool_run("bundler", "-i %s", dag);
