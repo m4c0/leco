@@ -78,7 +78,11 @@ static const char *chomp(const char *str, const char *prefix) {
   if (!ptr) return ptr;
 
   buf = sim::sb { ptr };
-  *strchr(*buf, ';') = 0;
+
+  auto scptr = strchr(*buf, ';');
+  if (!scptr) return scptr;
+  *scptr = 0;
+
   return *buf;
 }
 
@@ -394,7 +398,9 @@ void run() {
       if (l != 0)
         line = l - 1;
     } else if (auto pp = chomp(p, "module ")) {
-      if (0 != strcmp(pp, ":private")) {
+      if (pp[0] < 'a' || pp[0] > 'z') {
+        // Ignoring if not identifier
+      } else if (0 != strcmp(pp, ":private")) {
         mod_name = sim::sb { pp };
         add_mod_dep(pp, "main module dependency");
       }
