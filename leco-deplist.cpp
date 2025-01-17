@@ -51,6 +51,14 @@ static void read_dag(const char *dag) {
     }
   });
 }
+static void read_includes(const char * dag) {
+  sys::dag_read(dag, [](auto id, auto file) {
+    switch (id) {
+      case 'idir': fprintf(out, "-I%s\n", file); break;
+      default: break;
+    }
+  });
+}
 
 int main(int argc, char **argv) try {
   const char *input{};
@@ -71,6 +79,7 @@ int main(int argc, char **argv) try {
 
   out = sys::fopen(*output, "wb");
   read_dag(input);
+  read_includes(input);
   fclose(out);
 
   return 0;

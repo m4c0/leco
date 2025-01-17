@@ -355,6 +355,8 @@ void run() {
       read_file_list(pp, "framework", 'frwk', print_asis);
     } else if (auto pp = cmp(p, "#pragma leco add_impl ")) {
       read_file_list(pp, "implementation", 'impl', add_impl);
+    } else if (auto pp = cmp(p, "#pragma leco add_include_dir ")) {
+      read_file_list(pp, "include dir", 'idir');
     } else if (auto pp = cmp(p, "#pragma leco add_library ")) {
       read_file_list(pp, "library", 'libr', print_asis);
     } else if (auto pp = cmp(p, "#pragma leco add_library_dir ")) {
