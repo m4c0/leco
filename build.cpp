@@ -54,7 +54,7 @@ int try_main(int argc, char **argv) {
   MODULE("sysstd");
   LOCAL_MODULE("sim");
   LOCAL_MODULE("strset");
-  LOCAL_MODULE("sys", PARG("sysstd"));
+  LOCAL_MODULE("sys", PARG("pprent") PARG("sysstd"));
 
   TOOL("dagger");
   TOOL("deplist");
