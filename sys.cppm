@@ -99,6 +99,7 @@ FILE * fopen(const char * name, const char * mode) {
   if (res == nullptr) die("could not open file [%s]", name);
   return res;
 }
+void fclose(FILE * f) { ::fclose(f); }
 
 void dag_read(const char *dag, auto &&fn) try {
   auto f = fopen(dag, "r");
@@ -116,7 +117,7 @@ void dag_read(const char *dag, auto &&fn) try {
     fn(*id, file);
   }
 
-  fclose(f);
+  ::fclose(f);
 } catch (...) {
   fprintf(stderr, "whilst reading DAG node [%s]\n", dag);
   throw;
