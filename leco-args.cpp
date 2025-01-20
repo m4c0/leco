@@ -34,8 +34,7 @@ static str::set recursed {};
 static void recurse(const char * dag) {
   if (!recursed.insert(dag)) return;
 
-  auto af = sim::sb { dag };
-  af.path_extension("args");
+  auto af = sim::sb { dag }.path_extension("args");
   FILE * out {};
   if (mtime::of(dag) > mtime::of(*af)) out = sys::fopen(*af, "wb");
 

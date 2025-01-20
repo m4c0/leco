@@ -52,7 +52,10 @@ export namespace sim {
     const char * path_filename() const { return sim_sb_path_filename(this); }
 
     const char * path_extension() const { return sim_sb_path_extension(this); }
-    void path_extension(const char * ext) { sim_sb_path_set_extension(this, ext); }
+    auto & path_extension(const char * ext) {
+      sim_sb_path_set_extension(this, ext);
+      return *this;
+    }
 
     void path_parent() { sim_sb_path_parent(this); }
   };
