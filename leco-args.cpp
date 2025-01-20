@@ -23,6 +23,10 @@ static void print(FILE * out, const char * file) {
   auto stem = sim::path_stem(file);
   sim::sb pcmf { file };
   pcmf.path_extension("pcm");
+
+  for (auto *c = *stem; *c; c++) if (*c == '-') *c = ':';
+  for (auto *c = *pcmf; *c; c++) if (*c == '\\') *c = '/';
+
   fprintf(out, "-fmodule-file=%s=%s\n", *stem, *pcmf);
 }
 
