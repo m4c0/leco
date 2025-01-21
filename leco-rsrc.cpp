@@ -7,8 +7,6 @@ import strset;
 import sys;
 import sysstd;
 
-static str::set added{};
-
 static const char *target{};
 static const char *resdir{};
 
@@ -22,6 +20,7 @@ static void copy_res(const char *file) {
   sys::link(file, *path);
 }
 
+static str::set added{};
 static void read_dag(const char *dag) {
   if (!added.insert(dag)) return;
 
