@@ -8,7 +8,6 @@ import mtime;
 import popen;
 import pprent;
 import sim;
-import strset;
 import sys;
 import sysstd;
 
@@ -92,20 +91,6 @@ static void build_shader(const char * dag, const char * file) {
   if (p.wait() != 0) sys::die("shader compilation failed");
 }
 
-static str::set done {};
-static void read_dag(const char * dag) {
-  if (!done.insert(dag)) return;
-
-  sys::dag_read(dag, [&](auto id, auto file) {
-    switch (id) {
-      case 'shdr': build_shader(dag, file); break;
-      case 'idag':
-      case 'mdag': read_dag(file); break;
-      default: break;
-    }
-  });
-}
-
 int main(int argc, char ** argv) try {
   sim::sb input {};
 
@@ -118,7 +103,9 @@ int main(int argc, char ** argv) try {
   if (opts.argc) usage();
   if (!input.len) usage();
 
-  read_dag(*input);
+  sys::recurse_dag(*input, [&](auto id, auto file) {
+    if (id == 'shdr') build_shader(*input, file);
+  });
 } catch (...) {
   return 1;
 }

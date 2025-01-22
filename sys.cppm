@@ -22,6 +22,7 @@ module;
 export module sys;
 import pprent;
 import sim;
+import strset;
 import sysstd;
 
 export namespace sys {
@@ -132,6 +133,23 @@ void for_each_dag(const char * target, auto && fn) {
       fn(*dag, id, file);
     });
   }
+}
+
+void recurse_dag(const char * dag, auto && fn) {
+  str::set added {};
+  const auto rec = [&](const auto & rec, const char * dag) {
+    if (!added.insert(dag)) return;
+
+    dag_read(dag, [&](auto id, auto file) {
+      fn(id, file);
+      switch (id) {
+        case 'idag':
+        case 'mdag': rec(rec, file); break;
+        default: break;
+      }
+    });
+  };
+  rec(rec, dag);
 }
 
 auto tool_cmd(const char * name) {
