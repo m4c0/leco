@@ -20,18 +20,21 @@ static void copy_res(const char *file) {
   sys::link(file, *path);
 }
 
-static str::set added{};
-static void read_dag(const char *dag) {
-  if (!added.insert(dag)) return;
+static void recurse_dag(const char * dag, auto && fn) {
+  str::set added {};
+  const auto rec = [&](const auto & rec, const char * dag) {
+    if (!added.insert(dag)) return;
 
-  sys::dag_read(dag, [&](auto id, auto file) {
-    switch (id) {
-      case 'rsrc': copy_res(file); break;
-      case 'idag':
-      case 'mdag': read_dag(file); break;
-      default: break;
-    }
-  });
+    sys::dag_read(dag, [&](auto id, auto file) {
+      fn(id, file);
+      switch (id) {
+        case 'idag':
+        case 'mdag': rec(rec, file); break;
+        default: break;
+      }
+    });
+  };
+  rec(rec, dag);
 }
 
 int main(int argc, char **argv) try {
@@ -52,7 +55,9 @@ int main(int argc, char **argv) try {
   auto path = sim::path_parent(input);
   target = path.path_filename();
 
-  read_dag(input);
+  recurse_dag(input, [](auto id, auto file) {
+    if (id == 'rsrc') copy_res(file);
+  });
 
   return 0;
 } catch (...) {
