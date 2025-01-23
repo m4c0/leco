@@ -8,7 +8,6 @@
 import gopt;
 import mtime;
 import sim;
-import strset;
 import sys;
 
 static const char * exedir {};
@@ -49,21 +48,6 @@ static void copy_xcfw(const char * xcfw_path) {
   sys::tool_run("codesign", "-d %s", *tgt);
 }
 
-static str::set added {};
-static void read_dag(const char * dag) {
-  if (!added.insert(dag)) return;
-
-  sys::dag_read(dag, [](auto id, auto file) {
-    switch (id) {
-      case 'dlls': copy_exe(file); break;
-      case 'xcfw': copy_xcfw(file); break;
-      case 'idag':
-      case 'mdag': read_dag(file); break;
-      default: break;
-    }
-  });
-}
-
 int main(int argc, char ** argv) try {
   const char * input {};
 
@@ -87,7 +71,10 @@ int main(int argc, char ** argv) try {
   exe.path_extension("exe");
   copy_exe(*exe);
 
-  read_dag(input);
+  sys::recurse_dag(input, [](auto id, auto file) {
+    if (id == 'dlls') return copy_exe(file);
+    if (id == 'xcfw') return copy_xcfw(file);
+  });
 } catch (...) {
   return 1;
 }
