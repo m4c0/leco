@@ -61,22 +61,13 @@ int main(int argc, char **argv) try {
   bool all{};
   auto opts = gopt_parse(argc, argv, "avt:", [&](auto ch, auto val) {
     switch (ch) {
-    case 'a':
-      all = true;
-      break;
-    case 't':
-      target = val;
-      break;
-    case 'v':
-      log_all = true;
-      break;
-    default:
-      usage(argv[0]);
-      break;
+      case 'a': all     = true; break;
+      case 't': target  = val; break;
+      case 'v': log_all = true; break;
+      default: usage(argv[0]);
     }
   });
-  if (opts.argc != 0)
-    usage(argv[0]);
+  if (opts.argc != 0) usage(argv[0]);
 
   auto cwd = "."_real;
   if (all) {
