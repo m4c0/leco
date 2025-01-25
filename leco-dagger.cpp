@@ -472,10 +472,9 @@ static void process() {
 }
 
 int main(int argc, char **argv) try {
-  auto opts = gopt_parse(argc, argv, "dvi:t:", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "dvt:", [&](auto ch, auto val) {
     switch (ch) {
       case 'd': dump_errors = true; break;
-      case 'i': source = sim::path_real(val); break;
       case 't': target = val; break;
       case 'v': verbose = true; break;
       default: usage();
@@ -483,21 +482,14 @@ int main(int argc, char **argv) try {
   });
   if (opts.argc != 0) usage();
 
-  // TODO: remove "input"
-  if (source.len) {
+  for (auto file : pprent::list(".")) {
+    auto ext = sim::path_extension(file);
+    if (!ext.len) continue;
+
+    if (ext != ".cppm" && ext != ".cpp" && ext != ".c") continue;
+
+    source = sim::path_real(file);
     process();
-  } else {
-    for (auto file : pprent::list(".")) {
-      auto ext = sim::path_extension(file);
-      if (!ext.len) continue;
-
-      if (ext != ".cppm" && ext != ".cpp" && ext != ".c") continue;
-
-      // TODO: check mtime
-
-      source = sim::path_real(file);
-      process();
-    }
   }
   return 0;
 } catch (...) {
