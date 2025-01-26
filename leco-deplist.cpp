@@ -5,12 +5,10 @@
 
 import gopt;
 import sim;
-import strset;
 import sys;
 
 static FILE *out{stdout};
 static const char *target{};
-static str::set added{};
 
 // TODO: consider merging this with leco-clang
 // TODO: consider taking flag logic from leco-clang
@@ -41,22 +39,13 @@ static void print_pcm(const char * pcmf) {
 }
 
 static void read_dag(const char *dag) {
-  if (!added.insert(dag)) return;
-
-  sys::dag_read(dag, [](auto id, auto file) {
-    switch (id) {
-    case 'mdag': read_dag(file); break;
-    case 'pcmf': print_pcm(file); break;
-    default: break;
-    }
+  sys::recurse_dag(dag, [](auto id, auto file) {
+    if (id == 'pcmf') print_pcm(file);
   });
 }
 static void read_includes(const char * dag) {
   sys::dag_read(dag, [](auto id, auto file) {
-    switch (id) {
-      case 'idir': fprintf(out, "-I%s\n", file); break;
-      default: break;
-    }
+    if (id == 'idir') fprintf(out, "-I%s\n", file);
   });
 }
 
