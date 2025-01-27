@@ -434,31 +434,30 @@ void run() {
   fclose(out);
 }
 
+static void check_and_run(const char * dag) {
+  if (mtime::of(dag) > mtime::of(*source)) {
+    bool must_run = true;
+    sys::dag_read(dag, [&](auto id, auto file) {
+      if (id != 'vers') return;
+      if (dag_file_version == file) must_run = false;
+    });
+    if (!must_run) return;
+  }
+
+  out_filename = dag;
+  sys::mkdirs(*sim::path_parent(dag));
+  out = sys::fopen(out_filename, "w");
+  output('vers', *dag_file_version);
+  run();
+}
+
 static str::set done {};
 static void process() {
   if (!done.insert(*source)) return;
 
-  bool must_run = false;
-
   auto dag = sim::path_parent(*source) / "out" / target / sim::path_filename(*source);
   dag.path_extension("dag");
-  if (mtime::of(*dag) <= mtime::of(*source)) must_run = true;
-  else {
-    must_run = true;
-    sys::dag_read(*dag, [&](auto id, auto file) {
-      if (id != 'vers') return;
-      if (dag_file_version == file) must_run = false;
-    });
-  }
-
-
-  if (must_run) {
-    out_filename = dag.buffer;
-    sys::mkdirs(*sim::path_parent(*dag));
-    out = sys::fopen(out_filename, "w");
-    output('vers', *dag_file_version);
-    run();
-  }
+  check_and_run(*dag);
 
   sys::dag_read(*dag, [](auto id, auto file) {
     switch (id) {
