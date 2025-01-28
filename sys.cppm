@@ -123,17 +123,6 @@ void dag_read(const char *dag, auto &&fn) try {
   fprintf(stderr, "whilst reading DAG node [%s]\n", dag);
   throw;
 }
-void for_each_dag(const char * target, auto && fn) {
-  auto path = ("out"_real /= target);
-  for (auto file : pprent::list(*path)) {
-    if (sim::path_extension(file) != ".dag") continue;
-
-    auto dag = path / file;
-    sys::dag_read(*dag, [&](auto id, auto file) {
-      fn(*dag, id, file);
-    });
-  }
-}
 
 void recurse_dag(const char * dag, auto && fn) {
   str::set added {};
@@ -152,6 +141,23 @@ void recurse_dag(const char * dag, auto && fn) {
   rec(rec, dag);
 }
 
+void for_each_dag(const char * target, bool recurse, auto && fn) {
+  auto path = ("out"_real /= target);
+  for (auto file : pprent::list(*path)) {
+    if (sim::path_extension(file) != ".dag") continue;
+
+    auto dag = path / file;
+    if (recurse) {
+      recurse_dag(*dag, [&](auto id, auto file) {
+        fn(*dag, id, file);
+      });
+    } else {
+      dag_read(*dag, [&](auto id, auto file) {
+        fn(*dag, id, file);
+      });
+    }
+  }
+}
 auto tool_cmd(const char * name) {
   return (sim::path_real("../leco/out/" HOST_TARGET) / "leco-") + name + ".exe";
 }

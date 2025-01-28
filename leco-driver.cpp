@@ -52,7 +52,7 @@ static void dagger(const char * target) {
 }
 
 static void compile(const char * target) {
-  sys::for_each_dag(target, [](auto * dag, auto id, auto file) {
+  sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
     switch (id) {
       case 'tapp':
         sys::tool_run("shaders", "-i %s", dag);
@@ -71,7 +71,7 @@ static void compile(const char * target) {
 }
 
 static void link(const char * target) {
-  sys::for_each_dag(target, [](auto * dag, auto id, auto file) {
+  sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
     switch (id) {
       case 'tapp':
       case 'tdll':
@@ -84,7 +84,7 @@ static void link(const char * target) {
 }
 
 static void bundle(const char * target) {
-  sys::for_each_dag(target, [](auto * dag, auto id, auto file) {
+  sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
     switch (id) {
       case 'tapp':
         sys::tool_run("bundler", "-i %s", dag);
