@@ -452,8 +452,10 @@ static void check_and_run(const char * dag) {
 }
 
 static str::set done {};
-static void process() {
-  if (!done.insert(*source)) return;
+static void process(const char * path) {
+  if (!done.insert(path)) return;
+
+  source = sim::sb { path };
 
   auto dag = sim::path_parent(*source) / "out" / target / sim::path_filename(*source);
   dag.path_extension("dag");
@@ -462,10 +464,7 @@ static void process() {
   sys::dag_read(*dag, [](auto id, auto file) {
     switch (id) {
       case 'impl':
-      case 'mdep':
-        source = sim::sb { file };
-        process();
-        break;
+      case 'mdep': process(file); break;
     }
   });
 }
@@ -487,8 +486,7 @@ int main(int argc, char **argv) try {
 
     if (ext != ".cppm" && ext != ".cpp" && ext != ".c") continue;
 
-    source = sim::path_real(file);
-    process();
+    process(*sim::path_real(file));
   }
   return 0;
 } catch (...) {
