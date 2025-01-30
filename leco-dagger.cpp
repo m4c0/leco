@@ -434,8 +434,8 @@ void run() {
   fclose(out);
 }
 
-static void check_and_run(const char * dag) {
-  if (mtime::of(dag) > mtime::of(*source)) {
+static void check_and_run(const char * src, const char * dag) {
+  if (mtime::of(dag) > mtime::of(src)) {
     bool must_run = true;
     sys::dag_read(dag, [&](auto id, auto file) {
       if (id != 'vers') return;
@@ -444,6 +444,7 @@ static void check_and_run(const char * dag) {
     if (!must_run) return;
   }
 
+  source = sim::sb { src };
   out_filename = dag;
   sys::mkdirs(*sim::path_parent(dag));
   out = sys::fopen(out_filename, "w");
@@ -455,11 +456,9 @@ static str::set done {};
 static void process(const char * path) {
   if (!done.insert(path)) return;
 
-  source = sim::sb { path };
-
-  auto dag = sim::path_parent(*source) / "out" / target / sim::path_filename(*source);
+  auto dag = sim::path_parent(path) / "out" / target / sim::path_filename(path);
   dag.path_extension("dag");
-  check_and_run(*dag);
+  check_and_run(path, *dag);
 
   sys::dag_read(*dag, [](auto id, auto file) {
     switch (id) {
