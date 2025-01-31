@@ -452,16 +452,20 @@ static void check_and_run(const char * src, const char * dag) {
   run();
 }
 
-static void reprocess_dag(unsigned id, const char * dag) {
-  if (id != 'idag' && id != 'mdag') return;
+static str::set done {};
+static void process(const char * path) {
+  if (!done.insert(path)) return;
 
-  sim::sb src {};
-  sys::dag_read(dag, [&](auto id, auto file) {
-    if (id == 'srcf') src = sim::sb { file };
+  auto dag = sim::path_parent(path) / "out" / target / sim::path_filename(path);
+  dag.path_extension("dag");
+  check_and_run(path, *dag);
+
+  sys::dag_read(*dag, [](auto id, auto file) {
+    switch (id) {
+      case 'impl':
+      case 'mdep': process(file); break;
+    }
   });
-  if (!src.len) sys::die("DAG file without source information");
-
-  check_and_run(*src, dag);
 }
 
 int main(int argc, char **argv) try {
@@ -481,12 +485,7 @@ int main(int argc, char **argv) try {
 
     if (ext != ".cppm" && ext != ".cpp" && ext != ".c") continue;
 
-    auto src = sim::path_real(file);
-    auto dag = sim::path_parent(*src) / "out" / target / sim::path_filename(*src);
-    dag.path_extension("dag");
-    check_and_run(*src, *dag);
-
-    sys::recurse_dag(*dag, reprocess_dag);
+    process(*sim::path_real(file));
   }
   return 0;
 } catch (...) {
