@@ -46,8 +46,14 @@ static void remove_with_deps(const char * p) {
 
     sys::dag_read(*dag, [&](auto id, auto file) {
       switch (id) {
-        case 'impl':
-        case 'mdep': remove_with_deps(*sim::path_parent(file)); break;
+        case 'idag':
+        case 'mdag': {
+          auto p = sim::path_parent(file);
+          p.path_parent();
+          p.path_parent();
+          remove_with_deps(*p);
+          break;
+        }
         default: break;
       }
     });
