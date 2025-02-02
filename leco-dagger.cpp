@@ -337,43 +337,28 @@ void run() {
 
   while (proc.gets()) {
     const char *p = proc.last_line_read();
-    while (*p == ' ') {
-      p++;
-    }
+    while (*p == ' ') p++;
     line++;
-    if (cmp(p, "#pragma leco tool\n")) {
-      set_exe_type(exe_t::tool);
-    } else if (cmp(p, "#pragma leco tool\r")) {
-      set_exe_type(exe_t::tool);
-    } else if (cmp(p, "#pragma leco app\n")) {
-      set_exe_type(exe_t::app);
-    } else if (cmp(p, "#pragma leco app\r")) {
-      set_exe_type(exe_t::app);
-    } else if (cmp(p, "#pragma leco dll\n")) {
-      set_exe_type(exe_t::dll);
-    } else if (cmp(p, "#pragma leco dll\r")) {
-      set_exe_type(exe_t::dll);
-    } else if (auto pp = cmp(p, "#pragma leco add_dll ")) {
-      read_file_list(pp, "dll", 'dlls');
-    } else if (auto pp = cmp(p, "#pragma leco add_framework ")) {
-      read_file_list(pp, "framework", 'frwk', print_asis);
-    } else if (auto pp = cmp(p, "#pragma leco add_impl ")) {
-      read_file_list(pp, "implementation", 'impl', add_impl);
-    } else if (auto pp = cmp(p, "#pragma leco add_include_dir ")) {
-      read_file_list(pp, "include dir", 'idir');
-    } else if (auto pp = cmp(p, "#pragma leco add_library ")) {
-      read_file_list(pp, "library", 'libr', print_asis);
-    } else if (auto pp = cmp(p, "#pragma leco add_library_dir ")) {
-      read_file_list(pp, "library dir", 'ldir');
-    } else if (auto pp = cmp(p, "#pragma leco add_resource ")) {
-      read_file_list(pp, "resource", 'rsrc');
-    } else if (auto pp = cmp(p, "#pragma leco add_static ")) {
-      read_file_list(pp, "static library", 'slib');
-    } else if (auto pp = cmp(p, "#pragma leco add_shader ")) {
-      read_file_list(pp, "shader", 'shdr', add_shdr);
-    } else if (auto pp = cmp(p, "#pragma leco add_xcframework ")) {
-      read_file_list(pp, "xcframework", 'xcfw', add_xcfw);
-    } else if (auto pp = cmp(p, "#pragma leco display_name ")) {
+
+         if (cmp(p, "#pragma leco tool\n")) set_exe_type(exe_t::tool);
+    else if (cmp(p, "#pragma leco tool\r")) set_exe_type(exe_t::tool);
+    else if (cmp(p, "#pragma leco app\n"))  set_exe_type(exe_t::app);
+    else if (cmp(p, "#pragma leco app\r"))  set_exe_type(exe_t::app);
+    else if (cmp(p, "#pragma leco dll\n"))  set_exe_type(exe_t::dll);
+    else if (cmp(p, "#pragma leco dll\r"))  set_exe_type(exe_t::dll);
+
+    else if (auto pp = cmp(p, "#pragma leco add_dll "))         read_file_list(pp, "dll",            'dlls');
+    else if (auto pp = cmp(p, "#pragma leco add_framework "))   read_file_list(pp, "framework",      'frwk', print_asis);
+    else if (auto pp = cmp(p, "#pragma leco add_impl "))        read_file_list(pp, "implementation", 'impl', add_impl);
+    else if (auto pp = cmp(p, "#pragma leco add_include_dir ")) read_file_list(pp, "include dir",    'idir');
+    else if (auto pp = cmp(p, "#pragma leco add_library "))     read_file_list(pp, "library",        'libr', print_asis);
+    else if (auto pp = cmp(p, "#pragma leco add_library_dir ")) read_file_list(pp, "library dir",    'ldir');
+    else if (auto pp = cmp(p, "#pragma leco add_resource "))    read_file_list(pp, "resource",       'rsrc');
+    else if (auto pp = cmp(p, "#pragma leco add_static "))      read_file_list(pp, "static library", 'slib');
+    else if (auto pp = cmp(p, "#pragma leco add_shader "))      read_file_list(pp, "shader",         'shdr', add_shdr);
+    else if (auto pp = cmp(p, "#pragma leco add_xcframework ")) read_file_list(pp, "xcframework",    'xcfw', add_xcfw);
+
+    else if (auto pp = cmp(p, "#pragma leco display_name ")) {
       if (exe_type != exe_t::app) error("display name is only supported for apps");
       read_file_list(pp, "display name", 'name', print_asis);
     } else if (auto pp = cmp(p, "#pragma leco app_id ")) {
@@ -388,16 +373,20 @@ void run() {
     } else if (cmp(p, "#pragma leco landscape\n")) {
       if (exe_type != exe_t::app) error("landscape is only supported for apps");
       output('land', "");
-    } else if (cmp(p, "#pragma leco ")) {
-      error("unknown pragma");
-    } else if (auto pp = cmp(p, "# ")) {
+    }
+        
+    else if (cmp(p, "#pragma leco ")) error("unknown pragma");
+        
+    else if (auto pp = cmp(p, "# ")) {
       // # <line> "<file>" <flags>...
       find_header(pp);
 
       auto l = atoi(pp);
       if (l != 0)
         line = l - 1;
-    } else if (auto pp = chomp(p, "module ")) {
+    }
+        
+    else if (auto pp = chomp(p, "module ")) {
       if (pp[0] < 'a' || pp[0] > 'z') {
         // Ignoring if not identifier
       } else if (0 != strcmp(pp, ":private")) {
@@ -419,11 +408,7 @@ void run() {
     }
   }
 
-  if (dump_errors) {
-    while (proc.gets_err()) {
-      fputs(proc.last_line_read(), stderr);
-    }
-  }
+  if (dump_errors) while (proc.gets_err()) fputs(proc.last_line_read(), stderr);
 
   output('srcf', *source);
   // TODO: output mod_name
