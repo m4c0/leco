@@ -310,6 +310,50 @@ static void output_root_tag() {
   }
 }
 
+static bool pragma(const char * p) {
+  p = cmp(p, "#pragma leco ");
+  if (!p) return false;
+
+       if (cmp(p, "tool\n")) set_exe_type(exe_t::tool);
+  else if (cmp(p, "tool\r")) set_exe_type(exe_t::tool);
+  else if (cmp(p, "app\n"))  set_exe_type(exe_t::app);
+  else if (cmp(p, "app\r"))  set_exe_type(exe_t::app);
+  else if (cmp(p, "dll\n"))  set_exe_type(exe_t::dll);
+  else if (cmp(p, "dll\r"))  set_exe_type(exe_t::dll);
+
+  else if (auto pp = cmp(p, "add_dll "))         read_file_list(pp, "dll",            'dlls');
+  else if (auto pp = cmp(p, "add_framework "))   read_file_list(pp, "framework",      'frwk', print_asis);
+  else if (auto pp = cmp(p, "add_impl "))        read_file_list(pp, "implementation", 'impl', add_impl);
+  else if (auto pp = cmp(p, "add_include_dir ")) read_file_list(pp, "include dir",    'idir');
+  else if (auto pp = cmp(p, "add_library "))     read_file_list(pp, "library",        'libr', print_asis);
+  else if (auto pp = cmp(p, "add_library_dir ")) read_file_list(pp, "library dir",    'ldir');
+  else if (auto pp = cmp(p, "add_resource "))    read_file_list(pp, "resource",       'rsrc');
+  else if (auto pp = cmp(p, "add_static "))      read_file_list(pp, "static library", 'slib');
+  else if (auto pp = cmp(p, "add_shader "))      read_file_list(pp, "shader",         'shdr', add_shdr);
+  else if (auto pp = cmp(p, "add_xcframework ")) read_file_list(pp, "xcframework",    'xcfw', add_xcfw);
+
+  else if (auto pp = cmp(p, "display_name ")) {
+    if (exe_type != exe_t::app) error("display name is only supported for apps");
+    read_file_list(pp, "display name", 'name', print_asis);
+  } else if (auto pp = cmp(p, "app_id ")) {
+    if (exe_type != exe_t::app) error("application ID is only supported for apps");
+    read_file_list(pp, "application ID", 'apid', print_asis);
+  } else if (auto pp = cmp(p, "app_version ")) {
+    if (exe_type != exe_t::app) error("application version is only supported for apps");
+    read_file_list(pp, "application version", 'apvr', print_asis);
+  } else if (cmp(p, "portrait\n")) {
+    if (exe_type != exe_t::app) error("portrait is only supported for apps");
+    output('port', "");
+  } else if (cmp(p, "landscape\n")) {
+    if (exe_type != exe_t::app) error("landscape is only supported for apps");
+    output('land', "");
+  }
+      
+  else error("unknown pragma");
+
+  return true;
+}
+
 void run() {
   if (verbose) sys::log("inspecting", *source);
 
@@ -340,50 +384,9 @@ void run() {
     while (*p == ' ') p++;
     line++;
 
-    const auto pragma = [&](auto n) {
-      auto pp = cmp(p, "#pragma leco ");
-      if (!pp) return pp;
-      return cmp(pp, n);
-    };
+    if (pragma(p)) continue;
 
-         if (pragma("tool\n")) set_exe_type(exe_t::tool);
-    else if (pragma("tool\r")) set_exe_type(exe_t::tool);
-    else if (pragma("app\n"))  set_exe_type(exe_t::app);
-    else if (pragma("app\r"))  set_exe_type(exe_t::app);
-    else if (pragma("dll\n"))  set_exe_type(exe_t::dll);
-    else if (pragma("dll\r"))  set_exe_type(exe_t::dll);
-
-    else if (auto pp = pragma("add_dll "))         read_file_list(pp, "dll",            'dlls');
-    else if (auto pp = pragma("add_framework "))   read_file_list(pp, "framework",      'frwk', print_asis);
-    else if (auto pp = pragma("add_impl "))        read_file_list(pp, "implementation", 'impl', add_impl);
-    else if (auto pp = pragma("add_include_dir ")) read_file_list(pp, "include dir",    'idir');
-    else if (auto pp = pragma("add_library "))     read_file_list(pp, "library",        'libr', print_asis);
-    else if (auto pp = pragma("add_library_dir ")) read_file_list(pp, "library dir",    'ldir');
-    else if (auto pp = pragma("add_resource "))    read_file_list(pp, "resource",       'rsrc');
-    else if (auto pp = pragma("add_static "))      read_file_list(pp, "static library", 'slib');
-    else if (auto pp = pragma("add_shader "))      read_file_list(pp, "shader",         'shdr', add_shdr);
-    else if (auto pp = pragma("add_xcframework ")) read_file_list(pp, "xcframework",    'xcfw', add_xcfw);
-
-    else if (auto pp = pragma("display_name ")) {
-      if (exe_type != exe_t::app) error("display name is only supported for apps");
-      read_file_list(pp, "display name", 'name', print_asis);
-    } else if (auto pp = pragma("app_id ")) {
-      if (exe_type != exe_t::app) error("application ID is only supported for apps");
-      read_file_list(pp, "application ID", 'apid', print_asis);
-    } else if (auto pp = pragma("app_version ")) {
-      if (exe_type != exe_t::app) error("application version is only supported for apps");
-      read_file_list(pp, "application version", 'apvr', print_asis);
-    } else if (pragma("portrait\n")) {
-      if (exe_type != exe_t::app) error("portrait is only supported for apps");
-      output('port', "");
-    } else if (pragma("landscape\n")) {
-      if (exe_type != exe_t::app) error("landscape is only supported for apps");
-      output('land', "");
-    }
-        
-    else if (pragma("")) error("unknown pragma");
-        
-    else if (auto pp = cmp(p, "# ")) {
+    if (auto pp = cmp(p, "# ")) {
       // # <line> "<file>" <flags>...
       find_header(pp);
 
