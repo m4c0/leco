@@ -92,11 +92,6 @@ static void stamp(sim::sb * args, char **& argp, const char * arg) {
   *args += arg;
 }
 
-static void set_exe_type(exe_t t) {
-  if (exe_type != exe_t::none) error("multiple executable type found");
-  exe_type = t;
-}
-
 static bool print_if_found(const char *rel_path, const char *desc,
                            uint32_t code) {
   sim::sb abs = sim::path_parent(*source) / rel_path;
@@ -310,16 +305,21 @@ static void output_root_tag() {
   }
 }
 
+static bool exe_pragma(const char * p, const char * e, exe_t t) {
+  p = cmp(p, e);
+  if (!p) return false;
+  if (*p != '\n' && *p != '\r') error("expecting newline after this pragma");
+  if (exe_type != exe_t::none) error("multiple executable type found");
+  exe_type = t;
+  return true;
+}
 static bool pragma(const char * p) {
   p = cmp(p, "#pragma leco ");
   if (!p) return false;
 
-       if (cmp(p, "tool\n")) set_exe_type(exe_t::tool);
-  else if (cmp(p, "tool\r")) set_exe_type(exe_t::tool);
-  else if (cmp(p, "app\n"))  set_exe_type(exe_t::app);
-  else if (cmp(p, "app\r"))  set_exe_type(exe_t::app);
-  else if (cmp(p, "dll\n"))  set_exe_type(exe_t::dll);
-  else if (cmp(p, "dll\r"))  set_exe_type(exe_t::dll);
+  if (exe_pragma(p, "tool", exe_t::tool)) return true;
+  if (exe_pragma(p, "app",  exe_t::app))  return true;
+  if (exe_pragma(p, "dll",  exe_t::dll))  return true;
 
   else if (auto pp = cmp(p, "add_dll "))         read_file_list(pp, "dll",            'dlls');
   else if (auto pp = cmp(p, "add_framework "))   read_file_list(pp, "framework",      'frwk', print_asis);
