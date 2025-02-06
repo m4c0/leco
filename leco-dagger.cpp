@@ -313,6 +313,17 @@ static bool exe_pragma(const char * p, const char * e, exe_t t) {
   exe_type = t;
   return true;
 }
+static bool add_pragma(const char * p, const char * id, uint32_t code, printer_t prfn = print_found) {
+  p = cmp(p, "add_");
+  if (!p) return false;
+  p = cmp(p, id);
+  if (!p) return false;
+  p = cmp(p, " ");
+  if (!p) return false;
+
+  read_file_list(p, id, code, prfn);
+  return true;
+}
 static bool pragma(const char * p) {
   p = cmp(p, "#pragma leco ");
   if (!p) return false;
@@ -321,16 +332,16 @@ static bool pragma(const char * p) {
   if (exe_pragma(p, "app",  exe_t::app))  return true;
   if (exe_pragma(p, "dll",  exe_t::dll))  return true;
 
-  else if (auto pp = cmp(p, "add_dll "))         read_file_list(pp, "dll",            'dlls');
-  else if (auto pp = cmp(p, "add_framework "))   read_file_list(pp, "framework",      'frwk', print_asis);
-  else if (auto pp = cmp(p, "add_impl "))        read_file_list(pp, "implementation", 'impl', add_impl);
-  else if (auto pp = cmp(p, "add_include_dir ")) read_file_list(pp, "include dir",    'idir');
-  else if (auto pp = cmp(p, "add_library "))     read_file_list(pp, "library",        'libr', print_asis);
-  else if (auto pp = cmp(p, "add_library_dir ")) read_file_list(pp, "library dir",    'ldir');
-  else if (auto pp = cmp(p, "add_resource "))    read_file_list(pp, "resource",       'rsrc');
-  else if (auto pp = cmp(p, "add_static "))      read_file_list(pp, "static library", 'slib');
-  else if (auto pp = cmp(p, "add_shader "))      read_file_list(pp, "shader",         'shdr', add_shdr);
-  else if (auto pp = cmp(p, "add_xcframework ")) read_file_list(pp, "xcframework",    'xcfw', add_xcfw);
+  if (add_pragma(p, "dll",         'dlls'))             return true;
+  if (add_pragma(p, "framework",   'frwk', print_asis)) return true;
+  if (add_pragma(p, "impl",        'impl', add_impl))   return true;
+  if (add_pragma(p, "include_dir", 'idir'))             return true;
+  if (add_pragma(p, "library",     'libr', print_asis)) return true;
+  if (add_pragma(p, "library_dir", 'ldir'))             return true;
+  if (add_pragma(p, "resource",    'rsrc'))             return true;
+  if (add_pragma(p, "static_lib",  'slib'))             return true;
+  if (add_pragma(p, "shader",      'shdr', add_shdr))   return true;
+  if (add_pragma(p, "xcframework", 'xcfw', add_xcfw))   return true;
 
   else if (auto pp = cmp(p, "display_name ")) {
     if (exe_type != exe_t::app) error("display name is only supported for apps");
