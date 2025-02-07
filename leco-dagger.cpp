@@ -324,6 +324,16 @@ static bool add_pragma(const char * p, const char * id, uint32_t code, printer_t
   read_file_list(p, id, code, prfn);
   return true;
 }
+static const char * bundle_cmp(const char * p, const char * id) {
+  p = cmp(p, id);
+  if (!p) return nullptr;
+  p = cmp(p, " ");
+  if (!p) return nullptr;
+
+  if (exe_type != exe_t::app) error("display name is only supported for apps");
+
+  return p;
+}
 static bool pragma(const char * p) {
   p = cmp(p, "#pragma leco ");
   if (!p) return false;
@@ -343,23 +353,11 @@ static bool pragma(const char * p) {
   if (add_pragma(p, "shader",      'shdr', add_shdr))   return true;
   if (add_pragma(p, "xcframework", 'xcfw', add_xcfw))   return true;
 
-  else if (auto pp = cmp(p, "display_name ")) {
-    if (exe_type != exe_t::app) error("display name is only supported for apps");
-    read_file_list(pp, "display name", 'name', print_asis);
-  } else if (auto pp = cmp(p, "app_id ")) {
-    if (exe_type != exe_t::app) error("application ID is only supported for apps");
-    read_file_list(pp, "application ID", 'apid', print_asis);
-  } else if (auto pp = cmp(p, "app_version ")) {
-    if (exe_type != exe_t::app) error("application version is only supported for apps");
-    read_file_list(pp, "application version", 'apvr', print_asis);
-  } else if (cmp(p, "portrait\n")) {
-    if (exe_type != exe_t::app) error("portrait is only supported for apps");
-    output('port', "");
-  } else if (cmp(p, "landscape\n")) {
-    if (exe_type != exe_t::app) error("landscape is only supported for apps");
-    output('land', "");
-  }
-      
+       if (auto pp = bundle_cmp(p, "display_name")) read_file_list(pp, "display name", 'name', print_asis);
+  else if (auto pp = bundle_cmp(p, "app_id"))       read_file_list(pp, "application ID", 'apid', print_asis);
+  else if (auto pp = bundle_cmp(p, "app_version"))  read_file_list(pp, "application version", 'apvr', print_asis);
+  else if (bundle_cmp(p, "portrait\n"))  output('port', "");
+  else if (bundle_cmp(p, "landscape\n")) output('land', "");
   else error("unknown pragma");
 
   return true;
