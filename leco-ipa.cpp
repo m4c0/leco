@@ -1,6 +1,6 @@
 #ifdef __APPLE__
 #pragma leco tool
-#pragma leco add_impl "leco-ipa_plist"
+#pragma leco add_impl ipa_plist
 #endif
 
 #include "targets.hpp"
