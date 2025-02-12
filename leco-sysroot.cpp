@@ -86,6 +86,7 @@ int main(int argc, char **argv) try {
     }
   });
   if (opts.argc > 0) usage();
+  if (0 == strcmp(target, HOST_TARGET)) return 0;
 
   auto cf = sim::path_real(argv[0]);
   cf.path_parent();
