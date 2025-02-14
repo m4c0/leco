@@ -25,7 +25,9 @@ Plumbing tools:
         exs: copies dependent executables to app bundles
         ipa: generates and signs IPAs
         link: links an executable
+        meta: used to run other tools
         recurse: compiles C++ code recursively
+        rc: generates "RC" files for Windows
         rsrc: copies resource files to their app's resource folder
         sawblade: runs dagger recursively
         shaders: compiles GLSL into SPIRV
