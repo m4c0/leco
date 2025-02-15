@@ -22,8 +22,10 @@ Plumbing tools:
         codesign: runs codesign on Apple platforms
         dagger: generates dependency files based on parsed code
         deplist: list dependent c++ modules
+        driver: drives the build pipeline
         exs: copies dependent executables to app bundles
         ipa: generates and signs IPAs
+        ipa-export: exports an IPA archive
         link: links an executable
         meta: used to run other tools
         recurse: compiles C++ code recursively
