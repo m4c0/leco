@@ -5,9 +5,8 @@ import mtime;
 import sim;
 import sys;
 
-static void copy(const char *with, const char *dag, const char *to,
-                 const char *extra = "") {
-  sys::tool_run(with, " -i %s -o %s %s", dag, to, extra);
+static void copy(const char *with, const char *dag, const char *to) {
+  sys::tool_run(with, " -i %s -o %s", dag, to);
 }
 
 static void dir_bundle(const char *dag) {
@@ -22,7 +21,7 @@ static void wasm_bundle(const char *dag) {
   sim::sb path { dag };
   path.path_extension("app");
 
-  copy("exs", dag, *path, " -e wasm");
+  copy("exs", dag, *path);
   copy("rsrc", dag, *path);
 
   path /= sim::path_filename(dag);

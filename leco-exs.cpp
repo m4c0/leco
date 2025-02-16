@@ -51,9 +51,8 @@ static void copy_xcfw(const char * xcfw_path) {
 int main(int argc, char ** argv) try {
   const char * input {};
 
-  auto opts = gopt_parse(argc, argv, "e:i:o:", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "i:o:", [&](auto ch, auto val) {
     switch (ch) {
-      case 'e': ext = val; break;
       case 'i': input = val; break;
       case 'o': exedir = val; break;
       default: usage(); break;
@@ -66,6 +65,8 @@ int main(int argc, char ** argv) try {
 
   auto path = sim::path_parent(input);
   target = path.path_filename();
+
+  if (0 == strcmp(target, TGT_WASM)) ext = "wasm";
 
   auto exe = sim::sb { input };
   exe.path_extension("exe");
