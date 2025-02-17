@@ -356,6 +356,7 @@ static bool pragma(const char * p) {
   if (exe_pragma(p, "dll",  exe_t::dll))  return true;
 
   if (add_pragma(p, "dll",         'dlls'))             return true;
+  if (add_pragma(p, "embed",       'embd'))             return true;
   if (add_pragma(p, "framework",   'frwk', print_asis)) return true;
   if (add_pragma(p, "impl",        'impl', add_impl))   return true;
   if (add_pragma(p, "include_dir", 'idir'))             return true;
