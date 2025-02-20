@@ -1,4 +1,5 @@
 #pragma leco tool
+#include <stdio.h>
 
 import gopt;
 import sim;
@@ -8,10 +9,22 @@ static void usage() { sys::die("invalid usage"); }
 
 static void process_file(const char * dag, const char * file) {
   auto path = sim::path_parent(dag);
-  path /= *sim::path_stem(file);
-  path.path_extension("hpp");
+  path /= sim::path_filename(file);
+  path += ".hpp";
 
   sys::log("generating", *path);
+
+  sim::sb id { sim::path_filename(file) };
+  for (auto i = 0; i < id.len; i++) {
+    auto & c = id[i];
+    if (c == '.') c = '_';
+  }
+
+  auto f = sys::fopen(*path, "wb");
+  fprintf(f, "#pragma once\n");
+  fprintf(f, "static constexpr unsigned leco_%s_len = 0;\n", *id);
+  fprintf(f, "static constexpr const char * leco_%s_data = 0;\n", *id);
+  fclose(f);
 }
 
 int main(int argc, char ** argv) {
