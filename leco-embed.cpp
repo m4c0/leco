@@ -12,6 +12,7 @@ static void process_file(const char * dag, const char * file) {
   path /= sim::path_filename(file);
   path += ".hpp";
 
+  // TODO: check if newer
   sys::log("generating", *path);
 
   sim::sb id { sim::path_filename(file) };
@@ -23,7 +24,13 @@ static void process_file(const char * dag, const char * file) {
   auto f = sys::fopen(*path, "wb");
   fprintf(f, "#pragma once\n");
   fprintf(f, "static constexpr unsigned leco_%s_len = 0;\n", *id);
-  fprintf(f, "static constexpr const char * leco_%s_data = 0;\n", *id);
+
+  auto in = sys::fopen(file, "rb");
+  fseek(in, 0, SEEK_END);
+  int size = ftell(in);
+  fclose(in);
+
+  fprintf(f, "static constexpr const char * leco_%s_data = %d;\n", *id, size);
   fclose(f);
 }
 
