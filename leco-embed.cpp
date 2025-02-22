@@ -23,14 +23,30 @@ static void process_file(const char * dag, const char * file) {
 
   auto f = sys::fopen(*path, "wb");
   fprintf(f, "#pragma once\n");
-  fprintf(f, "static constexpr unsigned leco_%s_len = 0;\n", *id);
+  fprintf(f, "static constexpr const char * leco_%s_len =", *id);
 
   auto in = sys::fopen(file, "rb");
+  while (!feof(in)) {
+    fprintf(f, "\n  \"");
+    char buf[32];
+    int n = fread(buf, 1, 32, in);
+    for (auto i = 0; i < n; i++) {
+      char c = buf[i];
+      if (c >= 32 && c < 127 && c != '"') {
+        fputc(c, f);
+      } else {
+        fputc('?', f);
+      }
+    }
+    fprintf(f, "\"");
+  }
+
   fseek(in, 0, SEEK_END);
   int size = ftell(in);
   fclose(in);
 
-  fprintf(f, "static constexpr const char * leco_%s_data = %d;\n", *id, size);
+  fprintf(f, ";\n");
+  fprintf(f, "static constexpr const unsigned leco_%s_data = %d;\n", *id, size);
   fclose(f);
 }
 
