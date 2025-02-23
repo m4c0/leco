@@ -23,7 +23,7 @@ static void process_file(const char * dag, const char * file) {
 
   auto f = sys::fopen(*path, "wb");
   fprintf(f, "#pragma once\n");
-  fprintf(f, "static constexpr const char * leco_%s_len =", *id);
+  fprintf(f, "static constexpr const char * %s_len =", *id);
 
   auto in = sys::fopen(file, "rb");
   while (!feof(in)) {
@@ -35,7 +35,7 @@ static void process_file(const char * dag, const char * file) {
       if (c >= 32 && c < 127 && c != '"') {
         fputc(c, f);
       } else {
-        fputc('?', f);
+        fprintf(f, "\\x%02x", (int)c);
       }
     }
     fprintf(f, "\"");
@@ -46,7 +46,7 @@ static void process_file(const char * dag, const char * file) {
   fclose(in);
 
   fprintf(f, ";\n");
-  fprintf(f, "static constexpr const unsigned leco_%s_data = %d;\n", *id, size);
+  fprintf(f, "static constexpr const unsigned %s_data = %d;\n", *id, size);
   fclose(f);
 }
 
