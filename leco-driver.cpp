@@ -49,6 +49,10 @@ static void dagger(const char * target) {
   sys::tool_run("dagger", "-t %s", target);
 }
 
+static void embed(const char * target) {
+  sys::tool_run("embed", "-t %s", target);
+}
+
 static void compile(const char * target) {
   sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
     switch (id) {
@@ -96,6 +100,7 @@ static void run_target(const char * target) {
   cleaner(target);
   sysroot(target);
   dagger(target);
+  embed(target);
   compile(target);
   link(target);
   bundle(target);
