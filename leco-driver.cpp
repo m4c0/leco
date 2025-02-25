@@ -53,11 +53,17 @@ static void embed(const char * target) {
   sys::tool_run("embed", "-t %s", target);
 }
 
+static void shaders(const char * target) {
+  sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
+    if (id != 'tapp') return;
+    sys::tool_run("shaders", "-i %s", dag);
+  });
+}
+
 static void compile(const char * target) {
   sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
     switch (id) {
       case 'tapp':
-        sys::tool_run("shaders", "-i %s", dag);
 #if _WIN32
         sys::tool_run("rc", "-i %s", dag);
 #endif
@@ -100,6 +106,7 @@ static void run_target(const char * target) {
   cleaner(target);
   sysroot(target);
   dagger(target);
+  shaders(target);
   embed(target);
   compile(target);
   link(target);
