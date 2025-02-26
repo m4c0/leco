@@ -171,10 +171,10 @@ static void add_xcfw(const char * str, const char * desc, uint32_t code) {
 }
 
 static void add_shdr(const char * src, const char * desc, uint32_t code) {
-  print_found(src, desc, code);
+  print_found(src, desc, 'shdr');
 
   auto out = sim::path_parent(*sim::path_real(src)) / "out" / target / sim::path_filename(src) + ".spv";
-  output('rsrc', *out);
+  output(code, *out);
 }
 
 static void find_header(const char *l) {
@@ -324,6 +324,17 @@ static bool add_pragma(const char * p, const char * id, uint32_t code, printer_t
   read_file_list(p, id, code, prfn);
   return true;
 }
+static bool embed_pragma(const char * p, const char * id, uint32_t code, printer_t prfn = print_found) {
+  p = cmp(p, "embed_");
+  if (!p) return false;
+  p = cmp(p, id);
+  if (!p) return false;
+  p = cmp(p, " ");
+  if (!p) return false;
+
+  read_file_list(p, id, code, prfn);
+  return true;
+}
 static const char * bundle_cmp(const char * p, const char * id) {
   p = cmp(p, id);
   if (!p) return nullptr;
@@ -364,8 +375,10 @@ static bool pragma(const char * p) {
   if (add_pragma(p, "library_dir", 'ldir'))             return true;
   if (add_pragma(p, "resource",    'rsrc'))             return true;
   if (add_pragma(p, "static_lib",  'slib'))             return true;
-  if (add_pragma(p, "shader",      'shdr', add_shdr))   return true;
+  if (add_pragma(p, "shader",      'rsrc', add_shdr))   return true;
   if (add_pragma(p, "xcframework", 'xcfw', add_xcfw))   return true;
+
+  if (embed_pragma(p, "shader", 'embd', add_shdr)) return true;
 
   if (prop_pragma(p, "display_name", 'name')) return true;
   if (prop_pragma(p, "app_id",       'apid')) return true;
