@@ -35,7 +35,7 @@ static void process_file(const char * dag, const char * file) {
       if (c >= 32 && c < 127 && c != '"') {
         fputc(c, f);
       } else {
-        fprintf(f, "\\x%02x", (int)c);
+        fprintf(f, "\\x%02x", (unsigned)c & 0xFF);
       }
     }
     fprintf(f, "\"");
