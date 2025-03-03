@@ -9,6 +9,7 @@ static void usage() { sys::die("invalid usage"); }
 
 static void process_file(const char * dag, const char * file) {
   auto path = sim::path_parent(dag);
+  auto parent = sim::path_parent(*path);
   path /= sim::path_filename(file);
   path += ".hpp";
 
@@ -21,9 +22,12 @@ static void process_file(const char * dag, const char * file) {
     if (c == '.') c = '_';
   }
 
+  parent.path_parent();
+  auto pname = sim::path_filename(*parent);
+
   auto f = sys::fopen(*path, "wb");
   fprintf(f, "#pragma once\n");
-  fprintf(f, "static constexpr const char * %s_data =", *id);
+  fprintf(f, "static constexpr const char * %s_%s_data =", pname, *id);
 
   auto in = sys::fopen(file, "rb");
   while (!feof(in)) {
@@ -46,7 +50,7 @@ static void process_file(const char * dag, const char * file) {
   fclose(in);
 
   fprintf(f, ";\n");
-  fprintf(f, "static constexpr const unsigned %s_len = %d;\n", *id, size);
+  fprintf(f, "static constexpr const unsigned %s_%s_len = %d;\n", pname, *id, size);
   fclose(f);
 }
 
