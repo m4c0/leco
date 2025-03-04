@@ -27,9 +27,17 @@ static void process_file(const char * dag, const char * file) {
 
   auto f = sys::fopen(*path, "wb");
   fprintf(f, "#pragma once\n");
-  fprintf(f, "static constexpr const char * %s_%s_data =", pname, *id);
+  fprintf(f, "// Size includes null-terminator. Equivalent of this line...\n");
+  fprintf(f, "// static constexpr const char %s_%s[] = \"...\";\n", pname, *id);
+  fprintf(f, "// ...with size included for information purposes.\n");
 
   auto in = sys::fopen(file, "rb");
+  fseek(in, 0, SEEK_END);
+  int size = ftell(in);
+  fseek(in, 0, SEEK_SET);
+
+  fprintf(f, "static constexpr const char %s_%s[%d] =", pname, *id, size + 1);
+
   while (!feof(in)) {
     fprintf(f, "\n  \"");
     char buf[32];
@@ -44,13 +52,9 @@ static void process_file(const char * dag, const char * file) {
     }
     fprintf(f, "\"");
   }
-
-  fseek(in, 0, SEEK_END);
-  int size = ftell(in);
   fclose(in);
 
   fprintf(f, ";\n");
-  fprintf(f, "static constexpr const unsigned %s_%s_len = %d;\n", pname, *id, size);
   fclose(f);
 }
 
