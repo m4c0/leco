@@ -42,14 +42,7 @@ static void process_file(const char * dag, const char * file) {
     fprintf(f, "\n  \"");
     char buf[32];
     int n = fread(buf, 1, 32, in);
-    for (auto i = 0; i < n; i++) {
-      char c = buf[i];
-      // if (c >= 32 && c < 127 && c != '"') {
-      //   fputc(c, f);
-      // } else {
-        fprintf(f, "\\%03o", (unsigned)c & 0xFF);
-      // }
-    }
+    for (auto i = 0; i < n; i++) fprintf(f, "\\%03o", (unsigned)buf[i] & 0xFF);
     fprintf(f, "\"");
   }
   fclose(in);
