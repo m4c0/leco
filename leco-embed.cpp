@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 import gopt;
+import mtime;
 import sim;
 import sys;
 
@@ -13,7 +14,8 @@ static void process_file(const char * dag, const char * file) {
   path /= sim::path_filename(file);
   path += ".hpp";
 
-  // TODO: check if newer
+  if (mtime::of(file) < mtime::of(*path)) return;
+
   sys::log("generating", *path);
 
   sim::sb id { sim::path_filename(file) };
