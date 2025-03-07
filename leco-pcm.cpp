@@ -29,7 +29,6 @@ static void deplist(const char * dag) {
   sys::tool_run("deplist", "-i %s", dag);
 }
 static void compile(const char * src, const char * pcm, const char * deps) {
-  // TODO: stop using leco-clang's output inferring
   sys::log("compiling module", src);
   sys::tool_run("clang", "-i %s -t %s %s -- -std=c++2b --precompile -o %s @%s", src, target, common_flags, pcm, deps);
 }
