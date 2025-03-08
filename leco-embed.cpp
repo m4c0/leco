@@ -6,7 +6,14 @@ import mtime;
 import sim;
 import sys;
 
-static void usage() { sys::die("invalid usage"); }
+static void usage() {
+  sys::die(R"(
+Usage: ../leco/leco.exe embed -t <target>
+
+Where:
+        -t: target triple to scan and generate
+)");
+}
 
 static void process_file(const char * dag, const char * file) {
   auto path = sim::path_parent(dag);
