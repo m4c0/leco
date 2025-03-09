@@ -178,6 +178,7 @@ static void add_shdr(const char * src, const char * desc, uint32_t code) {
 
   out = out / sim::path_filename(src) + ".spv";
   output(code, *out);
+  if (code == 'embd') output('head', *(out + ".hpp"));
 }
 
 static void find_header(const char *l) {
