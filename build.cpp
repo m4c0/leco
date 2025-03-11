@@ -58,6 +58,7 @@ int try_main(int argc, char **argv) {
 
   TOOL("dagger");
   TOOL("deplist");
+  TOOL("embed");
   TOOL("link");
   TOOL("obj");
   TOOL("pcm");
