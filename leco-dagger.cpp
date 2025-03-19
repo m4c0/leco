@@ -378,6 +378,7 @@ static bool pragma(const char * p) {
   if (add_pragma(p, "library",     'libr', print_asis)) return true;
   if (add_pragma(p, "library_dir", 'ldir'))             return true;
   if (add_pragma(p, "resource",    'rsrc'))             return true;
+  if (add_pragma(p, "rpath",       'rpth'))             return true;
   if (add_pragma(p, "static_lib",  'slib'))             return true;
   if (add_pragma(p, "shader",      'rsrc', add_shdr))   return true;
   if (add_pragma(p, "xcframework", 'xcfw', add_xcfw))   return true;

@@ -61,6 +61,7 @@ static auto read_dag(const char *dag) {
     case 'frwk': fprintf(out, "-framework\n%s\n", file); break;
     case 'libr': fprintf(out, "-l%s\n", file); break;
     case 'ldir': fprintf(out, "-L%s\n", file); break;
+    case 'rpth': fprintf(out, "-Wl,-rpath,%s\n", file); break;
     case 'slib': fprintf(out, "%s\n", file); break;
     case 'objf': obj = sim::sb { file }; break;
     case 'xcfw': add_local_fw(file); break;
