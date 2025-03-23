@@ -60,7 +60,7 @@ static void bundle(const char * target) {
 
 static void shaders(const char * target) {
   sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
-    if (id != 'tapp') return;
+    if (id != 'tapp' && id != 'tool') return;
     sys::tool_run("shaders", "-i %s", dag);
   });
 }
