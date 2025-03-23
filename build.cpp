@@ -38,6 +38,12 @@ static void run(const char * cmd) {
   throw 0;
 }
 
+static void gitignore() {
+  auto f = fopen("out/.gitignore", "w");
+  fputs("*", f);
+  fclose(f);
+}
+
 int try_main(int argc, char **argv) {
   sysstd_mkdir("out");
   sysstd_mkdir("out" SEP HOST_TARGET);
