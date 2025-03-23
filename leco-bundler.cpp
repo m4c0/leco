@@ -47,16 +47,18 @@ static void bundle(const char *dag) {
 static void usage() { sys::die("invalid usage"); }
 
 int main(int argc, char **argv) try {
-  const char *input{};
-  auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
+  const char * target {};
+  auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
     switch (ch) {
-      case 'i': input = val; break;
+      case 't': target = val; break;
       default: usage(); break;
     }
   });
-  if (opts.argc != 0 || !input) usage();
+  if (opts.argc != 0 || !target) usage();
 
-  bundle(input);
+  sys::for_each_dag(target, false, [](auto dag, auto id, auto val) {
+    if (id == 'tapp') bundle(dag);
+  });
   return 0;
 } catch (...) {
   return 1;

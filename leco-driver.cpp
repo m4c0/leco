@@ -54,6 +54,10 @@ static void embed(const char * target) {
   sys::tool_run("embed", "-t %s", target);
 }
 
+static void bundle(const char * target) {
+  sys::tool_run("bundler", "-t %s", target);
+}
+
 static void shaders(const char * target) {
   sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
     if (id != 'tapp') return;
@@ -86,17 +90,6 @@ static void link(const char * target) {
       case 'tdll':
       case 'tool':
         sys::tool_run("link", "-i %s -o %s %s", dag, file, common_flags);
-        break;
-      default: break;
-    }
-  });
-}
-
-static void bundle(const char * target) {
-  sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
-    switch (id) {
-      case 'tapp':
-        sys::tool_run("bundler", "-i %s", dag);
         break;
       default: break;
     }
