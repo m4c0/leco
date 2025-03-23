@@ -5,6 +5,8 @@ import mtime;
 import sim;
 import sys;
 
+static void usage() { sys::die("invalid usage"); }
+
 static void copy(const char *with, const char *dag, const char *to) {
   sys::tool_run(with, " -i %s -o %s", dag, to);
 }
@@ -44,7 +46,9 @@ static void bundle(const char *dag) {
   else dir_bundle(dag);
 }
 
-static void usage() { sys::die("invalid usage"); }
+static void tool_bundle(const char * dag) {
+  copy("exs", dag, *sim::path_parent(dag));
+}
 
 int main(int argc, char **argv) try {
   const char * target {};
@@ -58,6 +62,7 @@ int main(int argc, char **argv) try {
 
   sys::for_each_dag(target, false, [](auto dag, auto id, auto val) {
     if (id == 'tapp') bundle(dag);
+    if (id == 'tool') tool_bundle(dag);
   });
   return 0;
 } catch (...) {
