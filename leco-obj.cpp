@@ -36,6 +36,7 @@ static void compile(const char * src, const char * obj, const char * deps) {
   if (ext == ".m" || ext == ".mm") lang = "-fmodules -fobjc-arc";
   else if (ext == ".c") lang = "-std=c11";
  
+  // TODO: find a way to avoid using -I when compiling pcm to obj
   sys::log("compiling object", src);
   sys::tool_run("clang", "-i %s -t %s %s -- %s -c -o %s @%s", src, target, common_flags, lang, obj, deps);
 }
