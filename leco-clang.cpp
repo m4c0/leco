@@ -110,7 +110,7 @@ int main(int argc, char **argv) try {
   argv0 = argv[0];
 
   struct gopt opts;
-  GOPT(opts, argc, argv, "gi:Oo:t:v");
+  GOPT(opts, argc, argv, "gi:Ot:v");
 
   bool debug{};
   bool opt{};
