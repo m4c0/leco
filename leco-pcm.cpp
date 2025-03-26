@@ -24,9 +24,12 @@ static const char * target;
 
 static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 
-static void compile(const char * src, const char * pcm, const char * deps) {
+static void compile(const char * src, const char * pcm, const char * dag) {
+  auto deps = sim::sb { dag };
+  deps.path_extension("deps");
+
   sys::log("compiling module", src);
-  sys::tool_run("clang", "-i %s -t %s %s -- -std=c++2b --precompile -o %s @%s", src, target, common_flags, pcm, deps);
+  sys::tool_run("clang", "-i %s -t %s %s -- -std=c++2b --precompile -o %s @%s", src, target, common_flags, pcm, *deps);
 }
 
 static str::map spec_cache {};
@@ -56,11 +59,8 @@ static auto process_spec(const char * dag) {
   mtime = max(mtime, mtime::of(*src));
 
   if (mtime > mtime::of(*pcm)) {
-    auto deps = sim::sb { dag };
-    deps.path_extension("deps");
-
     sys::tool_run("deplist", "-i %s", dag);
-    compile(*src, *pcm, *deps);
+    compile(*src, *pcm, dag);
     mtime = mtime::of(*pcm);
   }
 
