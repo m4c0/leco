@@ -64,10 +64,14 @@ int main(int argc, char **argv) try {
   target = path.path_filename();
 
   sim::sb output { input };
-  output.path_extension("deps");
 
+  output.path_extension("deps");
   out = sys::fopen(*output, "wb");
   read_dag(input);
+  fclose(out);
+
+  output.path_extension("incs");
+  out = sys::fopen(*output, "wb");
   read_includes(input);
   fclose(out);
 
