@@ -79,22 +79,16 @@ static auto read_dag(const char *dag) {
 int main(int argc, char **argv) try {
   argv0 = argv[0];
 
-  const char *input{};
-  const char *output{};
-  auto opts = gopt_parse(argc, argv, "i:o:gO", [&](auto ch, auto val) {
+  const char * input {};
+  const char * output {};
+  auto opts = gopt_parse(argc, argv, "i:o:", [&](auto ch, auto val) {
     switch (ch) {
-    case 'i':
-      input = val;
-      break;
-    case 'o':
-      output = val;
-      break;
-    default:
-      usage();
+      case 'i': input = val; break;
+      case 'o': output = val; break;
+      default: usage();
     }
   });
-  if (!input || !output)
-    usage();
+  if (!input || !output) usage();
 
   auto path = sim::path_parent(input);
   target = path.path_filename();
