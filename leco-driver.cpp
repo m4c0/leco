@@ -51,17 +51,17 @@ static void dagger(const char * target) {
 }
 
 static void embed(const char * target) {
-  sys::tool_run("embed", "-t %s", target);
+  sys::opt_tool_run("embed", "-t %s", target);
 }
 
 static void bundle(const char * target) {
-  sys::tool_run("bundler", "-t %s", target);
+  sys::opt_tool_run("bundler", "-t %s", target);
 }
 
 static void shaders(const char * target) {
   sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
     if (id != 'tapp' && id != 'tool') return;
-    sys::tool_run("shaders", "-i %s", dag);
+    sys::opt_tool_run("shaders", "-i %s", dag);
   });
 }
 

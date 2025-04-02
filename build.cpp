@@ -60,11 +60,10 @@ int try_main(int argc, char **argv) {
   MODULE("sysstd");
   LOCAL_MODULE("sim");
   LOCAL_MODULE("strset");
-  LOCAL_MODULE("sys", PARG("pprent") PARG("sysstd"));
+  LOCAL_MODULE("sys", PARG("mtime") PARG("pprent") PARG("sysstd"));
 
   TOOL("dagger");
   TOOL("deplist");
-  TOOL("embed");
   TOOL("link");
   TOOL("obj");
   TOOL("pcm");

@@ -20,6 +20,7 @@ module;
 #endif
 
 export module sys;
+import mtime;
 import pprent;
 import sim;
 import strset;
@@ -172,6 +173,11 @@ void tool_run(const char * name) {
 void tool_run(const char * name, const char * args, auto &&... as) {
   auto cmd = tool_cmd(name, args, as...);
   run(*cmd);
+}
+void opt_tool_run(const char * name, const char * args, auto &&... as) {
+  auto cmd = tool_cmd(name);
+  if (mtime::of(*cmd) == 0) return;
+  run(*(cmd + " ").printf(args, as...));
 }
 
 constexpr const char * host_target = HOST_TARGET;
