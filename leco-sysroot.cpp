@@ -95,13 +95,15 @@ int main(int argc, char **argv) try {
   sys::mkdirs(*cf);
   cf /= "sysroot";
   if (exists(*cf)) {
+    if (!verbose) return 0;
+
     auto f = sys::fopen(*cf, "r");
     char buf[10240] {};
     if (fgets(buf, sizeof(buf), f) != nullptr) {
-      if (verbose) fwrite(buf, 1, sizeof(buf), stdout);
-      return 0;
+      fwrite(buf, 1, sizeof(buf), stdout);
     }
     fclose(f);
+    return 0;
   }
 
   auto sysroot = sysroot_for_target(target);
