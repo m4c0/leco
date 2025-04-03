@@ -77,11 +77,11 @@ static sim::sb sysroot_for_target(const char *target) {
 
 int main(int argc, char **argv) try {
   const char *target{HOST_TARGET};
-  bool quiet{};
-  auto opts = gopt_parse(argc, argv, "qt:", [&](auto ch, auto val) {
+  bool verbose {};
+  auto opts = gopt_parse(argc, argv, "vt:", [&](auto ch, auto val) {
     switch (ch) {
       case 't': target = val; break;
-      case 'q': quiet = true; break;
+      case 'v': verbose = true; break;
       default: usage(); break;
     }
   });
@@ -98,7 +98,7 @@ int main(int argc, char **argv) try {
     auto f = sys::fopen(*cf, "r");
     char buf[10240] {};
     if (fgets(buf, sizeof(buf), f) != nullptr) {
-      if (!quiet) fwrite(buf, 1, sizeof(buf), stdout);
+      if (verbose) fwrite(buf, 1, sizeof(buf), stdout);
       return 0;
     }
     fclose(f);
@@ -106,7 +106,7 @@ int main(int argc, char **argv) try {
 
   auto sysroot = sysroot_for_target(target);
   if (sysroot.len) {
-    if (!quiet) puts(*sysroot);
+    if (verbose) puts(*sysroot);
 
     auto f = sys::fopen(*cf, "w");
     fputs(*sysroot, f);

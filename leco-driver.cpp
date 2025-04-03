@@ -43,7 +43,7 @@ static void cleaner(const char *target) {
 
 static void sysroot(const char *target) {
   if (0 == strcmp(target, HOST_TARGET)) return;
-  sys::tool_run("sysroot", "-q -t %s", target);
+  sys::tool_run("sysroot", "-t %s", target);
 }
 
 static void dagger(const char * target) {
