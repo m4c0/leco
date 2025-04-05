@@ -1,9 +1,4 @@
 #pragma leco tool
-#include "targets.hpp"
-
-#include <stdlib.h>
-
-import gopt;
 import mtime;
 import sim;
 import sys;
@@ -18,24 +13,13 @@ int main(int argc, char ** argv) try {
   system(""); // enable ANSI colours
 #endif
 
-  auto opts = gopt_parse(argc, argv, "C:", [&](auto ch, auto val) {
-    if (ch == 'C') chdir(val);
-  });
+  const auto shift = [&] { return argc ? "" : (argc--, *++argv); };
+  argc--;
 
-  if (opts.argc == 0) return sys::tool_run("driver");
+  if (sim::sb{"-C"} == *argv) chdir((shift(), shift()));
 
-  auto cmd = sys::tool_cmd(opts.argv[0]);
-  if (mtime::of(*cmd) > 0) {
-    opts.argc--;
-    opts.argv++;
-  } else {
-    cmd = sys::tool_cmd("driver");
-  }
-
-  // TODO: escape arguments or replace with execvp
-  for (auto i = 0; i < opts.argc; i++)
-    cmd.printf(" %s", opts.argv[i]);
-
+  auto cmd = sys::tool_cmd(argc && mtime::of(*argv) ? shift() : "driver");
+  while (argc) cmd.printf(" %s", shift());
   sys::run(*cmd);
 } catch (...) {
   return 1;
