@@ -112,8 +112,6 @@ int main(int argc, char **argv) try {
   struct gopt opts;
   GOPT(opts, argc, argv, "gi:Ot:v");
 
-  bool debug{};
-  bool opt{};
   bool cpp = true;
   bool verbose{};
   const char *target{HOST_TARGET};
@@ -133,13 +131,8 @@ int main(int argc, char **argv) try {
             (0 == strcmp(ext, ".mm"));
       break;
     }
-
-    case 'g': debug   = true; break;
-    case 'O': opt     = true; break;
     case 'v': verbose = true; break;
-
     case 't': target = val; break;
-
     default: return usage();
     }
   }
@@ -149,13 +142,14 @@ int main(int argc, char **argv) try {
   clang_cmd(&args, cpp ? "clang++" : "clang");
   sim_sb_concat(&args, " -Wall -Wno-unknown-pragmas");
 
+  if (sysstd_env("LECO_DEBUG")) {
 #ifdef _WIN32
-  if (debug) sim_sb_concat(&args, " -gdwarf");
+    sim_sb_concat(&args, " -gdwarf");
 #else
-  if (debug) sim_sb_concat(&args, " -g");
+    sim_sb_concat(&args, " -g");
 #endif
-
-  if (opt) sim_sb_concat(&args, " -O3 -flto -fvisibility=hidden");
+  }
+  if (sysstd_env("LECO_OPT")) sim_sb_concat(&args, " -O3 -flto -fvisibility=hidden");
 
   sim_sb_printf(&args, " -target %s", target);
   add_target_defs(&args, target);
