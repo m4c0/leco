@@ -21,8 +21,6 @@ Usage: %s -i <input.dag> -o <output.exe> [-g] [-O]
 Where:
         -i: input DAG
         -o: output executable
-        -g: enable debug symbols
-        -O: enable optimisations
 )",
       argv0);
 }
@@ -83,8 +81,6 @@ int main(int argc, char **argv) try {
 
   const char *input{};
   const char *output{};
-  bool debug{};
-  bool opt{};
   auto opts = gopt_parse(argc, argv, "i:o:gO", [&](auto ch, auto val) {
     switch (ch) {
     case 'i':
@@ -92,12 +88,6 @@ int main(int argc, char **argv) try {
       break;
     case 'o':
       output = val;
-      break;
-    case 'g':
-      debug = true;
-      break;
-    case 'O':
-      opt = true;
       break;
     default:
       usage();
@@ -137,8 +127,6 @@ int main(int argc, char **argv) try {
 
   sim::sb cmd{10240};
   cmd.printf(" -t %s", target);
-  if (debug) cmd += " -g";
-  if (opt) cmd += " -O";
   cmd.printf(" -- @%s -o ", *args);
 #ifdef _WIN32
   cmd += *next;

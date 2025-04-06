@@ -8,7 +8,6 @@ import gopt;
 import sim;
 import sys;
 
-const char *common_flags;
 unsigned clean_level{};
 
 static void usage() {
@@ -74,8 +73,8 @@ static void compile(const char * target) {
       case 'tdll':
       case 'tool':
       case 'tmmd': 
-        sys::tool_run("pcm", "-i %s %s", dag, common_flags);
-        sys::tool_run("obj", "-i %s %s", dag, common_flags);
+        sys::tool_run("pcm", "-i %s", dag);
+        sys::tool_run("obj", "-i %s", dag);
         break;
       default: break;
     }
@@ -88,7 +87,7 @@ static void link(const char * target) {
       case 'tapp':
       case 'tdll':
       case 'tool':
-        sys::tool_run("link", "-i %s -o %s %s", dag, file, common_flags);
+        sys::tool_run("link", "-i %s -o %s", dag, file);
         break;
       default: break;
     }
@@ -172,19 +171,15 @@ static void run_targets(const char *target) {
 
 extern "C" int main(int argc, char **argv) try {
   const char *target{"host"};
-  sim::sb flags {};
   auto opts = gopt_parse(argc, argv, "cgOt:", [&](auto ch, auto val) {
     switch (ch) {
     case 'c': clean_level++; break;
-    case 'g': flags += " -g"; break;
-    case 'O': flags += " -O"; break;
     case 't': target = val; break;
     default: usage(); break;
     }
   });
   if (opts.argc != 0) usage();
 
-  common_flags = *flags;
   run_targets(target);
   return 0;
 } catch (...) {
