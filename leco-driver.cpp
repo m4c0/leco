@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-import gopt;
 import sim;
 import sys;
 
@@ -105,7 +104,9 @@ static void run_target(const char * target) {
   bundle(target);
 }
 
-static void run_targets(const char *target) {
+static void run_targets(const char * target) {
+  if (!target) usage();
+
 #ifdef __APPLE__
   if (0 == strcmp(target, "apple")) {
     run_target(TGT_OSX);
@@ -169,16 +170,14 @@ static void run_targets(const char *target) {
   sys::die("unknown target: %s", target);
 }
 
-extern "C" int main(int argc, char **argv) try {
-  const char *target{"host"};
-  auto opts = gopt_parse(argc, argv, "ct:", [&](auto ch, auto val) {
-    switch (ch) {
-    case 'c': clean_level++; break;
-    case 't': target = val; break;
-    default: usage(); break;
-    }
-  });
-  if (opts.argc != 0) usage();
+extern "C" int main(int argc, char ** argv) try {
+  const auto shift = [&] { return argc > 1 ? (argc--, *++argv) : nullptr; };
+  const char * target = "host";
+  while (auto val = shift()) {
+    if (sim::sb{"-c"} == val) clean_level++;
+    else if (sim::sb{"-t"} == val) target = shift();
+    else usage();
+  }
 
   run_targets(target);
   return 0;
