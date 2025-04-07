@@ -168,6 +168,5 @@ int main(int argc, char **argv) try {
 
   return 0;
 } catch (...) {
-  fprintf(stderr, "err\n");
-  return 1;
+  return (fprintf(stderr, "err\n"), 1);
 }
