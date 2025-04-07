@@ -171,7 +171,7 @@ static void run_targets(const char *target) {
 
 extern "C" int main(int argc, char **argv) try {
   const char *target{"host"};
-  auto opts = gopt_parse(argc, argv, "cgOt:", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "ct:", [&](auto ch, auto val) {
     switch (ch) {
     case 'c': clean_level++; break;
     case 't': target = val; break;
