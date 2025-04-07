@@ -1,5 +1,3 @@
-#define SIM_IMPLEMENTATION
-
 #include "sim.h"
 #include "targets.hpp"
 
@@ -9,8 +7,8 @@
 // Using Windows definition for extra constness
 extern "C" int execv(const char *, const char * const *);
 
-int main(int argc, char ** argv) {
+int main(int argc, const char ** argv) {
   if (argv[argc]) return 69;
-  argv[0] = strdup(CMD);
+  argv[0] = CMD;
   return execv(argv[0], argv);
 }
