@@ -28,11 +28,8 @@ Where:
 static void put(const char *a) {
   while (*a != 0) {
     char c = *a++;
-    if (c == '\\') {
-      fputs("\\\\", out); // escapes backslash
-    } else {
-      fputc(c, out);
-    }
+    if (c == '\\') fputs("\\\\", out); // escapes backslash
+    else fputc(c, out);
   }
   fputc('\n', out);
 }
