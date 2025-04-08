@@ -21,7 +21,7 @@ int main(int argc, char ** argv) try {
 
   const auto shift = [&] { return argc ? (argc--, *++argv) : nullptr; };
   while (auto val = shift())
-    if (sim::sb{"-C"} == val) chdir(shift());
+    if ("-C"_s == val) chdir(shift());
     else break;
 
   auto cmd = sys::tool_cmd(*argv ? *argv : "");

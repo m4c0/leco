@@ -99,4 +99,5 @@ export namespace sim {
   const char * path_filename(const char * path) { return sim_path_filename(path); }
 } // namespace sim
 
+export sim::sb operator""_s(const char * str, decltype(sizeof(void *)) sz) { return sim::sb{str}; }
 export sim::sb operator""_real(const char * str, decltype(sizeof(void *)) sz) { return sim::path_real(str); }
