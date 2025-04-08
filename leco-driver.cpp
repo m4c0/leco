@@ -104,70 +104,28 @@ static void run_target(const char * target) {
   bundle(target);
 }
 
-static void run_targets(const char * target) {
-  if (!target) usage();
+static void run_targets(auto ... target) {
+  (run_target(target), ...);
+}
 
+static void run_for(const sim::sb & target) {
 #ifdef __APPLE__
-  if (0 == strcmp(target, "apple")) {
-    run_target(TGT_OSX);
-    run_target(TGT_IPHONEOS);
-    run_target(TGT_IOS_SIMULATOR);
-    return;
-  }
-
-  if (0 == strcmp(target, "ios")) {
-    run_target(TGT_IPHONEOS);
-    run_target(TGT_IOS_SIMULATOR);
-    return;
-  }
-
-  if (0 == strcmp(target, "host") || 0 == strcmp(target, "macosx")) {
-    run_target(TGT_OSX);
-    return;
-  }
-  if (0 == strcmp(target, "iphoneos")) {
-    run_target(TGT_IPHONEOS);
-    return;
-  }
-  if (0 == strcmp(target, "iphonesimulator")) {
-    run_target(TGT_IOS_SIMULATOR);
-    return;
-  }
+  if (target == "apple") return run_targets(TGT_OSX, TGT_IPHONEOS, TGT_IOS_SIMULATOR);
+  if (target == "ios") return run_targets(TGT_IPHONEOS, TGT_IOS_SIMULATOR);
+  if (target == "host" || target == "macosx") return run_target(TGT_OSX);
+  if (target == "iphoneos") return run_target(TGT_IPHONEOS);
+  if (target == "iphonesimulator") return run_target(TGT_IOS_SIMULATOR);
+#elifdef _WIN32
+  if (target == "host" || target == "windows") return run_target(TGT_WINDOWS);
+#elifdef __linux__
+  if (target == "host" || target == "linux") return run_target(TGT_LINUX);
 #endif
 
-#ifdef _WIN32
-  if (0 == strcmp(target, "host") || 0 == strcmp(target, "windows")) {
-    run_target(TGT_WINDOWS);
-    return;
-  }
-#endif
+  if (target == "wasm") return run_target(TGT_WASM);
+  if (target == "android")
+    return run_targets(TGT_DROID_AARCH64, TGT_DROID_ARMV7, TGT_DROID_X86, TGT_DROID_X86_64);
 
-#ifdef __linux__
-  if (0 == strcmp(target, "host") || 0 == strcmp(target, "linux")) {
-    run_target(TGT_LINUX);
-    return;
-  }
-#endif
-
-  if (0 == strcmp(target, "android")) {
-    run_target(TGT_DROID_AARCH64);
-    run_target(TGT_DROID_ARMV7);
-    run_target(TGT_DROID_X86);
-    run_target(TGT_DROID_X86_64);
-    return;
-  }
-  if (0 == strcmp(target, "wasm")) {
-    run_target(TGT_WASM);
-    return;
-  }
-
-  if (IS_TGT_DROID(target) || IS_TGT_APPLE(target) || IS_TGT(target, TGT_WINDOWS) || IS_TGT(target, TGT_LINUX)
-      || IS_TGT(target, TGT_WASM)) {
-    run_target(target);
-    return;
-  }
-
-  sys::die("unknown target: %s", target);
+  sys::die("unknown or invalid target for this platform: %s", *target);
 }
 
 extern "C" int main(int argc, char ** argv) try {
@@ -178,8 +136,9 @@ extern "C" int main(int argc, char ** argv) try {
     else if (sim::sb{"-t"} == val) target = shift();
     else usage();
   }
+  if (!target) usage();
 
-  run_targets(target);
+  run_for(sim::sb{target});
   return 0;
 } catch (...) {
   return 1;
