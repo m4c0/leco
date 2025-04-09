@@ -91,9 +91,6 @@ int main(int argc, char **argv) try {
   // TODO: move argument build (and mtime check) somewhere else
   //       just in case we want to force a link for any reason
   out = sys::fopen(*args, "wb");
-  for (auto i = 0; i < opts.argc; i++) {
-    fprintf(out, "%s\n", opts.argv[i]);
-  }
   auto mtime = read_dag(input);
   fclose(out);
 
