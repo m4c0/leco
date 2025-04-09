@@ -12,17 +12,14 @@ import sys;
 
 static const char *target{};
 static FILE *out{};
-static const char *argv0{};
-
 static void usage() {
   sys::die(R"(
-Usage: %s -i <input.dag> -o <output.exe> [-g] [-O]
+Usage: ../leco/leco.exe link -i <input.dag> -o <output.exe> [-g] [-O]
 
 Where:
         -i: input DAG
         -o: output executable
-)",
-      argv0);
+)");
 }
 
 static void put(const char *a) {
@@ -74,8 +71,6 @@ static auto read_dag(const char *dag) {
 }
 
 int main(int argc, char **argv) try {
-  argv0 = argv[0];
-
   const char * input {};
   const char * output {};
   auto opts = gopt_parse(argc, argv, "i:o:", [&](auto ch, auto val) {
