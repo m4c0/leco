@@ -6,6 +6,7 @@
 
 import sim;
 import sys;
+import sysstd;
 
 unsigned clean_level{};
 
@@ -100,6 +101,8 @@ extern "C" int main(int argc, char ** argv) try {
   while (auto val = shift()) {
     if (sim::sb{"-c"} == val) clean_level++;
     else if (sim::sb{"-t"} == val) target = shift();
+    else if (sim::sb{"-g"} == val) sysstd::setenv("LECO_DEBUG", "1");
+    else if (sim::sb{"-O"} == val) sysstd::setenv("LECO_OPT", "1");
     else usage();
   }
   if (!target) usage();
