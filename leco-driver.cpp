@@ -40,7 +40,7 @@ static void cleaner(const char *target) {
 }
 
 static void sysroot(const char *target) {
-  sys::tool_run("sysroot", "-t %s", target);
+  sys::opt_tool_run("sysroot", "-t %s", target);
 }
 
 static void dagger(const char * target) {
