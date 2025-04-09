@@ -39,22 +39,6 @@ static void cleaner(const char *target) {
   sys::tool_run("cleaner", "-t %s %s", target, lvl);
 }
 
-static void sysroot(const char *target) {
-  sys::opt_tool_run("sysroot", "-t %s", target);
-}
-
-static void dagger(const char * target) {
-  sys::tool_run("dagger", "-t %s", target);
-}
-
-static void embed(const char * target) {
-  sys::opt_tool_run("embed", "-t %s", target);
-}
-
-static void bundle(const char * target) {
-  sys::opt_tool_run("bundler", "-t %s", target);
-}
-
 static void shaders(const char * target) {
   sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
     if (id != 'tapp' && id != 'tool') return;
@@ -80,19 +64,15 @@ static void compile(const char * target) {
   });
 }
 
-static void link(const char * target) {
-  sys::tool_run("link", "-t %s", target);
-}
-
 static void run_target(const char * target) {
   cleaner(target);
-  sysroot(target);
-  dagger(target);
+  sys::opt_tool_run("sysroot", "-t %s", target);
+  sys::    tool_run("dagger",  "-t %s", target);
   shaders(target);
-  embed(target);
+  sys::opt_tool_run("embed",   "-t %s", target);
   compile(target);
-  link(target);
-  bundle(target);
+  sys::    tool_run("link",    "-t %s", target);
+  sys::opt_tool_run("bundler", "-t %s", target);
 }
 
 static void run_targets(auto ... target) {
