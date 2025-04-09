@@ -70,18 +70,7 @@ static auto read_dag(const char *dag) {
   return mtime;
 }
 
-int main(int argc, char **argv) try {
-  const char * input {};
-  const char * output {};
-  auto opts = gopt_parse(argc, argv, "i:o:", [&](auto ch, auto val) {
-    switch (ch) {
-      case 'i': input = val; break;
-      case 'o': output = val; break;
-      default: usage();
-    }
-  });
-  if (!input || !output) usage();
-
+void run(const char * input, const char * output) {
   auto path = sim::path_parent(input);
   target = path.path_filename();
 
@@ -94,7 +83,7 @@ int main(int argc, char **argv) try {
   auto mtime = read_dag(input);
   fclose(out);
 
-  if (mtime <= mtime::of(output)) return 0;
+  if (mtime <= mtime::of(output)) return;
 
 #ifdef _WIN32
   // We can rename but we can't overwrite an open executable.
@@ -157,6 +146,22 @@ int main(int argc, char **argv) try {
   rename(output, *prev);
   rename(*next, output);
 #endif
+}
+
+int main(int argc, char **argv) try {
+  const char * input {};
+  const char * output {};
+  auto opts = gopt_parse(argc, argv, "i:o:", [&](auto ch, auto val) {
+    switch (ch) {
+      case 'i': input = val; break;
+      case 'o': output = val; break;
+      default: usage();
+    }
+  });
+  if (!input || !output) usage();
+  if (opts.argc) usage();
+
+  run(input, output);
 
   return 0;
 } catch (...) {
