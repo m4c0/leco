@@ -81,16 +81,7 @@ static void compile(const char * target) {
 }
 
 static void link(const char * target) {
-  sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
-    switch (id) {
-      case 'tapp':
-      case 'tdll':
-      case 'tool':
-        sys::tool_run("link", "-i %s -o %s", dag, file);
-        break;
-      default: break;
-    }
-  });
+  sys::tool_run("link", "-t %s", target);
 }
 
 static void run_target(const char * target) {

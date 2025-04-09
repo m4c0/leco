@@ -13,13 +13,7 @@ import sys;
 static const char *target{};
 static FILE *out{};
 static void usage() {
-  sys::die(R"(
-Usage: ../leco/leco.exe link -i <input.dag> -o <output.exe> [-g] [-O]
-
-Where:
-        -i: input DAG
-        -o: output executable
-)");
+  sys::die("../leco/leco.exe link -t <target>");
 }
 
 static void put(const char *a) {
@@ -40,8 +34,7 @@ static void add_local_fw(const char * fw) {
   fprintf(out, "-F%s\n-framework\n%s\n", *path, stem.buffer);
 }
 
-static str::map cache{};
-static auto read_dag(const char *dag) {
+static auto read_dag(str::map & cache, const char *dag) {
   auto & mtime = cache[dag];
   if (mtime != 0) return mtime;
   mtime = 1;
@@ -58,7 +51,7 @@ static auto read_dag(const char *dag) {
     case 'objf': obj = sim::sb { file }; break;
     case 'xcfw': add_local_fw(file); break;
     case 'idag':
-    case 'mdag': mtime = max(mtime, read_dag(file)); break;
+    case 'mdag': mtime = max(mtime, read_dag(cache, file)); break;
     default: break;
     }
   });
@@ -80,7 +73,8 @@ void run(const char * input, const char * output) {
   // TODO: move argument build (and mtime check) somewhere else
   //       just in case we want to force a link for any reason
   out = sys::fopen(*args, "wb");
-  auto mtime = read_dag(input);
+  str::map cache {};
+  auto mtime = read_dag(cache, input);
   fclose(out);
 
   if (mtime <= mtime::of(output)) return;
@@ -149,19 +143,20 @@ void run(const char * input, const char * output) {
 }
 
 int main(int argc, char **argv) try {
-  const char * input {};
-  const char * output {};
-  auto opts = gopt_parse(argc, argv, "i:o:", [&](auto ch, auto val) {
-    switch (ch) {
-      case 'i': input = val; break;
-      case 'o': output = val; break;
-      default: usage();
+  auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
+    if (ch == 't') target = val;
+    else usage();
+  });
+  if (!target || opts.argc) usage();
+
+  sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
+    switch (id) {
+      case 'tapp':
+      case 'tdll':
+      case 'tool': run(dag, file); break;
+      default: break;
     }
   });
-  if (!input || !output) usage();
-  if (opts.argc) usage();
-
-  run(input, output);
 
   return 0;
 } catch (...) {
