@@ -32,13 +32,6 @@ static void usage() {
   throw 0;
 }
 
-static void cleaner(const char *target) {
-  if (clean_level == 0) return;
-
-  const char * lvl = (clean_level > 1) ? "-a" : "";
-  sys::tool_run("cleaner", "-t %s %s", target, lvl);
-}
-
 static void shaders(const char * target) {
   sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
     if (id != 'tapp' && id != 'tool') return;
@@ -65,7 +58,9 @@ static void compile(const char * target) {
 }
 
 static void run_target(const char * target) {
-  cleaner(target);
+  if (clean_level == 1) sys::tool_run("cleaner", "-t %s", target);
+  if (clean_level >= 2) sys::tool_run("cleaner", "-t %s -a", target);
+
   sys::opt_tool_run("sysroot", "-t %s", target);
   sys::    tool_run("dagger",  "-t %s", target);
   shaders(target);
