@@ -33,13 +33,6 @@ static void usage() {
   throw 0;
 }
 
-static void shaders(const char * target) {
-  sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
-    if (id != 'tapp' && id != 'tool') return;
-    sys::opt_tool_run("shaders", "-i %s", dag);
-  });
-}
-
 static void compile(const char * target) {
   sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
     switch (id) {
@@ -64,7 +57,7 @@ static void run_target(const char * target) {
 
   sys::opt_tool_run("sysroot", "-t %s", target);
   sys::    tool_run("dagger",  "-t %s", target);
-  shaders(target);
+  sys::opt_tool_run("shaders", "-t %s", target);
   sys::opt_tool_run("embed",   "-t %s", target);
   compile(target);
   sys::    tool_run("link",    "-t %s", target);

@@ -15,10 +15,10 @@ static void usage() {
   sys::die(R"(
 Compiles shaders referenced by their modules via pragmas.
 
-Usage: ../leco/leco.exe shaders -i <dag>
+Usage: ../leco/leco.exe shaders -t <target>
 
 Where:
-        -i  root DAG to start scanning
+        -t  target triple
 
 Requires DAGs created via leco-dagger.
 )"); 
@@ -91,20 +91,23 @@ static void build_shader(const char * dag, const char * file) {
   if (p.wait() != 0) sys::die("shader compilation failed");
 }
 
-int main(int argc, char ** argv) try {
-  sim::sb input {};
-
-  auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
-    switch (ch) {
-      case 'i': input = sim::path_real(val); break;
-      default: usage();
-    }
+static void run(const char * dag) {
+  sys::recurse_dag(dag, [&](auto id, auto file) {
+    if (id == 'shdr') build_shader(dag, file);
   });
-  if (opts.argc) usage();
-  if (!input.len) usage();
+}
 
-  sys::recurse_dag(*input, [&](auto id, auto file) {
-    if (id == 'shdr') build_shader(*input, file);
+int main(int argc, char ** argv) try {
+  const char * target = sys::host_target;
+
+  auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
+    if (ch == 't') target = val;
+    else usage();
+  });
+  if (!target || opts.argc) usage();
+
+  sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
+    if (id == 'tapp' || id == 'tool') run(dag);
   });
 } catch (...) {
   return 1;
