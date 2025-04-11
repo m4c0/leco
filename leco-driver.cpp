@@ -37,9 +37,6 @@ static void compile(const char * target) {
   sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
     switch (id) {
       case 'tapp':
-#if _WIN32
-        sys::tool_run("rc", "-i %s", dag);
-#endif
       case 'tdll':
       case 'tool':
       case 'tmmd': 
@@ -59,6 +56,7 @@ static void run_target(const char * target) {
   sys::    tool_run("dagger",  "-t %s", target);
   sys::opt_tool_run("shaders", "-t %s", target);
   sys::opt_tool_run("embed",   "-t %s", target);
+  sys::    tool_run("rc",      "-t %s", target);
   compile(target);
   sys::    tool_run("link",    "-t %s", target);
   sys::opt_tool_run("bundler", "-t %s", target);
