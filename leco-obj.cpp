@@ -16,12 +16,9 @@ Usage: ../leco/leco.exe obj -i <input.dag> -g -O
 
 Where:
         -i: input DAG
-        -g: enable debug symbols
-        -O: enable optimisations
 )");
 }
 
-static const char * common_flags;
 static const char * target;
 
 static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
@@ -38,7 +35,7 @@ static void compile(const char * src, const char * obj, const char * deps) {
  
   // TODO: find a way to avoid using -I when compiling pcm to obj
   sys::log("compiling object", src);
-  sys::tool_run("clang", "-i %s -t %s %s -- %s -c -o %s @%s", src, target, common_flags, lang, obj, deps);
+  sys::tool_run("clang", "-i %s -t %s -- %s -c -o %s @%s", src, target, lang, obj, deps);
 }
 
 static str::set done {};
@@ -86,20 +83,14 @@ static void process(const char * dag) {
 }
 
 int main(int argc, char ** argv) try {
-  sim::sb flags {};
   sim::sb input {};
   auto opts = gopt_parse(argc, argv, "i:gO", [&](auto ch, auto val) {
     switch (ch) {
       case 'i': input = sim::path_real(val); break;
-      case 'g': flags += " -g"; break;
-      case 'O': flags += " -O"; break;
       default: usage();
     }
   });
-
   if (input.len == 0 || opts.argc != 0) usage();
-
-  common_flags = *flags;
 
   auto d = sim::path_parent(*input);
   target = d.path_filename();
