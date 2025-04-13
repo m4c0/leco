@@ -10,16 +10,13 @@ static void usage() {
   sys::die(R"(
 Compiles PCMs recursively.
 
-Usage: ../leco/leco.exe pcm -i <input.dag> -g -O
+Usage: ../leco/leco.exe pcm -i <input.dag>
 
 Where:
         -i: input DAG
-        -g: enable debug symbols
-        -O: enable optimisations
 )");
 }
 
-static const char * common_flags;
 static const char * target;
 
 static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
@@ -29,7 +26,7 @@ static void compile(const char * src, const char * pcm, const char * dag) {
   deps.path_extension("deps");
 
   sys::log("compiling module", src);
-  sys::tool_run("clang", "-i %s -t %s %s -- -std=c++2b --precompile -o %s @%s", src, target, common_flags, pcm, *deps);
+  sys::tool_run("clang", "-i %s -t %s -- -std=c++2b --precompile -o %s @%s", src, target, pcm, *deps);
 }
 
 static str::map spec_cache {};
@@ -86,20 +83,14 @@ static void process_impl(const char * dag) {
 }
 
 int main(int argc, char ** argv) try {
-  sim::sb flags {};
   sim::sb input {};
-  auto opts = gopt_parse(argc, argv, "i:gO", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
     switch (ch) {
       case 'i': input = sim::path_real(val); break;
-      case 'g': flags += " -g"; break;
-      case 'O': flags += " -O"; break;
       default: usage();
     }
   });
-
   if (input.len == 0 || opts.argc != 0) usage();
-
-  common_flags = *flags;
 
   auto d = sim::path_parent(*input);
   target = d.path_filename();
