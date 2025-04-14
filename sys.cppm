@@ -125,21 +125,21 @@ void dag_read(const char *dag, auto &&fn) try {
   throw;
 }
 
+void recurse_dag(str::set * cache, const char * dag, auto && fn) {
+  if (!cache->insert(dag)) return;
+
+  dag_read(dag, [&](auto id, auto file) {
+    fn(id, file);
+    switch (id) {
+      case 'idag':
+      case 'mdag': recurse_dag(cache, file, fn); break;
+      default: break;
+    }
+  });
+}
 void recurse_dag(const char * dag, auto && fn) {
   str::set added {};
-  const auto rec = [&](const auto & rec, const char * dag) {
-    if (!added.insert(dag)) return;
-
-    dag_read(dag, [&](auto id, auto file) {
-      fn(id, file);
-      switch (id) {
-        case 'idag':
-        case 'mdag': rec(rec, file); break;
-        default: break;
-      }
-    });
-  };
-  rec(rec, dag);
+  recurse_dag(&added, dag, fn);
 }
 
 void for_each_dag(const char * target, bool recurse, auto && fn) {
