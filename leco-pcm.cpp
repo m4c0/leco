@@ -64,22 +64,10 @@ static auto process_spec(const char * dag) {
   return mtime;
 }
 
-static str::set impl_cache {};
 static void process_impl(const char * dag) {
-  if (!impl_cache.insert(dag)) return;
-
-  sys::dag_read(dag, [&](auto id, auto file) {
-    switch (id) {
-      case 'mdag':
-        process_spec(file);
-        process_impl(file);
-        break;
-      case 'idag': process_impl(file); break;
-      default: break;
-    }
+  sys::recurse_dag(dag, [&](auto id, auto file) {
+    if (id == 'mdag') process_spec(file);
   });
-
-  return;
 }
 
 int main(int argc, char ** argv) try {
