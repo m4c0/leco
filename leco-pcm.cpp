@@ -8,7 +8,7 @@ import sys;
 
 static void usage() {
   sys::die(R"(
-Compiles PCMs recursively.
+Compiles C++ sources to PCM, recursively.
 
 Usage: ../leco/leco.exe pcm -i <input.dag>
 
@@ -65,6 +65,7 @@ static auto process_spec(const char * dag) {
 }
 
 static void process_impl(const char * dag) {
+  // Search for imports starting from an implementation file.
   sys::recurse_dag(dag, [&](auto id, auto file) {
     if (id == 'mdag') process_spec(file);
   });
