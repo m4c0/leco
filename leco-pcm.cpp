@@ -64,6 +64,17 @@ static auto process_spec(const char * dag) {
   return mtime;
 }
 
+// Caches globally so we don't reprocess DAGs for each root
+static str::set cache {};
+void process(const char * dag) {
+  process_spec(dag);
+
+  // Search for imports starting from an implementation file.
+  sys::recurse_dag(&cache, dag, [&](auto id, auto file) {
+    if (id == 'mdag') process_spec(file);
+  });
+}
+
 int main(int argc, char ** argv) try {
   sim::sb input {};
   auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
@@ -77,14 +88,7 @@ int main(int argc, char ** argv) try {
   auto d = sim::path_parent(*input);
   target = d.path_filename();
 
-  process_spec(*input);
-
-  // Search for imports starting from an implementation file.
-  // Caches the whole thing in preparation for scanning all roots at once.
-  str::set cache {};
-  sys::recurse_dag(&cache, *input, [&](auto id, auto file) {
-    if (id == 'mdag') process_spec(file);
-  });
+  process(*input);
 } catch (...) {
   return 1;
 }
