@@ -40,7 +40,6 @@ static void compile(const char * target) {
       case 'tdll':
       case 'tool':
       case 'tmmd': 
-        sys::tool_run("pcm", "-i %s", dag);
         sys::tool_run("obj", "-i %s", dag);
         break;
       default: break;
@@ -57,6 +56,7 @@ static void run_target(const char * target) {
   sys::opt_tool_run("shaders", "-t %s", target);
   sys::opt_tool_run("embed",   "-t %s", target);
   sys::opt_tool_run("rc",      "-t %s", target);
+  sys::    tool_run("pcm",     "-t %s", target);
   compile(target);
   sys::    tool_run("link",    "-t %s", target);
   sys::opt_tool_run("bundler", "-t %s", target);

@@ -10,14 +10,12 @@ static void usage() {
   sys::die(R"(
 Compiles C++ sources to PCM, recursively.
 
-Usage: ../leco/leco.exe pcm -i <input.dag>
-
-Where:
-        -i: input DAG
+Usage: ../leco/leco.exe pcm -t <target>
+Where: -t: target triple
 )");
 }
 
-static const char * target;
+static const char * target = sys::host_target;
 
 static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 
@@ -76,19 +74,21 @@ void process(const char * dag) {
 }
 
 int main(int argc, char ** argv) try {
-  sim::sb input {};
-  auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
-    switch (ch) {
-      case 'i': input = sim::path_real(val); break;
-      default: usage();
+  auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
+    if (ch == 't') target = val;
+    else usage();
+  });
+  if (opts.argc) usage();
+
+  sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
+    switch (id) {
+      case 'tapp':
+      case 'tdll':
+      case 'tool':
+      case 'tmmd': process(dag); break;
+      default: break;
     }
   });
-  if (input.len == 0 || opts.argc != 0) usage();
-
-  auto d = sim::path_parent(*input);
-  target = d.path_filename();
-
-  process(*input);
 } catch (...) {
   return 1;
 }
