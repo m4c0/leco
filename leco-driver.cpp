@@ -33,31 +33,18 @@ static void usage() {
   throw 0;
 }
 
-static void compile(const char * target) {
-  sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
-    switch (id) {
-      case 'tapp':
-      case 'tdll':
-      case 'tool':
-      case 'tmmd': 
-        sys::tool_run("obj", "-i %s", dag);
-        break;
-      default: break;
-    }
-  });
-}
-
 static void run_target(const char * target) {
   if (clean_level == 1) sys::tool_run("cleaner", "-t %s", target);
   if (clean_level >= 2) sys::tool_run("cleaner", "-t %s -a", target);
 
+  // TODO: bring deplist to this list
   sys::opt_tool_run("sysroot", "-t %s", target);
   sys::    tool_run("dagger",  "-t %s", target);
   sys::opt_tool_run("shaders", "-t %s", target);
   sys::opt_tool_run("embed",   "-t %s", target);
   sys::opt_tool_run("rc",      "-t %s", target);
   sys::    tool_run("pcm",     "-t %s", target);
-  compile(target);
+  sys::    tool_run("obj",     "-t %s", target);
   sys::    tool_run("link",    "-t %s", target);
   sys::opt_tool_run("bundler", "-t %s", target);
 }
