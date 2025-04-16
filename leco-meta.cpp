@@ -4,9 +4,6 @@ import sim;
 import sys;
 import sysstd;
 
-// Using Windows definition for extra constness
-extern "C" int execv(const char *, char * const *);
-
 static void chdir(const char * dir) {
   if (0 != sysstd::chdir(dir)) sys::die("Directory not found: [%s]\n", dir);
 }
@@ -30,7 +27,7 @@ int main(int argc, char ** argv) try {
     cmd = sys::tool_cmd("driver");
   }
   *argv = *cmd;
-  execv(*argv, argv);
+  return sysstd::spawn(*argv, argv);
 } catch (...) {
   return 1;
 }
