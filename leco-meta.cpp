@@ -12,10 +12,6 @@ extern "C" int puts(const char *);
 int main(int argc, char ** argv) try {
   if (argv[argc]) return 69;
 
-#ifdef _WIN32
-  system(""); // enable ANSI colours
-#endif
-
   const auto shift = [&] { return argc ? (argc--, *++argv) : nullptr; };
   while (auto val = shift())
     if ("-C"_s == val) chdir(shift());
