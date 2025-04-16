@@ -129,7 +129,7 @@ void recurse_dag(str::set * cache, const char * dag, auto && fn) {
   if (!cache->insert(dag)) return;
 
   dag_read(dag, [&](auto id, auto file) {
-    fn(id, file);
+    fn(dag, id, file);
     switch (id) {
       case 'idag':
       case 'mdag': recurse_dag(cache, file, fn); break;
@@ -149,9 +149,7 @@ void for_each_dag(const char * target, bool recurse, auto && fn) {
 
     auto dag = path / file;
     if (recurse) {
-      recurse_dag(*dag, [&](auto id, auto file) {
-        fn(*dag, id, file);
-      });
+      recurse_dag(*dag, fn);
     } else {
       dag_read(*dag, [&](auto id, auto file) {
         fn(*dag, id, file);

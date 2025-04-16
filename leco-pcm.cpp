@@ -67,7 +67,7 @@ void process(const char * dag) {
   process_spec(dag);
 
   // Search for imports starting from an implementation file.
-  sys::recurse_dag(&cache, dag, [&](auto id, auto file) {
+  sys::recurse_dag(&cache, dag, [&](auto dag, auto id, auto file) {
     if (id == 'mdag') process_spec(file);
   });
 }

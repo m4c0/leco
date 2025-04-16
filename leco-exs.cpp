@@ -72,7 +72,7 @@ int main(int argc, char ** argv) try {
   exe.path_extension("exe");
   copy_exe(*exe);
 
-  sys::recurse_dag(input, [](auto id, auto file) {
+  sys::recurse_dag(input, [](auto dag, auto id, auto file) {
     if (id == 'dlls') return copy_exe(file);
     if (id == 'xcfw') return copy_xcfw(file);
   });

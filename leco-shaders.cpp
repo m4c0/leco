@@ -92,7 +92,7 @@ static void build_shader(const char * dag, const char * file) {
 }
 
 static void run(const char * dag) {
-  sys::recurse_dag(dag, [&](auto id, auto file) {
+  sys::recurse_dag(dag, [&](auto dag, auto id, auto file) {
     if (id == 'shdr') build_shader(dag, file);
   });
 }

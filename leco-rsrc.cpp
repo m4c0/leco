@@ -37,7 +37,7 @@ int main(int argc, char **argv) try {
   auto path = sim::path_parent(input);
   target = path.path_filename();
 
-  sys::recurse_dag(input, [](auto id, auto file) {
+  sys::recurse_dag(input, [](auto dag, auto id, auto file) {
     if (id == 'rsrc') copy_res(file);
   });
 

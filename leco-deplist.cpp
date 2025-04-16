@@ -37,7 +37,7 @@ static void print_pcm(const char * pcmf) {
 }
 
 static void read_dag(const char *dag) {
-  sys::recurse_dag(dag, [](auto id, auto file) {
+  sys::recurse_dag(dag, [](auto dag, auto id, auto file) {
     if (id == 'pcmf') print_pcm(file);
   });
 }
