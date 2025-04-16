@@ -4,6 +4,7 @@
 #include <string.h>
 
 import gopt;
+import mtime;
 import sim;
 import sys;
 
@@ -55,17 +56,23 @@ int main(int argc, char **argv) try {
   if (opts.argc != 0) usage();
 
   sys::for_each_dag(target, true, [](auto dag, auto id, auto file) {
+    if (id != 'vers') return;
+
     sim::sb output { dag };
 
     output.path_extension("deps");
-    out = sys::fopen(*output, "wb");
-    read_dag(dag);
-    fclose(out);
+    if (mtime::of(dag) > mtime::of(*output)) {
+      out = sys::fopen(*output, "wb");
+      read_dag(dag);
+      fclose(out);
+    }
 
     output.path_extension("incs");
-    out = sys::fopen(*output, "wb");
-    read_includes(dag);
-    fclose(out);
+    if (mtime::of(dag) > mtime::of(*output)) {
+      out = sys::fopen(*output, "wb");
+      read_includes(dag);
+      fclose(out);
+    }
   });
 
   return 0;
