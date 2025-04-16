@@ -54,7 +54,6 @@ static auto process_spec(const char * dag) {
   mtime = max(mtime, mtime::of(*src));
 
   if (mtime > mtime::of(*pcm)) {
-    sys::tool_run("deplist", "-i %s", dag);
     compile(*src, *pcm, dag);
     mtime = mtime::of(*pcm);
   }

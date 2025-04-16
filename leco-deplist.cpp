@@ -8,7 +8,7 @@ import sim;
 import sys;
 
 static FILE *out{stdout};
-static const char *target{};
+static const char * target = sys::host_target;
 
 // TODO: consider merging this with leco-clang
 // TODO: consider taking flag logic from leco-clang
@@ -17,10 +17,8 @@ static void usage() {
   sys::die(R"(
 Generates a argument file containing all modules required by a C++ unit.
 
-Usage: leco deplist -i <input>
-
-Where:
-        -i: input DAG file (must be inside the "out" folder)
+Usage: leco deplist -t <target>
+Where: -t  target triple
 )");
 }
 
@@ -50,30 +48,25 @@ static void read_includes(const char * dag) {
 }
 
 int main(int argc, char **argv) try {
-  const char *input{};
-  auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
-    switch (ch) {
-    case 'i': input = val; break;
-    default: usage();
-    }
+  auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
+    if (ch == 't') target = val;
+    else usage();
   });
   if (opts.argc != 0) usage();
-  if (!*input) usage();
 
-  auto path = sim::path_parent(input);
-  target = path.path_filename();
+  sys::for_each_dag(target, true, [](auto dag, auto id, auto file) {
+    sim::sb output { dag };
 
-  sim::sb output { input };
+    output.path_extension("deps");
+    out = sys::fopen(*output, "wb");
+    read_dag(dag);
+    fclose(out);
 
-  output.path_extension("deps");
-  out = sys::fopen(*output, "wb");
-  read_dag(input);
-  fclose(out);
-
-  output.path_extension("incs");
-  out = sys::fopen(*output, "wb");
-  read_includes(input);
-  fclose(out);
+    output.path_extension("incs");
+    out = sys::fopen(*output, "wb");
+    read_includes(dag);
+    fclose(out);
+  });
 
   return 0;
 } catch (...) {

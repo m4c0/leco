@@ -70,8 +70,6 @@ static void process(const char * dag) {
   if (mtime > mtime::of(*obj)) {
     auto deps = sim::sb { dag };
     deps.path_extension("deps");
-
-    sys::tool_run("deplist", "-i %s", dag);
     compile(*src, *obj, *deps);
   }
 }
