@@ -36,8 +36,8 @@ static void usage() {
 static void run_target(const char * target) {
   sysstd::setenv("LECO_TARGET", target);
 
-  if (clean_level == 1) sys::tool_run("cleaner", "-t %s", target);
-  if (clean_level >= 2) sys::tool_run("cleaner", "-t %s -a", target);
+  if (clean_level == 1) sys::tool_run("cleaner");
+  if (clean_level >= 2) sys::tool_run("cleaner", "-a");
 
   sys::opt_tool_run("sysroot", "-t %s", target);
   sys::    tool_run("dagger",  "-t %s", target);

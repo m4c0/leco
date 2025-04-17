@@ -7,15 +7,12 @@ import strset;
 import sys;
 
 static bool log_all{};
-static const char * target = sys::host_target;
-
 static void usage(const char *argv0) {
   sys::die(R"(
-usage: %s [-a] [-t <target>] [-v]
+usage: %s [-a] [-v]
 
 where:
       -a        remove all known deps recursively
-      -t        set target to clean (defaults to host target)
       -v        log all removed files
 
 )", argv0);
@@ -37,7 +34,7 @@ static str::set temp{};
 static void remove_with_deps(const char * p) {
   if (!temp.insert(p)) return;
 
-  auto path = sim::sb { p } / "out" / target;
+  auto path = sim::sb { p } / "out" / sys::target();
 
   for (auto entry : pprent::list(*path)) {
     auto dag = path / entry;
@@ -68,7 +65,6 @@ int main(int argc, char **argv) try {
   auto opts = gopt_parse(argc, argv, "avt:", [&](auto ch, auto val) {
     switch (ch) {
       case 'a': all     = true; break;
-      case 't': target  = val; break;
       case 'v': log_all = true; break;
       default: usage(argv[0]);
     }
@@ -79,7 +75,7 @@ int main(int argc, char **argv) try {
   if (all) {
     remove_with_deps(*cwd);
   } else {
-    auto tgt = cwd / "out" / target;
+    auto tgt = cwd / "out" / sys::target();
     if (!log_all) sys::log("removing", *tgt);
     rm_rf(*tgt);
   }
