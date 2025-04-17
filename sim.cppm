@@ -44,6 +44,10 @@ export namespace sim {
       return *this;
     }
 
+    sb & printf(const char * fmt) {
+      sim_sb_concat(this, fmt);
+      return *this;
+    }
     sb & printf(const char * fmt, auto ... args) {
       sim_sb_printf(this, fmt, args...);
       return *this;
