@@ -1,5 +1,5 @@
 #define SYSSTD_IMPLEMENTATION
-#include "..\sysstd\sysstd.h"
+#include "../sysstd/sysstd.h"
 #include "sim.h"
 #include "targets.hpp"
 
