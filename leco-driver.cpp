@@ -34,10 +34,11 @@ static void usage() {
 }
 
 static void run_target(const char * target) {
+  sysstd::setenv("LECO_TARGET", target);
+
   if (clean_level == 1) sys::tool_run("cleaner", "-t %s", target);
   if (clean_level >= 2) sys::tool_run("cleaner", "-t %s -a", target);
 
-  // TODO: bring deplist to this list
   sys::opt_tool_run("sysroot", "-t %s", target);
   sys::    tool_run("dagger",  "-t %s", target);
   sys::opt_tool_run("shaders", "-t %s", target);
