@@ -9,6 +9,10 @@
 
 #define SEP SYSSTD_FILE_SEP
 
+#define MKOUT(name) \
+  sysstd_mkdir(".." SEP name SEP "out"); \
+  sysstd_mkdir(".." SEP name SEP "out" SEP HOST_TARGET);
+
 #define CLANG "out" SEP HOST_TARGET SEP "leco-clang.exe"
 
 #define CPPSTD " -std=c++2b"
@@ -21,7 +25,7 @@
 #define MARG(name) " -fmodule-file=" name "=" PCM(name) " " PCM(name)
 #define LMARG(name) " -fmodule-file=" name "=" LPCM(name) " " LPCM(name)
 
-#define MODULE(name) run(CLANG " -i .." SEP name SEP name ".cppm -- -o " PCM(name) PCMFL);
+#define MODULE(name) MKOUT(name); run(CLANG " -i .." SEP name SEP name ".cppm -- -o " PCM(name) PCMFL);
 #define LOCAL_MODULE(name, ...) run(CLANG " -i " name ".cppm -- -o " LPCM(name) PCMFL PMP __VA_ARGS__);
 
 #define TOOL(name)                                                    \
@@ -45,8 +49,7 @@ static void gitignore() {
 }
 
 int try_main(int argc, char **argv) {
-  sysstd_mkdir("out");
-  sysstd_mkdir("out" SEP HOST_TARGET);
+  MKOUT("leco");
 
   puts("Building clang runner");
   run("clang++ -std=c++20 leco-clang.cpp -o " CLANG);
