@@ -9,8 +9,6 @@ import pprent;
 import sim;
 import sys;
 
-void usage() { sys::die("invalid usage"); }
-
 static bool exists(const char * path) { return mtime::of(path) > 0; }
 
 static sim::sb android_sysroot() {
@@ -77,41 +75,20 @@ int main(int argc, char **argv) try {
   const char * target = sys::target();
   if (sys::is_tgt_host(target)) return 0;
 
-  bool verbose {};
-  auto opts = gopt_parse(argc, argv, "v", [&](auto ch, auto val) {
-    switch (ch) {
-      case 'v': verbose = true; break;
-      default: usage(); break;
-    }
-  });
-  if (opts.argc > 0) usage();
-
   auto cf = sim::path_real(argv[0]);
   cf.path_parent();
   cf.path_parent();
   cf /= target;
   sys::mkdirs(*cf);
   cf /= "sysroot";
-  if (exists(*cf)) {
-    if (!verbose) return 0;
-
-    auto f = sys::fopen(*cf, "r");
-    char buf[10240] {};
-    if (fgets(buf, sizeof(buf), f) != nullptr) {
-      fwrite(buf, 1, sizeof(buf), stdout);
-    }
-    fclose(f);
-    return 0;
-  }
+  if (exists(*cf)) return 0; 
 
   auto sysroot = sysroot_for_target(target);
-  if (sysroot.len) {
-    if (verbose) puts(*sysroot);
+  if (!sysroot.len) return 0;
 
-    auto f = sys::fopen(*cf, "w");
-    fputs(*sysroot, f);
-    fclose(f);
-  }
+  auto f = sys::fopen(*cf, "w");
+  fputs(*sysroot, f);
+  fclose(f);
 } catch (...) {
   return 1;
 }
