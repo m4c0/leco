@@ -75,10 +75,7 @@ int main(int argc, char **argv) try {
   const char * target = sys::target();
   if (sys::is_tgt_host(target)) return 0;
 
-  auto cf = sim::path_real(argv[0]);
-  cf.path_parent();
-  cf.path_parent();
-  cf /= target;
+  auto cf = sim::printf("../leco/out/%s", target);
   sys::mkdirs(*cf);
   cf /= "sysroot";
   if (exists(*cf)) return 0; 
