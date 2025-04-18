@@ -1,7 +1,5 @@
 #pragma leco tool
 
-#include "targets.hpp"
-
 #include <stdio.h>
 #include <string.h>
 
@@ -67,26 +65,26 @@ static sim::sb apple_sysroot(const char *sdk) {
 static sim::sb wasm_sysroot() { return sim::sb { sys::env("WASI_SYSROOT") }; }
 
 static sim::sb sysroot_for_target(const char *target) {
-  if (IS_TGT(target, TGT_OSX)) return apple_sysroot("macosx");
-  if (IS_TGT(target, TGT_IPHONEOS)) return apple_sysroot("iphoneos");
-  if (IS_TGT(target, TGT_IOS_SIMULATOR)) return apple_sysroot("iphonesimulator");
-  if (IS_TGT_DROID(target)) return android_sysroot();
-  if (IS_TGT(target, TGT_WASM)) return wasm_sysroot();
+  if (sys::is_tgt_osx(target))      return apple_sysroot("macosx");
+  if (sys::is_tgt_iphoneos(target)) return apple_sysroot("iphoneos");
+  if (sys::is_tgt_ios_sim(target))  return apple_sysroot("iphonesimulator");
+  if (sys::is_tgt_droid(target))    return android_sysroot();
+  if (sys::is_tgt_wasm(target))     return wasm_sysroot();
   sys::die("invalid target: %s", target);
 }
 
 int main(int argc, char **argv) try {
-  const char *target{HOST_TARGET};
+  const char * target = sys::target();
+  if (sys::is_tgt_host(target)) return 0;
+
   bool verbose {};
-  auto opts = gopt_parse(argc, argv, "vt:", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "v", [&](auto ch, auto val) {
     switch (ch) {
-      case 't': target = val; break;
       case 'v': verbose = true; break;
       default: usage(); break;
     }
   });
   if (opts.argc > 0) usage();
-  if (0 == strcmp(target, HOST_TARGET)) return 0;
 
   auto cf = sim::path_real(argv[0]);
   cf.path_parent();
