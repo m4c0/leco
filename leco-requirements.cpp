@@ -1,5 +1,4 @@
 #pragma leco tool
-#include "targets.hpp"
 
 #include <stdio.h>
 #include <string.h>
@@ -11,9 +10,6 @@ import sim;
 import strset;
 import sys;
 import sysstd;
-
-static const char *target{HOST_TARGET};
-static const char *argv0;
 
 static str::set all_deps{};
 static str::set collected{};
@@ -35,18 +31,6 @@ static void recurse(const char * dag) {
   });
 }
 
-static void usage() {
-  sys::die(R"(
-Usage: %s -t <target> [-g]
-
-Where:
-        -t: Target triple to scan. The list might vary based on target
-            depending on the platform-specifics of each dependency.
-        -g: Print the git commit hash alongside each dep
-)",
-      argv0);
-}
-
 static void run_git(const char *path) {
   char *cmd[6]{
     sysstd::strdup("git"),
@@ -65,19 +49,7 @@ static void run_git(const char *path) {
 }
 
 int main(int argc, char **argv) try {
-  bool git{};
-
-  argv0 = argv[0];
-  auto opts = gopt_parse(argc, argv, "gt:", [&](auto ch, auto val) {
-    switch (ch) {
-    case 'g': git = true; break;
-    case 't': target = val; break;
-    default: usage(); break;
-    }
-  });
-  if (opts.argc != 0) usage();
-
-  auto cwd = "."_real / "out" / target;
+  auto cwd = "."_real / "out" / sys::target();
 
   collected.insert("../leco");
   for (auto entry : pprent::list(*cwd)) {
@@ -89,7 +61,7 @@ int main(int argc, char **argv) try {
   }
 
   for (const auto &s : collected) {
-    if (git) run_git(s.c_str());
+    run_git(s.c_str());
     puts(sim::path_filename(s.c_str()));
   }
 } catch (...) {
