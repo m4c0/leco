@@ -183,7 +183,10 @@ void opt_tool_run(const char * name, const char * args, auto &&... as) {
   run(*(cmd + " ").printf(args, as...));
 }
 
-const char * target() { return env("LECO_TARGET"); }
+const char * target() { 
+  auto e = sysstd::env("LECO_TARGET");
+  return e ? e : HOST_TARGET;
+}
 
 constexpr const char * host_target = HOST_TARGET;
 bool is_tgt(const char * t, const char * x) { return 0 == strcmp(t, x); }
