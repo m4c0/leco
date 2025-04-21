@@ -28,7 +28,7 @@ static bool verbose {};
 static sim::sb source {};
 static FILE * out{stdout};
 static const char * out_filename {};
-static const char * target { sys::host_target };
+static const char * target = sys::target();
 
 static unsigned line {};
 static exe_t exe_type {};
@@ -39,15 +39,10 @@ static void usage() {
 LECO tool responsible for preprocessing C++ files containing leco pragmas and
 storing dependencies in a DAG-like file.
 
-Usage: ../leco/leco.exe dagger [-d] [-i <input.cpp>] [-t <target>] [-v]
+Usage: ../leco/leco.exe dagger [-d] [-v]
 
 Where:
         -d: Dump errors from clang if enabled
-
-        -i: Source file name. Required if not recursing.
-
-        -t: Target triple. Defaults to host target.
-
         -v: Verbose. Output name of inspected files.
 
 )");
@@ -504,10 +499,9 @@ static void process(const char * path) {
 }
 
 int main(int argc, char **argv) try {
-  auto opts = gopt_parse(argc, argv, "dvt:", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "dv", [&](auto ch, auto val) {
     switch (ch) {
       case 'd': dump_errors = true; break;
-      case 't': target = val; break;
       case 'v': verbose = true; break;
       default: usage();
     }

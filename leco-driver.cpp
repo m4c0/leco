@@ -40,7 +40,7 @@ static void run_target(const char * target) {
   if (clean_level >= 2) sys::tool_run("cleaner", "-a");
 
   sys::opt_tool_run("sysroot");
-  sys::    tool_run("dagger",  "-t %s", target);
+  sys::    tool_run("dagger");
   sys::opt_tool_run("shaders", "-t %s", target);
   sys::opt_tool_run("embed",   "-t %s", target);
   sys::opt_tool_run("rc",      "-t %s", target);
