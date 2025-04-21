@@ -15,11 +15,6 @@ static void usage() {
   sys::die(R"(
 Compiles shaders referenced by their modules via pragmas.
 
-Usage: ../leco/leco.exe shaders -t <target>
-
-Where:
-        -t  target triple
-
 Requires DAGs created via leco-dagger.
 )"); 
 }
@@ -98,15 +93,9 @@ static void run(const char * dag) {
 }
 
 int main(int argc, char ** argv) try {
-  const char * target = sys::host_target;
+  if (argc != 1) usage();
 
-  auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
-    if (ch == 't') target = val;
-    else usage();
-  });
-  if (!target || opts.argc) usage();
-
-  sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
+  sys::for_each_dag(sys::target(), false, [](auto * dag, auto id, auto file) {
     if (id == 'tapp' || id == 'tool') run(dag);
   });
 } catch (...) {
