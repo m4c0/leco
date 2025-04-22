@@ -6,14 +6,7 @@ import mtime;
 import sim;
 import sys;
 
-static void usage() {
-  sys::die(R"(
-Usage: ../leco/leco.exe embed -t <target>
-
-Where:
-        -t: target triple to scan and generate
-)");
-}
+static void usage() { sys::die("Usage: ../leco/leco.exe embed"); }
 
 static void process_file(const char * dag, const char * file) {
   auto path = sim::path_parent(dag);
@@ -61,16 +54,9 @@ static void process_file(const char * dag, const char * file) {
 }
 
 int main(int argc, char ** argv) {
-  const char * target = nullptr;
-  auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto var) {
-    switch (ch) {
-      case 't': target = var; break;
-      default: usage();
-    }
-  });
-  if (!target || opts.argc) usage();
+  if (argc != 1) usage();
 
-  sys::for_each_dag(target, true, [](const char * dag, auto id, auto file) {
+  sys::for_each_dag(sys::target(), true, [](const char * dag, auto id, auto file) {
     if (id != 'embd') return;
     process_file(dag, file);
   });
