@@ -21,12 +21,8 @@ static void print_pcm(const char * pcmf) {
   sim::sb pcm { pcmf };
   auto stem = sim::path_stem(*pcm);
 
-  auto * c = strchr(*stem, '-');
-  if (c != nullptr) *c = ':';
-
-  for (auto *c = *pcm; *c; c++)
-    if (*c == '\\')
-      *c = '/';
+  for (auto & c : stem) if (c == '-') c = ':';
+  for (auto & c : pcm) if (c == '\\') c = '/';
 
   fprintf(out, "-fmodule-file=%s=%s\n", *stem, *pcm);
 }
