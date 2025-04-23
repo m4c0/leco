@@ -44,7 +44,7 @@ static void run_target(const char * target) {
   sys::opt_tool_run("shaders");
   sys::opt_tool_run("embed");
   sys::opt_tool_run("rc");
-  sys::opt_tool_run("deplist", "-t %s", target);
+  sys::opt_tool_run("deplist");
   sys::    tool_run("pcm",     "-t %s", target);
   sys::    tool_run("obj",     "-t %s", target);
   sys::    tool_run("link",    "-t %s", target);

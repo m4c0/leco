@@ -9,18 +9,12 @@ import sim;
 import sys;
 
 static FILE *out{stdout};
-static const char * target = sys::host_target;
 
 // TODO: consider merging this with leco-clang
 // TODO: consider taking flag logic from leco-clang
 
 static void usage() {
-  sys::die(R"(
-Generates a argument file containing all modules required by a C++ unit.
-
-Usage: leco deplist -t <target>
-Where: -t  target triple
-)");
+  sys::die("Generates a argument file containing all modules required by a C++ unit.");
 }
 
 static void print_pcm(const char * pcmf) {
@@ -49,13 +43,9 @@ static void read_includes(const char * dag) {
 }
 
 int main(int argc, char **argv) try {
-  auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
-    if (ch == 't') target = val;
-    else usage();
-  });
-  if (opts.argc != 0) usage();
+  if (argc != 1) usage();
 
-  sys::for_each_dag(target, true, [](auto dag, auto id, auto file) {
+  sys::for_each_dag(sys::target(), true, [](auto dag, auto id, auto file) {
     if (id != 'vers') return;
 
     sim::sb output { dag };
