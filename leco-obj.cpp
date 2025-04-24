@@ -21,15 +21,23 @@ static const char * target = sys::host_target;
 
 static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 
-static void compile(const char * src, const char * obj, const char * deps) {
+static void compile(const char * src, const char * obj, const char * dag) {
   auto ext = sim::path_extension(src);
   const char * lang = "-std=c++2b";
   if (ext == ".m" || ext == ".mm") lang = "-fmodules -fobjc-arc";
   else if (ext == ".c") lang = "-std=c11";
  
-  // TODO: find a way to avoid using -I when compiling pcm to obj
+  auto deps = sim::sb { dag };
+  deps.path_extension("deps");
+
+  sim::sb incs {};
+  if (ext != ".pcm") {
+    incs = sim::sb { "@" } + dag;
+    incs.path_extension("incs");
+  }
+
   sys::log("compiling object", src);
-  sys::tool_run("clang", "-i %s -t %s -- %s -c -o %s @%s", src, target, lang, obj, deps);
+  sys::tool_run("clang", "-i %s -t %s -- %s -c -o %s @%s %s", src, target, lang, obj, *deps, *incs);
 }
 
 static str::set done {};
@@ -68,9 +76,7 @@ static void process(const char * dag) {
   if (obj.len == 0) sys::die("dag without object info: [%s]", dag);
 
   if (mtime > mtime::of(*obj)) {
-    auto deps = sim::sb { dag };
-    deps.path_extension("deps");
-    compile(*src, *obj, *deps);
+    compile(*src, *obj, dag);
   }
 }
 
