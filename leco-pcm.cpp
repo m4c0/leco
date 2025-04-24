@@ -14,9 +14,11 @@ static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 static void compile(const char * src, const char * pcm, const char * dag) {
   auto deps = sim::sb { dag };
   deps.path_extension("deps");
+  auto incs = sim::sb { dag };
+  incs.path_extension("incs");
 
   sys::log("compiling module", src);
-  sys::tool_run("clang", "-i %s -t %s -- -std=c++2b --precompile -o %s @%s", src, sys::target(), pcm, *deps);
+  sys::tool_run("clang", "-i %s -t %s -- -std=c++2b --precompile -o %s @%s @%s", src, sys::target(), pcm, *deps, *incs);
 }
 
 static str::map spec_cache {};
