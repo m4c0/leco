@@ -1,21 +1,13 @@
 #pragma leco tool
 
-import gopt;
 import mtime;
 import sim;
 import strset;
 import sys;
 
 static void usage() {
-  sys::die(R"(
-Compiles C++ sources to PCM, recursively.
-
-Usage: ../leco/leco.exe pcm -t <target>
-Where: -t: target triple
-)");
+  sys::die("Compiles C++ sources to PCM, recursively.");
 }
-
-static const char * target = sys::host_target;
 
 static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 
@@ -24,7 +16,7 @@ static void compile(const char * src, const char * pcm, const char * dag) {
   deps.path_extension("deps");
 
   sys::log("compiling module", src);
-  sys::tool_run("clang", "-i %s -t %s -- -std=c++2b --precompile -o %s @%s", src, target, pcm, *deps);
+  sys::tool_run("clang", "-i %s -t %s -- -std=c++2b --precompile -o %s @%s", src, sys::target(), pcm, *deps);
 }
 
 static str::map spec_cache {};
@@ -73,13 +65,9 @@ void process(const char * dag) {
 }
 
 int main(int argc, char ** argv) try {
-  auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
-    if (ch == 't') target = val;
-    else usage();
-  });
-  if (opts.argc) usage();
+  if (argc != 1) usage();
 
-  sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
+  sys::for_each_dag(sys::target(), false, [](auto * dag, auto id, auto file) {
     switch (id) {
       case 'tapp':
       case 'tdll':
