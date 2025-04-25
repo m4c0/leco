@@ -1,19 +1,14 @@
 #pragma leco tool
 
 #include <stdio.h>
-#include <string.h>
 
-import gopt;
 import mtime;
 import sim;
 import strset;
 import sys;
 
-static const char *target{};
 static FILE *out{};
-static void usage() {
-  sys::die("../leco/leco.exe link -t <target>");
-}
+static void usage() { sys::die("invalid usage"); }
 
 static void put(const char *a) {
   while (*a != 0) {
@@ -63,9 +58,6 @@ static auto read_dag(str::map & cache, const char *dag) {
 }
 
 void run(const char * input, const char * output) {
-  auto path = sim::path_parent(input);
-  target = path.path_filename();
-
   sim::sb args { input };
   args.path_extension("link");
 
@@ -91,7 +83,7 @@ void run(const char * input, const char * output) {
 #endif
 
   sim::sb cmd{10240};
-  cmd.printf(" -t %s", target);
+  cmd.printf(" -t %s", sys::target());
   cmd.printf(" -- @%s -o ", *args);
 #ifdef _WIN32
   cmd += *next;
@@ -101,18 +93,18 @@ void run(const char * input, const char * output) {
   cmd += output;
 #endif
 
-  if (sys::is_tgt_osx(target)) {
+  if (sys::is_tgt_osx(sys::target())) {
     // Required for custom frameworks
     cmd += " -rpath @executable_path/../Frameworks";
     // Useful for third-party dylibs, like vulkan loader
     cmd += " -rpath @executable_path";
-  } else if (sys::is_tgt_ios(target)) {
+  } else if (sys::is_tgt_ios(sys::target())) {
     cmd += " -rpath @executable_path/Frameworks";
-  } else if (sys::is_tgt_windows(target)) {
+  } else if (sys::is_tgt_windows(sys::target())) {
     sim::sb rc { input };
     rc.path_extension("res");
     if (mtime::of(*rc) > 0) cmd.printf(" %s", *rc);
-  } else if (sys::is_tgt_wasm(target)) {
+  } else if (sys::is_tgt_wasm(sys::target())) {
     char sra[1024] {};
 
     auto f = sys::fopen("../leco/out/wasm32-wasi/sysroot", "r");
@@ -142,13 +134,9 @@ void run(const char * input, const char * output) {
 }
 
 int main(int argc, char **argv) try {
-  auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
-    if (ch == 't') target = val;
-    else usage();
-  });
-  if (!target || opts.argc) usage();
+  if (argc != 1) usage();
 
-  sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
+  sys::for_each_dag(sys::target(), false, [](auto * dag, auto id, auto file) {
     switch (id) {
       case 'tapp':
       case 'tdll':
