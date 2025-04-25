@@ -1,23 +1,11 @@
 #pragma leco tool
 
-#include <string.h>
-
-import gopt;
 import mtime;
 import sim;
 import strset;
 import sys;
 
-static void usage() {
-  sys::die(R"(
-Compiles object files recursively.
-
-Usage: ../leco/leco.exe obj -t <target>
-Where: -t: target triple
-)");
-}
-
-static const char * target = sys::host_target;
+static void usage() { sys::die("Compiles object files recursively."); }
 
 static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 
@@ -37,7 +25,7 @@ static void compile(const char * src, const char * obj, const char * dag) {
   }
 
   sys::log("compiling object", src);
-  sys::tool_run("clang", "-i %s -t %s -- %s -c -o %s @%s %s", src, target, lang, obj, *deps, *incs);
+  sys::tool_run("clang", "-i %s -t %s -- %s -c -o %s @%s %s", src, sys::target(), lang, obj, *deps, *incs);
 }
 
 static str::set done {};
@@ -81,13 +69,9 @@ static void process(const char * dag) {
 }
 
 int main(int argc, char ** argv) try {
-  auto opts = gopt_parse(argc, argv, "t:", [&](auto ch, auto val) {
-    if (ch == 't') target = val;
-    else usage();
-  });
-  if (opts.argc) usage();
+  if (argc != 1) usage();
 
-  sys::for_each_dag(target, false, [](auto * dag, auto id, auto file) {
+  sys::for_each_dag(sys::target(), false, [](auto * dag, auto id, auto file) {
     switch (id) {
       case 'tapp':
       case 'tdll':
