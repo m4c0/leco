@@ -4,8 +4,6 @@ import mtime;
 import sim;
 import sys;
 
-static void usage() { sys::die("invalid usage"); }
-
 static void copy(const char *with, const char *dag, const char *to) {
   sys::tool_run(with, " -i %s -o %s", dag, to);
 }
@@ -46,9 +44,7 @@ static void tool_bundle(const char * dag) {
   copy("exs", dag, *sim::path_parent(dag));
 }
 
-int main(int argc, char **argv) try {
-  if (argc != 1) usage();
-
+int main() try {
   sys::for_each_dag(sys::target(), false, [](auto dag, auto id, auto val) {
     if (id == 'tapp') bundle(dag);
     if (id == 'tool') tool_bundle(dag);

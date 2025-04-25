@@ -1,7 +1,5 @@
 #pragma leco tool
-#include <stdint.h>
 #include <stdio.h>
-#include <string.h>
 
 import gopt;
 import mtime;
@@ -12,10 +10,6 @@ static FILE *out{stdout};
 
 // TODO: consider merging this with leco-clang
 // TODO: consider taking flag logic from leco-clang
-
-static void usage() {
-  sys::die("Generates a argument file containing all modules required by a C++ unit.");
-}
 
 static void print_pcm(const char * pcmf) {
   sim::sb pcm { pcmf };
@@ -38,9 +32,7 @@ static void read_includes(const char * dag) {
   });
 }
 
-int main(int argc, char **argv) try {
-  if (argc != 1) usage();
-
+int main() try {
   sys::for_each_dag(sys::target(), true, [](auto dag, auto id, auto file) {
     if (id != 'vers') return;
 

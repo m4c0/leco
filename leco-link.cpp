@@ -8,7 +8,6 @@ import strset;
 import sys;
 
 static FILE *out{};
-static void usage() { sys::die("invalid usage"); }
 
 static void put(const char *a) {
   while (*a != 0) {
@@ -133,9 +132,7 @@ void run(const char * input, const char * output) {
 #endif
 }
 
-int main(int argc, char **argv) try {
-  if (argc != 1) usage();
-
+int main() try {
   sys::for_each_dag(sys::target(), false, [](auto * dag, auto id, auto file) {
     switch (id) {
       case 'tapp':

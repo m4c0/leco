@@ -1,11 +1,8 @@
 #pragma leco tool
 
-import gopt;
 import mtime;
 import sim;
 import sys;
-
-static void usage() { sys::die("invalid usage"); }
 
 void run(const char * dag) {
   sim::sb rc {};
@@ -22,8 +19,7 @@ void run(const char * dag) {
   sys::runf("llvm-rc.exe /FO %s %s", *res, *rc);
 }
 
-int main(int argc, char **argv) try {
-  if (argc != 1) usage();
+int main() try {
   if (!sys::is_tgt_windows(sys::target())) return 0;
 
   sys::for_each_dag(sys::target(), false, [](auto * dag, auto id, auto file) {

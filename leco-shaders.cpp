@@ -3,21 +3,15 @@
 #include <stdio.h>
 #include <string.h>
 
-import gopt;
 import mtime;
 import popen;
-import pprent;
 import sim;
 import sys;
 import sysstd;
 
-static void usage() {
-  sys::die(R"(
-Compiles shaders referenced by their modules via pragmas.
-
-Requires DAGs created via leco-dagger.
-)"); 
-}
+// Compiles shaders referenced by their modules via pragmas.
+// 
+// Requires DAGs created via leco-dagger.
 
 static bool must_recompile(const char * file, auto spv_time) {
   if (spv_time < mtime::of(file)) return true;
@@ -92,9 +86,7 @@ static void run(const char * dag) {
   });
 }
 
-int main(int argc, char ** argv) try {
-  if (argc != 1) usage();
-
+int main() try {
   sys::for_each_dag(sys::target(), false, [](auto * dag, auto id, auto file) {
     if (id == 'tapp' || id == 'tool') run(dag);
   });

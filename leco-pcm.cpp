@@ -5,10 +5,6 @@ import sim;
 import strset;
 import sys;
 
-static void usage() {
-  sys::die("Compiles C++ sources to PCM, recursively.");
-}
-
 static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 
 static void compile(const char * src, const char * pcm, const char * dag) {
@@ -66,9 +62,7 @@ void process(const char * dag) {
   });
 }
 
-int main(int argc, char ** argv) try {
-  if (argc != 1) usage();
-
+int main() try {
   sys::for_each_dag(sys::target(), false, [](auto * dag, auto id, auto file) {
     switch (id) {
       case 'tapp':

@@ -48,7 +48,7 @@ static void run_git(const char *path) {
   printf("%.*s ", len - 1, line);
 }
 
-int main(int argc, char **argv) try {
+int main() try {
   auto cwd = "."_real / "out" / sys::target();
 
   collected.insert("../leco");

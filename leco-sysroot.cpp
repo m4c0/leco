@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 
-import gopt;
 import mtime;
 import pprent;
 import sim;
@@ -71,7 +70,7 @@ static sim::sb sysroot_for_target(const char *target) {
   sys::die("invalid target: %s", target);
 }
 
-int main(int argc, char **argv) try {
+int main() try {
   const char * target = sys::target();
   if (sys::is_tgt_host(target)) return 0;
 

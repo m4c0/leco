@@ -48,7 +48,7 @@ static void gitignore() {
   fclose(f);
 }
 
-int try_main(int argc, char **argv) {
+int try_main() {
   MKOUT("leco");
 
   puts("Building clang runner");
@@ -84,7 +84,7 @@ int try_main(int argc, char **argv) {
   return 0;
 }
 
-int main(int argc, char **argv) try {
+int main() try {
   if (mtime_of("build.cpp") > mtime_of("build.exe")) {
     puts("Rebuilding self");
     remove("build.old");
@@ -95,7 +95,7 @@ int main(int argc, char **argv) try {
     run("." SEP "build.exe");
     return 0;
   }
-  return try_main(argc, argv);
+  return try_main();
 } catch (...) {
   return 1;
 }

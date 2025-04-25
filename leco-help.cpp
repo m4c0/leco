@@ -1,7 +1,7 @@
 #pragma leco tool
 #include <stdio.h>
 
-int main(int argc, char **argv) {
+int main() {
   fprintf(stderr, R"(
 Usage: ../leco/leco.exe <tool> <tool-options>
 

@@ -4,15 +4,7 @@ import sim;
 import strset;
 import sys;
 
-static void usage() {
-  sys::die(R"(
-Runs a "git pull" for each of the collected dependencies of the given target.
-)");
-}
-
-int main(int argc, char **argv) try {
-  if (argc == 1) usage();
-
+int main() try {
   str::set unique_parents {};
   sys::for_each_dag(sys::target(), true, [&](auto dag, auto id, auto file) {
     if (id != 'vers') return;

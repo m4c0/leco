@@ -15,7 +15,7 @@ static auto starts_with(const char *str, const char (&prefix)[N]) {
   return 0 == strncmp(str, prefix, N - 1);
 }
 
-int main(int argc, char **argv) try {
+int main() try {
   for (auto file : pprent::list("..")) {
     if (file[0] == '.') continue;
 

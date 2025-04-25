@@ -6,8 +6,6 @@ import mtime;
 import sim;
 import sys;
 
-static void usage() { sys::die("Usage: ../leco/leco.exe embed"); }
-
 static void process_file(const char * dag, const char * file) {
   auto path = sim::path_parent(dag);
   auto parent = sim::path_parent(*path);
@@ -53,9 +51,7 @@ static void process_file(const char * dag, const char * file) {
   fclose(f);
 }
 
-int main(int argc, char ** argv) {
-  if (argc != 1) usage();
-
+int main() {
   sys::for_each_dag(sys::target(), true, [](const char * dag, auto id, auto file) {
     if (id != 'embd') return;
     process_file(dag, file);
