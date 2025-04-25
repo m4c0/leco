@@ -48,7 +48,7 @@ static void run_target(const char * target) {
   sys::    tool_run("pcm");
   sys::    tool_run("obj");
   sys::    tool_run("link");
-  sys::opt_tool_run("bundler", "-t %s", target);
+  sys::opt_tool_run("bundler");
 }
 
 static void run_targets(auto ... target) {
