@@ -1,5 +1,4 @@
 #pragma leco tool
-#include "targets.hpp"
 
 #include <stdio.h>
 #include <string.h>
@@ -102,18 +101,18 @@ void run(const char * input, const char * output) {
   cmd += output;
 #endif
 
-  if (IS_TGT(target, TGT_OSX)) {
+  if (sys::is_tgt_osx(target)) {
     // Required for custom frameworks
     cmd += " -rpath @executable_path/../Frameworks";
     // Useful for third-party dylibs, like vulkan loader
     cmd += " -rpath @executable_path";
-  } else if (IS_TGT_IOS(target)) {
+  } else if (sys::is_tgt_ios(target)) {
     cmd += " -rpath @executable_path/Frameworks";
-  } else if (IS_TGT(target, TGT_WINDOWS)) {
+  } else if (sys::is_tgt_windows(target)) {
     sim::sb rc { input };
     rc.path_extension("res");
     if (mtime::of(*rc) > 0) cmd.printf(" %s", *rc);
-  } else if (IS_TGT(target, TGT_WASM)) {
+  } else if (sys::is_tgt_wasm(target)) {
     char sra[1024] {};
 
     auto f = sys::fopen("../leco/out/wasm32-wasi/sysroot", "r");
