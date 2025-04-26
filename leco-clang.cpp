@@ -114,8 +114,10 @@ int main(int argc, char **argv) try {
 
   bool cpp = true;
   bool verbose{};
-  // TODO: use LECO_TARGET as default
-  const char *target{HOST_TARGET};
+  
+  const char * target = sysstd_env("LECO_TARGET");
+  if (!target) target = HOST_TARGET;
+
   const char *ext{".cpp"};
 
   sim_sb input{};
