@@ -25,7 +25,7 @@ static void compile(const char * src, const char * obj, const char * dag) {
   }
 
   sys::log("compiling object", src);
-  sys::tool_run("clang", "-i %s -t %s -- %s -c -o %s @%s %s", src, sys::target(), lang, obj, *deps, *incs);
+  sys::tool_run("clang", "-i %s -- %s -c -o %s @%s %s", src, lang, obj, *deps, *incs);
 }
 
 static str::set done {};

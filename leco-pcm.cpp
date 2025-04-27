@@ -18,7 +18,7 @@ static void compile(const char * src, const char * pcm, const char * dag) {
   incs.path_extension("incs");
 
   sys::log("compiling module", src);
-  sys::tool_run("clang", "-i %s -t %s -- -std=c++2b --precompile -o %s @%s @%s", src, sys::target(), pcm, *deps, *incs);
+  sys::tool_run("clang", "-i %s -- -std=c++2b --precompile -o %s @%s @%s", src, pcm, *deps, *incs);
 }
 
 static str::map spec_cache {};
