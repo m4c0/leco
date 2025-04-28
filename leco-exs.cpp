@@ -1,9 +1,6 @@
 #pragma leco tool
 
-#include "targets.hpp"
-
 #include <stdio.h>
-#include <string.h>
 
 import gopt;
 import mtime;
@@ -36,7 +33,7 @@ static void copy_exe(const char * input) {
 
 static void copy_xcfw(const char * xcfw_path) {
   auto tgt = sim::sb { exedir };
-  if (!IS_TGT_IOS(target)) tgt.path_parent();
+  if (!sys::is_tgt_ios(target)) tgt.path_parent();
   tgt /= "Frameworks";
 
   auto cmd = sim::printf("rsync -rav %s %s", xcfw_path, *tgt);
@@ -66,7 +63,7 @@ int main(int argc, char ** argv) try {
   auto path = sim::path_parent(input);
   target = path.path_filename();
 
-  if (0 == strcmp(target, TGT_WASM)) ext = "wasm";
+  if (sys::is_tgt_wasm(target)) ext = "wasm";
 
   auto exe = sim::sb { input };
   exe.path_extension("exe");
