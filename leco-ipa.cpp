@@ -3,7 +3,6 @@
 #pragma leco add_impl ipa_plist
 #endif
 
-#include "targets.hpp"
 #include <string.h>
 
 import gopt;
@@ -99,6 +98,7 @@ static void iphone_bundle(const char *dag) {
   upload_archive(dag);
 }
 
+// TODO: consider remove "input" parameter like other tools
 int main(int argc, char ** argv) try {
   const char * input {};
   auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
@@ -112,9 +112,9 @@ int main(int argc, char ** argv) try {
   auto path = sim::path_parent(input);
   auto target = path.path_filename();
 
-  if (IS_TGT(target, TGT_IPHONEOS)) iphone_bundle(input);
-  else if (IS_TGT(target, TGT_IOS_SIMULATOR)) iphonesim_bundle(input);
-  else if (IS_TGT(target, TGT_OSX)) osx_bundle(input);
+  if (sys::is_tgt_iphoneos(target)) iphone_bundle(input);
+  else if (sys::is_tgt_ios_sim(target)) iphonesim_bundle(input);
+  else if (sys::is_tgt_osx(target)) osx_bundle(input);
   else usage();
 
   return 0;

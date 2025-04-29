@@ -1,7 +1,5 @@
 #pragma leco tool
 
-#include "targets.hpp"
-
 import sim;
 import sys;
 
@@ -22,8 +20,9 @@ import sys;
 // Usage: ../leco/leco.exe ipa-export
 
 int main() try {
-  // TODO: use sys::target and check for iphoneos target
-  auto path = "."_real / "out" / TGT_IPHONEOS;
+  if (!sys::is_tgt_iphoneos(sys::target())) sys::die("only supported on iOS");
+
+  auto path = "."_real / "out" / sys::target();
 
   sys::log("exporting from", *path);
   sys::runf("xcodebuild -exportArchive"

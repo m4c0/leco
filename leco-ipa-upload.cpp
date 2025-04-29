@@ -1,7 +1,5 @@
 #pragma leco tool
 
-#include "targets.hpp"
-
 #include <string.h>
 
 import gopt;
@@ -40,7 +38,7 @@ int main(int argc, char ** argv) try {
   if (opts.argc != 0 || !input) usage();
 
   auto ipa = sim::path_parent(input);
-  if (!IS_TGT(TGT_IPHONEOS, ipa.path_filename()))
+  if (!sys::is_tgt_iphoneos(ipa.path_filename()))
     sys::die("only iPhone target is supported");
 
   ipa = ipa / "export" / sim::path_filename(input);
