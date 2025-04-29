@@ -75,7 +75,7 @@ static void run_for(const sim::sb & target) {
   sys::die("unknown or invalid target for this platform: %s", *target);
 }
 
-extern "C" int main(int argc, char ** argv) try {
+int main(int argc, char ** argv) try {
   const auto shift = [&] { return argc > 1 ? (argc--, *++argv) : nullptr; };
   const char * target = "host";
   while (auto val = shift()) {
