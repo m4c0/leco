@@ -22,7 +22,7 @@ void run(const char * dag) {
 int main() try {
   if (!sys::is_tgt_windows(sys::target())) return 0;
 
-  sys::for_each_dag(sys::target(), false, [](auto * dag, auto id, auto file) {
+  sys::for_each_dag(false, [](auto * dag, auto id, auto file) {
     if (id == 'tadd') run(dag);
   });
 } catch (...) {

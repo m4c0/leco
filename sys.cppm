@@ -142,8 +142,9 @@ void recurse_dag(const char * dag, auto && fn) {
   recurse_dag(&added, dag, fn);
 }
 
-void for_each_dag(const char * target, bool recurse, auto && fn) {
-  auto path = ("out"_real /= target);
+const char * target(); 
+void for_each_dag(bool recurse, auto && fn) {
+  auto path = ("out"_real /= target());
   for (auto file : pprent::list(*path)) {
     if (sim::path_extension(file) != ".dag") continue;
 
@@ -157,6 +158,7 @@ void for_each_dag(const char * target, bool recurse, auto && fn) {
     }
   }
 }
+
 auto tool_cmd(const char * name) {
   return (sim::path_real("../leco/out/" HOST_TARGET) / "leco-") + name + ".exe";
 }

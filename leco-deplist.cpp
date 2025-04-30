@@ -33,7 +33,7 @@ static void read_includes(const char * dag) {
 }
 
 int main() try {
-  sys::for_each_dag(sys::target(), true, [](auto dag, auto id, auto file) {
+  sys::for_each_dag(true, [](auto dag, auto id, auto file) {
     if (id != 'vers') return;
 
     sim::sb output { dag };

@@ -87,7 +87,7 @@ static void run(const char * dag) {
 }
 
 int main() try {
-  sys::for_each_dag(sys::target(), false, [](auto * dag, auto id, auto file) {
+  sys::for_each_dag(false, [](auto * dag, auto id, auto file) {
     if (id == 'tapp' || id == 'tool') run(dag);
   });
 } catch (...) {

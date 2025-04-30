@@ -63,7 +63,7 @@ void process(const char * dag) {
 }
 
 int main() try {
-  sys::for_each_dag(sys::target(), false, [](auto * dag, auto id, auto file) {
+  sys::for_each_dag(false, [](auto * dag, auto id, auto file) {
     switch (id) {
       case 'tapp':
       case 'tdll':

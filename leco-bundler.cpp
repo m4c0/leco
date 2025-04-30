@@ -45,7 +45,7 @@ static void tool_bundle(const char * dag) {
 }
 
 int main() try {
-  sys::for_each_dag(sys::target(), false, [](auto dag, auto id, auto val) {
+  sys::for_each_dag(false, [](auto dag, auto id, auto val) {
     if (id == 'tapp') bundle(dag);
     if (id == 'tool') tool_bundle(dag);
   });
