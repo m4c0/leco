@@ -4,13 +4,8 @@ import mtime;
 import sim;
 import sys;
 
-void run(const char * dag) {
-  sim::sb rc {};
-  sys::dag_read(dag, [&](auto id, auto file) {
-    if (id == 'srcf') rc = sim::sb { file };
-  });
-
-  if (rc == "") sys::die("dag file without source information");
+void run(const char * dag, const char * file) {
+  sim::sb rc { file };
   rc.path_extension("rc");
   if (mtime::of(*rc) == 0) return;
 
@@ -23,7 +18,11 @@ int main() try {
   if (!sys::is_tgt_windows(sys::target())) return 0;
 
   sys::for_each_dag(false, [](auto * dag, auto id, auto file) {
-    if (id == 'tapp') run(dag);
+    if (id != 'tapp') return;
+
+    sys::dag_read(dag, [&](auto id, auto file) {
+      if (id == 'srcf') run(dag, file);
+    });
   });
 } catch (...) {
   return 1;
