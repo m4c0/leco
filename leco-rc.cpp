@@ -23,7 +23,7 @@ int main() try {
   if (!sys::is_tgt_windows(sys::target())) return 0;
 
   sys::for_each_dag(false, [](auto * dag, auto id, auto file) {
-    if (id == 'tadd') run(dag);
+    if (id == 'tapp') run(dag);
   });
 } catch (...) {
   return 1;
