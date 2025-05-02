@@ -4,9 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-import sim;
 import sys;
-import sysstd;
 
 unsigned clean_level{};
 

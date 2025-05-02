@@ -6,11 +6,8 @@ module;
 
 export module plist;
 
-import mtime;
 import popen;
-import sim;
 import sys;
-import sysstd;
 
 export namespace plist {
 constexpr const auto minimum_os_version = "17.0";

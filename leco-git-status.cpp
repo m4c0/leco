@@ -3,12 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
-import mtime;
 import popen;
-import pprent;
-import sim;
 import sys;
-import sysstd;
 
 template <unsigned N>
 static auto starts_with(const char *str, const char (&prefix)[N]) {

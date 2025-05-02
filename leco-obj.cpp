@@ -1,8 +1,5 @@
 #pragma leco tool
 
-import mtime;
-import sim;
-import strset;
 import sys;
 
 static constexpr auto max(auto a, auto b) { return a > b ? a : b; }

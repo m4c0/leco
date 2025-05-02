@@ -2,9 +2,6 @@
 #include <string.h>
 
 import gopt;
-import mtime;
-import pprent;
-import sim;
 import sys;
 
 static void usage() {

@@ -1,7 +1,5 @@
 #pragma leco tool
 
-import mtime;
-import sim;
 import sys;
 
 static void copy(const char *with, const char *dag, const char *to) {

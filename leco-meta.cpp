@@ -1,8 +1,5 @@
 #pragma leco tool
-import mtime;
-import sim;
 import sys;
-import sysstd;
 
 static void chdir(const char * dir) {
   if (0 != sysstd::chdir(dir)) sys::die("Directory not found: [%s]\n", dir);

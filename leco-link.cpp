@@ -2,9 +2,6 @@
 
 #include <stdio.h>
 
-import mtime;
-import sim;
-import strset;
 import sys;
 
 static FILE *out{};

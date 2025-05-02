@@ -1,6 +1,5 @@
 #pragma leco tool
 
-import sim;
 import sys;
 
 // Exports an iOS application - i.e. generates an uploadable IPA. This should be

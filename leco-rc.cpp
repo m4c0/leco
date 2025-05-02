@@ -1,7 +1,5 @@
 #pragma leco tool
 
-import mtime;
-import sim;
 import sys;
 
 void run(const char * dag, const char * file) {

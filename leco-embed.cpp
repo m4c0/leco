@@ -2,8 +2,6 @@
 #include <stdio.h>
 
 import gopt;
-import mtime;
-import sim;
 import sys;
 
 static void process_file(const char * dag, const char * file) {

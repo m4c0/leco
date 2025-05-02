@@ -1,7 +1,5 @@
 #pragma leco tool
 
-import sim;
-import strset;
 import sys;
 
 int main() try {

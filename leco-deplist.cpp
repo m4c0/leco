@@ -2,8 +2,6 @@
 #include <stdio.h>
 
 import gopt;
-import mtime;
-import sim;
 import sys;
 
 static FILE *out{stdout};

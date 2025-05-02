@@ -7,7 +7,6 @@
 
 import gopt;
 import plist;
-import sim;
 import sys;
 
 void usage() {

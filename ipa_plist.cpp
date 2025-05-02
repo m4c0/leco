@@ -3,7 +3,6 @@
 
 import plist;
 import popen;
-import sim;
 import sys;
 
 static const char * bundle_version;

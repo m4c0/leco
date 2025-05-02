@@ -3,9 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 
-import mtime;
-import pprent;
-import sim;
 import sys;
 
 static bool exists(const char * path) { return mtime::of(path) > 0; }

@@ -1,10 +1,7 @@
 #pragma leco tool
 
 import gopt;
-import mtime;
-import sim;
 import sys;
-import sysstd;
 
 static const char *target{};
 static const char *resdir{};

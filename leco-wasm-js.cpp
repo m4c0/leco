@@ -2,9 +2,6 @@
 #include <stdio.h>
 
 import gopt;
-import mtime;
-import sim;
-import strset;
 import sys;
 
 // TODO: check if files actually need regen

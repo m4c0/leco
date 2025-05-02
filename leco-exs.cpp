@@ -3,8 +3,6 @@
 #include <stdio.h>
 
 import gopt;
-import mtime;
-import sim;
 import sys;
 
 static const char * exedir {};

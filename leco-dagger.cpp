@@ -6,11 +6,7 @@
 #include <string.h>
 
 import gopt;
-import mtime;
 import popen;
-import pprent;
-import sim;
-import strset;
 import sys;
 
 enum class exe_t {

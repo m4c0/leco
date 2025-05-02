@@ -3,11 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
-import mtime;
 import popen;
-import sim;
 import sys;
-import sysstd;
 
 // Compiles shaders referenced by their modules via pragmas.
 // 

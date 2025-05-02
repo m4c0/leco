@@ -3,7 +3,6 @@
 #include <string.h>
 
 import gopt;
-import sim;
 import sys;
 
 void usage() {

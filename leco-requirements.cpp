@@ -5,11 +5,7 @@
 
 import gopt;
 import popen;
-import pprent;
-import sim;
-import strset;
 import sys;
-import sysstd;
 
 static str::set all_deps{};
 static str::set collected{};
