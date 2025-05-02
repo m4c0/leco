@@ -38,6 +38,12 @@ int main() try {
 
     sim::sb output { dag };
 
+    // TODO: fix the following bug
+    // 1. "leco"
+    // 2. Add a new module in a dep (ex: added "print" to "sys")
+    // 3. "leco" again
+    // We are failing with "failed to find module file for module 'print'"
+
     output.path_extension("deps");
     if (mtime::of(dag) > mtime::of(*output)) {
       out = sys::fopen(*output, "wb");

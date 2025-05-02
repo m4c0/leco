@@ -21,29 +21,20 @@ module;
 
 export module sys;
 import mtime;
+import print;
 import pprent;
 import sim;
 import strset;
 import sysstd;
 
 export namespace sys {
-struct death {};
-
-[[noreturn]] __attribute__((format(printf, 1, 2))) inline void die(const char *msg, ...) {
-  va_list arg;
-  va_start(arg, msg);
-  vfprintf(stderr, msg, arg);
-  va_end(arg);
-
-  fputs("\n", stderr);
-  throw death{};
-}
 inline void run(const char *cmd) {
-  if (0 != system(cmd)) die("command failed: %s", cmd);
+  if (0 != system(cmd)) dief("command failed: %s", cmd);
 }
 __attribute__((format(printf, 1, 2))) inline void runf(const char * cmd, ...) {
   char buf[10240] {};
 
+  // TODO: create string variants in "print"
   va_list arg;
   va_start(arg, cmd);
   vsnprintf(buf, sizeof(buf), cmd, arg);
@@ -52,9 +43,7 @@ __attribute__((format(printf, 1, 2))) inline void runf(const char * cmd, ...) {
   run(buf);
 }
 
-inline void log(const char *verb, const char *msg) {
-  fprintf(stderr, "%20s %s\n", verb, msg);
-}
+inline void log(const char *verb, const char * msg) { errfn("%20s %s", verb, msg); }
 
 void unlink(const char * f) {
 #ifdef _WIN32
@@ -83,7 +72,7 @@ void link(const char *src, const char *dst) {
 const char *env(const char *name) {
   auto e = sysstd::env(name);
   if (e) return e;
-  sys::die("missing environment variable [%s]", name);
+  die("missing environment variable: ", name);
 }
 
 void mkdirs(const char *path) {
@@ -98,7 +87,7 @@ void mkdirs(const char *path) {
 
 FILE * fopen(const char * name, const char * mode) {
   FILE * res = sysstd::fopen(name, mode);
-  if (res == nullptr) die("could not open file [%s]", name);
+  if (res == nullptr) die("could not open file: ", name);
   return res;
 }
 void fclose(FILE * f) { ::fclose(f); }
@@ -109,8 +98,7 @@ void dag_read(const char *dag, auto &&fn) try {
 
   char buf[10240];
   while (!feof(f) && fgets(buf, sizeof(buf), f) != nullptr) {
-    if (strlen(buf) < 5)
-      die("invalid line in dag file [%s]", dag);
+    if (strlen(buf) < 5) die("invalid line in dag file: ", dag);
 
     uint32_t *id = reinterpret_cast<uint32_t *>(buf);
     char *file = reinterpret_cast<char *>(id + 1);
@@ -121,8 +109,7 @@ void dag_read(const char *dag, auto &&fn) try {
 
   ::fclose(f);
 } catch (...) {
-  fprintf(stderr, "whilst reading DAG node [%s]\n", dag);
-  throw;
+  whilst("reading DAG node: ", dag);
 }
 
 void recurse_dag(str::set * cache, const char * dag, auto && fn) {
@@ -205,4 +192,9 @@ bool is_tgt_droid(const char * t) {
 }
 bool is_tgt_ios(const char * t) { return is_tgt_iphoneos(t) || is_tgt_ios_sim(t); }
 bool is_tgt_apple(const char * t) { return is_tgt_osx(t) || is_tgt_ios(t); }
+
+#pragma clang diagnostic ignored "-Wgcc-compat"
+[[noreturn]] __attribute__((format(printf, 1, 2))) inline void die(const char *msg, auto &&... args) {
+  ::dief(msg, args...);
+}
 } // namespace sys
