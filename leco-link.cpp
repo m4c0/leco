@@ -9,7 +9,7 @@ import sys;
 
 static FILE *out{};
 
-static void put(const char *a) {
+static void put_escape(const char *a) {
   while (*a != 0) {
     char c = *a++;
     if (c == '\\') fputs("\\\\", out); // escapes backslash
@@ -50,7 +50,7 @@ static auto read_dag(str::map & cache, const char *dag) {
   });
 
   // Add object after dependencies as this kinda enforces the static init order
-  put(*obj);
+  put_escape(*obj);
 
   mtime = max(mtime, mtime::of(*obj));
   return mtime;

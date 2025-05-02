@@ -20,12 +20,12 @@ module;
 #endif
 
 export module sys;
-import mtime;
-import print;
-import pprent;
-import sim;
-import strset;
-import sysstd;
+export import mtime;
+export import print;
+export import pprent;
+export import sim;
+export import strset;
+export import sysstd;
 
 export namespace sys {
 inline void run(const char *cmd) {
