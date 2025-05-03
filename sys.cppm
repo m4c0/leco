@@ -145,6 +145,17 @@ void for_each_dag(bool recurse, auto && fn) {
     }
   }
 }
+void for_each_root_dag(auto && fn) {
+  for_each_dag(false, [&](auto dag, auto id, auto file) {
+    switch (id) {
+      case 'tapp':
+      case 'tdll':
+      case 'tool':
+      case 'tmmd': fn(dag, id, file); break;
+      default: break;
+    }
+  });
+}
 
 auto tool_cmd(const char * name) {
   return (sim::path_real("../leco/out/" HOST_TARGET) / "leco-") + name + ".exe";

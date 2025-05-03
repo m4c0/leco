@@ -130,13 +130,8 @@ void run(const char * input, const char * output) {
 }
 
 int main() try {
-  sys::for_each_dag(false, [](auto * dag, auto id, auto file) {
-    switch (id) {
-      case 'tapp':
-      case 'tdll':
-      case 'tool': run(dag, file); break;
-      default: break;
-    }
+  sys::for_each_root_dag([](auto * dag, auto id, auto file) {
+    if (id != 'tmmd') run(dag, file);
   });
 
   return 0;

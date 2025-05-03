@@ -64,14 +64,8 @@ static void process(const char * dag) {
 }
 
 int main() try {
-  sys::for_each_dag(false, [](auto * dag, auto id, auto file) {
-    switch (id) {
-      case 'tapp':
-      case 'tdll':
-      case 'tool':
-      case 'tmmd': process(dag); break;
-      default: break;
-    }
+  sys::for_each_root_dag([](auto * dag, auto id, auto file) {
+    process(dag);
   });
 } catch (...) {
   return 1;

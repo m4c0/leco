@@ -46,26 +46,16 @@ static auto process_spec(const char * dag) {
   return mtime;
 }
 
-// Caches globally so we don't reprocess DAGs for each root
-static str::set cache {};
-void process(const char * dag) {
-  process_spec(dag);
-
-  // Search for imports starting from an implementation file.
-  sys::recurse_dag(&cache, dag, [&](auto dag, auto id, auto file) {
-    if (id == 'mdag') process_spec(file);
-  });
-}
-
 int main() try {
-  sys::for_each_dag(false, [](auto * dag, auto id, auto file) {
-    switch (id) {
-      case 'tapp':
-      case 'tdll':
-      case 'tool':
-      case 'tmmd': process(dag); break;
-      default: break;
-    }
+  // Caches globally so we don't reprocess DAGs for each root
+  str::set cache {};
+  sys::for_each_root_dag([&](auto dag, auto, auto) {
+    process_spec(dag);
+
+    // Search for imports starting from an implementation file.
+    sys::recurse_dag(&cache, dag, [&](auto dag, auto id, auto file) {
+      if (id == 'mdag') process_spec(file);
+    });
   });
 } catch (...) {
   return 1;
