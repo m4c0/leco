@@ -97,8 +97,7 @@ void run(const char * input, const char * output) {
   } else if (sys::is_tgt_ios(sys::target())) {
     cmd += " -rpath @executable_path/Frameworks";
   } else if (sys::is_tgt_windows(sys::target())) {
-    sim::sb rc { input };
-    rc.path_extension("res");
+    auto rc = sim::sb { input }.path_extension("res");
     if (mtime::of(*rc) > 0) cmd.printf(" %s", *rc);
   } else if (sys::is_tgt_wasm(sys::target())) {
     char sra[1024] {};
