@@ -13,7 +13,7 @@ void run(const char * dag, const char * file) {
 }
 
 int main() try {
-  if (!sys::is_tgt_windows(sys::target())) return 0;
+  if (!sys::is_tgt_windows()) return 0;
 
   sys::for_each_dag(false, [](auto * dag, auto id, auto file) {
     if (id != 'tapp') return;

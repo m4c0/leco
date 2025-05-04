@@ -109,11 +109,10 @@ int main(int argc, char ** argv) try {
   if (!input || opts.argc != 0) usage();
 
   auto path = sim::path_parent(input);
-  auto target = path.path_filename();
 
-  if (sys::is_tgt_iphoneos(target)) iphone_bundle(input);
-  else if (sys::is_tgt_ios_sim(target)) iphonesim_bundle(input);
-  else if (sys::is_tgt_osx(target)) osx_bundle(input);
+  if (sys::is_tgt_iphoneos()) iphone_bundle(input);
+  else if (sys::is_tgt_ios_sim()) iphonesim_bundle(input);
+  else if (sys::is_tgt_osx()) osx_bundle(input);
   else usage();
 
   return 0;

@@ -89,17 +89,17 @@ void run(const char * input, const char * output) {
   cmd += output;
 #endif
 
-  if (sys::is_tgt_osx(sys::target())) {
+  if (sys::is_tgt_osx()) {
     // Required for custom frameworks
     cmd += " -rpath @executable_path/../Frameworks";
     // Useful for third-party dylibs, like vulkan loader
     cmd += " -rpath @executable_path";
-  } else if (sys::is_tgt_ios(sys::target())) {
+  } else if (sys::is_tgt_ios()) {
     cmd += " -rpath @executable_path/Frameworks";
-  } else if (sys::is_tgt_windows(sys::target())) {
+  } else if (sys::is_tgt_windows()) {
     auto rc = sim::sb { input }.path_extension("res");
     if (mtime::of(*rc) > 0) cmd.printf(" %s", *rc);
-  } else if (sys::is_tgt_wasm(sys::target())) {
+  } else if (sys::is_tgt_wasm()) {
     char sra[1024] {};
 
     auto f = sys::fopen("../leco/out/wasm32-wasi/sysroot", "r");

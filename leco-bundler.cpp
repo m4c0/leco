@@ -33,9 +33,9 @@ static void wasm_bundle(const char *dag) {
 }
 
 static void bundle(const char *dag) {
-  if (sys::is_tgt_apple(sys::target())) sys::tool_run("ipa", "-i %s", dag);
-  else if (sys::is_tgt_wasm(sys::target())) wasm_bundle(dag);
-  else dir_bundle(dag);
+  if      (sys::is_tgt_apple()) sys::tool_run("ipa", "-i %s", dag);
+  else if (sys::is_tgt_wasm())  wasm_bundle(dag);
+  else                          dir_bundle(dag);
 }
 
 static void tool_bundle(const char * dag) {

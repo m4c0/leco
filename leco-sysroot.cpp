@@ -58,25 +58,24 @@ static sim::sb apple_sysroot(const char *sdk) {
 
 static sim::sb wasm_sysroot() { return sim::sb { sys::env("WASI_SYSROOT") }; }
 
-static sim::sb sysroot_for_target(const char *target) {
-  if (sys::is_tgt_osx(target))      return apple_sysroot("macosx");
-  if (sys::is_tgt_iphoneos(target)) return apple_sysroot("iphoneos");
-  if (sys::is_tgt_ios_sim(target))  return apple_sysroot("iphonesimulator");
-  if (sys::is_tgt_droid(target))    return android_sysroot();
-  if (sys::is_tgt_wasm(target))     return wasm_sysroot();
-  sys::die("invalid target: %s", target);
+static sim::sb sysroot_for_target() {
+  if (sys::is_tgt_osx())      return apple_sysroot("macosx");
+  if (sys::is_tgt_iphoneos()) return apple_sysroot("iphoneos");
+  if (sys::is_tgt_ios_sim())  return apple_sysroot("iphonesimulator");
+  if (sys::is_tgt_droid())    return android_sysroot();
+  if (sys::is_tgt_wasm())     return wasm_sysroot();
+  sys::die("invalid target: %s", sys::target());
 }
 
 int main() try {
-  const char * target = sys::target();
-  if (sys::is_tgt_host(target)) return 0;
+  if (sys::is_tgt_host()) return 0;
 
-  auto cf = sim::printf("../leco/out/%s", target);
+  auto cf = sim::printf("../leco/out/%s", sys::target());
   sys::mkdirs(*cf);
   cf /= "sysroot";
   if (exists(*cf)) return 0; 
 
-  auto sysroot = sysroot_for_target(target);
+  auto sysroot = sysroot_for_target();
   if (!sysroot.len) return 0;
 
   auto f = sys::fopen(*cf, "w");

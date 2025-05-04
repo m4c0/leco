@@ -19,7 +19,7 @@ import sys;
 // Usage: ../leco/leco.exe ipa-export
 
 int main() try {
-  if (!sys::is_tgt_iphoneos(sys::target())) sys::die("only supported on iOS");
+  if (!sys::is_tgt_iphoneos()) sys::die("only supported on iOS");
 
   auto path = "."_real / "out" / sys::target();
 

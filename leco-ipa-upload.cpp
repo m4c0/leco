@@ -25,6 +25,9 @@ Where:
 }
 
 int main(int argc, char ** argv) try {
+  // TODO: match with dag target or transform this into a root-diver
+  if (!sys::is_tgt_iphoneos()) sys::die("only iPhone target is supported");
+
   const char * input {};
   bool upload {};
   auto opts = gopt_parse(argc, argv, "i:s", [&](auto ch, auto val) {
@@ -37,8 +40,6 @@ int main(int argc, char ** argv) try {
   if (opts.argc != 0 || !input) usage();
 
   auto ipa = sim::path_parent(input);
-  if (!sys::is_tgt_iphoneos(ipa.path_filename()))
-    sys::die("only iPhone target is supported");
 
   ipa = ipa / "export" / sim::path_filename(input);
   ipa.path_extension("ipa");

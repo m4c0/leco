@@ -150,9 +150,9 @@ static void read_file_list(const char *str, const char *desc, uint32_t code,
 static void add_xcfw(const char * str, const char * desc, uint32_t code) {
   auto path = sim::sb { str };
 
-  if (sys::is_tgt_iphoneos(target))     path /= "ios-arm64";
-  else if (sys::is_tgt_ios_sim(target)) path /= "ios-arm64_x86_64-simulator";
-  else if (sys::is_tgt_osx(target))     path /= "macos-arm64_x86_64";
+  if (sys::is_tgt_iphoneos())     path /= "ios-arm64";
+  else if (sys::is_tgt_ios_sim()) path /= "ios-arm64_x86_64-simulator";
+  else if (sys::is_tgt_osx())     path /= "macos-arm64_x86_64";
   else sys::die("xcframework is only supported in apple platforms");
 
   path /= sim::path_filename(str);
@@ -285,14 +285,14 @@ static void output_root_tag() {
     output('tapp', *path);
     break;
   case exe_t::dll:
-    if (sys::is_tgt_windows(target)) path.path_extension("dll");
-    else if (sys::is_tgt_apple(target)) path.path_extension("dylib");
-    else path.path_extension("so");
+    if      (sys::is_tgt_windows()) path.path_extension("dll");
+    else if (sys::is_tgt_apple())   path.path_extension("dylib");
+    else                            path.path_extension("so");
 
     output('tdll', *path);
     break;
   case exe_t::tool:
-    if (sys::is_tgt_host(target)) {
+    if (sys::is_tgt_host()) {
       path.path_extension("exe");
       output('tool', *path);
     }
