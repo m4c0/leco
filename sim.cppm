@@ -66,7 +66,15 @@ export namespace sim {
       return *this;
     }
 
-    void path_parent() { sim_sb_path_parent(this); }
+    auto & path_append(const char * s) {
+      sim_sb_path_append(this, s);
+      return *this;
+    }
+
+    auto & path_parent() {
+      sim_sb_path_parent(this);
+      return *this;
+    }
   };
 
   sb path_extension(const char * path) {
