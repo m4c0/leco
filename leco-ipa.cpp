@@ -47,9 +47,7 @@ static void upload_archive(const char * dag) {
 }
 
 static void osx_bundle(const char *dag) {
-  sim::sb app_path { dag };
-  app_path.path_extension("app");
-
+  auto app_path = sim::sb { dag }.path_extension("app");
   auto cnt_path = app_path / "Contents";
 
   copy("exs", dag, *(cnt_path / "MacOS"));
@@ -60,8 +58,7 @@ static void osx_bundle(const char *dag) {
 }
 
 static void iphonesim_bundle(const char * dag) {
-  sim::sb path { dag };
-  path.path_extension("app");
+  auto path = sim::sb { dag }.path_extension("app");
 
   copy("exs", dag, *path);
   copy("rsrc", dag, *path);
