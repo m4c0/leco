@@ -124,8 +124,7 @@ int main(int argc, char **argv) try {
   });
   if (!input || !app_path || opts.argc != 0) usage();
 
-  auto path = sim::sb { input };
-  path.path_parent();
+  auto path = sim::sb { input }.path_parent();
 
   auto plist = path / "icon-partial.plist";
   auto xcassets = gen_assets(*path);
