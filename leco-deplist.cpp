@@ -4,20 +4,8 @@
 import gopt;
 import sys;
 
-static FILE *out{stdout};
-
 // TODO: consider merging this with leco-clang
 // TODO: consider taking flag logic from leco-clang
-
-static void print_pcm(const char * pcmf) {
-  sim::sb pcm { pcmf };
-  auto stem = sim::path_stem(*pcm);
-
-  for (auto & c : stem) if (c == '-') c = ':';
-  for (auto & c : pcm) if (c == '\\') c = '/';
-
-  fprintf(out, "-fmodule-file=%s=%s\n", *stem, *pcm);
-}
 
 int main() try {
   sys::for_each_dag(true, [](auto dag, auto id, auto file) {
@@ -33,17 +21,25 @@ int main() try {
 
     output.path_extension("deps");
     if (mtime::of(dag) > mtime::of(*output)) {
-      out = sys::fopen(*output, "wb");
-      sys::recurse_dag(dag, [](auto dag, auto id, auto file) {
-        if (id == 'pcmf') print_pcm(file);
+      auto out = sys::fopen(*output, "wb");
+      sys::recurse_dag(dag, [&](auto dag, auto id, auto file) {
+        if (id != 'pcmf') return;
+
+        auto pcm  = sim::sb { file };
+        for (auto & c : pcm) if (c == '\\') c = '/';
+
+        auto stem = sim::path_stem(file);
+        for (auto & c : stem) if (c == '-') c = ':';
+
+        fprintf(out, "-fmodule-file=%s=%s\n", *stem, *pcm);
       });
       fclose(out);
     }
 
     output.path_extension("incs");
     if (mtime::of(dag) > mtime::of(*output)) {
-      out = sys::fopen(*output, "wb");
-      sys::dag_read(dag, [](auto id, auto file) {
+      auto out = sys::fopen(*output, "wb");
+      sys::dag_read(dag, [&](auto id, auto file) {
         if (id == 'idir') fprintf(out, "-I%s\n", file);
       });
       fclose(out);
