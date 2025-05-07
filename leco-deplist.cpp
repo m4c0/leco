@@ -1,7 +1,6 @@
 #pragma leco tool
 #include <stdio.h>
 
-import gopt;
 import sys;
 
 // TODO: consider merging this with leco-clang
