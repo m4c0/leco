@@ -63,8 +63,7 @@ int main(int argc, char ** argv) try {
 
   if (sys::is_tgt_wasm()) ext = "wasm";
 
-  auto exe = sim::sb { input };
-  exe.path_extension("exe");
+  auto exe = sim::sb { input }.path_extension("exe");
   copy_exe(*exe);
 
   sys::recurse_dag(input, [](auto dag, auto id, auto file) {
