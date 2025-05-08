@@ -7,16 +7,14 @@ static void copy(const char *with, const char *dag, const char *to) {
 }
 
 static void dir_bundle(const char *dag) {
-  sim::sb path { dag };
-  path.path_extension("app");
+  auto path = sim::sb { dag }.path_extension("app");
 
   copy("exs", dag, *path);
   copy("rsrc", dag, *path);
 }
 
 static void wasm_bundle(const char *dag) {
-  sim::sb path { dag };
-  path.path_extension("app");
+  auto path = sim::sb { dag }.path_extension("app");
 
   copy("exs", dag, *path);
   copy("rsrc", dag, *path);
