@@ -22,15 +22,7 @@ int main() try {
 
     auto pwd = sim::printf("../%s", file);
 
-    char *args[7] {};
-    args[0] = sysstd::strdup("git");
-    args[1] = sysstd::strdup("-C");
-    args[2] = *pwd;
-    args[3] = sysstd::strdup("status");
-    args[4] = sysstd::strdup("--porcelain=v2");
-    args[5] = sysstd::strdup("--branch");
-
-    p::proc gs{args};
+    p::proc gs { "git", "-C", *pwd, "status", "--porcelain=v2", "--branch" };
 
     bool printing{};
     const auto enable_printer = [&] {

@@ -77,12 +77,6 @@ static const char *chomp(const char *str, const char *prefix) {
   return *buf;
 }
 
-static void stamp(sim::sb * args, char **& argp, const char * arg) {
-  *args += " ";
-  *argp++ = **args + args->len;
-  *args += arg;
-}
-
 static bool print_if_found(const char *rel_path, const char *desc,
                            uint32_t code) {
   sim::sb abs = sim::path_parent(*source) / rel_path;
@@ -389,23 +383,9 @@ static bool pragma(const char * p) {
 void run() {
   if (verbose) sys::log("inspecting", *source);
 
-  char *clang_argv[100]{};
-  char **argp = clang_argv;
-
-  auto args = sys::tool_cmd("clang");
-  *argp++ = *args;
-
-  stamp(&args, argp, "-t");
-  stamp(&args, argp, target);
-  stamp(&args, argp, "--");
-  stamp(&args, argp, "-E");
-  stamp(&args, argp, *source);
-
-  for (auto p = clang_argv + 1; *p && p != argp; p++) {
-    (*p)[-1] = 0;
-  }
-
-  p::proc proc{clang_argv};
+  p::proc proc {
+    *sys::tool_cmd("clang"), "-t", target, "--", "-E", *source
+  };
 
   line = 0;
   exe_type = {};

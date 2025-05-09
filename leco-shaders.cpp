@@ -47,18 +47,7 @@ static void build_shader(const char * dag, const char * file) {
   if (!must_recompile(file, mtime::of(*out))) return;
 
   sys::log("compiling shader", file);
-
-  char * args[] {
-    sysstd::strdup("glslangValidator"),
-    sysstd::strdup("--target-env"),
-    sysstd::strdup("spirv1.3"),
-    sysstd::strdup("-V"),
-    sysstd::strdup("-o"),
-    *out,
-    sysstd::strdup(file),
-    0,
-  };
-  p::proc p { args };
+  p::proc p { "glslangValidator", "--target-env", "spirv1.3", "-V", "-o", *out, file };
 
   while (p.gets()) {
     auto line = p.last_line_read();

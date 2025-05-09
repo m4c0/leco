@@ -28,14 +28,7 @@ static void recurse(const char * dag) {
 }
 
 static void run_git(const char *path) {
-  char *cmd[6]{
-    sysstd::strdup("git"),
-    sysstd::strdup("-C"),
-    sysstd::strdup(path),
-    sysstd::strdup("rev-parse"),
-    sysstd::strdup("HEAD"),
-  };
-  p::proc p{cmd};
+  p::proc p { "git", "-C", path, "rev-parse", "HEAD" };
   if (!p.gets())
     sys::die("failed to get git status");
 
