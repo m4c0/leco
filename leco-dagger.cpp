@@ -429,8 +429,15 @@ void run() {
     }
   }
 
-  if (dump_errors) while (proc.gets_err()) fputs(proc.last_line_read(), stderr);
-  if (proc.wait() != 0) die("Error running clang");
+  sim::sb buf { 102400 };
+  while (proc.gets_err())
+    if (dump_errors) fputs(proc.last_line_read(), stderr);
+    else buf += proc.last_line_read();
+
+  if (proc.wait() != 0) {
+    err(*buf);
+    die("error inspecting ", *source);
+  }
 
   output('srcf', *source);
   // TODO: output mod_name
