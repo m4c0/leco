@@ -436,8 +436,6 @@ void run() {
 
   output_root_tag();
   output_file_tags();
-
-  fclose(out);
 }
 
 static void check_and_run(const char * src, const char * dag) {
@@ -454,8 +452,14 @@ static void check_and_run(const char * src, const char * dag) {
   out_filename = dag;
   sys::mkdirs(*sim::path_parent(dag));
   out = sys::fopen(out_filename, "w");
-  output('vers', *dag_file_version);
-  run();
+  try {
+    output('vers', *dag_file_version);
+    run();
+    fclose(out);
+  } catch (...) {
+    fclose(out);
+    throw;
+  }
 }
 
 static str::set done {};
@@ -494,7 +498,6 @@ int main(int argc, char **argv) try {
   }
   return 0;
 } catch (...) {
-  if (out != nullptr) fclose(out);
   if (out_filename != nullptr) remove(out_filename);
   return 1;
 }
