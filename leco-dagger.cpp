@@ -430,6 +430,7 @@ void run() {
   }
 
   if (dump_errors) while (proc.gets_err()) fputs(proc.last_line_read(), stderr);
+  if (proc.wait() != 0) die("Error running clang");
 
   output('srcf', *source);
   // TODO: output mod_name
