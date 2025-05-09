@@ -384,7 +384,7 @@ void run() {
   if (verbose) sys::log("inspecting", *source);
 
   p::proc proc {
-    *sys::tool_cmd("clang"), "-t", target, "--", "-E", *source
+    *sys::tool_cmd("clang"), "-i", *source, "-t", target, "--", "-E"
   };
 
   line = 0;
