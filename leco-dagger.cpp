@@ -19,8 +19,6 @@ enum class exe_t {
 
 static const sim::sb dag_file_version { "2025-01-04" };
 
-static bool dump_errors {};
-static bool verbose {};
 static sim::sb source {};
 static FILE * out{stdout};
 static const char * out_filename {};
@@ -34,13 +32,6 @@ static void usage() {
   sys::die(R"(
 LECO tool responsible for preprocessing C++ files containing leco pragmas and
 storing dependencies in a DAG-like file.
-
-Usage: ../leco/leco.exe dagger [-d] [-v]
-
-Where:
-        -d: Dump errors from clang if enabled
-        -v: Verbose. Output name of inspected files.
-
 )");
 }
 
@@ -381,8 +372,6 @@ static bool pragma(const char * p) {
 }
 
 void run() {
-  if (verbose) sys::log("inspecting", *source);
-
   p::proc proc {
     *sys::tool_cmd("clang"), "-i", *source, "-t", target, "--", "-E"
   };
@@ -430,13 +419,11 @@ void run() {
   }
 
   sim::sb buf { 102400 };
-  while (proc.gets_err())
-    if (dump_errors) fputs(proc.last_line_read(), stderr);
-    else buf += proc.last_line_read();
+  while (proc.gets_err()) buf += proc.last_line_read();
 
   if (proc.wait() != 0) {
     err(*buf);
-    die("error inspecting ", *source);
+    die("error running: ", *sys::tool_cmd("clang"), " -i ", *source, " -t ", target, " -- -E");
   }
 
   output('srcf', *source);
@@ -487,14 +474,7 @@ static void process(const char * path) {
 }
 
 int main(int argc, char **argv) try {
-  auto opts = gopt_parse(argc, argv, "dv", [&](auto ch, auto val) {
-    switch (ch) {
-      case 'd': dump_errors = true; break;
-      case 'v': verbose = true; break;
-      default: usage();
-    }
-  });
-  if (opts.argc != 0) usage();
+  if (argc != 1) usage();
 
   for (auto file : pprent::list(".")) {
     auto ext = sim::path_extension(file);
