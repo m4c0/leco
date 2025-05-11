@@ -36,7 +36,15 @@ static void xcassets(const char * dag, const char * app_path) {
 }
 
 static void export_archive() {
-  sys::tool_run("ipa-export");
+  // TODO: fix this for multiple exports on the same repo
+  auto path = "."_real / "out" / sys::target();
+
+  sys::log("exporting from", *path);
+  sys::runf("xcodebuild -exportArchive"
+            " -archivePath %s/export.xcarchive"
+            " -exportPath %s/export"
+            " -exportOptionsPlist %s/export.plist",
+            *path, *path, *path);
 }
 
 static void upload_archive(const char * dag) {
