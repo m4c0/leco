@@ -1,6 +1,5 @@
 #pragma leco tool
 
-#include <stdio.h>
 #include <string.h>
 
 import gopt;
@@ -27,16 +26,6 @@ static void recurse(const char * dag) {
   });
 }
 
-static void run_git(const char *path) {
-  p::proc p { "git", "-C", path, "rev-parse", "HEAD" };
-  if (!p.gets())
-    sys::die("failed to get git status");
-
-  const char *line = p.last_line_read();
-  int len = strlen(line);
-  printf("%.*s ", len - 1, line);
-}
-
 int main() try {
   auto cwd = "."_real / "out" / sys::target();
 
@@ -50,8 +39,10 @@ int main() try {
   }
 
   for (const auto &s : collected) {
-    run_git(s.c_str());
-    puts(sim::path_filename(s.c_str()));
+    auto path = s.c_str();
+    p::proc p { "git", "-C", path, "rev-parse", "HEAD" };
+    if (!p.gets()) sys::die("failed to get git status");
+    putln(*sim::sb { p.last_line_read() }.chomp(), " ", sim::path_filename(path));
   }
 } catch (...) {
   return 1;
