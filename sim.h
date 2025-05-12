@@ -14,6 +14,8 @@ void sim_sb_delete(sim_sb *sb);
 void sim_sb_copy(sim_sb *dst, const char *src);
 void sim_sb_concat(sim_sb *dst, const char *src);
 
+void sim_sb_chomp(sim_sb * sb);
+
 __attribute__((format(printf, 2, 3))) void sim_sb_printf(sim_sb *dst,
                                                          const char *src, ...);
 
@@ -100,6 +102,13 @@ void sim_sb_concat(sim_sb *dst, const char *src) {
 
   SIM_STRNCPY(dst->buffer + dst->len, src, dst->size - dst->len);
   dst->len = strlen(dst->buffer);
+}
+
+void sim_sb_chomp(sim_sb * sb) {
+  assert(sb && "invalid buffer");
+  if (!sb->buffer || sb->len == 0) return;
+  sb->len--;
+  sb->buffer[sb->len - 1] = 0;
 }
 
 __attribute__((format(printf, 2, 3))) void

@@ -58,6 +58,8 @@ export namespace sim {
       return *this;
     }
 
+    sb & chomp() { return (sim_sb_chomp(this), *this); }
+
     const char * path_filename() const { return sim_sb_path_filename(this); }
 
     const char * path_extension() const { return sim_sb_path_extension(this); }
