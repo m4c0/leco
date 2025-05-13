@@ -1,42 +1,20 @@
 #pragma leco tool
 
-#include <string.h>
-
-import gopt;
 import popen;
 import sys;
 
-static str::set all_deps{};
-static str::set collected{};
-
-static void recurse(const char * dag) {
-  if (!all_deps.insert(dag)) return;
-
-  auto path = sim::path_parent(dag);
-  path.path_parent();
-  path.path_parent();
-  collected.insert(*path);
-
-  sys::dag_read(dag, [](auto id, auto file) {
-    switch (id) {
-      case 'idag':
-      case 'mdag': recurse(file); break;
-      default: break;
-    }
-  });
-}
-
 int main() try {
-  auto cwd = "."_real / "out" / sys::target();
+  str::set collected {};
+  collected.insert("../leco"); // Marking as dependency for any leco-based software
 
-  collected.insert("../leco");
-  for (auto entry : pprent::list(*cwd)) {
-    auto ext = sim::path_extension(entry);
-    if (ext != ".dag") continue;
+  sys::for_each_dag(true, [&](auto dag, auto id, auto file) {
+    if (id != 'vers') return;
 
-    auto e = cwd / entry;
-    recurse(*e);
-  }
+    auto path = sim::path_parent(dag);
+    path.path_parent();
+    path.path_parent();
+    collected.insert(*path);
+  });
 
   for (const auto &s : collected) {
     auto path = s.c_str();
