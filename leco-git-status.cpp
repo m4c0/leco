@@ -1,6 +1,5 @@
 #pragma leco tool
 
-#include <stdio.h>
 #include <string.h>
 
 import popen;
@@ -27,7 +26,7 @@ int main() try {
     bool printing{};
     const auto enable_printer = [&] {
       if (printing) return;
-      fprintf(stderr, "-=-=-=-=-=-=-=-=-=- %s -=-=-=-=-=-=-=-=-=-\n", file);
+      errln("-=-=-=-=-=-=-=-=-=- ", file, " -=-=-=-=-=-=-=-=-=-");
       printing = true;
     };
 
@@ -40,7 +39,7 @@ int main() try {
       } else if (buf[0] == '#') {
       } else {
         enable_printer();
-        fputs(buf, stderr);
+        err(buf);
       }
     }
   }
