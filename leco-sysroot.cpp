@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
+import popen;
 import sys;
 
 static bool exists(const char * path) { return mtime::of(path) > 0; }
@@ -42,17 +43,10 @@ static sim::sb apple_sysroot(const char *sdk) {
 #else
   auto cmd = sim::printf("xcrun --show-sdk-path --sdk %s", sdk);
 
-  sim::sb buf {};
 
-  auto f = popen(*cmd, "r");
-  auto path = fgets(*buf, buf.size, f);
-  pclose(f);
-
-  if (path == nullptr) return {};
-
-  buf.len = strlen(path) - 1;
-  (*buf)[buf.len] = 0; // chomp "\n"
-  return buf;
+  auto p = p::proc(*cmd, "r");
+  if (!p.gets()) return {};
+  return sim::sb { p.last_line_read() }.chomp();
 #endif
 }
 
