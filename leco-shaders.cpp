@@ -60,7 +60,7 @@ static void build_shader(const char * dag, const char * file) {
       l[l.len - 2] = '\n';
       l[l.len - 1] = 0;
     }
-    fputs(*l, stdout);
+    put(*l);
   }
 
   if (p.wait() != 0) sys::die("shader compilation failed");
