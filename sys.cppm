@@ -93,6 +93,17 @@ FILE * fopen(const char * name, const char * mode) {
 }
 void fclose(FILE * f) { ::fclose(f); }
 
+class file : public no::no {
+  FILE * m_h;
+public:
+  file(const char * name, const char * mode) 
+    : m_h { fopen(name, mode) }
+  {}
+  ~file() { ::fclose(m_h); }
+
+  operator FILE *() const { return m_h; }
+};
+
 void dag_read(const char *dag, auto &&fn) try {
   auto f = fopen(dag, "r");
   if (!f) die("could not open dag file");
