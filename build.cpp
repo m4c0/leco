@@ -43,7 +43,7 @@ static void run(const char * cmd) {
 }
 
 static void gitignore() {
-  auto f = fopen("out/.gitignore", "w");
+  auto f = sysstd_fopen("out/.gitignore", "w");
   fputs("*", f);
   fclose(f);
 }
