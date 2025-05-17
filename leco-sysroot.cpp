@@ -72,9 +72,7 @@ int main() try {
   auto sysroot = sysroot_for_target();
   if (!sysroot.len) return 0;
 
-  auto f = sys::fopen(*cf, "w");
-  fputs(*sysroot, f);
-  fclose(f);
+  fputs(*sysroot, sys::file { *cf, "w" });
 } catch (...) {
   return 1;
 }
