@@ -13,16 +13,13 @@ import sys;
 static void create_xca_contents(const char *path) {
   auto file = sim::sb { path } / "Contents.json";
 
-  auto f = sys::fopen(*file, "w");
-  fprintf(f, R"({ "info": {"version": 1} })");
-  fclose(f);
+  fprintf(sys::file { *file, "w" }, R"({ "info": {"version": 1} })");
 }
 
 static void create_icon_contents(const char *path) {
   auto file = sim::sb { path } / "Contents.json";
 
-  auto f = sys::fopen(*file, "w");
-  fprintf(f, R"({
+  fprintf(sys::file { *file, "w" }, R"({
   "images": [{
     "filename": "Icon-1024.png",
     "idiom": "universal",
@@ -31,15 +28,12 @@ static void create_icon_contents(const char *path) {
   }],
   "info": {"version": 1}
 })");
-  fclose(f);
 }
 
 static void create_colour_contents(const char *path) {
   auto file = sim::sb { path } / "Contents.json";
 
-  auto f = sys::fopen(file.buffer, "w");
-  fprintf(f, R"({ "info": {"version": 1} })");
-  fclose(f);
+  fprintf(sys::file { *file, "w" }, R"({ "info": {"version": 1} })");
 }
 
 static void copy_icon(const char *path) {

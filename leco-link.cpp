@@ -102,9 +102,7 @@ void run(const char * input, const char * output) {
   } else if (sys::is_tgt_wasm()) {
     char sra[1024] {};
 
-    auto f = sys::fopen("../leco/out/wasm32-wasi/sysroot", "r");
-    fgets(sra, sizeof(sra) - 1, f);
-    fclose(f);
+    fgets(sra, sizeof(sra) - 1, sys::file { "../leco/out/wasm32-wasi/sysroot", "r" });
 
     cmd.printf(" -resource-dir %s", sra);
 

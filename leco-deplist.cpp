@@ -20,7 +20,7 @@ int main() try {
 
     output.path_extension("deps");
     if (mtime::of(dag) > mtime::of(*output)) {
-      auto out = sys::fopen(*output, "wb");
+      sys::file out { *output, "wb" };
       sys::recurse_dag(dag, [&](auto dag, auto id, auto file) {
         if (id != 'pcmf') return;
 
@@ -32,16 +32,14 @@ int main() try {
 
         fprintf(out, "-fmodule-file=%s=%s\n", *stem, *pcm);
       });
-      fclose(out);
     }
 
     output.path_extension("incs");
     if (mtime::of(dag) > mtime::of(*output)) {
-      auto out = sys::fopen(*output, "wb");
+      sys::file out { *output, "wb" };
       sys::dag_read(dag, [&](auto id, auto file) {
         if (id == 'idir') fprintf(out, "-I%s\n", file);
       });
-      fclose(out);
     }
   });
 
