@@ -21,6 +21,7 @@ module;
 
 export module sys;
 export import mtime;
+export import no;
 export import print;
 export import pprent;
 export import sim;
