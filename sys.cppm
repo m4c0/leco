@@ -183,7 +183,7 @@ void tool_run(const char * name, const char * args, auto &&... as) {
 void opt_tool_run(const char * name) {
   auto cmd = tool_cmd(name);
   if (mtime::of(*cmd) == 0) return;
-  run(*(cmd + " "));
+  run(*cmd);
 }
 void opt_tool_run(const char * name, const char * args, auto &&... as) {
   auto cmd = tool_cmd(name);
