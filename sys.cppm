@@ -30,9 +30,13 @@ export import strset;
 export import sysstd;
 
 export namespace sys {
-inline void run(const char *cmd) {
-  if (0 != system(cmd)) dief("command failed: %s", cmd);
-}
+  inline void run(const char * cmd) { if (0 != system(cmd)) dief("command failed: %s", cmd); }
+  inline void run(const char * cmd, auto *... args) {
+    sim::sb buf { cmd };
+    (buf.printf(" %s", args), ...);
+    run(*buf);
+  }
+
 __attribute__((format(printf, 1, 2))) inline void runf(const char * cmd, ...) {
   char buf[10240] {};
 
