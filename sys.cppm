@@ -139,13 +139,14 @@ void recurse_dag(const char * dag, auto && fn) {
 
 const char * target(); 
 void for_each_dag(bool recurse, auto && fn) {
+  str::set added {};
   auto path = ("out"_real /= target());
   for (auto file : pprent::list(*path)) {
     if (sim::path_extension(file) != ".dag") continue;
 
     auto dag = path / file;
     if (recurse) {
-      recurse_dag(*dag, fn);
+      recurse_dag(&added, *dag, fn);
     } else {
       dag_read(*dag, [&](auto id, auto file) {
         fn(*dag, id, file);
