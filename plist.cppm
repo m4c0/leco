@@ -53,7 +53,7 @@ public:
   }
 
   void merge(const char * fname) {
-    auto f = sys::file::open { fname, "rb" };
+    auto f = sys::file { fname, "rb" };
 
     char buf[10240];
     fgets(buf, sizeof(buf), f); // xml
@@ -80,7 +80,7 @@ void gen(FILE * f, auto && fn) {
 }
 void gen(const char * fname, auto && fn) {
   sys::log("generating", fname);
-  gen(sys::file::open { fname, "wb" }, fn);
+  gen(sys::file { fname, "wb" }, fn);
 }
 
 void common_app_plist(dict &d, const char *name, const char *sdk, const char * ver) {
