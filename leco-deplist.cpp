@@ -1,5 +1,4 @@
 #pragma leco tool
-#include <stdio.h>
 
 import sys;
 
@@ -20,7 +19,7 @@ void run(const char * parent, const char * depf, const char * incf) {
   sys::file incs { incf, "wb" };
 
   sys::for_each_dag(parent, true, [&](auto dag, auto id, auto file) {
-    if      (id == 'idir') fprintf(incs, "-I%s\n", file);
+    if      (id == 'idir') fputln(incs, "-I%s", file);
     else if (id == 'pcmf') {
       auto pcm = sim::sb { file };
       for (auto & c : pcm) if (c == '\\') c = '/';
@@ -28,7 +27,7 @@ void run(const char * parent, const char * depf, const char * incf) {
       auto stem = sim::path_stem(file);
       for (auto & c : stem) if (c == '-') c = ':';
 
-      fprintf(deps, "-fmodule-file=%s=%s\n", *stem, *pcm);
+      fputfn(deps, "-fmodule-file=%s=%s", *stem, *pcm);
     }
   });
 }
