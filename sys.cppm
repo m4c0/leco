@@ -138,9 +138,9 @@ void recurse_dag(const char * dag, auto && fn) {
 }
 
 const char * target(); 
-void for_each_dag(bool recurse, auto && fn) {
+void for_each_dag(const char * basedir, bool recurse, auto && fn) {
   str::set added {};
-  auto path = ("out"_real /= target());
+  auto path = (sim::sb { basedir } /= "out") /= target();
   for (auto file : pprent::list(*path)) {
     if (sim::path_extension(file) != ".dag") continue;
 
@@ -153,6 +153,9 @@ void for_each_dag(bool recurse, auto && fn) {
       });
     }
   }
+}
+void for_each_dag(bool recurse, auto && fn) {
+  for_each_dag(*"."_real, recurse, fn);
 }
 void for_each_root_dag(auto && fn) {
   for_each_dag(false, [&](auto dag, auto id, auto file) {
