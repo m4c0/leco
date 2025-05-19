@@ -6,7 +6,6 @@ import gopt;
 import sys;
 
 static const char * exedir {};
-static const char * target {};
 static const char * ext {};
 
 static void usage() { sys::die("invalid usage"); }
@@ -57,9 +56,6 @@ int main(int argc, char ** argv) try {
   if (opts.argc != 0) usage();
 
   sys::mkdirs(exedir);
-
-  auto path = sim::path_parent(input);
-  target = path.path_filename();
 
   if (sys::is_tgt_wasm()) ext = "wasm";
 
