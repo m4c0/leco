@@ -1,7 +1,6 @@
 #pragma leco tool
 #include "targets.hpp"
 
-#include <stdio.h>
 #include <string.h>
 
 import sys;
@@ -9,7 +8,7 @@ import sys;
 unsigned clean_level{};
 
 static void usage() {
-  fprintf(stderr, R"(
+  sys::die(R"(
   Usage: ../leco/leco.exe [-C <dir>] [-D] [-g] [-O] [-t <target>] [-v]
 
   Where:
@@ -28,7 +27,6 @@ static void usage() {
       apple, linux, macosx, windows: for their respective platforms (requires their SDKs)
       host: for the same platform as the host (default)
 )");
-  throw 0;
 }
 
 static void run_target(const char * target) {
