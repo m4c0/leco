@@ -10,13 +10,13 @@ static void compile(const char * src, const char * obj, const char * dag) {
   if (ext == ".m" || ext == ".mm") lang = "-fmodules -fobjc-arc";
   else if (ext == ".c") lang = "-std=c11";
  
-  auto deps = sim::sb { dag };
-  deps.path_extension("deps");
+  auto deps = sim::path_parent(dag) / "deplist";
 
   sim::sb incs {};
   if (ext != ".pcm") {
     incs = sim::sb { "@" } + dag;
-    incs.path_extension("incs");
+    incs.path_parent();
+    incs.path_append("includes");
   }
 
   sys::log("compiling object", src);

@@ -5,8 +5,8 @@ import sys;
 static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 
 static void compile(const char * src, const char * pcm, const char * dag) {
-  auto deps = sim::sb { dag }.path_extension("deps");
-  auto incs = sim::sb { dag }.path_extension("incs");
+  auto deps = sim::path_parent(dag) / "deplist";
+  auto incs = sim::path_parent(dag) / "includes";
 
   sys::log("compiling module", src);
   sys::tool_run("clang", "-i %s -- -std=c++2b --precompile -o %s @%s @%s", src, pcm, *deps, *incs);
