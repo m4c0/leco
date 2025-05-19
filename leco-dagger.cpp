@@ -17,7 +17,7 @@ enum class exe_t {
   app,
 };
 
-static const sim::sb dag_file_version { "2025-01-04" };
+static const sim::sb dag_file_version { "2025-05-19" };
 
 static sim::sb source {};
 static FILE * out{stdout};
@@ -268,6 +268,24 @@ static void output_root_tag() {
   case exe_t::app:
     path.path_extension("exe");
     output('tapp', *path);
+
+    if (sys::is_tgt_osx()) {
+      path.path_extension("app");
+      output('edir', *(path / "Contents/MacOS"));
+      output('rdir', *(path / "Contents/Resources"));
+    } else if (sys::is_tgt_iphoneos()) {
+      path.path_parent();
+      path /= "export.xcarchive/Products/Applications";
+      path /= source.path_filename();
+      path.path_extension("app");
+      output('edir', *path);
+      output('rdir', *path);
+    } else {
+      path.path_extension("app");
+      output('edir', *path);
+      output('rdir', *path);
+    }
+
     break;
   case exe_t::dll:
     if      (sys::is_tgt_windows()) path.path_extension("dll");
@@ -280,6 +298,9 @@ static void output_root_tag() {
     if (sys::is_tgt_host()) {
       path.path_extension("exe");
       output('tool', *path);
+
+      path.path_parent();
+      output('edir', *path);
     }
     break;
   }
