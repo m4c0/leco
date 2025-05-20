@@ -8,8 +8,6 @@ import sys;
 static const char * exedir {};
 static const char * ext {};
 
-static void usage() { sys::die("invalid usage"); }
-
 static void copy_exe(const char * input) {
   auto path = sim::sb { exedir } / sim::path_filename(input);
   if (ext) path.path_extension(ext);
@@ -43,28 +41,24 @@ static void copy_xcfw(const char * xcfw_path) {
 }
 
 int main(int argc, char ** argv) try {
-  const char * input {};
+  sys::for_each_root_dag([](auto dag, auto id, auto file) {
+    if (id != 'tapp' && id != 'tool') return;
 
-  auto opts = gopt_parse(argc, argv, "i:o:", [&](auto ch, auto val) {
-    switch (ch) {
-      case 'i': input = val; break;
-      case 'o': exedir = val; break;
-      default: usage(); break;
-    }
-  });
-  if (!input || !exedir) usage();
-  if (opts.argc != 0) usage();
+    sim::sb edir {};
+    sys::dag_read(dag, [&](auto id, auto file) {
+      if (id == 'edir') exedir = *(edir = sim::sb { file });
+    });
+    if (!exedir) sys::die("dag without executable directory");
 
-  sys::mkdirs(exedir);
+    sys::mkdirs(exedir);
 
-  if (sys::is_tgt_wasm()) ext = "wasm";
+    if (sys::is_tgt_wasm()) ext = "wasm";
+    copy_exe(file);
 
-  auto exe = sim::sb { input }.path_extension("exe");
-  copy_exe(*exe);
-
-  sys::recurse_dag(input, [](auto dag, auto id, auto file) {
-    if (id == 'dlls') return copy_exe(file);
-    if (id == 'xcfw') return copy_xcfw(file);
+    sys::recurse_dag(dag, [](auto dag, auto id, auto file) {
+      if (id == 'dlls') return copy_exe(file);
+      if (id == 'xcfw') return copy_xcfw(file);
+    });
   });
 } catch (...) {
   return 1;

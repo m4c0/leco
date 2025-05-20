@@ -9,14 +9,12 @@ static void copy(const char *with, const char *dag, const char *to) {
 static void dir_bundle(const char *dag) {
   auto path = sim::sb { dag }.path_extension("app");
 
-  copy("exs", dag, *path);
   copy("rsrc", dag, *path);
 }
 
 static void wasm_bundle(const char *dag) {
   auto path = sim::sb { dag }.path_extension("app");
 
-  copy("exs", dag, *path);
   copy("rsrc", dag, *path);
 
   path /= sim::path_filename(dag);
@@ -36,14 +34,9 @@ static void bundle(const char *dag) {
   else                          dir_bundle(dag);
 }
 
-static void tool_bundle(const char * dag) {
-  copy("exs", dag, *sim::path_parent(dag));
-}
-
 int main() try {
   sys::for_each_dag(false, [](auto dag, auto id, auto val) {
     if (id == 'tapp') bundle(dag);
-    if (id == 'tool') tool_bundle(dag);
   });
   return 0;
 } catch (...) {

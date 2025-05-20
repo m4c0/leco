@@ -58,7 +58,6 @@ static void osx_bundle(const char *dag) {
   auto app_path = sim::sb { dag }.path_extension("app");
   auto cnt_path = app_path / "Contents";
 
-  copy("exs", dag, *(cnt_path / "MacOS"));
   copy("rsrc", dag, *(cnt_path / "Resources"));
 
   plist::gen_osx_plist(*cnt_path);
@@ -68,7 +67,6 @@ static void osx_bundle(const char *dag) {
 static void iphonesim_bundle(const char * dag) {
   auto path = sim::sb { dag }.path_extension("app");
 
-  copy("exs", dag, *path);
   copy("rsrc", dag, *path);
 
   auto stem = sim::path_stem(dag);
@@ -90,7 +88,6 @@ static void iphone_bundle(const char *dag) {
   path /= sim::path_filename(dag);
   path.path_extension("app");
 
-  copy("exs", dag, *path);
   copy("rsrc", dag, *path);
   xcassets(dag, *path);
 
