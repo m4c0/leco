@@ -21,7 +21,6 @@ static const sim::sb dag_file_version { "2025-05-19" };
 
 static sim::sb source {};
 static FILE * out{stdout};
-static const char * out_filename {};
 static const char * target = sys::target();
 
 static unsigned line {};
@@ -464,16 +463,17 @@ static void check_and_run(const char * src, const char * dag) {
     if (!must_run) return;
   }
 
-  source = sim::sb { src };
-  out_filename = dag;
   sys::mkdirs(*sim::path_parent(dag));
-  out = sys::fopen(out_filename, "w");
+
+  source = sim::sb { src };
+  out = sys::fopen(dag, "w");
   try {
     output('vers', *dag_file_version);
     run();
     fclose(out);
   } catch (...) {
     fclose(out);
+    remove(dag);
     throw;
   }
 }
@@ -507,6 +507,5 @@ int main(int argc, char **argv) try {
   }
   return 0;
 } catch (...) {
-  if (out_filename != nullptr) remove(out_filename);
   return 1;
 }
