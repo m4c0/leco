@@ -391,11 +391,13 @@ static bool pragma(const char * p) {
   error("unknown pragma");
 }
 
-void run() {
+void run(FILE * dag, const char * src, bool root) {
   p::proc proc {
-    *sys::tool_cmd("clang"), "-i", *source, "-t", target, "--", "-E"
+    *sys::tool_cmd("clang"), "-i", src, "-t", target, "--", "-E"
   };
 
+  source = sim::sb { src };
+  out = dag;
   line = 0;
   exe_type = {};
   mod_name = {};
@@ -446,6 +448,7 @@ void run() {
     die("error running: ", *sys::tool_cmd("clang"), " -i ", *source, " -t ", target, " -- -E");
   }
 
+  output('vers', *dag_file_version);
   output('srcf', *source);
   // TODO: output mod_name
 
@@ -453,7 +456,7 @@ void run() {
   output_file_tags();
 }
 
-static void check_and_run(const char * src, const char * dag) {
+static void check_and_run(const char * src, const char * dag, bool root) {
   if (mtime::of(dag) > mtime::of(src)) {
     bool must_run = true;
     sys::dag_read(dag, [&](auto id, auto file) {
@@ -465,31 +468,27 @@ static void check_and_run(const char * src, const char * dag) {
 
   sys::mkdirs(*sim::path_parent(dag));
 
-  source = sim::sb { src };
-  out = sys::fopen(dag, "w");
   try {
-    output('vers', *dag_file_version);
-    run();
-    fclose(out);
+    sys::file f { dag, "w" };
+    run(f, src, root);
   } catch (...) {
-    fclose(out);
     remove(dag);
     throw;
   }
 }
 
 static str::set done {};
-static void process(const char * path) {
+static void process(const char * path, bool root) {
   if (!done.insert(path)) return;
 
   auto dag = sim::path_parent(path) / "out" / target / sim::path_filename(path);
   dag.path_extension("dag");
-  check_and_run(path, *dag);
+  check_and_run(path, *dag, root);
 
   sys::dag_read(*dag, [](auto id, auto file) {
     switch (id) {
       case 'impl':
-      case 'mdep': process(file); break;
+      case 'mdep': process(file, false); break;
     }
   });
 }
@@ -503,7 +502,7 @@ int main(int argc, char **argv) try {
 
     if (ext != ".cppm" && ext != ".cpp" && ext != ".c") continue;
 
-    process(*sim::path_real(file));
+    process(*sim::path_real(file), true);
   }
   return 0;
 } catch (...) {
