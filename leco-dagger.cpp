@@ -391,7 +391,8 @@ static bool pragma(const char * p) {
   error("unknown pragma");
 }
 
-static void run(const char * dag, const char * src, bool must_succeed) try {
+enum run_result { OK, ERR, SKIPPED };
+[[nodiscard]] static run_result run(const char * dag, const char * src, bool must_succeed) try {
   p::proc proc {
     *sys::tool_cmd("clang"), "-i", src, "-t", target, "--", "-E"
   };
@@ -444,7 +445,10 @@ static void run(const char * dag, const char * src, bool must_succeed) try {
   sim::sb buf { 102400 };
   while (proc.gets_err()) buf += proc.last_line_read();
 
+  // TODO: skip if "must_succeed and non-root"
+
   if (proc.wait() != 0) {
+    if (!must_succeed) return run_result::SKIPPED;
     err(*buf);
     die("error running: ", *sys::tool_cmd("clang"), " -i ", *source, " -t ", target, " -- -E");
   }
@@ -455,9 +459,9 @@ static void run(const char * dag, const char * src, bool must_succeed) try {
 
   output_root_tag();
   output_file_tags();
+  return run_result::OK;
 } catch (...) {
-  remove(dag);
-  if (must_succeed) throw;
+  return run_result::ERR;
 }
 
 static void check_and_run(const char * src, bool must_succeed) {
@@ -475,7 +479,16 @@ static void check_and_run(const char * src, bool must_succeed) {
 
   sys::mkdirs(*sim::path_parent(*dag));
 
-  run(*dag, src, must_succeed);
+  switch (run(*dag, src, must_succeed)) {
+    case run_result::OK:
+      return;
+    case run_result::ERR:
+      remove(*dag);
+      throw 0;
+    case run_result::SKIPPED:
+      remove(*dag);
+      return;
+  }
 }
 
 
