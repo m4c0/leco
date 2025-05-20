@@ -391,13 +391,14 @@ static bool pragma(const char * p) {
   error("unknown pragma");
 }
 
-void run(FILE * dag, const char * src, bool root) {
+static void run(const char * dag, const char * src, bool must_succeed) try {
   p::proc proc {
     *sys::tool_cmd("clang"), "-i", src, "-t", target, "--", "-E"
   };
+  sys::file f { dag, "w" };
 
   source = sim::sb { src };
-  out = dag;
+  out = f;
   line = 0;
   exe_type = {};
   mod_name = {};
@@ -454,44 +455,29 @@ void run(FILE * dag, const char * src, bool root) {
 
   output_root_tag();
   output_file_tags();
+} catch (...) {
+  remove(dag);
+  if (must_succeed) throw;
 }
 
-static void check_and_run(const char * src, const char * dag, bool root) {
-  if (mtime::of(dag) > mtime::of(src)) {
+static void check_and_run(const char * src, bool must_succeed) {
+  auto dag = sim::path_parent(src) / "out" / target / sim::path_filename(src);
+  dag.path_extension("dag");
+
+  if (mtime::of(*dag) > mtime::of(src)) {
     bool must_run = true;
-    sys::dag_read(dag, [&](auto id, auto file) {
+    sys::dag_read(*dag, [&](auto id, auto file) {
       if (id != 'vers') return;
       if (dag_file_version == file) must_run = false;
     });
     if (!must_run) return;
   }
 
-  sys::mkdirs(*sim::path_parent(dag));
+  sys::mkdirs(*sim::path_parent(*dag));
 
-  try {
-    sys::file f { dag, "w" };
-    run(f, src, root);
-  } catch (...) {
-    remove(dag);
-    throw;
-  }
+  run(*dag, src, must_succeed);
 }
 
-static str::set done {};
-static void process(const char * path, bool root) {
-  if (!done.insert(path)) return;
-
-  auto dag = sim::path_parent(path) / "out" / target / sim::path_filename(path);
-  dag.path_extension("dag");
-  check_and_run(path, *dag, root);
-
-  sys::dag_read(*dag, [](auto id, auto file) {
-    switch (id) {
-      case 'impl':
-      case 'mdep': process(file, false); break;
-    }
-  });
-}
 
 int main(int argc, char **argv) try {
   if (argc != 1) usage();
@@ -502,8 +488,13 @@ int main(int argc, char **argv) try {
 
     if (ext != ".cppm" && ext != ".cpp" && ext != ".c") continue;
 
-    process(*sim::path_real(file), true);
+    check_and_run(*sim::path_real(file), false);
   }
+
+  sys::for_each_dag(true, [](auto dag, auto id, auto file) {
+    if (id != 'impl' && id != 'mdep') return;
+    check_and_run(file, true);
+  });
   return 0;
 } catch (...) {
   return 1;
