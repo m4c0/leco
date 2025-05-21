@@ -2,7 +2,6 @@
 
 #include <stdio.h>
 
-import gopt;
 import sys;
 
 static void copy_exe(const sim::sb & exedir, const char * input) {
