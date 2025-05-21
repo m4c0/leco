@@ -2,20 +2,8 @@
 
 import sys;
 
-static void copy(const char *with, const char *dag, const char *to) {
-  sys::tool_run(with, " -i %s -o %s", dag, to);
-}
-
-static void dir_bundle(const char *dag) {
-  auto path = sim::sb { dag }.path_extension("app");
-
-  copy("rsrc", dag, *path);
-}
-
 static void wasm_bundle(const char *dag) {
   auto path = sim::sb { dag }.path_extension("app");
-
-  copy("rsrc", dag, *path);
 
   path /= sim::path_filename(dag);
   path.path_extension("html");
@@ -31,7 +19,6 @@ static void wasm_bundle(const char *dag) {
 static void bundle(const char *dag) {
   if      (sys::is_tgt_apple()) sys::tool_run("ipa", "-i %s", dag);
   else if (sys::is_tgt_wasm())  wasm_bundle(dag);
-  else                          dir_bundle(dag);
 }
 
 int main() try {

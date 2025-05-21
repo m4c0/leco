@@ -27,10 +27,6 @@ Where:
 
 void gen_iphone_ipa(const char * exe, const char * dag);
 
-static void copy(const char * with, const char * dag, const char * to) {
-  sys::tool_run(with, " -i %s -o %s", dag, to);
-}
-
 static void xcassets(const char * dag, const char * app_path) {
   sys::tool_run("xcassets", " -i %s -a %s", dag, app_path);
 }
@@ -58,16 +54,12 @@ static void osx_bundle(const char *dag) {
   auto app_path = sim::sb { dag }.path_extension("app");
   auto cnt_path = app_path / "Contents";
 
-  copy("rsrc", dag, *(cnt_path / "Resources"));
-
   plist::gen_osx_plist(*cnt_path);
   sys::tool_run("codesign", "-d %s", *app_path);
 }
 
 static void iphonesim_bundle(const char * dag) {
   auto path = sim::sb { dag }.path_extension("app");
-
-  copy("rsrc", dag, *path);
 
   auto stem = sim::path_stem(dag);
   plist::gen_iphonesim_plist(*path, *stem);
@@ -88,7 +80,6 @@ static void iphone_bundle(const char *dag) {
   path /= sim::path_filename(dag);
   path.path_extension("app");
 
-  copy("rsrc", dag, *path);
   xcassets(dag, *path);
 
   path /= sim::path_filename(dag);

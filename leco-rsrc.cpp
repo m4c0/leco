@@ -1,15 +1,9 @@
 #pragma leco tool
 
-import gopt;
 import sys;
 
-static const char *target{};
-static const char *resdir{};
-
-static void usage() { sys::die("invalid usage"); }
-
-static void copy_res(const char *file) {
-  auto path = sim::sb { resdir } / sim::path_filename(file);
+static void copy_res(const sim::sb & resdir, const char * file) {
+  auto path = resdir / sim::path_filename(file);
   if (mtime::of(*path) >= mtime::of(file)) return;
 
   sys::log("hard-linking", file);
@@ -17,25 +11,19 @@ static void copy_res(const char *file) {
 }
 
 int main(int argc, char **argv) try {
-  const char *input{};
-  auto opts = gopt_parse(argc, argv, "o:i:", [&](auto ch, auto val) {
-    switch (ch) {
-      case 'i': input = val; break;
-      case 'o': resdir = val; break;
-      default: usage();
-    }
-  });
+  sys::for_each_root_dag([](auto dag, auto id, auto file) {
+    if (id != 'tapp') return;
 
-  if (!input || !resdir) usage();
-  if (opts.argc != 0) usage();
+    sim::sb rdir {};
+    sys::dag_read(dag, [&](auto id, auto file) {
+      if (id == 'rdir') rdir = sim::sb { file };
+    });
+    if (rdir == "") sys::die("app dag without resource dir");
 
-  sys::mkdirs(resdir);
-
-  auto path = sim::path_parent(input);
-  target = path.path_filename();
-
-  sys::recurse_dag(input, [](auto dag, auto id, auto file) {
-    if (id == 'rsrc') copy_res(file);
+    sys::mkdirs(*rdir);
+    sys::recurse_dag(dag, [&](auto dag, auto id, auto file) {
+      if (id == 'rsrc') copy_res(rdir, file);
+    });
   });
 
   return 0;
