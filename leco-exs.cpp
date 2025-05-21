@@ -5,12 +5,9 @@
 import gopt;
 import sys;
 
-static const char * exedir {};
-static const char * ext {};
-
-static void copy_exe(const char * input) {
-  auto path = sim::sb { exedir } / sim::path_filename(input);
-  if (ext) path.path_extension(ext);
+static void copy_exe(const sim::sb & exedir, const char * input) {
+  auto path = exedir / sim::path_filename(input);
+  if (sys::is_tgt_wasm()) path.path_extension("wasm");
 
   if (mtime::of(*path) >= mtime::of(input)) return;
 
@@ -26,8 +23,8 @@ static void copy_exe(const char * input) {
   sys::link(input, *path);
 }
 
-static void copy_xcfw(const char * xcfw_path) {
-  auto tgt = sim::sb { exedir };
+static void copy_xcfw(const sim::sb & exedir, const char * xcfw_path) {
+  sim::sb tgt = exedir;
   if (!sys::is_tgt_ios()) tgt.path_parent();
   tgt /= "Frameworks";
 
@@ -46,18 +43,17 @@ int main(int argc, char ** argv) try {
 
     sim::sb edir {};
     sys::dag_read(dag, [&](auto id, auto file) {
-      if (id == 'edir') exedir = *(edir = sim::sb { file });
+      if (id == 'edir') edir = sim::sb { file };
     });
-    if (!exedir) sys::die("dag without executable directory");
+    if (edir == "") sys::die("dag without executable directory");
 
-    sys::mkdirs(exedir);
+    sys::mkdirs(*edir);
 
-    if (sys::is_tgt_wasm()) ext = "wasm";
-    copy_exe(file);
+    copy_exe(edir, file);
 
-    sys::recurse_dag(dag, [](auto dag, auto id, auto file) {
-      if (id == 'dlls') return copy_exe(file);
-      if (id == 'xcfw') return copy_xcfw(file);
+    sys::recurse_dag(dag, [&](auto dag, auto id, auto file) {
+      if (id == 'dlls') return copy_exe(edir, file);
+      if (id == 'xcfw') return copy_xcfw(edir, file);
     });
   });
 } catch (...) {
