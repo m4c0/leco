@@ -32,9 +32,7 @@ static auto process_spec(const char * dag) {
   });
 
   if (!src.len) sys::die("missing source for [%s]", dag);
-
   if (!pcm.len) return mtime;
-  if (sim::path_extension(*src) != ".cppm") return mtime;
 
   mtime = max(mtime, mtime::of(*src));
 
