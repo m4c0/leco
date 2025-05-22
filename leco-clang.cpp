@@ -113,7 +113,6 @@ int main(int argc, char **argv) try {
   const char * target = sysstd_env("LECO_TARGET");
   if (!target) target = HOST_TARGET;
 
-  const char *ext{".cpp"};
 
   sim_sb input{};
 
@@ -124,7 +123,7 @@ int main(int argc, char **argv) try {
     case 'i': {
       sim_sb_new(&input, 10240);
       sim_sb_path_copy_real(&input, val);
-      ext = sim_path_extension(input.buffer);
+      auto ext = sim_path_extension(input.buffer);
       cpp = (0 == strcmp(ext, ".cpp")) || (0 == strcmp(ext, ".cppm")) ||
             (0 == strcmp(ext, ".mm"));
       break;
