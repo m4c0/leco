@@ -10,8 +10,6 @@
 #include "sim.h"
 #include "targets.hpp"
 
-static const char *argv0;
-
 static void clang_cmd(sim_sb *buf, const char *exe) {
 #if __APPLE__ && !__arm64__
   sim_sb_copy(buf, "/usr/local/opt/llvm/bin");
@@ -37,7 +35,7 @@ static int usage() {
   fprintf(stderr, R"(
 LECO's heavily-opiniated CLANG runner
 
-Usage: %s [-i <input>] [-t <target>] [-g] [-O] [-v] [-- <clang-flags>]
+Usage: ../leco/leco.exe clang [-i <input>] [-t <target>] [-g] [-O] [-v] [-- <clang-flags>]
 
 This tool uses the clang version available via PATH, except on MacOS where it 
 requires llvm to be installed via Homebrew.
@@ -56,8 +54,7 @@ Where:
       -v             print command-line before running it
 
       <clang-flags>  pass flags as-is to clang
-)",
-          argv0);
+)");
   return 1;
 }
 
@@ -90,7 +87,7 @@ static void add_target_defs(sim_sb *buf, const char *tgt) {
   }
 }
 
-static void add_sysroot(sim_sb *args, const char *target) {
+static void add_sysroot(sim_sb * args, const char * target, const char * argv0) {
   sim_sb sra{};
   sim_sb_new(&sra, 10240);
   sim_sb_path_copy_parent(&sra, argv0);
@@ -107,8 +104,6 @@ static void add_sysroot(sim_sb *args, const char *target) {
 }
 
 int main(int argc, char **argv) try {
-  argv0 = argv[0];
-
   struct gopt opts;
   GOPT(opts, argc, argv, "gi:Ot:v");
 
@@ -156,7 +151,7 @@ int main(int argc, char **argv) try {
 
   sim_sb_printf(&args, " -target %s", target);
   add_target_defs(&args, target);
-  if (0 != strcmp(target, HOST_TARGET)) add_sysroot(&args, target);
+  if (0 != strcmp(target, HOST_TARGET)) add_sysroot(&args, target, argv[0]);
 
   if (input.len != 0) sim_sb_printf(&args, " %s", input.buffer);
 
