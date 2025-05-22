@@ -71,6 +71,7 @@ int try_main() {
   TOOL("link");
   TOOL("obj");
   TOOL("pcm");
+  TOOL("pcm2obj");
 
   TOOL("driver");
   TOOL("meta");
