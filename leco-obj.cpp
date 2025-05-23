@@ -22,31 +22,26 @@ static void process(const char * dag) {
   if (!done.insert(dag)) return;
 
   auto mtime = 0ULL;
+  bool is_pcm = false;
 
   sim::sb src {};
-  sim::sb pcm {};
   sim::sb obj {};
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
       case 'head': mtime = max(mtime, mtime::of(file)); break;
-      case 'idag': process(file); break;
-      case 'mdag': {
-        process(file);
 
-        sim::sb pcm { file };
-        pcm.path_extension("pcm");
-        mtime = max(mtime, mtime::of(*pcm));
-        break;
-      }
+      case 'idag':
+      case 'mdag': process(file); break;
+
+      case 'pcmf': is_pcm = true; break;
 
       case 'srcf': src = sim::sb { file }; break;
-      case 'pcmf': pcm = sim::sb { file }; break;
       case 'objf': obj = sim::sb { file }; break;
       default: break;
     }
   });
 
-  if (pcm.len > 0) return;
+  if (is_pcm) return;
   mtime = max(mtime, mtime::of(*src));
 
   if (src.len == 0) sys::die("dag without source info: [%s]", dag);
