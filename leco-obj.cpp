@@ -11,16 +11,10 @@ static void compile(const char * src, const char * obj, const char * dag) {
   else if (ext == ".c") lang = "-std=c11";
  
   auto deps = sim::path_parent(dag) / "deplist";
+  auto incs = sim::path_parent(dag) / "includes";
 
-  sim::sb incs {};
-  if (ext != ".pcm") {
-    incs = sim::sb { "@" } + dag;
-    incs.path_parent();
-    incs.path_append("includes");
-  }
-
-  sys::log("compiling object", src);
-  sys::tool_run("clang", "-i %s -- %s -c -o %s @%s %s", src, lang, obj, *deps, *incs);
+  sys::log("compiling object", obj);
+  sys::tool_run("clang", "-i %s -- %s -c -o %s @%s @%s", src, lang, obj, *deps, *incs);
 }
 
 static str::set done {};
@@ -52,7 +46,7 @@ static void process(const char * dag) {
     }
   });
 
-  if (pcm.len > 0) src = pcm;
+  if (pcm.len > 0) return;
   mtime = max(mtime, mtime::of(*src));
 
   if (src.len == 0) sys::die("dag without source info: [%s]", dag);
