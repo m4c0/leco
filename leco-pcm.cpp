@@ -13,47 +13,37 @@ static void compile(const char * src, const char * pcm, const char * dag) {
 }
 
 static str::map spec_cache {};
-static auto process_spec(const char * dag) {
+static auto calc_mtime(const char * dag) {
   auto &mtime = spec_cache[dag];
   if (mtime != 0) return mtime;
-  mtime = 1;
+  mtime = mtime::of(dag);
 
+  sys::dag_read(dag, [&](auto id, auto file) {
+    switch (id) {
+      case 'head': mtime = max(mtime, mtime::of(file)); break;
+      case 'mdag': mtime = max(mtime, calc_mtime(file)); break;
+    }
+  });
+
+  return mtime;
+}
+static void compile(const char * dag) {
   sim::sb src {};
   sim::sb pcm {};
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
-      case 'head': mtime = max(mtime, mtime::of(file)); break;
-      case 'mdag': mtime = max(mtime, process_spec(file)); break;
-
       case 'srcf': src = sim::sb { file }; break;
       case 'pcmf': pcm = sim::sb { file }; break;
-      default: break;
     }
   });
+  if (calc_mtime(dag) < mtime::of(*pcm)) return;
 
-  if (!src.len) sys::die("missing source for [%s]", dag);
-  if (!pcm.len) return mtime;
-
-  mtime = max(mtime, mtime::of(*src));
-
-  if (mtime > mtime::of(*pcm)) {
-    compile(*src, *pcm, dag);
-    mtime = mtime::of(*pcm);
-  }
-
-  return mtime;
+  compile(*src, *pcm, dag);
 }
 
 int main() try {
-  // Caches globally so we don't reprocess DAGs for each root
-  str::set cache {};
-  sys::for_each_root_dag([&](auto dag, auto, auto) {
-    process_spec(dag);
-
-    // Search for imports starting from an implementation file.
-    sys::recurse_dag(&cache, dag, [&](auto dag, auto id, auto file) {
-      if (id == 'mdag') process_spec(file);
-    });
+  sys::for_each_dag(true, [](auto dag, auto id, auto file) {
+    if (id == 'pcmf') compile(dag);
   });
 } catch (...) {
   return 1;
