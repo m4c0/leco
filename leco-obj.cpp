@@ -2,6 +2,9 @@
 
 import sys;
 
+// TODO: investigate why changes in deps are not triggering these
+// Example: change "sys.cppm", no tool gets its obj compiled
+
 static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 
 static void compile(const char * src, const char * obj, const char * dag) {
