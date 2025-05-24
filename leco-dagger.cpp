@@ -465,8 +465,8 @@ enum run_result { OK, ERR, SKIPPED };
 }
 
 static void check_and_run(const char * src, bool must_succeed) {
-  auto dag = sim::path_parent(src) / "out" / target / sim::path_filename(src);
-  dag.path_extension("dag");
+  auto parent = sim::path_parent(src) / "out" / target;
+  auto dag = (parent / sim::path_filename(src)).path_extension("dag");
 
   if (mtime::of(*dag) > mtime::of(src)) {
     bool must_run = true;
@@ -477,7 +477,7 @@ static void check_and_run(const char * src, bool must_succeed) {
     if (!must_run) return;
   }
 
-  sys::mkdirs(*sim::path_parent(*dag));
+  sys::mkdirs(*parent);
 
   switch (run(*dag, src, must_succeed)) {
     case run_result::OK:
