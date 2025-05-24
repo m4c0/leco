@@ -34,7 +34,7 @@ Some rules:
 Roughly:
 
 ```sh
-clang++ -std=c+20 -o build.exe build.cpp
+clang++ -std=c++20 -o build.exe build.cpp
 build.exe
 ```
 
