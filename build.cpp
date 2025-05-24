@@ -42,12 +42,6 @@ static void run(const char * cmd) {
   throw 0;
 }
 
-static void gitignore() {
-  auto f = sysstd_fopen("out/.gitignore", "w");
-  fputs("*", f);
-  fclose(f);
-}
-
 int try_main() {
   MKOUT("leco");
 
