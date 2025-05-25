@@ -59,7 +59,7 @@ static void remove_with_deps(const char * p) {
 
 int main(int argc, char **argv) try {
   bool all{};
-  auto opts = gopt_parse(argc, argv, "avt:", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "av", [&](auto ch, auto val) {
     switch (ch) {
       case 'a': all     = true; break;
       case 'v': log_all = true; break;
