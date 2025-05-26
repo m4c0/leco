@@ -17,7 +17,7 @@ enum class exe_t {
   app,
 };
 
-static const sim::sb dag_file_version { "2025-05-19" };
+static const char * dag_file_version = "2025-05-19";
 
 static sim::sb source {};
 static FILE * out{stdout};
@@ -453,7 +453,7 @@ enum run_result { OK, ERR, SKIPPED };
     die("error running: ", *sys::tool_cmd("clang"), " -i ", *source, " -t ", target, " -- -E");
   }
 
-  output('vers', *dag_file_version);
+  output('vers', dag_file_version);
   output('srcf', *source);
   // TODO: output mod_name
 
@@ -482,12 +482,11 @@ static void check_and_run(const char * src, bool must_succeed) {
   auto dag = (parent / sim::path_filename(src)).path_extension("dag");
 
   if (mtime::of(*dag) > mtime::of(src)) {
-    bool must_run = true;
+    sim::sb vers {};
     sys::dag_read(*dag, [&](auto id, auto file) {
-      if (id != 'vers') return;
-      if (dag_file_version == file) must_run = false;
+      if (id == 'vers') vers = sim::sb { file };
     });
-    if (!must_run) return;
+    if (vers == dag_file_version) return;
   }
 
   switch (run(*dag, src, must_succeed)) {
