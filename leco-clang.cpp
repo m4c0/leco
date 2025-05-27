@@ -105,14 +105,12 @@ static void add_sysroot(sim_sb * args, const char * target, const char * argv0) 
 
 int main(int argc, char **argv) try {
   struct gopt opts;
-  GOPT(opts, argc, argv, "gi:Ot:v");
+  GOPT(opts, argc, argv, "i:t:");
 
   bool cpp = true;
-  bool verbose{};
   
   const char * target = sysstd_env("LECO_TARGET");
   if (!target) target = HOST_TARGET;
-
 
   sim_sb input{};
 
@@ -128,7 +126,6 @@ int main(int argc, char **argv) try {
             (0 == strcmp(ext, ".mm"));
       break;
     }
-    case 'v': verbose = true; break;
     case 't': target = val; break;
     default: return usage();
     }
@@ -156,8 +153,6 @@ int main(int argc, char **argv) try {
 
   // TODO: escape argv
   for (auto i = 0; i < opts.argc; i++) sim_sb_printf(&args, " %s", opts.argv[i]);
-
-  if (verbose) fprintf(stderr, "%s\n", args.buffer);
 
   run(args.buffer);
   return 0;
