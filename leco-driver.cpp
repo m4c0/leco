@@ -9,7 +9,7 @@ unsigned clean_level{};
 
 static void usage() {
   sys::die(R"(
-  Usage: ../leco/leco.exe [-C <dir>] [-D] [-g] [-O] [-t <target>] [-v]
+  Usage: ../leco/leco.exe [-C <dir>] [-g] [-O] [-t <target>]
 
   Where:
     -c -- clean current module before build (if repeated, clean all modules)
@@ -78,10 +78,10 @@ int main(int argc, char ** argv) try {
   const auto shift = [&] { return argc > 1 ? (argc--, *++argv) : nullptr; };
   const char * target = "host";
   while (auto val = shift()) {
-    if (sim::sb{"-c"} == val) clean_level++;
-    else if (sim::sb{"-t"} == val) target = shift();
-    else if (sim::sb{"-g"} == val) sysstd::setenv("LECO_DEBUG", "1");
-    else if (sim::sb{"-O"} == val) sysstd::setenv("LECO_OPT", "1");
+    if ("-c"_s == val) clean_level++;
+    else if ("-t"_s == val) target = shift();
+    else if ("-g"_s == val) sysstd::setenv("LECO_DEBUG", "1");
+    else if ("-O"_s == val) sysstd::setenv("LECO_OPT", "1");
     else usage();
   }
   if (!target) usage();
