@@ -392,7 +392,7 @@ static bool pragma(const char * p) {
 }
 
 enum run_result { OK, ERR, SKIPPED };
-[[nodiscard]] static run_result run(const char * dag, const char * src, bool must_succeed) try {
+[[nodiscard]] static run_result run(const char * dag, const char * src, bool roots_only) try {
   p::proc proc {
     *sys::tool_cmd("clang"), "-i", src, "-t", target, "--", "-E"
   };
@@ -445,10 +445,9 @@ enum run_result { OK, ERR, SKIPPED };
   sim::sb buf { 102400 };
   while (proc.gets_err()) buf += proc.last_line_read();
 
-  // TODO: skip if "must_succeed and non-root"
+  if (roots_only && exe_type == exe_t::none) return run_result::SKIPPED;
 
   if (proc.wait() != 0) {
-    if (!must_succeed) return run_result::SKIPPED;
     err(*buf);
     die("error running: ", *sys::tool_cmd("clang"), " -i ", *source, " -t ", target, " -- -E");
   }
@@ -471,7 +470,7 @@ static void create_gitignore(const auto & out) {
   fputln(sys::file { *path, "w" }, "*");
 }
 
-static void check_and_run(const char * src, bool must_succeed) {
+static void check_and_run(const char * src, bool roots_only) {
   auto gparent = sim::path_parent(src) / "out";
   sys::mkdirs(*gparent);
   create_gitignore(gparent);
@@ -489,7 +488,7 @@ static void check_and_run(const char * src, bool must_succeed) {
     if (vers == dag_file_version) return;
   }
 
-  switch (run(*dag, src, must_succeed)) {
+  switch (run(*dag, src, roots_only)) {
     case run_result::OK:
       return;
     case run_result::ERR:
@@ -511,12 +510,12 @@ int main(int argc, char **argv) try {
 
     if (ext != ".cppm" && ext != ".cpp" && ext != ".c") continue;
 
-    check_and_run(*sim::path_real(file), false);
+    check_and_run(*sim::path_real(file), true);
   }
 
   sys::for_each_dag(true, [](auto dag, auto id, auto file) {
     if (id != 'impl' && id != 'mdep') return;
-    check_and_run(file, true);
+    check_and_run(file, false);
   });
   return 0;
 } catch (...) {
