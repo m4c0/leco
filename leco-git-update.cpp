@@ -4,9 +4,7 @@ import sys;
 
 int main() try {
   str::set unique_parents {};
-  sys::for_each_dag(true, [&](auto dag, auto id, auto file) {
-    if (id != 'vers') return;
-
+  sys::for_each_tag_in_dags('vers', true, [&](auto dag, auto file) {
     auto parent = sim::path_parent(dag);
     parent.path_parent();
     parent.path_parent();

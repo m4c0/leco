@@ -169,6 +169,12 @@ void for_each_root_dag(auto && fn) {
   });
 }
 
+void for_each_tag_in_dags(auto tid, bool recurse, auto && fn) {
+  for_each_dag(recurse, [&](auto dag, auto id, auto file) {
+    if (id == tid) fn(dag, file);
+  });
+}
+
 auto tool_cmd(const char * name) {
   return (sim::path_real("../leco/out/" HOST_TARGET) / "leco-") + name + ".exe";
 }

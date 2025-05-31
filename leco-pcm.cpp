@@ -27,7 +27,7 @@ static auto calc_mtime(const char * dag) {
 
   return mtime;
 }
-static void compile(const char * dag) {
+static void compile_pcmf(const char * dag, const char * _) {
   sim::sb src {};
   sim::sb pcm {};
   sys::dag_read(dag, [&](auto id, auto file) {
@@ -42,9 +42,7 @@ static void compile(const char * dag) {
 }
 
 int main() try {
-  sys::for_each_dag(true, [](auto dag, auto id, auto file) {
-    if (id == 'pcmf') compile(dag);
-  });
+  sys::for_each_tag_in_dags('pcmf', true, &compile_pcmf);
 } catch (...) {
   return 1;
 }

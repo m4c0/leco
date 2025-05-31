@@ -66,16 +66,15 @@ static void build_shader(const char * dag, const char * file) {
   if (p.wait() != 0) sys::die("shader compilation failed");
 }
 
-static void run(const char * dag) {
+static void run(const char * dag, const char * _) {
   sys::recurse_dag(dag, [&](auto dag, auto id, auto file) {
     if (id == 'shdr') build_shader(dag, file);
   });
 }
 
 int main() try {
-  sys::for_each_dag(false, [](auto * dag, auto id, auto file) {
-    if (id == 'tapp' || id == 'tool') run(dag);
-  });
+  sys::for_each_tag_in_dags('tapp', false, &run);
+  sys::for_each_tag_in_dags('tool', false, &run);
 } catch (...) {
   return 1;
 }

@@ -5,9 +5,7 @@ import sys;
 int main() try {
   if (!sys::is_tgt_windows()) return 0;
 
-  sys::for_each_dag(false, [](auto * dag, auto id, auto) {
-    if (id != 'tapp') return;
-
+  sys::for_each_tag_in_dags('tapp', false, [](auto * dag, auto) {
     sys::dag_read(dag, [dag](auto id, auto file) {
       if (id != 'srcf') return;
 

@@ -5,9 +5,7 @@ import sys;
 // TODO: investigate why changes in deps are not triggering these
 // Example: change "sys.cppm", no tool gets its obj compiled
 int main() try {
-  sys::for_each_dag(true, [](auto * dag, auto id, auto file) {
-    if (id != 'pcmf') return;
-
+  sys::for_each_tag_in_dags('pcmf' , true, [](auto * dag, auto file) {
     sim::sb pcm { file };
     sim::sb obj {};
     sys::dag_read(dag, [&](auto id, auto file) {

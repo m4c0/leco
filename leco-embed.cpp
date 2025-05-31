@@ -50,8 +50,5 @@ static void process_file(const char * dag, const char * file) {
 }
 
 int main() {
-  sys::for_each_dag(true, [](const char * dag, auto id, auto file) {
-    if (id != 'embd') return;
-    process_file(dag, file);
-  });
+  sys::for_each_tag_in_dags('embd', true, &process_file);
 }

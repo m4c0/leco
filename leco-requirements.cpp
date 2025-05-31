@@ -7,9 +7,7 @@ int main() try {
   str::set collected {};
   collected.insert("../leco"); // Marking as dependency for any leco-based software
 
-  sys::for_each_dag(true, [&](auto dag, auto id, auto file) {
-    if (id != 'vers') return;
-
+  sys::for_each_tag_in_dags('vers', true, [&](auto dag, auto file) {
     auto path = sim::path_parent(dag);
     path.path_parent();
     path.path_parent();

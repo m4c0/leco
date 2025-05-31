@@ -36,7 +36,7 @@ static auto calc_mtime(const char * dag) {
   return mtime;
 }
 
-static void compile(const char * dag) {
+static void compile_objf(const char * dag, const char * _) {
   bool pcm = false;
   sim::sb src {};
   sim::sb obj {};
@@ -54,9 +54,7 @@ static void compile(const char * dag) {
 }
 
 int main() try {
-  sys::for_each_dag(true, [](auto * dag, auto id, auto file) {
-    if (id == 'objf') compile(dag);
-  });
+  sys::for_each_tag_in_dags('objf', true, &compile_objf);
 } catch (...) {
   return 1;
 }
