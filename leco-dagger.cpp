@@ -516,8 +516,8 @@ int main(int argc, char **argv) try {
     check_and_run(*sim::path_real(file), true);
   }
 
-  sys::for_each_tag_in_dags('impl', true, &check_non_root);
   sys::for_each_tag_in_dags('mdep', true, &check_non_root);
+  sys::for_each_tag_in_dags('impl', true, &check_non_root);
   return 0;
 } catch (...) {
   return 1;
