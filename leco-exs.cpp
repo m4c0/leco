@@ -40,10 +40,7 @@ int main(int argc, char ** argv) try {
   sys::for_each_root_dag([](auto dag, auto id, auto file) {
     if (id != 'tapp' && id != 'tool') return;
 
-    sim::sb edir {};
-    sys::dag_read(dag, [&](auto id, auto file) {
-      if (id == 'edir') edir = sim::sb { file };
-    });
+    sim::sb edir = sys::read_dag_tag('edir', dag); 
     if (edir == "") sys::die("dag without executable directory");
 
     sys::mkdirs(*edir);

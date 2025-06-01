@@ -481,11 +481,7 @@ static void check_and_run(const char * src, bool roots_only) {
   auto dag = (parent / sim::path_filename(src)).path_extension("dag");
 
   if (mtime::of(*dag) > mtime::of(src)) {
-    sim::sb vers {};
-    sys::dag_read(*dag, [&](auto id, auto file) {
-      if (id == 'vers') vers = sim::sb { file };
-    });
-    if (vers == dag_file_version) return;
+    if (dag_file_version == sys::read_dag_tag('vers', *dag)) return;
   }
 
   switch (run(*dag, src, roots_only)) {

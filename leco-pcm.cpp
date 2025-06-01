@@ -28,14 +28,8 @@ static auto calc_mtime(const char * dag) {
   return mtime;
 }
 static void compile_pcmf(const char * dag, const char * _) {
-  sim::sb src {};
-  sim::sb pcm {};
-  sys::dag_read(dag, [&](auto id, auto file) {
-    switch (id) {
-      case 'srcf': src = sim::sb { file }; break;
-      case 'pcmf': pcm = sim::sb { file }; break;
-    }
-  });
+  sim::sb src = sys::read_dag_tag('srcf', dag);
+  sim::sb pcm = sys::read_dag_tag('pcmf', dag);
   if (calc_mtime(dag) < mtime::of(*pcm)) return;
 
   compile(*src, *pcm, dag);

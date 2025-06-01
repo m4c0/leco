@@ -119,6 +119,13 @@ void dag_read(const char *dag, auto &&fn) try {
 } catch (...) {
   whilst("reading DAG node: ", dag);
 }
+auto read_dag_tag(uint32_t tid, const char * dag) {
+  sim::sb res {};
+  dag_read(dag, [&](auto id, auto file) {
+    if (id == tid) res = sim::sb { file };
+  });
+  return res;
+}
 
 void recurse_dag(str::set * cache, const char * dag, auto && fn) {
   if (!cache->insert(dag)) return;

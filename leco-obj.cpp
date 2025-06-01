@@ -37,17 +37,10 @@ static auto calc_mtime(const char * dag) {
 }
 
 static void compile_objf(const char * dag, const char * _) {
-  bool pcm = false;
-  sim::sb src {};
-  sim::sb obj {};
-  sys::dag_read(dag, [&](auto id, auto file) {
-    switch (id) {
-      case 'pcmf': pcm = true; break;
-      case 'srcf': src = sim::sb { file }; break;
-      case 'objf': obj = sim::sb { file }; break;
-    }
-  });
-  if (pcm) return;
+  if (sys::read_dag_tag('pcmf', dag) != "") return;
+
+  sim::sb src = sys::read_dag_tag('srcf', dag);
+  sim::sb obj = sys::read_dag_tag('objf', dag);
   if (calc_mtime(dag) < mtime::of(*obj)) return;
 
   compile(*src, *obj, dag);

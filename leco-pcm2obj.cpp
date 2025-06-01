@@ -7,10 +7,7 @@ import sys;
 int main() try {
   sys::for_each_tag_in_dags('pcmf' , true, [](auto * dag, auto file) {
     sim::sb pcm { file };
-    sim::sb obj {};
-    sys::dag_read(dag, [&](auto id, auto file) {
-      if (id == 'objf') obj = sim::sb { file };
-    });
+    sim::sb obj = sys::read_dag_tag('objf', dag);
     if (mtime::of(*pcm) < mtime::of(*obj)) return;
 
     auto deps = sim::path_parent(dag) / "deplist";

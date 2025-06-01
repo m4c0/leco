@@ -14,10 +14,7 @@ int main(int argc, char **argv) try {
   sys::for_each_root_dag([](auto dag, auto id, auto file) {
     if (id != 'tapp') return;
 
-    sim::sb rdir {};
-    sys::dag_read(dag, [&](auto id, auto file) {
-      if (id == 'rdir') rdir = sim::sb { file };
-    });
+    sim::sb rdir = sys::read_dag_tag('rdir', dag);
     if (rdir == "") sys::die("app dag without resource dir");
 
     sys::mkdirs(*rdir);
