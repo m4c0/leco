@@ -496,7 +496,8 @@ static void check_and_run(const char * src, bool roots_only) {
   }
 }
 
-static void check_non_root(const char * _, const char * file) {
+static void check_non_root(const char * _, unsigned id, const char * file) {
+  if (id != 'mdep' && id != 'impl') return;
   return check_and_run(file, false);
 }
 
@@ -512,8 +513,7 @@ int main(int argc, char **argv) try {
     check_and_run(*sim::path_real(file), true);
   }
 
-  sys::for_each_tag_in_dags('mdep', true, &check_non_root);
-  sys::for_each_tag_in_dags('impl', true, &check_non_root);
+  sys::for_each_dag(true, &check_non_root);
   return 0;
 } catch (...) {
   return 1;
