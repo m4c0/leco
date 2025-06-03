@@ -1,7 +1,6 @@
 #pragma leco tool
 #include <stdio.h>
 
-import gopt;
 import sys;
 
 static void process_file(const char * dag, const char * file) {

@@ -32,7 +32,7 @@
   puts("Building " name);                                             \
   run(CLANG " -i leco-" name ".cpp "                                  \
             "-- -o out/" HOST_TARGET "/leco-" name ".exe " CPPSTD     \
-            MARG("gopt") MARG("mtime") MARG("no") MARG("popen")       \
+            MARG("mtime") MARG("no") MARG("popen")                    \
             MARG("pprent") MARG("print") MARG("sysstd")               \
             LMARG("sim") LMARG("strset") LMARG("sys"))
 
@@ -49,7 +49,6 @@ int try_main() {
   run("clang++ -std=c++20 leco-clang.cpp -o " CLANG);
 
   puts("Building core modules");
-  MODULE("gopt");
   MODULE("mtime");
   MODULE("no");
   MODULE("popen", PARG("no"));

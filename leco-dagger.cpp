@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-import gopt;
 import popen;
 import sys;
 
