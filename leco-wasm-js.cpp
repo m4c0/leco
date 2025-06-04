@@ -72,7 +72,21 @@ static auto mtime_rec(const char * dag) {
   return mtime;
 }
 
-int main(int argc, char **argv) {
+static void run(const char * input, const char * output) {
+  if (mtime::of(output) >= mtime_rec(input)) return;
+
+  sys::log("generating", output);
+
+  auto f = sys::fopen(output, "wb");
+  fprintf(f, "var leco_exports;\n");
+  fprintf(f, "var leco_imports = {};\n");
+
+  concat_all(f, input);
+
+  concat(f, "../leco/wasm.js");
+}
+
+int main(int argc, char **argv) try {
   const char * input {};
   sim::sb appdir {};
 
@@ -86,17 +100,7 @@ int main(int argc, char **argv) {
 
   if (opts.argc != 0 || !input || !appdir.len) usage();
 
-  appdir /= "leco.js";
-  if (mtime::of(*appdir) >= mtime_rec(input)) return 0;
-
-  sys::log("generating", *appdir);
-
-  auto f = sys::fopen(*appdir, "wb");
-  fprintf(f, "var leco_exports;\n");
-  fprintf(f, "var leco_imports = {};\n");
-
-  concat_all(f, input);
-
-  concat(f, "../leco/wasm.js");
-  fclose(f);
+  run(input, *(appdir / "leco.js"));
+} catch (...) {
+  return 1;
 }
