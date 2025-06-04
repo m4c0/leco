@@ -4,9 +4,6 @@ import sys;
 
 static void copy_res(const sim::sb & resdir, const char * file) {
   auto path = resdir / sim::path_filename(file);
-  if (mtime::of(*path) >= mtime::of(file)) return;
-
-  sys::log("hard-linking", file);
   sys::link(file, *path);
 }
 

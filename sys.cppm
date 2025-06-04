@@ -61,7 +61,17 @@ void unlink(const char * f) {
 }
 
 void link(const char *src, const char *dst) {
-  unlink(dst);
+  if (mtime::of(dst) >= mtime::of(src)) return;
+  sys::log("hard-linking", dst);
+
+  if (0 != remove(dst)) {
+    // Rename original file. This is a "Windows-approved" way of modifying an
+    // open executable or file.
+    auto bkp = sim::sb { dst } + ".bkp";
+    remove(*bkp);
+    rename(dst, *bkp);
+  }
+
 #ifdef _WIN32
   if (!CreateHardLink(dst, src, nullptr))
     die("could not create hard-link");

@@ -7,18 +7,6 @@ import sys;
 static void copy_exe(const sim::sb & exedir, const char * input) {
   auto path = exedir / sim::path_filename(input);
   if (sys::is_tgt_wasm()) path.path_extension("wasm");
-
-  if (mtime::of(*path) >= mtime::of(input)) return;
-
-  sys::log("copying", *path);
-
-  if (0 != remove(*path)) {
-    // Rename original file. This is a "Windows-approved" way of modifying an
-    // open executable.
-    auto bkp = path + ".bkp";
-    remove(*bkp);
-    rename(*path, *bkp);
-  }
   sys::link(input, *path);
 }
 

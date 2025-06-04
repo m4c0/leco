@@ -37,8 +37,6 @@ static void create_colour_contents(const char *path) {
 }
 
 static void copy_icon(const char *path) {
-  sys::log("copying", "icon.png");
-
   auto file = sim::sb { path } / "Icon-1024.png";
   sys::link("icon.png", *file);
 }
