@@ -23,57 +23,16 @@ static void concat(FILE *out, const char *in_file) {
   while ((got = fread(buf, 1, sizeof(buf), in)) > 0) {
     fwrite(buf, 1, got, out);
   }
-
-  fclose(in);
-}
-
-static str::set added{};
-static void concat_all(FILE *out, const char *dag) {
-  if (!added.insert(dag))
-    return;
-
-  sys::dag_read(dag, [=](auto id, auto file) {
-    switch (id) {
-    case 'srcf': {
-      sim::sb js { file };
-      js.path_extension("js");
-      if (mtime::of(*js) > 0) concat(out, *js);
-      break;
-    }
-    case 'idag':
-    case 'mdag':
-      concat_all(out, file);
-      break;
-    }
-  });
-}
-
-static str::map mtime_cache {};
-static auto mtime_rec(const char * dag) {
-  auto & mtime = mtime_cache[dag];
-  if (mtime != 0) return mtime;
-  mtime = 1;
-
-  sys::dag_read(dag, [&](auto id, auto file) {
-    switch (id) {
-      case 'srcf': {
-        sim::sb js { file };
-        js.path_extension("js");
-        mtime = sys::max(mtime, mtime::of(*js));
-        break;
-      }
-      case 'idag':
-      case 'mdag':
-        mtime = sys::max(mtime, mtime_rec(file));
-        break;
-    }
-  });
-
-  return mtime;
 }
 
 static void run(const char * input, const char * output) {
-  if (mtime::of(output) >= mtime_rec(input)) return;
+  mtime::t mtime = 0;
+  sys::recurse_dag(input, [&](auto dag, auto id, auto file) {
+    if (id != 'srcf') return;
+    auto js = sim::sb { file }.path_extension("js");
+    mtime = sys::max(mtime, mtime::of(*js));
+  });
+  if (mtime::of(output) >= mtime) return;
 
   sys::log("generating", output);
 
@@ -81,7 +40,11 @@ static void run(const char * input, const char * output) {
   fprintf(f, "var leco_exports;\n");
   fprintf(f, "var leco_imports = {};\n");
 
-  concat_all(f, input);
+  sys::recurse_dag(input, [&](auto dag, auto id, auto file) {
+    if (id != 'srcf') return;
+    auto js = sim::sb { file }.path_extension("js");
+    if (mtime::of(*js) > 0) concat(f, *js);
+  });
 
   concat(f, "../leco/wasm.js");
 }
