@@ -15,8 +15,6 @@ static void put_escape(const char *a) {
   fputc('\n', out);
 }
 
-static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
-
 static void add_local_fw(const char * fw) {
   auto stem = sim::path_stem(fw);
   auto path = sim::path_parent(fw);
@@ -41,7 +39,7 @@ static auto read_dag(str::map & cache, const char *dag) {
     case 'objf': obj = sim::sb { file }; break;
     case 'xcfw': add_local_fw(file); break;
     case 'idag':
-    case 'mdag': mtime = max(mtime, read_dag(cache, file)); break;
+    case 'mdag': mtime = sys::max(mtime, read_dag(cache, file)); break;
     default: break;
     }
   });
@@ -49,7 +47,7 @@ static auto read_dag(str::map & cache, const char *dag) {
   // Add object after dependencies as this kinda enforces the static init order
   put_escape(*obj);
 
-  mtime = max(mtime, mtime::of(*obj));
+  mtime = sys::max(mtime, mtime::of(*obj));
   return mtime;
 }
 

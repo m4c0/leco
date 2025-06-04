@@ -48,7 +48,6 @@ static void concat_all(FILE *out, const char *dag) {
   });
 }
 
-static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 static str::map mtime_cache {};
 static auto mtime_rec(const char * dag) {
   auto & mtime = mtime_cache[dag];
@@ -60,12 +59,12 @@ static auto mtime_rec(const char * dag) {
       case 'srcf': {
         sim::sb js { file };
         js.path_extension("js");
-        mtime = max(mtime, mtime::of(*js));
+        mtime = sys::max(mtime, mtime::of(*js));
         break;
       }
       case 'idag':
       case 'mdag':
-        mtime = max(mtime, mtime_rec(file));
+        mtime = sys::max(mtime, mtime_rec(file));
         break;
     }
   });

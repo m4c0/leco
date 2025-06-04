@@ -5,8 +5,6 @@ import sys;
 // TODO: investigate why changes in deps are not triggering these
 // Example: change "sys.cppm", no tool gets its obj compiled
 
-static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
-
 static void compile(const char * src, const char * obj, const char * dag) {
   auto ext = sim::path_extension(src);
   const char * lang = "-std=c++2b";
@@ -28,8 +26,8 @@ static auto calc_mtime(const char * dag) {
 
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
-      case 'head': mtime = max(mtime, mtime::of(file)); break;
-      case 'mdag': mtime = max(mtime, calc_mtime(file)); break;
+      case 'head': mtime = sys::max(mtime, mtime::of(file)); break;
+      case 'mdag': mtime = sys::max(mtime, calc_mtime(file)); break;
     }
   });
 

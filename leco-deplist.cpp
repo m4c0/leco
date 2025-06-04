@@ -5,12 +5,10 @@ import sys;
 // TODO: consider merging this with leco-clang
 // TODO: consider taking flag logic from leco-clang
 
-static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
-
 void run(const char * parent, const char * depf, const char * incf) {
   auto mt = 0ULL;
   sys::for_each_dag(parent, true, [&](auto dag, auto id, auto file) {
-    if (id == 'vers') mt = max(mt, mtime::of(dag));
+    if (id == 'vers') mt = sys::max(mt, mtime::of(dag));
   });
 
   if (mtime::of(depf) > mt && mtime::of(incf) > mt) return;

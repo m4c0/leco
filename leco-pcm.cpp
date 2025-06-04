@@ -2,8 +2,6 @@
 
 import sys;
 
-static constexpr auto max(auto a, auto b) { return a > b ? a : b; }
-
 static void compile(const char * src, const char * pcm, const char * dag) {
   auto deps = sim::path_parent(dag) / "deplist";
   auto incs = sim::path_parent(dag) / "includes";
@@ -20,8 +18,8 @@ static auto calc_mtime(const char * dag) {
 
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
-      case 'head': mtime = max(mtime, mtime::of(file)); break;
-      case 'mdag': mtime = max(mtime, calc_mtime(file)); break;
+      case 'head': mtime = sys::max(mtime, mtime::of(file)); break;
+      case 'mdag': mtime = sys::max(mtime, calc_mtime(file)); break;
     }
   });
 

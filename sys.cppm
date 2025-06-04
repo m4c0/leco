@@ -233,4 +233,6 @@ bool is_tgt_apple() { return is_tgt_osx()      || is_tgt_ios();     }
 [[noreturn]] __attribute__((format(printf, 1, 2))) inline void die(const char *msg, auto &&... args) {
   ::dief(msg, args...);
 }
+
+constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 } // namespace sys
