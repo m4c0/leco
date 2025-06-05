@@ -11,7 +11,7 @@ static void usage() {
 Merges JS files into a single file. Only useful with WASM target. Expects JS to
 have the same name as its related C++ module.
 
-Usage: ../leco/leco.exe wasm-js -i <input.dag>
+Usage: ../leco/leco.exe wasm-js
 )");
 }
 
