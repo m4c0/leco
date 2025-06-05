@@ -10,7 +10,7 @@ static void wasm_bundle(const char *dag) {
   sys::link("../leco/wasm.html", *path);
 
   path.path_parent();
-  sys::tool_run("wasm-js", " -i %s -a %s", dag, *path);
+  sys::tool_run("wasm-js", " -i %s", dag);
 }
 
 static void bundle(const char * dag, const char * _) {

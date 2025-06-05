@@ -11,7 +11,7 @@ static void usage() {
 Merges JS files into a single file. Only useful with WASM target. Expects JS to
 have the same name as its related C++ module.
 
-Usage: ../leco/leco.exe wasm-js -a <bundle-dir> -i <input.dag>
+Usage: ../leco/leco.exe wasm-js -i <input.dag>
 )");
 }
 
@@ -51,19 +51,18 @@ static void run(const char * input, const char * output) {
 
 int main(int argc, char **argv) try {
   const char * input {};
-  sim::sb appdir {};
 
-  auto opts = gopt_parse(argc, argv, "i:a:", [&](auto ch, auto val) {
+  auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
     switch (ch) {
-    case 'a': appdir = sim::path_real(val); break;
     case 'i': input = val; break;
     default:  usage();
     }
   });
 
-  if (opts.argc != 0 || !input || !appdir.len) usage();
+  if (opts.argc != 0 || !input) usage();
 
-  run(input, *(appdir / "leco.js"));
+  auto js = sim::sb { input }.path_extension("app") / "leco.js";
+  run(input, *js);
 } catch (...) {
   return 1;
 }
