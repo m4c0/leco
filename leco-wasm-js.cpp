@@ -25,15 +25,20 @@ static void concat(FILE *out, const char *in_file) {
   }
 }
 
-static void run(const char * input) {
+static void run(const char * dag, const char * _) {
+  auto path = sim::sb { dag }.path_extension("app");
+
+  auto html = (path / sim::path_filename(dag)).path_extension("html");
+  sys::link("../leco/wasm.html", *html);
+
   mtime::t mtime = 0;
-  sys::recurse_dag(input, [&](auto dag, auto id, auto file) {
+  sys::recurse_dag(dag, [&](auto dag, auto id, auto file) {
     if (id != 'srcf') return;
     auto js = sim::sb { file }.path_extension("js");
     mtime = sys::max(mtime, mtime::of(*js));
   });
 
-  auto output = sim::sb { input }.path_extension("app") / "leco.js";
+  auto output = path / "leco.js";
   if (mtime::of(*output) >= mtime) return;
 
   sys::log("generating", *output);
@@ -42,7 +47,7 @@ static void run(const char * input) {
   fprintf(f, "var leco_exports;\n");
   fprintf(f, "var leco_imports = {};\n");
 
-  sys::recurse_dag(input, [&](auto dag, auto id, auto file) {
+  sys::recurse_dag(dag, [&](auto dag, auto id, auto file) {
     if (id != 'srcf') return;
     auto js = sim::sb { file }.path_extension("js");
     if (mtime::of(*js) > 0) concat(f, *js);
@@ -52,18 +57,8 @@ static void run(const char * input) {
 }
 
 int main(int argc, char **argv) try {
-  const char * input {};
-
-  auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
-    switch (ch) {
-    case 'i': input = val; break;
-    default:  usage();
-    }
-  });
-
-  if (opts.argc != 0 || !input) usage();
-
-  run(input);
+  if (!sys::is_tgt_apple()) usage();
+  sys::for_each_tag_in_dags('tapp', false, &run);
 } catch (...) {
   return 1;
 }
