@@ -25,18 +25,20 @@ static void concat(FILE *out, const char *in_file) {
   }
 }
 
-static void run(const char * input, const char * output) {
+static void run(const char * input) {
   mtime::t mtime = 0;
   sys::recurse_dag(input, [&](auto dag, auto id, auto file) {
     if (id != 'srcf') return;
     auto js = sim::sb { file }.path_extension("js");
     mtime = sys::max(mtime, mtime::of(*js));
   });
-  if (mtime::of(output) >= mtime) return;
 
-  sys::log("generating", output);
+  auto output = sim::sb { input }.path_extension("app") / "leco.js";
+  if (mtime::of(*output) >= mtime) return;
 
-  auto f = sys::fopen(output, "wb");
+  sys::log("generating", *output);
+
+  auto f = sys::fopen(*output, "wb");
   fprintf(f, "var leco_exports;\n");
   fprintf(f, "var leco_imports = {};\n");
 
@@ -61,8 +63,7 @@ int main(int argc, char **argv) try {
 
   if (opts.argc != 0 || !input) usage();
 
-  auto js = sim::sb { input }.path_extension("app") / "leco.js";
-  run(input, *js);
+  run(input);
 } catch (...) {
   return 1;
 }
