@@ -244,5 +244,6 @@ bool is_tgt_apple() { return is_tgt_osx()      || is_tgt_ios();     }
   ::dief(msg, args...);
 }
 
+#undef max
 constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 } // namespace sys
