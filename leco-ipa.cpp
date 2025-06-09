@@ -90,7 +90,12 @@ static void iphone_bundle(const char *dag) {
   upload_archive(dag);
 }
 
-// TODO: consider remove "input" parameter like other tools
+static void run(const char * input) {
+  if (sys::is_tgt_iphoneos()) iphone_bundle(input);
+  else if (sys::is_tgt_ios_sim()) iphonesim_bundle(input);
+  else if (sys::is_tgt_osx()) osx_bundle(input);
+}
+
 int main(int argc, char ** argv) try {
   const char * input {};
   auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
@@ -101,13 +106,9 @@ int main(int argc, char ** argv) try {
   });
   if (!input || opts.argc != 0) usage();
 
-  auto path = sim::path_parent(input);
+  if (!sys::is_tgt_apple()) usage();
 
-  if (sys::is_tgt_iphoneos()) iphone_bundle(input);
-  else if (sys::is_tgt_ios_sim()) iphonesim_bundle(input);
-  else if (sys::is_tgt_osx()) osx_bundle(input);
-  else usage();
-
+  run(input);
   return 0;
 } catch (...) {
   return 1;
