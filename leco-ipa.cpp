@@ -11,17 +11,14 @@ import sys;
 
 void usage() {
   sys::die(R"(
-Exports an iOS application - i.e. generates an uploadable IPA.
+Exports iOS applications - i.e. generates uploadable IPAs.
 
 If you see werid messages from XCode about missing iOS Simulator stuff, you
 need to download the iOS SDK. This command might help:
 
         xcodebuild -downloadPlatform iOS
 
-Usage: ../leco/leco.exe ipa -i <input.dag>
-
-Where:
-        -i: Application DAG
+Usage: ../leco/leco.exe ipa
 )");
 }
 
@@ -90,25 +87,17 @@ static void iphone_bundle(const char *dag) {
   upload_archive(dag);
 }
 
-static void run(const char * input) {
-  if (sys::is_tgt_iphoneos()) iphone_bundle(input);
-  else if (sys::is_tgt_ios_sim()) iphonesim_bundle(input);
-  else if (sys::is_tgt_osx()) osx_bundle(input);
+static void run(const char * dag, const char * _) {
+  if (sys::is_tgt_iphoneos()) iphone_bundle(dag);
+  else if (sys::is_tgt_ios_sim()) iphonesim_bundle(dag);
+  else if (sys::is_tgt_osx()) osx_bundle(dag);
 }
 
 int main(int argc, char ** argv) try {
-  const char * input {};
-  auto opts = gopt_parse(argc, argv, "i:", [&](auto ch, auto val) {
-    switch (ch) {
-      case 'i': input = val; break;
-      default: usage(); break;
-    }
-  });
-  if (!input || opts.argc != 0) usage();
-
+  if (argc != 1) usage();
   if (!sys::is_tgt_apple()) usage();
 
-  run(input);
+  sys::for_each_tag_in_dags('tapp', false, &run);
   return 0;
 } catch (...) {
   return 1;
