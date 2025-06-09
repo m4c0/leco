@@ -35,7 +35,8 @@ static void run_target(const char * target) {
   if (clean_level == 1) sys::tool_run("cleaner");
   if (clean_level >= 2) sys::tool_run("cleaner", "-a");
 
-  sys::opt_tool_run("sysroot");
+  if (!sys::is_tgt_host()) sys::tool_run("sysroot");
+
   sys::    tool_run("dagger");
   sys::opt_tool_run("shaders");
   sys::opt_tool_run("embed");
