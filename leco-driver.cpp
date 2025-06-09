@@ -47,7 +47,9 @@ static void run_target(const char * target) {
   sys::    tool_run("link");
   sys::opt_tool_run("exs");
   sys::opt_tool_run("rsrc");
-  sys::opt_tool_run("bundler");
+
+  if (sys::is_tgt_apple()) sys::tool_run("ipa");
+  if (sys::is_tgt_wasm())  sys::tool_run("wasm-js");
 }
 
 static void run_targets(auto ... target) {
