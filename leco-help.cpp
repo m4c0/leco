@@ -17,7 +17,6 @@ Porcelain tools:
 
 Plumbing tools:
 
-        bundler: bundles applications
         clang: runs clang with opiniated defaults
         codesign: runs codesign on Apple platforms
         dagger: generates dependency files based on parsed code
@@ -28,10 +27,8 @@ Plumbing tools:
         ipa-export: exports an IPA archive
         link: links an executable
         meta: used to run other tools
-        recurse: compiles C++ code recursively
         rc: generates "RC" files for Windows
         rsrc: copies resource files to their app's resource folder
-        sawblade: runs dagger recursively
         shaders: compiles GLSL into SPIRV
         sysroot: calculates the sysroot of the environment
         wasm-js: almost a webpacker
