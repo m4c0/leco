@@ -5,19 +5,6 @@ import sys;
 // TODO: investigate why changes in deps are not triggering these
 // Example: change "sys.cppm", no tool gets its obj compiled
 
-static void compile(const char * src, const char * obj, const char * dag) {
-  auto ext = sim::path_extension(src);
-  const char * lang = "-std=c++2b";
-  if (ext == ".m" || ext == ".mm") lang = "-fmodules -fobjc-arc";
-  else if (ext == ".c") lang = "-std=c11";
- 
-  auto deps = sim::path_parent(dag) / "deplist";
-  auto incs = sim::path_parent(dag) / "includes";
-
-  sys::log("compiling object", obj);
-  sys::tool_run("clang", "-i %s -- %s -c -o %s @%s @%s", src, lang, obj, *deps, *incs);
-}
-
 static str::map spec_cache {};
 static auto calc_mtime(const char * dag) {
   auto &mtime = spec_cache[dag];
@@ -41,7 +28,16 @@ static void compile_objf(const char * dag, const char * _) {
   sim::sb obj = sys::read_dag_tag('objf', dag);
   if (calc_mtime(dag) < mtime::of(*obj)) return;
 
-  compile(*src, *obj, dag);
+  auto ext = sim::path_extension(*src);
+  const char * lang = "-std=c++2b";
+  if (ext == ".m" || ext == ".mm") lang = "-fmodules -fobjc-arc";
+  else if (ext == ".c") lang = "-std=c11";
+ 
+  auto deps = sim::path_parent(dag) / "deplist";
+  auto incs = sim::path_parent(dag) / "includes";
+
+  sys::log("compiling object", *obj);
+  sys::tool_run("clang", "-i %s -- %s -c -o %s @%s @%s", *src, lang, *obj, *deps, *incs);
 }
 
 int main() try {
