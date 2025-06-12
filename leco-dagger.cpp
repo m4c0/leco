@@ -393,7 +393,7 @@ static bool pragma(const char * p) {
 enum run_result { OK, ERR, SKIPPED };
 [[nodiscard]] static run_result run(const char * dag, const char * src, bool roots_only) try {
   p::proc proc {
-    *sys::tool_cmd("clang"), "-i", src, "-t", target, "--", "-E"
+    *sys::tool_cmd("clang"), "-i", src, "--", "-E"
   };
   sys::file f { dag, "w" };
 
@@ -448,7 +448,7 @@ enum run_result { OK, ERR, SKIPPED };
 
   if (proc.wait() != 0) {
     err(*buf);
-    die("error running: ", *sys::tool_cmd("clang"), " -i ", *source, " -t ", target, " -- -E");
+    die("error running: ", *sys::tool_cmd("clang"), " -i ", *source, " -- -E");
   }
 
   output('vers', dag_file_version);

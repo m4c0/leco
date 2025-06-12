@@ -35,7 +35,7 @@ static int usage() {
   fprintf(stderr, R"(
 LECO's heavily-opiniated CLANG runner
 
-Usage: ../leco/leco.exe clang [-i <input>] [-t <target>] [-g] [-O] [-v] [-- <clang-flags>]
+Usage: ../leco/leco.exe clang [-i <input>] [-- <clang-flags>]
 
 This tool uses the clang version available via PATH, except on MacOS where it 
 requires llvm to be installed via Homebrew.
@@ -44,16 +44,16 @@ Where:
       -i <input>     input file. When used, certain flags will be automatically
                      inferred, like C/C++ standard
 
-      -t <target>    target triple (check this tool's source for list of
+      <clang-flags>  pass flags as-is to clang
+
+Environment variables:
+      LECO_TARGET    target triple (check this tool's source for list of
                      supported targets)
 
-      -g             enable debug flags
+      LECO_DEBUG     enable debug flags
 
-      -O             enable optimisation flags
+      LECO_OPT       enable optimisation flags
 
-      -v             print command-line before running it
-
-      <clang-flags>  pass flags as-is to clang
 )");
   return 1;
 }
@@ -105,7 +105,7 @@ static void add_sysroot(sim_sb * args, const char * target, const char * argv0) 
 
 int main(int argc, char **argv) try {
   struct gopt opts;
-  GOPT(opts, argc, argv, "i:t:");
+  GOPT(opts, argc, argv, "i:");
 
   bool cpp = true;
   
@@ -126,7 +126,6 @@ int main(int argc, char **argv) try {
             (0 == strcmp(ext, ".mm"));
       break;
     }
-    case 't': target = val; break;
     default: return usage();
     }
   }

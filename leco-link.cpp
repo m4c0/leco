@@ -77,7 +77,6 @@ void run(const char * input, const char * output) {
 #endif
 
   sim::sb cmd{10240};
-  cmd.printf(" -t %s", sys::target());
   cmd.printf(" -- @%s -o ", *args);
 #ifdef _WIN32
   cmd += *next;
