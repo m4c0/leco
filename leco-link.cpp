@@ -4,9 +4,7 @@
 
 import sys;
 
-static FILE *out{};
-
-static void put_escape(const char *a) {
+static void put_escape(FILE * out, const char *a) {
   while (*a != 0) {
     char c = *a++;
     if (c == '\\') fputs("\\\\", out); // escapes backslash
@@ -15,14 +13,14 @@ static void put_escape(const char *a) {
   fputc('\n', out);
 }
 
-static void add_local_fw(const char * fw) {
+static void add_local_fw(FILE * out, const char * fw) {
   auto stem = sim::path_stem(fw);
   auto path = sim::path_parent(fw);
 
   fprintf(out, "-F%s\n-framework\n%s\n", *path, stem.buffer);
 }
 
-static auto read_dag(str::map & cache, const char *dag) {
+static auto read_dag(str::map & cache, const char * dag, FILE * out) {
   auto & mtime = cache[dag];
   if (mtime != 0) return mtime;
   mtime = 1;
@@ -37,15 +35,15 @@ static auto read_dag(str::map & cache, const char *dag) {
     case 'rpth': fprintf(out, "-Wl,-rpath,%s\n", file); break;
     case 'slib': fprintf(out, "%s\n", file); break;
     case 'objf': obj = sim::sb { file }; break;
-    case 'xcfw': add_local_fw(file); break;
+    case 'xcfw': add_local_fw(out, file); break;
     case 'idag':
-    case 'mdag': mtime = sys::max(mtime, read_dag(cache, file)); break;
+    case 'mdag': mtime = sys::max(mtime, read_dag(cache, file, out)); break;
     default: break;
     }
   });
 
   // Add object after dependencies as this kinda enforces the static init order
-  put_escape(*obj);
+  put_escape(out, *obj);
 
   mtime = sys::max(mtime, mtime::of(*obj));
   return mtime;
@@ -57,9 +55,9 @@ void run(const char * input, const char * output) {
 
   // TODO: move argument build (and mtime check) somewhere else
   //       just in case we want to force a link for any reason
-  out = sys::fopen(*args, "wb");
+  auto out = sys::fopen(*args, "wb");
   str::map cache {};
-  auto mtime = read_dag(cache, input);
+  auto mtime = read_dag(cache, input, out);
   fclose(out);
 
   if (mtime <= mtime::of(output)) return;
