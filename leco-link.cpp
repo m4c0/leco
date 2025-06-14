@@ -64,22 +64,6 @@ void run(const char * input, const char * output) {
   str::map cache {};
   read_dag(cache, input, out);
 
-#ifdef _WIN32
-  // We can rename but we can't overwrite an open executable.
-  // To link "clang" we need the old version, so we have to compile in a new
-  // place then do the appropriate renames.
-
-  auto next = sim::sb { output } + ".new";
-  auto prev = sim::sb { output } + ".old";
-
-  remove(*next);
-  remove(*prev);
-
-  const char * exe = *next;
-#else
-  const char * exe = output;
-#endif
-
   if (sys::is_tgt_osx()) {
     // Required for custom frameworks
     fputln(out, "-rpath\n@executable_path/../Frameworks");
@@ -111,6 +95,22 @@ void run(const char * input, const char * output) {
   }
 
   fclose(out);
+
+#ifdef _WIN32
+  // We can rename but we can't overwrite an open executable.
+  // To link "clang" we need the old version, so we have to compile in a new
+  // place then do the appropriate renames.
+
+  auto next = sim::sb { output } + ".new";
+  auto prev = sim::sb { output } + ".old";
+
+  remove(*next);
+  remove(*prev);
+
+  const char * exe = *next;
+#else
+  const char * exe = output;
+#endif
 
   sys::log("linking", output);
   sys::tool_run("clang", "-- @%s -o %s", *args, exe);
