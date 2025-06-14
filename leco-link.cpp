@@ -7,17 +7,17 @@ import sys;
 static void put_escape(FILE * out, const char *a) {
   while (*a != 0) {
     char c = *a++;
-    if (c == '\\') fputs("\\\\", out); // escapes backslash
-    else fputc(c, out);
+    if (c == '\\') fput(out, "\\\\"); // escapes backslash
+    else fput(out, c);
   }
-  fputc('\n', out);
+  fputln(out);
 }
 
 static void add_local_fw(FILE * out, const char * fw) {
   auto stem = sim::path_stem(fw);
   auto path = sim::path_parent(fw);
 
-  fprintf(out, "-F%s\n-framework\n%s\n", *path, stem.buffer);
+  fputfn(out, "-F%s\n-framework\n%s", *path, stem.buffer);
 }
 
 static void read_dag(str::map & cache, const char * dag, FILE * out) {
@@ -28,12 +28,12 @@ static void read_dag(str::map & cache, const char * dag, FILE * out) {
   sim::sb obj {};
   sys::dag_read(dag, [&](auto id, auto file) {
     switch (id) {
-    case 'tdll': fprintf(out, "-shared\n"); break;
-    case 'frwk': fprintf(out, "-framework\n%s\n", file); break;
-    case 'libr': fprintf(out, "-l%s\n", file); break;
-    case 'ldir': fprintf(out, "-L%s\n", file); break;
-    case 'rpth': fprintf(out, "-Wl,-rpath,%s\n", file); break;
-    case 'slib': fprintf(out, "%s\n", file); break;
+    case 'tdll': fputfn(out, "-shared"); break;
+    case 'frwk': fputfn(out, "-framework\n%s", file); break;
+    case 'libr': fputfn(out, "-l%s", file); break;
+    case 'ldir': fputfn(out, "-L%s", file); break;
+    case 'rpth': fputfn(out, "-Wl,-rpath,%s", file); break;
+    case 'slib': fputfn(out, "%s", file); break;
     case 'objf': obj = sim::sb { file }; break;
     case 'xcfw': add_local_fw(out, file); break;
     case 'idag':
