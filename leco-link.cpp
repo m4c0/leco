@@ -4,7 +4,7 @@
 
 import sys;
 
-static void put_escape(FILE * out, const char *a) {
+static void put_escape(sys::file & out, const char *a) {
   while (*a != 0) {
     char c = *a++;
     if (c == '\\') fput(out, "\\\\"); // escapes backslash
@@ -13,14 +13,14 @@ static void put_escape(FILE * out, const char *a) {
   fputln(out);
 }
 
-static void add_local_fw(FILE * out, const char * fw) {
+static void add_local_fw(sys::file & out, const char * fw) {
   auto stem = sim::path_stem(fw);
   auto path = sim::path_parent(fw);
 
   fputfn(out, "-F%s\n-framework\n%s", *path, stem.buffer);
 }
 
-static void read_dag(str::map & cache, const char * dag, FILE * out) {
+static void read_dag(str::map & cache, const char * dag, sys::file & out) {
   auto & mtime = cache[dag];
   if (mtime != 0) return;
   mtime = 1;
