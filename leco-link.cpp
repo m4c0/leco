@@ -20,9 +20,9 @@ static void add_local_fw(FILE * out, const char * fw) {
   fprintf(out, "-F%s\n-framework\n%s\n", *path, stem.buffer);
 }
 
-static auto read_dag(str::map & cache, const char * dag, FILE * out) {
+static void read_dag(str::map & cache, const char * dag, FILE * out) {
   auto & mtime = cache[dag];
-  if (mtime != 0) return mtime;
+  if (mtime != 0) return;
   mtime = 1;
 
   sim::sb obj {};
@@ -37,16 +37,13 @@ static auto read_dag(str::map & cache, const char * dag, FILE * out) {
     case 'objf': obj = sim::sb { file }; break;
     case 'xcfw': add_local_fw(out, file); break;
     case 'idag':
-    case 'mdag': mtime = sys::max(mtime, read_dag(cache, file, out)); break;
+    case 'mdag': read_dag(cache, file, out); break;
     default: break;
     }
   });
 
   // Add object after dependencies as this kinda enforces the static init order
   put_escape(out, *obj);
-
-  mtime = sys::max(mtime, mtime::of(*obj));
-  return mtime;
 }
 
 static auto mtime_of(const char * exe_dag) {
