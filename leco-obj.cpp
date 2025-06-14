@@ -25,6 +25,7 @@ static void drain(ctx * c, int res) {
   while (proc->gets())     err(proc->last_line_read());
   while (proc->gets_err()) err(proc->last_line_read());
 
+  c->proc = {};
   if (res != 0) die("command failed: ", *clang, "-i", *c->src, "--", c->lang, "-c", "-o", *c->obj, *c->deps, *c->incs);
 }
 
