@@ -55,7 +55,7 @@ static auto mtime_of(const char * exe_dag) {
 }
 
 static void prepare_args(const char * input, const char * args) {
-  auto out = sys::fopen(args, "wb");
+  sys::file out { args, "wb" };
   str::map cache {};
   read_dag(cache, input, out);
 
@@ -88,8 +88,6 @@ static void prepare_args(const char * input, const char * args) {
     //                    Only works because we won't be using malloc in threads
     // cmd += " -Xlinker --shared-memory -Xlinker --no-check-features";
   }
-
-  fclose(out);
 }
 void run(const char * input, const char * output) {
   if (mtime_of(input) <= mtime::of(output)) return;
