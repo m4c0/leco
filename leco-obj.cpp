@@ -66,6 +66,7 @@ static void compile_objf(const char * dag, const char * _) {
   for (i = 0; i < 8; i++) if (hs[i] == nullptr) break;
 
   if (i == 8) {
+    // TODO: "drain" buffers otherwise we might deadlock
     auto res = p::wait_any(hs, &i);
     drain(cs + i, res);
   }
