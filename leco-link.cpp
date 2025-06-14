@@ -49,18 +49,24 @@ static auto read_dag(str::map & cache, const char * dag, FILE * out) {
   return mtime;
 }
 
+static auto mtime_of(const char * exe_dag) {
+  mtime::t res {};
+  sys::recurse_dag(exe_dag, [&](auto dag, auto id, auto file) {
+    if (id == 'objf') res = sys::max(res, mtime::of(file));
+  });
+  return res;
+}
+
 void run(const char * input, const char * output) {
+  if (mtime_of(input) <= mtime::of(output)) return;
+
   sim::sb args { input };
   args.path_extension("link");
 
-  // TODO: move argument build (and mtime check) somewhere else
-  //       just in case we want to force a link for any reason
   auto out = sys::fopen(*args, "wb");
   str::map cache {};
-  auto mtime = read_dag(cache, input, out);
+  read_dag(cache, input, out);
   fclose(out);
-
-  if (mtime <= mtime::of(output)) return;
 
 #ifdef _WIN32
   // We can rename but we can't overwrite an open executable.
