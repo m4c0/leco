@@ -63,7 +63,6 @@ void run(const char * input, const char * output) {
   auto out = sys::fopen(*args, "wb");
   str::map cache {};
   read_dag(cache, input, out);
-  fclose(out);
 
 #ifdef _WIN32
   // We can rename but we can't overwrite an open executable.
@@ -81,39 +80,41 @@ void run(const char * input, const char * output) {
   cmd.printf(" -- @%s -o ", *args);
 #ifdef _WIN32
   cmd += *next;
-  // otherwise, face LNK1107 errors from MSVC
-  cmd += " -fuse-ld=lld";
 #else
   cmd += output;
 #endif
 
   if (sys::is_tgt_osx()) {
     // Required for custom frameworks
-    cmd += " -rpath @executable_path/../Frameworks";
+    fputln(out, "-rpath\n@executable_path/../Frameworks");
     // Useful for third-party dylibs, like vulkan loader
-    cmd += " -rpath @executable_path";
+    fputln(out, "-rpath\n@executable_path");
   } else if (sys::is_tgt_ios()) {
-    cmd += " -rpath @executable_path/Frameworks";
+    fputln(out, "-rpath\n@executable_path/Frameworks");
   } else if (sys::is_tgt_windows()) {
+    // otherwise, face LNK1107 errors from MSVC
+    fputln(out, "-fuse-ld=lld");
+
     auto rc = sim::sb { input }.path_extension("res");
-    if (mtime::of(*rc) > 0) cmd.printf(" %s", *rc);
+    if (mtime::of(*rc) > 0) fputln(out, *rc);
   } else if (sys::is_tgt_wasm()) {
     char sra[1024] {};
 
     fgets(sra, sizeof(sra) - 1, sys::file { "../leco/out/wasm32-wasi/sysroot", "r" });
-
-    cmd.printf(" -resource-dir %s", sra);
+    fputln(out, "-resource-dir\n", sra);
 
     // export-table: allows passing lambdas to JS
-    cmd += " -Xlinker --export-table";
+    fputln(out, "-Xlinker\n--export-table");
     // exec-model: without it, we could use "main" but _start calls the global
     //             dtor after "main" returns
-    cmd += " -mexec-model=reactor";
+    fputln(out, "-mexec-model=reactor");
     // no-check-features: allows using shared-memory without atomics/etc
     //                    https://stackoverflow.com/a/70186219
     //                    Only works because we won't be using malloc in threads
     // cmd += " -Xlinker --shared-memory -Xlinker --no-check-features";
   }
+
+  fclose(out);
 
   sys::log("linking", output);
   sys::tool_run("clang", "%s", *cmd);
