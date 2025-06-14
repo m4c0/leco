@@ -74,14 +74,10 @@ void run(const char * input, const char * output) {
 
   remove(*next);
   remove(*prev);
-#endif
 
-  sim::sb cmd{10240};
-  cmd.printf(" -- @%s -o ", *args);
-#ifdef _WIN32
-  cmd += *next;
+  const char * exe = *next;
 #else
-  cmd += output;
+  const char * exe = output;
 #endif
 
   if (sys::is_tgt_osx()) {
@@ -117,7 +113,7 @@ void run(const char * input, const char * output) {
   fclose(out);
 
   sys::log("linking", output);
-  sys::tool_run("clang", "%s", *cmd);
+  sys::tool_run("clang", "-- @%s -o %s", *args, exe);
 
 #ifdef _WIN32
   rename(output, *prev);
