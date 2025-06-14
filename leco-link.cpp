@@ -54,13 +54,8 @@ static auto mtime_of(const char * exe_dag) {
   return res;
 }
 
-void run(const char * input, const char * output) {
-  if (mtime_of(input) <= mtime::of(output)) return;
-
-  sim::sb args { input };
-  args.path_extension("link");
-
-  auto out = sys::fopen(*args, "wb");
+static void prepare_args(const char * input, const char * args) {
+  auto out = sys::fopen(args, "wb");
   str::map cache {};
   read_dag(cache, input, out);
 
@@ -95,6 +90,13 @@ void run(const char * input, const char * output) {
   }
 
   fclose(out);
+}
+void run(const char * input, const char * output) {
+  if (mtime_of(input) <= mtime::of(output)) return;
+
+  sim::sb args { input };
+  args.path_extension("link");
+  prepare_args(input, *args);
 
 #ifdef _WIN32
   // We can rename but we can't overwrite an open executable.
