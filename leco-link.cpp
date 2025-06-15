@@ -5,13 +5,15 @@
 import popen;
 import sys;
 
-static const auto clang = sys::tool_cmd("clang");
-
 struct ctx {
   sim::sb cmd;
   sim::sb exe;
   p::proc * proc {};
 };
+
+static const auto clang = sys::tool_cmd("clang");
+static void * hs[8] {};
+static ctx cs[8] {};
 
 static void drain(ctx * c, int res) {
   auto &[cmd, exe, proc] = *c;
@@ -134,22 +136,35 @@ void run(const char * input, const char * output) {
   const char * exe = output;
 #endif
 
-  sys::log("linking", output);
+  int i {};
+  for (i = 0; i < 8; i++) if (hs[i] == nullptr) break;
+
+  if (i == 8) {
+    // TODO: "drain" buffers otherwise we might deadlock
+    auto res = p::wait_any(hs, &i);
+    drain(cs + i, res);
+  }
 
   auto a = "@"_s + *args;
 
-  ctx c {
+  sys::log("linking", output);
+  cs[i] = {
     .cmd = clang + " -- " + *a + " -o " + exe,
     .exe = sim::sb { output },
     .proc = new p::proc { *clang, "--", *a, "-o", exe },
   };
-  drain(&c, c.proc->wait());
+  hs[i] = cs[i].proc->handle();
 }
 
 int main() try {
   sys::for_each_root_dag([](auto * dag, auto id, auto file) {
     if (id != 'tmmd') run(dag, file);
   });
+
+  for (auto i = 0; i < 8; i++) {
+    if (!cs[i].proc) continue;
+    drain(cs + i, cs[i].proc->wait());
+  }
 
   return 0;
 } catch (...) {
