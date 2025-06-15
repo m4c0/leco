@@ -9,8 +9,26 @@ static const auto clang = sys::tool_cmd("clang");
 
 struct ctx {
   sim::sb cmd;
+  sim::sb exe;
   p::proc * proc {};
 };
+
+static void drain(ctx * c, int res) {
+  auto &[cmd, exe, proc] = *c;
+
+  while (proc->gets())     err(proc->last_line_read());
+  while (proc->gets_err()) err(proc->last_line_read());
+
+  c->proc = {};
+  if (0 != res) die("command failed: ", *c->cmd);
+
+#ifdef _WIN32
+  auto old_f = exe + ".old";
+  auto new_f = exe + ".new";
+  rename(*exe, *old_f);
+  rename(*new_f, *exe);
+#endif
+}
 
 static void put_escape(sys::file & out, const char *a) {
   while (*a != 0) {
@@ -110,11 +128,7 @@ void run(const char * input, const char * output) {
   // place then do the appropriate renames.
 
   auto next = sim::sb { output } + ".new";
-  auto prev = sim::sb { output } + ".old";
-
   remove(*next);
-  remove(*prev);
-
   const char * exe = *next;
 #else
   const char * exe = output;
@@ -126,17 +140,10 @@ void run(const char * input, const char * output) {
 
   ctx c {
     .cmd = clang + " -- " + *a + " -o " + exe,
+    .exe = sim::sb { output },
     .proc = new p::proc { *clang, "--", *a, "-o", exe },
   };
-
-  while (c.proc->gets())     err(c.proc->last_line_read());
-  while (c.proc->gets_err()) err(c.proc->last_line_read());
-  if (0 != c.proc->wait()) die("command failed: ", *c.cmd);
-
-#ifdef _WIN32
-  rename(output, *prev);
-  rename(*next, output);
-#endif
+  drain(&c, c.proc->wait());
 }
 
 int main() try {
