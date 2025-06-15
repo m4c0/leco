@@ -7,6 +7,11 @@ import sys;
 
 static const auto clang = sys::tool_cmd("clang");
 
+struct ctx {
+  sim::sb cmd;
+  p::proc * proc {};
+};
+
 static void put_escape(sys::file & out, const char *a) {
   while (*a != 0) {
     char c = *a++;
@@ -119,10 +124,14 @@ void run(const char * input, const char * output) {
 
   auto a = "@"_s + *args;
 
-  p::proc proc { *clang, "--", *a, "-o", exe };
-  while (proc.gets())     err(proc.last_line_read());
-  while (proc.gets_err()) err(proc.last_line_read());
-  if (0 != proc.wait()) die("command failed: ", *clang, "--", *a, "-o", exe);
+  ctx c {
+    .cmd = clang + " -- " + *a + " -o " + exe,
+    .proc = new p::proc { *clang, "--", *a, "-o", exe },
+  };
+
+  while (c.proc->gets())     err(c.proc->last_line_read());
+  while (c.proc->gets_err()) err(c.proc->last_line_read());
+  if (0 != c.proc->wait()) die("command failed: ", *c.cmd);
 
 #ifdef _WIN32
   rename(output, *prev);
