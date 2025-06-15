@@ -2,7 +2,10 @@
 
 #include <stdio.h>
 
+import popen;
 import sys;
+
+static const auto clang = sys::tool_cmd("clang");
 
 static void put_escape(sys::file & out, const char *a) {
   while (*a != 0) {
@@ -113,7 +116,13 @@ void run(const char * input, const char * output) {
 #endif
 
   sys::log("linking", output);
-  sys::tool_run("clang", "-- @%s -o %s", *args, exe);
+
+  auto a = "@"_s + *args;
+
+  p::proc proc { *clang, "--", *a, "-o", exe };
+  while (proc.gets())     err(proc.last_line_read());
+  while (proc.gets_err()) err(proc.last_line_read());
+  if (0 != proc.wait()) die("command failed: ", *clang, "--", *a, "-o", exe);
 
 #ifdef _WIN32
   rename(output, *prev);
