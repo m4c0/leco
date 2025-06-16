@@ -7,22 +7,20 @@ import sys;
 // Example: change "sys.cppm", no tool gets its obj compiled
 
 struct ctx {
-  sim::sb pcm;
-  sim::sb obj;
-  sim::sb deps;
+  sim::sb cmd;
   p::proc * proc {};
 };
 
 static auto clang = sys::tool_cmd("clang");
 
 static void drain(ctx * c, int res) {
-  auto &[pcm, obj, deps, proc] = *c;
+  auto &[cmd, proc] = *c;
 
   while (proc->gets())     err(proc->last_line_read());
   while (proc->gets_err()) err(proc->last_line_read());
 
   c->proc = {};
-  if (res != 0) die("command failed: ", *clang, "--", "-c", *pcm, "-o", *obj, *deps);
+  if (res != 0) die("command failed: ", *cmd);
 }
 
 int main() try {
@@ -30,13 +28,11 @@ int main() try {
   static ctx cs[8] {};
 
   sys::for_each_tag_in_dags('pcmf' , true, [](auto * dag, auto file) {
-    ctx c {
-      .pcm { file },
-      .obj = sys::read_dag_tag('objf', dag),
-    };
-    if (mtime::of(*c.pcm) < mtime::of(*c.obj)) return;
+    auto pcm = file;
+    auto obj = sys::read_dag_tag('objf', dag);
+    if (mtime::of(pcm) < mtime::of(*obj)) return;
 
-    c.deps = "@"_s + *(sim::path_parent(dag) / "deplist");
+    auto deps = "@"_s + *(sim::path_parent(dag) / "deplist");
 
     int i {};
     for (i = 0; i < 8; i++) if (hs[i] == nullptr) break;
@@ -47,11 +43,13 @@ int main() try {
       drain(cs + i, res);
     }
 
-    sys::log("compiling mod obj", *c.obj);
+    sys::log("compiling mod obj", *obj);
 
-    c.proc = new p::proc { *clang, "--", "-c", *c.pcm, "-o", *c.obj, *c.deps };
-    hs[i] = c.proc->handle();
-    cs[i] = c;
+    cs[i] = {
+      .cmd = clang + " -- -c " + pcm + " -o " + *obj + " " + *deps,
+      .proc = new p::proc { *clang, "--", "-c", pcm, "-o", *obj, *deps },
+    };
+    hs[i] = cs[i].proc->handle();
   });
   for (auto i = 0; i < 8; i++) {
     if (!cs[i].proc) continue;
