@@ -7,11 +7,7 @@ import sys;
 // Example: change "sys.cppm", no tool gets its obj compiled
 
 struct ctx {
-  sim::sb src;
-  sim::sb obj;
-  sim::sb deps;
-  sim::sb incs;
-  const char * lang;
+  sim::sb cmd;
   p::proc * proc {};
 };
 
@@ -20,13 +16,13 @@ static void * hs[8] {};
 static ctx cs[8] {};
 
 static void drain(ctx * c, int res) {
-  auto &[pcm, obj, deps, incs, lang, proc] = *c;
+  auto &[cmd, proc] = *c;
 
   while (proc->gets())     err(proc->last_line_read());
   while (proc->gets_err()) err(proc->last_line_read());
 
   c->proc = {};
-  if (res != 0) die("command failed: ", *clang, "-i", *c->src, "--", c->lang, "-c", "-o", *c->obj, *c->deps, *c->incs);
+  if (res != 0) die("command failed: ", *cmd);
 }
 
 static str::map spec_cache {};
@@ -48,19 +44,17 @@ static auto calc_mtime(const char * dag) {
 static void compile_objf(const char * dag, const char * _) {
   if (sys::read_dag_tag('pcmf', dag) != "") return;
 
-  ctx c {
-    .src = sys::read_dag_tag('srcf', dag),
-    .obj = sys::read_dag_tag('objf', dag),
-  };
-  if (calc_mtime(dag) < mtime::of(*c.obj)) return;
+  auto src = sys::read_dag_tag('srcf', dag);
+  auto obj = sys::read_dag_tag('objf', dag);
+  if (calc_mtime(dag) < mtime::of(*obj)) return;
 
-  auto ext = sim::path_extension(*c.src);
-  c.lang = "-std=c++2b";
-  if (ext == ".m" || ext == ".mm") c.lang = "-fmodules -fobjc-arc";
-  else if (ext == ".c") c.lang = "-std=c11";
+  auto ext = sim::path_extension(*src);
+  auto lang = "-std=c++2b";
+  if (ext == ".m" || ext == ".mm") lang = "-fmodules -fobjc-arc";
+  else if (ext == ".c") lang = "-std=c11";
  
-  c.deps = "@"_s + *(sim::path_parent(dag) / "deplist");
-  c.incs = "@"_s + *(sim::path_parent(dag) / "includes");
+  auto deps = "@"_s + *(sim::path_parent(dag) / "deplist");
+  auto incs = "@"_s + *(sim::path_parent(dag) / "includes");
 
   int i {};
   for (i = 0; i < 8; i++) if (hs[i] == nullptr) break;
@@ -71,10 +65,12 @@ static void compile_objf(const char * dag, const char * _) {
     drain(cs + i, res);
   }
 
-  sys::log("compiling object", *c.obj);
-  c.proc = new p::proc { *clang, "-i", *c.src, "--", c.lang, "-c", "-o", *c.obj, *c.deps, *c.incs };
-  hs[i] = c.proc->handle();
-  cs[i] = c;
+  sys::log("compiling object", *obj);
+  cs[i] = {
+    .cmd = clang + " -i " + *src + " -- " + lang + " -c -o " + *obj + " " + *deps + " " + *incs,
+    .proc = new p::proc { *clang, "-i", *src, "--", lang, "-c", "-o", *obj, *deps, *incs },
+  };
+  hs[i] = cs[i].proc->handle();
 }
 
 int main() try {
