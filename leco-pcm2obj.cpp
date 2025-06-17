@@ -12,6 +12,8 @@ struct ctx {
 };
 
 static auto clang = sys::tool_cmd("clang");
+static void * hs[8] {};
+static ctx cs[8] {};
 
 static void drain(ctx * c, int res) {
   auto &[cmd, proc] = *c;
@@ -24,9 +26,6 @@ static void drain(ctx * c, int res) {
 }
 
 int main() try {
-  static void * hs[8] {};
-  static ctx cs[8] {};
-
   sys::for_each_tag_in_dags('pcmf' , true, [](auto * dag, auto file) {
     auto pcm = file;
     auto obj = sys::read_dag_tag('objf', dag);
