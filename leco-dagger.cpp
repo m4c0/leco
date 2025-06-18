@@ -351,7 +351,7 @@ static bool prop_pragma(const char * p, const char * id, uint32_t code) {
   return true;
 }
 static bool flag_pragma(const char * p, const char * id, uint32_t code) {
-  p = bundle_cmp(p, id);
+  p = cmp(p, id);
   if (!p) return false;
   if (!cmp(p, "\n")) return false;
   output(code, "");
