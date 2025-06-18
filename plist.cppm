@@ -6,7 +6,6 @@ module;
 
 export module plist;
 
-import popen;
 import sys;
 
 export namespace plist {
