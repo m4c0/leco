@@ -17,38 +17,50 @@ constexpr const auto xcode_version = "1540";
 class dict {
   FILE * m_f;
 
-  void array_element(const char *t) { fprintf(m_f, "  <string>%s</string>\n", t); }
-  void array_element(int i) { fprintf(m_f, "  <integer>%d</integer>\n", i); }
+  void tag(const char * tag, auto value) const {
+    fputln(m_f, "<", tag, ">", value, "</", tag, ">");
+  }
+  void tag(const char * tag) const {
+    fputln(m_f, "<", tag, "/>");
+  }
+
+  void array_element(const char *t) const { tag("string",  t); }
+  void array_element(int i)         const { tag("integer", i); }
 
 public:
   explicit constexpr dict(FILE * o) : m_f { o } {}
 
   void array(const char *key, auto &&...v) {
-    fprintf(m_f, "<key>%s</key><array>\n", key);
+    tag("key", key);
+    fprintf(m_f, "<array>\n");
     (array_element(v), ...);
     fprintf(m_f, "</array>\n");
   }
   void boolean(const char *key, bool v) {
-    auto val = v ? "true" : "false";
-    fprintf(m_f, "<key>%s</key><%s/>\n", key, val);
+    tag("key", key);
+    tag(v ? "true" : "false");
   }
   void date(const char *key) {
     time_t now;
     time(&now);
     char buf[128];
     strftime(buf, sizeof(buf), "%FT%TZ", sysstd::gmtime(&now));
-    fprintf(m_f, "<key>%s</key><date>%s</date>\n", key, buf);
+    tag("key", key);
+    tag("date", buf);
   }
   void dictionary(const char *key, auto &&fn) {
-    fprintf(m_f, "<key>%s</key><dict>\n", key);
+    tag("key", key);
+    fprintf(m_f, "<dict>\n");
     fn(dict { m_f });
     fprintf(m_f, "</dict>\n");
   }
   void integer(const char *key, int value) {
-    fprintf(m_f, "<key>%s</key><integer>%d</integer>\n", key, value);
+    tag("key", key);
+    tag("integer", value);
   }
   void string(const char *key, const char *value) {
-    fprintf(m_f, "<key>%s</key><string>%s</string>\n", key, value);
+    tag("key", key);
+    tag("string", value);
   }
 
   void merge(const char * fname) {
