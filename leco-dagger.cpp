@@ -260,6 +260,15 @@ static auto dll_path(const sim::sb & src) {
   return path;
 }
 
+static void add_plgn(const char *mod_impl, const char *desc, uint32_t code) {
+  auto src = path_of(mod_impl);
+  if (src.len == 0) return missing_file(desc);
+
+  auto path = sim::path_parent(*source) / "out" / target / src.path_filename();
+  path.path_extension("dag");
+  output('plgn', *path);
+}
+
 static void output_file_tags() {
   auto path = sim::path_parent(*source) / "out" / target / source.path_filename();
 
@@ -385,6 +394,7 @@ static bool pragma(const char * p) {
   if (add_pragma(p, "include_dir", 'idir'))             return true;
   if (add_pragma(p, "library",     'libr', print_asis)) return true;
   if (add_pragma(p, "library_dir", 'ldir'))             return true;
+  if (add_pragma(p, "plugin",      'plgn', add_plgn))   return true;
   if (add_pragma(p, "resource",    'rsrc'))             return true;
   if (add_pragma(p, "rpath",       'rpth'))             return true;
   if (add_pragma(p, "static_lib",  'slib'))             return true;
