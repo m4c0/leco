@@ -247,6 +247,19 @@ static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
   missing_file(desc);
 }
 
+static auto exe_path(const sim::sb & src) {
+  auto path = sim::path_parent(*source) / "out" / target / src.path_filename();
+  path.path_extension("exe");
+  return path;
+}
+static auto dll_path(const sim::sb & src) {
+  auto path = sim::path_parent(*source) / "out" / target / src.path_filename();
+  if      (sys::is_tgt_windows()) path.path_extension("dll");
+  else if (sys::is_tgt_apple())   path.path_extension("dylib");
+  else                            path.path_extension("so");
+  return path;
+}
+
 static void output_file_tags() {
   auto path = sim::path_parent(*source) / "out" / target / source.path_filename();
 
@@ -260,16 +273,14 @@ static void output_file_tags() {
 }
 
 static void output_root_tag() {
-  auto path = sim::path_parent(*source) / "out" / target / source.path_filename();
-
   switch (exe_type) {
   case exe_t::none:
     break;
   case exe_t::main_mod:
     output('tmmd', "");
     break;
-  case exe_t::app:
-    path.path_extension("exe");
+  case exe_t::app: {
+    auto path = exe_path(source);
     output('tapp', *path);
 
     if (sys::is_tgt_osx()) {
@@ -290,16 +301,13 @@ static void output_root_tag() {
     }
 
     break;
+  }
   case exe_t::dll:
-    if      (sys::is_tgt_windows()) path.path_extension("dll");
-    else if (sys::is_tgt_apple())   path.path_extension("dylib");
-    else                            path.path_extension("so");
-
-    output('tdll', *path);
+    output('tdll', *dll_path(source));
     break;
   case exe_t::tool:
     if (sys::is_tgt_host()) {
-      path.path_extension("exe");
+      auto path = exe_path(source);
       output('tool', *path);
 
       path.path_parent();
