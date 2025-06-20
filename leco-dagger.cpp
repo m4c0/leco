@@ -66,15 +66,20 @@ static const char *chomp(const char *str, const char *prefix) {
   return *buf;
 }
 
-static bool print_if_found(const char *rel_path, const char *desc,
-                           uint32_t code) {
+static sim::sb path_of(const char * rel_path) {
   sim::sb abs = sim::path_parent(*source) / rel_path;
   if (mtime::of(*abs) != 0) {
     abs = sim::path_real(*abs);
   } else {
     abs = sim::path_real(rel_path);
-    if (mtime::of(*abs) == 0) return false;
+    if (mtime::of(*abs) == 0) return {};
   }
+  return abs;
+}
+static bool print_if_found(const char *rel_path, const char *desc,
+                           uint32_t code) {
+  auto abs = path_of(rel_path);
+  if (abs.len == 0) return false;
 
   output(code, *abs);
   return true;
