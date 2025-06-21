@@ -27,6 +27,7 @@ static void drain(ctx * c, int res) {
 #ifdef _WIN32
   auto old_f = exe + ".old";
   auto new_f = exe + ".new";
+  remove(*old_f);
   rename(*exe, *old_f);
   rename(*new_f, *exe);
 #endif
