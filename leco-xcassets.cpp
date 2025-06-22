@@ -103,6 +103,14 @@ static auto gen_assets(const char * build_path) {
   return xcassets;
 }
 
+static void run(const char * input, const char * app_path) {
+  auto path = sim::sb { input }.path_parent();
+
+  auto plist = path / "icon-partial.plist";
+  auto xcassets = gen_assets(*path);
+  run_actool(*plist, app_path, *xcassets);
+}
+
 int main(int argc, char **argv) try {
   const char *input{};
   const char *app_path{};
@@ -115,11 +123,7 @@ int main(int argc, char **argv) try {
   });
   if (!input || !app_path || opts.argc != 0) usage();
 
-  auto path = sim::sb { input }.path_parent();
-
-  auto plist = path / "icon-partial.plist";
-  auto xcassets = gen_assets(*path);
-  run_actool(*plist, app_path, *xcassets);
+  run(input, app_path);
   return 0;
 } catch (...) {
   return 1;
