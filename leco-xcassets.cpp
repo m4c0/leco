@@ -20,11 +20,7 @@ need to download the iOS SDK. This command might help:
 
         xcodebuild -downloadPlatform iOS
 
-Usage: ../leco/leco.exe xcassets -i <input.dag> -a <app-path>
-
-Where:
-        -i: Application DAG
-        -a: Target application folder
+Usage: ../leco/leco.exe xcassets
 )");
 }
 
@@ -103,27 +99,19 @@ static auto gen_assets(const char * build_path) {
   return xcassets;
 }
 
-static void run(const char * input, const char * app_path) {
-  auto path = sim::sb { input }.path_parent();
-
+static void run(const char * dag, const char * _) {
+  auto app_path = sys::read_dag_tag('edir', dag);
+  auto path = sim::path_parent(dag);
   auto plist = path / "icon-partial.plist";
   auto xcassets = gen_assets(*path);
-  run_actool(*plist, app_path, *xcassets);
+  run_actool(*plist, *app_path, *xcassets);
 }
 
 int main(int argc, char **argv) try {
-  const char *input{};
-  const char *app_path{};
-  auto opts = gopt_parse(argc, argv, "i:a:", [&](auto ch, auto val) {
-    switch (ch) {
-      case 'a': app_path = val; break;
-      case 'i': input = val; break;
-      default: usage(); break;
-    }
-  });
-  if (!input || !app_path || opts.argc != 0) usage();
+  if (argc != 1) usage();
+  if (!sys::is_tgt_apple()) usage();
 
-  run(input, app_path);
+  sys::for_each_tag_in_dags('tapp', false, &run);
   return 0;
 } catch (...) {
   return 1;

@@ -24,10 +24,6 @@ Usage: ../leco/leco.exe ipa
 
 void gen_iphone_ipa(const char * exe, const char * dag);
 
-static void xcassets(const char * dag, const char * app_path) {
-  sys::tool_run("xcassets", " -i %s -a %s", dag, app_path);
-}
-
 static void export_archive() {
   // TODO: fix this for multiple exports on the same repo
   auto path = "."_real / "out" / sys::target();
@@ -69,17 +65,9 @@ static void iphonesim_bundle(const char * dag) {
 }
 
 static void iphone_bundle(const char *dag) {
-  auto path = sim::sb { dag };
-  path.path_parent();
-  path /= "export.xcarchive";
-  path /= "Products";
-  path /= "Applications";
-  path /= sim::path_filename(dag);
-  path.path_extension("app");
+  sys::tool_run("xcassets");
 
-  xcassets(dag, *path);
-
-  path /= sim::path_filename(dag);
+  auto path = sys::read_dag_tag('edir', dag) / sim::path_filename(dag);
   path.path_extension("exe");
   gen_iphone_ipa(*path, dag);
 
