@@ -9,6 +9,24 @@ import sys;
 //       with a bizarre "A 1024 x 1024 pixel app icon for your app must be
 //       added to the asset catalog in Xcode." error
 
+static void usage() {
+  sys::die(R"(
+Generates assets required for iOS bundling. Expects a 1024x1024 PNG icon named
+`icon.png` in the source root and assumes you don't want to mess with accent
+colours etc etc.
+
+If you see werid messages from XCode about missing iOS Simulator stuff, you
+need to download the iOS SDK. This command might help:
+
+        xcodebuild -downloadPlatform iOS
+
+Usage: ../leco/leco.exe xcassets -i <input.dag> -a <app-path>
+
+Where:
+        -i: Application DAG
+        -a: Target application folder
+)");
+}
 
 static void create_xca_contents(const char *path) {
   auto file = sim::sb { path } / "Contents.json";
@@ -83,25 +101,6 @@ static auto gen_assets(const char * build_path) {
   create_colour_contents(*colourset);
 
   return xcassets;
-}
-
-static void usage() {
-  sys::die(R"(
-Generates assets required for iOS bundling. Expects a 1024x1024 PNG icon named
-`icon.png` in the source root and assumes you don't want to mess with accent
-colours etc etc.
-
-If you see werid messages from XCode about missing iOS Simulator stuff, you
-need to download the iOS SDK. This command might help:
-
-        xcodebuild -downloadPlatform iOS
-
-Usage: ../leco/leco.exe xcassets -i <input.dag> -a <app-path>
-
-Where:
-        -i: Application DAG
-        -a: Target application folder
-)");
 }
 
 int main(int argc, char **argv) try {
