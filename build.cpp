@@ -1,7 +1,7 @@
-#define MTIME_IMPLEMENTATION
+#define MCT_STAT_IMPLEMENTATION
 #define SYSSTD_IMPLEMENTATION
 #include "targets.hpp"
-#include "../mtime/mtime.h"
+#include "../mct/mct-stat.h"
 #include "../sysstd/sysstd.h"
 
 #include <stdio.h>
@@ -80,7 +80,7 @@ int try_main() {
 }
 
 int main() try {
-  if (mtime_of("build.cpp") > mtime_of("build.exe")) {
+  if (mct_stat_mtime("build.cpp") > mct_stat_mtime("build.exe")) {
     puts("Rebuilding self");
     remove("build.old");
     remove("build.new");

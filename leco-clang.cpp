@@ -1,11 +1,9 @@
 #pragma leco tool
 #define GOPT_IMPLEMENTATION
-#define MTIME_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 #define SYSSTD_IMPLEMENTATION
 
 #include "../gopt/gopt.h"
-#include "../mtime/mtime.h"
 #include "../sysstd/sysstd.h"
 #include "sim.h"
 #include "targets.hpp"
@@ -94,9 +92,9 @@ static void add_sysroot(sim_sb * args, const char * target, const char * argv0) 
   sim_sb_path_parent(&sra);
   sim_sb_path_append(&sra, target);
   sim_sb_path_append(&sra, "sysroot");
-  if (mtime_of(sra.buffer) == 0) return;
 
   auto f = sysstd_fopen(sra.buffer, "r");
+  if (!f) return;
   fgets(sra.buffer, sra.size, f);
   fclose(f);
 
