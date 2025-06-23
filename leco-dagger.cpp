@@ -19,7 +19,7 @@ enum class exe_t {
 static const char * dag_file_version = "2025-05-19";
 
 static sim::sb source {};
-static FILE * out{stdout};
+static sys::file * current_output;
 static const char * target = sys::target();
 
 static unsigned line {};
@@ -41,9 +41,9 @@ storing dependencies in a DAG-like file.
 }
 
 static void output(uint32_t code, const char *msg) {
-  fwrite(&code, sizeof(uint32_t), 1, out);
-  fputs(msg, out);
-  fputc('\n', out);
+  fwrite(&code, sizeof(uint32_t), 1, *current_output);
+  fputs(msg, *current_output);
+  fputc('\n', *current_output);
 }
 
 static const char *cmp(const char *str, const char *prefix) {
@@ -421,7 +421,7 @@ enum run_result { OK, ERR, SKIPPED };
   sys::file f { dag, "w" };
 
   source = sim::sb { src };
-  out = f;
+  current_output = &f;
   line = 0;
   exe_type = {};
   mod_name = {};
