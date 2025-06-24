@@ -410,7 +410,11 @@ static bool pragma(const char * p) {
   if (flag_pragma(p, "portrait",  'port')) return true;
   if (flag_pragma(p, "landscape", 'land')) return true;
 
-  error("unknown pragma");
+  sim::sb buf { "unknown pragma: " };
+  auto pp = strchr(p, ' ');
+  buf.printf("%.*s", pp - p, p);
+
+  error(*buf);
 }
 
 enum run_result { OK, ERR, SKIPPED };
