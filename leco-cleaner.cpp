@@ -24,7 +24,7 @@ static void rm_rf(const char * p) {
   }
 
   if (log_all) sys::log("removing", p);
-  sys::unlink(p);
+  sys::remove(p);
 }
 
 static str::set temp{};

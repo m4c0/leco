@@ -37,8 +37,8 @@ void run(const char * parent) {
   try {
     run(parent, *depf, *incf);
   } catch (...) {
-    sys::unlink(*depf);
-    sys::unlink(*incf);
+    sys::remove(*depf);
+    sys::remove(*incf);
     throw;
   }
 }
