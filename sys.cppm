@@ -30,23 +30,15 @@ export import strset;
 export import sysstd;
 
 export namespace sys {
-  inline void run(const char * cmd) { if (0 != system(cmd)) dief("command failed: %s", cmd); }
-  inline void run(const char * cmd, auto *... args) {
-    sim::sb buf { cmd };
-    (buf.printf(" %s", args), ...);
-    run(*buf);
-  }
-
 __attribute__((format(printf, 1, 2))) inline void runf(const char * cmd, ...) {
   char buf[10240] {};
 
-  // TODO: create string variants in "print"
   va_list arg;
   va_start(arg, cmd);
   vsnprintf(buf, sizeof(buf), cmd, arg);
   va_end(arg);
 
-  run(buf);
+  if (0 != system(buf)) dief("command failed: %s", buf);
 }
 
 inline void log(const char *verb, const char * msg) { errfn("%20s %s", verb, msg); }
@@ -201,21 +193,21 @@ auto tool_cmd(const char * name, const char * args, auto &&... as) {
 }
 void tool_run(const char * name) {
   auto cmd = tool_cmd(name);
-  run(*cmd);
+  runf("%s", *cmd);
 }
 void tool_run(const char * name, const char * args, auto &&... as) {
   auto cmd = tool_cmd(name, args, as...);
-  run(*cmd);
+  runf("%s", *cmd);
 }
 void opt_tool_run(const char * name) {
   auto cmd = tool_cmd(name);
   if (mtime::of(*cmd) == 0) return;
-  run(*cmd);
+  runf("%s", *cmd);
 }
 void opt_tool_run(const char * name, const char * args, auto &&... as) {
   auto cmd = tool_cmd(name);
   if (mtime::of(*cmd) == 0) return;
-  run(*(cmd + " ").printf(args, as...));
+  runf("%s", *(cmd + " ").printf(args, as...));
 }
 
 const char * target() { 

@@ -8,11 +8,9 @@ import sys;
 static void compile_launch(const char *bundle_path) {
   sys::log("ibtool", bundle_path);
 
-  auto cmd = sim::printf(
-                "ibtool ../leco/launch.storyboard "
-                "--compile %s/Base.lproj/launch.storyboard",
-                bundle_path);
-  sys::run(*cmd);
+  sys::runf("ibtool ../leco/launch.storyboard "
+            "--compile %s/Base.lproj/launch.storyboard",
+            bundle_path);
 }
 static void code_sign(const char *bundle_path) {
   sys::tool_run("codesign", "-d %s", bundle_path);
@@ -25,8 +23,7 @@ static void dump_symbols(const char * exe, const char * exca) {
   path /= sim::path_filename(exe);
   path.path_extension(".app.dSYM");
 
-  auto cmd = sim::printf("dsymutil %s -o %s", exe, *path);
-  sys::run(*cmd);
+  sys::runf("dsymutil %s -o %s", exe, *path);
 }
 void gen_iphone_ipa(const char * exe, const char * dag) {
   auto app_path = sim::path_parent(exe);

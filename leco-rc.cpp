@@ -10,7 +10,7 @@ int main() try {
     if (mtime::of(*rc) == 0) return;
 
     auto res = sim::sb { dag }.path_extension("res");
-    sys::run("llvm-rc.exe /FO", *res, *rc);
+    sys::runf("llvm-rc.exe /FO %s %s", *res, *rc);
   });
 } catch (...) {
   return 1;

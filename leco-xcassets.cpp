@@ -59,26 +59,24 @@ static void run_actool(const char *plist, const char *app_path,
                        const char *xcassets) {
   sys::log("running", "actool");
 
-  auto cmd = sim::sb { 10240 }.printf(
-                "actool "
-                "--notices --warnings --errors "
-                "--output-format human-readable-text "
-                "--app-icon AppIcon "
-                "--accent-color AccentColor "
-                "--compress-pngs "
-                "--enable-on-demand-resources YES "
-                "--target-device iphone "
-                "--target-device ipad "
-                "--platform iphoneos "
-                //"--filter-for-thinning-device-configuration iPhone16,1 "
-                //"--filter-for-device-os-version 17.0 "
-                "--development-region en "
-                "--minimum-deployment-target 17.5 "
-                "--output-partial-info-plist %s "
-                "--compile %s "
-                "%s",
-                plist, app_path, xcassets);
-  sys::run(*cmd);
+  sys::runf("actool "
+            "--notices --warnings --errors "
+            "--output-format human-readable-text "
+            "--app-icon AppIcon "
+            "--accent-color AccentColor "
+            "--compress-pngs "
+            "--enable-on-demand-resources YES "
+            "--target-device iphone "
+            "--target-device ipad "
+            "--platform iphoneos "
+            //"--filter-for-thinning-device-configuration iPhone16,1 "
+            //"--filter-for-device-os-version 17.0 "
+            "--development-region en "
+            "--minimum-deployment-target 17.5 "
+            "--output-partial-info-plist %s "
+            "--compile %s "
+            "%s",
+            plist, app_path, xcassets);
 }
 
 static auto gen_assets(const char * build_path) {
