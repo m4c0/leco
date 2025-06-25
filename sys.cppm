@@ -9,10 +9,6 @@ module;
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef __APPLE__
-#include <sys/clonefile.h>
-#endif
-
 #ifdef _WIN32
 #define WIN32_MEAN_AND_LEAN
 #include <windows.h>
@@ -57,17 +53,8 @@ void link(const char *src, const char *dst) {
     rename(dst, *bkp);
   }
 
-#ifdef _WIN32
-  if (!CreateHardLink(dst, src, nullptr))
-    die("could not create hard-link");
-#elif __APPLE__
-  if (0 != clonefile(src, dst, 0)) die("could not clone file");
-#else
-  if (::link(src, dst) != 0) {
-    perror("could not create hard-link");
-    throw death{};
-  }
-#endif
+  auto msg = sysstd::link(src, dst);
+  if (msg) die("error: ", msg);
 }
 
 const char *env(const char *name) {
