@@ -57,9 +57,9 @@ void link(const char *src, const char *dst) {
   if (msg) die("error: ", msg);
 }
 
-const char *env(const char *name) {
+sim::sb env(const char *name) {
   auto e = sysstd::env(name);
-  if (e) return e;
+  if (e) return sim::sb { e };
   die("missing environment variable: ", name);
 }
 

@@ -48,7 +48,7 @@ int main(int argc, char ** argv) try {
 
   sys::runf(
       "xcrun altool %s -t iphoneos -f %s --apiKey %s --apiIssuer %s",
-      verb, ipa.buffer, sys::env("LECO_IOS_API_KEY"), sys::env("LECO_IOS_API_ISSUER"));
+      verb, ipa.buffer, *sys::env("LECO_IOS_API_KEY"), *sys::env("LECO_IOS_API_ISSUER"));
 } catch (...) {
   return 1;
 }

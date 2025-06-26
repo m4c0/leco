@@ -59,8 +59,9 @@ static bool sign_is_fresh(const char * path) {
 static void sign(const char * path) {
   const char * team;
   try {
+    // TODO: move all those "envs" to a module?
     // Only sign when we want to sign
-    team = sys::env("LECO_IOS_TEAM");
+    team = *sys::env("LECO_IOS_TEAM");
   } catch (...) {
     return;
   }

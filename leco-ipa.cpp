@@ -38,7 +38,7 @@ static void export_archive() {
 
 static void upload_archive(const char * dag) {
   auto method = sys::env("LECO_IOS_METHOD");
-  if (0 != strcmp("app-store-connect", method)) return;
+  if (method != "app-store-connect") return;
 
   sys::tool_run("ipa-upload", " -i %s -s", dag);
 }
@@ -60,7 +60,7 @@ static void iphonesim_bundle(const char * dag) {
   sys::log("installing", *stem);
   sys::runf(
       "xcrun simctl install %s %s",
-      sys::env("LECO_IOS_SIM_TARGET"),
+      *sys::env("LECO_IOS_SIM_TARGET"),
       *path);
 }
 
