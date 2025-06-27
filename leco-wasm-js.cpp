@@ -16,7 +16,7 @@ Usage: ../leco/leco.exe wasm-js
 }
 
 static void concat(FILE *out, const char *in_file) {
-  auto in = sys::fopen(in_file, "rb");
+  sys::file in { in_file, "rb" };
 
   char buf[10240];
   int got{};
@@ -43,7 +43,7 @@ static void run(const char * dag, const char * _) {
 
   sys::log("generating", *output);
 
-  auto f = sys::fopen(*output, "wb");
+  sys::file f { *output, "wb" };
   fprintf(f, "var leco_exports;\n");
   fprintf(f, "var leco_imports = {};\n");
 

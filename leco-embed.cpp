@@ -22,13 +22,13 @@ static void process_file(const char * dag, const char * file) {
   parent.path_parent();
   auto pname = sim::path_filename(*parent);
 
-  auto f = sys::fopen(*path, "wb");
+  sys::file f { *path, "wb" };
   fprintf(f, "#pragma once\n");
   fprintf(f, "// Size includes null-terminator. Equivalent of this line...\n");
   fprintf(f, "// static constexpr const char %s_%s[] = \"...\";\n", pname, *id);
   fprintf(f, "// ...with size included for information purposes.\n");
 
-  auto in = sys::fopen(file, "rb");
+  sys::file in { file, "rb" };
   fseek(in, 0, SEEK_END);
   int size = ftell(in);
   fseek(in, 0, SEEK_SET);
@@ -42,10 +42,8 @@ static void process_file(const char * dag, const char * file) {
     for (auto i = 0; i < n; i++) fprintf(f, "\\%03o", (unsigned)buf[i] & 0xFF);
     fprintf(f, "\"");
   }
-  fclose(in);
 
   fprintf(f, ";\n");
-  fclose(f);
 }
 
 int main() {

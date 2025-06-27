@@ -14,7 +14,7 @@ static bool must_recompile(const char * file, auto spv_time) {
   if (spv_time < mtime::of(file)) return true;
 
   char buf[10240];
-  auto f = sys::fopen(file, "r");
+  auto f = sys::file { file, "r" };
   unsigned line { 0 };
   while (!feof(f) && fgets(buf, sizeof(buf), f)) {
     line++;
@@ -37,8 +37,6 @@ static bool must_recompile(const char * file, auto spv_time) {
     if (!mtime::of(*path)) fail(s, "include file not found");
     if (must_recompile(*path, spv_time)) return true;
   }
-
-  fclose(f);
 
   return false;
 }
