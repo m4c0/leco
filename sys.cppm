@@ -73,14 +73,14 @@ void mkdirs(const char *path) {
   sysstd::mkdir(path);
 }
 
-FILE * fopen(const char * name, const char * mode) {
-  FILE * res = sysstd::fopen(name, mode);
-  if (res == nullptr) die("could not open file: ", name);
-  return res;
-}
-void fclose(FILE * f) { ::fclose(f); }
-
-using file = hay<FILE *, sys::fopen, ::fclose>;
+using file = hay<
+  FILE *, 
+  [](const char * name, const char * mode) {
+    FILE * res = sysstd::fopen(name, mode);
+    if (res == nullptr) die("could not open file: ", name);
+    return res;
+  },
+  ::fclose>;
 
 void dag_read(const char *dag, auto &&fn) try {
   auto f = fopen(dag, "r");
