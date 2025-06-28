@@ -1,8 +1,9 @@
 #pragma leco tool
+#include "../mct/mct-syscall.h"
 import sys;
 
 static void chdir(const char * dir) {
-  if (0 != sysstd::chdir(dir)) sys::die("Directory not found: [%s]\n", dir);
+  if (0 != mct_syscall_chdir(dir)) sys::die("Directory not found: [%s]\n", dir);
 }
 
 extern "C" int puts(const char *);
@@ -20,7 +21,7 @@ int main(int argc, char ** argv) try {
     cmd = sys::tool_cmd("driver");
   }
   *argv = *cmd;
-  return sysstd::spawn(*argv, argv);
+  return mct_syscall_spawn(*argv, argv);
 } catch (...) {
   return 1;
 }

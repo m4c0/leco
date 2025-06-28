@@ -1,5 +1,5 @@
-#define SYSSTD_IMPLEMENTATION
-#include "../sysstd/sysstd.h"
+#define MCT_SYSCALL_IMPLEMENTATION
+#include "../mct/mct-syscall.h"
 #include "sim.h"
 #include "targets.hpp"
 
@@ -9,5 +9,5 @@
 int main(int argc, const char ** argv) {
   if (argv[argc]) return 69;
   argv[0] = CMD;
-  return sysstd_spawn(argv[0], argv);
+  return mct_syscall_spawn(argv[0], argv);
 }

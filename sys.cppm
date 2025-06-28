@@ -1,4 +1,7 @@
 module;
+#define MCT_SYSCALL_IMPLEMENTATION
+#include "../mct/mct-syscall.h"
+
 #include "../hay/hay.hpp"
 #include "targets.hpp"
 
@@ -23,7 +26,6 @@ export import print;
 export import pprent;
 export import sim;
 export import strset;
-export import sysstd;
 
 export namespace sys {
 __attribute__((format(printf, 1, 2))) inline void runf(const char * cmd, ...) {
@@ -53,38 +55,38 @@ void link(const char *src, const char *dst) {
     rename(dst, *bkp);
   }
 
-  auto msg = sysstd::link(src, dst);
+  auto msg = mct_syscall_link(src, dst);
   if (msg) die("error: ", msg);
 }
 
 sim::sb env(const char *name) {
-  auto e = sysstd::env(name);
+  // TODO: fix leak
+  auto e = mct_syscall_dupenv(name);
   if (e) return sim::sb { e };
   die("missing environment variable: ", name);
 }
 
 void mkdirs(const char *path) {
-  if (0 == sysstd::mkdir(path)) return;
+  if (0 == mct_syscall_mkdir(path)) return;
   if (errno == EEXIST) return;
 
   auto p = sim::path_parent(path);
   mkdirs(*p);
 
-  sysstd::mkdir(path);
+  mct_syscall_mkdir(path);
 }
 
 using file = hay<
   FILE *, 
   [](const char * name, const char * mode) {
-    FILE * res = sysstd::fopen(name, mode);
+    FILE * res = mct_syscall_fopen(name, mode);
     if (res == nullptr) die("could not open file: ", name);
     return res;
   },
   ::fclose>;
 
 void dag_read(const char *dag, auto &&fn) try {
-  auto f = fopen(dag, "r");
-  if (!f) die("could not open dag file");
+  file f { dag, "r" };
 
   char buf[10240];
   while (!feof(f) && fgets(buf, sizeof(buf), f) != nullptr) {
@@ -96,8 +98,6 @@ void dag_read(const char *dag, auto &&fn) try {
 
     fn(*id, file);
   }
-
-  ::fclose(f);
 } catch (...) {
   whilst("reading DAG node: ", dag);
 }
@@ -191,7 +191,7 @@ void opt_tool_run(const char * name, const char * args, auto &&... as) {
 }
 
 const char * target() { 
-  auto e = sysstd::env("LECO_TARGET");
+  auto e = mct_syscall_dupenv("LECO_TARGET");
   return e ? e : HOST_TARGET;
 }
 

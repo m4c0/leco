@@ -1,4 +1,5 @@
 #pragma leco tool
+#include "../mct/mct-syscall.h"
 #include "targets.hpp"
 
 #include <string.h>
@@ -30,7 +31,7 @@ static void usage() {
 }
 
 static void run_target(const char * target) {
-  sysstd::setenv("LECO_TARGET", target);
+  mct_syscall_setenv("LECO_TARGET", target);
 
   if (clean_level == 1) sys::tool_run("cleaner");
   if (clean_level >= 2) sys::tool_run("cleaner", "-a");
@@ -83,8 +84,8 @@ int main(int argc, char ** argv) try {
   while (auto val = shift()) {
     if ("-c"_s == val) clean_level++;
     else if ("-t"_s == val) target = shift();
-    else if ("-g"_s == val) sysstd::setenv("LECO_DEBUG", "1");
-    else if ("-O"_s == val) sysstd::setenv("LECO_OPT", "1");
+    else if ("-g"_s == val) mct_syscall_setenv("LECO_DEBUG", "1");
+    else if ("-O"_s == val) mct_syscall_setenv("LECO_OPT", "1");
     else usage();
   }
   if (!target) usage();
