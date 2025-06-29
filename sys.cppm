@@ -28,6 +28,10 @@ export import sim;
 export import strset;
 
 export namespace sys {
+inline void run(const char * cmd) {
+  if (0 != system(cmd)) dief("command failed: %s", cmd);
+}
+
 __attribute__((format(printf, 1, 2))) inline void runf(const char * cmd, ...) {
   char buf[10240] {};
 
@@ -36,7 +40,7 @@ __attribute__((format(printf, 1, 2))) inline void runf(const char * cmd, ...) {
   vsnprintf(buf, sizeof(buf), cmd, arg);
   va_end(arg);
 
-  if (0 != system(buf)) dief("command failed: %s", buf);
+  run(buf);
 }
 
 inline void log(const char *verb, const char * msg) { errfn("%20s %s", verb, msg); }
@@ -167,27 +171,17 @@ void for_each_tag_in_dags(auto tid, bool recurse, auto && fn) {
 auto tool_cmd(const char * name) {
   return (sim::path_real("../leco/out/" HOST_TARGET) / "leco-") + name + ".exe";
 }
-auto tool_cmd(const char * name, const char * args, auto &&... as) {
-  auto cmd = tool_cmd(name) + " ";
-  return cmd.printf(args, as...);
-}
 void tool_run(const char * name) {
-  auto cmd = tool_cmd(name);
-  runf("%s", *cmd);
+  run(*tool_cmd(name));
 }
 void tool_run(const char * name, const char * args, auto &&... as) {
-  auto cmd = tool_cmd(name, args, as...);
-  runf("%s", *cmd);
+  auto cmd = tool_cmd(name) + " ";
+  cmd.printf(args, as...);
+  run(*cmd);
 }
-void opt_tool_run(const char * name) {
-  auto cmd = tool_cmd(name);
-  if (mtime::of(*cmd) == 0) return;
-  runf("%s", *cmd);
-}
-void opt_tool_run(const char * name, const char * args, auto &&... as) {
-  auto cmd = tool_cmd(name);
-  if (mtime::of(*cmd) == 0) return;
-  runf("%s", *(cmd + " ").printf(args, as...));
+void opt_tool_run(const char * name, auto &&... as) {
+  if (mtime::of(*tool_cmd(name)) == 0) return;
+  tool_run(name, as...);
 }
 
 const char * target() { 
