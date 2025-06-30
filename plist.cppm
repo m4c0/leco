@@ -3,6 +3,7 @@ module;
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include "../mct/mct-syscall.h"
 
 export module plist;
 
@@ -54,7 +55,7 @@ public:
     time_t now;
     time(&now);
     char buf[128];
-    strftime(buf, sizeof(buf), "%FT%TZ", sysstd::gmtime(&now));
+    strftime(buf, sizeof(buf), "%FT%TZ", mct_syscall_gmtime(&now));
     tag("key", key);
     tag("date", buf);
   }
