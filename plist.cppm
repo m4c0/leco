@@ -216,8 +216,8 @@ void gen_archive_plist(const char *xca_path, const char *name, const char * id, 
       dd.string("CFBundleIdentifier", id);
       dd.string("CFBundleShortVersionString", app_ver);
       dd.string("CFBundleVersion", *bundle_version);
-      dd.string("SigningIdentity", *sys::env("LECO_IOS_SIGN_ID"));
-      dd.string("Team", *team_id());
+      dd.string("SigningIdentity", sys::env("LECO_IOS_SIGN_ID"));
+      dd.string("Team", team_id());
     });
     d.integer("ArchiveVersion", 2);
     d.date("CreationDate");
@@ -229,14 +229,14 @@ void gen_export_plist(const char *build_path, const char * app_id) {
   auto path = sim::sb { build_path } / "export.plist";
 
   plist::gen(path.buffer, [&](auto &&d) {
-    d.string("method", *sys::env("LECO_IOS_METHOD"));
-    d.string("teamID", *team_id());
+    d.string("method", sys::env("LECO_IOS_METHOD"));
+    d.string("teamID", team_id());
     d.string("thinning", "&lt;none&gt;");
     d.boolean("uploadSymbols", true);
     d.boolean("generateAppStoreInformation", true);
     d.dictionary("provisioningProfiles", [&](auto &&dd) {
       // TODO: detect based on installed profiles
-      dd.string(app_id, *sys::env("LECO_IOS_PROV_PROF"));
+      dd.string(app_id, sys::env("LECO_IOS_PROV_PROF"));
     });
   });
 }

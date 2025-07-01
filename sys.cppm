@@ -63,12 +63,14 @@ void link(const char *src, const char *dst) {
   if (msg) die("error: ", msg);
 }
 
-sim::sb env(const char *name) {
-  // TODO: fix leak
-  auto e = mct_syscall_dupenv(name);
-  if (e) return sim::sb { e };
-  die("missing environment variable: ", name);
-}
+using env = hay<
+  char *,
+  [](const char * name) {
+    auto e = mct_syscall_dupenv(name);
+    if (!e) die("missing environment variable: ", name);
+    return e;
+  },
+  free>;
 
 void mkdirs(const char *path) {
   if (0 == mct_syscall_mkdir(path)) return;
