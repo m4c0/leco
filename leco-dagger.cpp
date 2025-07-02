@@ -329,7 +329,8 @@ static void output_root_tag() {
 static bool exe_pragma(const char * p, const char * e, exe_t t) {
   p = cmp(p, e);
   if (!p) return false;
-  if (*p != '\n' && *p != '\r') error("expecting newline after this pragma");
+  if (*p != '\n' && *p != '\r') return false;
+  if (*p == ' ') error("expecting newline after this pragma");
   if (exe_type != exe_t::none) error("multiple executable type found");
   exe_type = t;
   return true;
@@ -362,7 +363,7 @@ static const char * bundle_cmp(const char * p, const char * id) {
   p = cmp(p, " ");
   if (!p) return nullptr;
 
-  if (exe_type != exe_t::app) error("display name is only supported for apps");
+  if (exe_type != exe_t::app) error("this pragma is only supported for apps");
 
   return p;
 }
