@@ -42,15 +42,12 @@ void gen_iphone_ipa(const char * exe, const char * dag) {
   dump_symbols(exe, *exca);
 
   auto stem = sim::path_stem(dag);
-  auto app_id = sim::printf("br.com.tpk.%s", *stem);
-  sim::sb app_ver { "1.0.0" };
-  sys::dag_read(dag, [&](auto id, auto val) {
-    switch (id) {
-      case 'apid': app_id = sim::sb { val }; break;
-      case 'apvr': app_ver = sim::sb { val }; break;
-      default: break;
-    }
-  });
+
+  auto app_id = sys::read_dag_tag('apid', dag);
+  if (app_id == "") app_id.printf("br.com.tpk.%s", *stem);
+
+  auto app_ver = sys::read_dag_tag('apvr', dag);
+  if (app_ver == "") app_ver = sim::sb { "1.0.0" };
 
   plist::gen_archive_plist(*exca, *stem, *app_id, *app_ver);
   plist::gen_export_plist(*build_path, *app_id);
