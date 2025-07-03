@@ -51,6 +51,12 @@ static const char *cmp(const char *str, const char *prefix) {
   if (strncmp(str, prefix, len) != 0) return nullptr;
   return str + len;
 }
+static const char * cmp(const char * str, auto ... prefixes) {
+  const auto c = [&](const char * p) { return str = cmp(str, p); };
+  if ((... && c(prefixes))) return str;
+  return nullptr;
+}
+
 static const char *chomp(const char *str, const char *prefix) {
   static sim::sb buf {};
 
@@ -336,48 +342,27 @@ static bool exe_pragma(const char * p, const char * e, exe_t t) {
   return true;
 }
 static bool add_pragma(const char * p, const char * id, uint32_t code, printer_t prfn = print_found) {
-  p = cmp(p, "add_");
-  if (!p) return false;
-  p = cmp(p, id);
-  if (!p) return false;
-  p = cmp(p, " ");
-  if (!p) return false;
-
+  if (!(p = cmp(p, "add_", id, " "))) return false;
   read_file_list(p, id, code, prfn);
   return true;
 }
 static bool embed_pragma(const char * p, const char * id, uint32_t code, printer_t prfn = print_found) {
-  p = cmp(p, "embed_");
-  if (!p) return false;
-  p = cmp(p, id);
-  if (!p) return false;
-  p = cmp(p, " ");
-  if (!p) return false;
-
+  if (!(p = cmp(p, "embed_", id, " "))) return false;
   read_file_list(p, id, code, prfn);
   return true;
 }
-static const char * bundle_cmp(const char * p, const char * id) {
-  p = cmp(p, id);
-  if (!p) return nullptr;
-  p = cmp(p, " ");
-  if (!p) return nullptr;
-
-  if (exe_type != exe_t::app) error("this pragma is only supported for apps");
-
-  return p;
-}
 static bool prop_pragma(const char * p, const char * id, uint32_t code) {
-  p = bundle_cmp(p, id);
-  if (!p) return false;
+  if (!(p = cmp(p, id, " "))) return false;
   read_file_list(p, id, code, print_asis);
   return true;
 }
 static bool flag_pragma(const char * p, const char * id, uint32_t code) {
-  p = cmp(p, id);
-  if (!p) return false;
-  if (!cmp(p, "\n")) return false;
+  if (!(p = cmp(id, "\n"))) return false;
   output(code, "");
+  return true;
+}
+static bool check_app() {
+  if (exe_type != exe_t::app) error("this pragma is only supported for apps");
   return true;
 }
 static bool pragma(const char * p) {
@@ -404,12 +389,12 @@ static bool pragma(const char * p) {
 
   if (embed_pragma(p, "shader", 'embd', add_shdr)) return true;
 
-  if (prop_pragma(p, "display_name", 'name')) return true;
-  if (prop_pragma(p, "app_id",       'apid')) return true;
-  if (prop_pragma(p, "app_version",  'apvr')) return true;
+  if (prop_pragma(p, "display_name", 'name')) return check_app();
+  if (prop_pragma(p, "app_id",       'apid')) return check_app();
+  if (prop_pragma(p, "app_version",  'apvr')) return check_app();
 
-  if (flag_pragma(p, "portrait",  'port')) return true;
-  if (flag_pragma(p, "landscape", 'land')) return true;
+  if (flag_pragma(p, "portrait",  'port')) return check_app();
+  if (flag_pragma(p, "landscape", 'land')) return check_app();
 
   sim::sb buf { "unknown pragma: " };
   auto pp = strchr(p, ' ');
