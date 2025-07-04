@@ -15,8 +15,6 @@ module;
 #ifdef _WIN32
 #define WIN32_MEAN_AND_LEAN
 #include <windows.h>
-#else
-#include <unistd.h>
 #endif
 
 export module sys;
