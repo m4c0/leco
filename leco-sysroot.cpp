@@ -69,6 +69,7 @@ int main() try {
   auto sysroot = sysroot_for_target();
   if (!sysroot.len) return 0;
 
+  sys::log("sysroot", *sysroot);
   fputs(*sysroot, sys::file { *cf, "w" });
 } catch (...) {
   return 1;
