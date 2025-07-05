@@ -104,6 +104,7 @@ static void prepare_args(const char * input, const char * args) {
   } else if (sys::is_tgt_wasm()) {
     char sra[1024] {};
 
+    // TODO: the "sysroot" might make more sense in leco-sysroot
     fgets(sra, sizeof(sra) - 1, sys::file { "../leco/out/wasm32-wasi/sysroot", "r" });
     fputln(out, "-resource-dir\n", sra);
 
