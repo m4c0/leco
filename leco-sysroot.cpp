@@ -43,7 +43,7 @@ static sim::sb apple_sysroot(const char *sdk) {
 #else
   auto p = p::proc { "xcrun", "--show-sdk-path", "--sdk", sdk };
   if (!p.gets()) return {};
-  return sim::sb { p.last_line_read() };
+  return sim::sb { p.last_line_read() }.chomp();
 #endif
 }
 

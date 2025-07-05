@@ -108,7 +108,7 @@ void sim_sb_chomp(sim_sb * sb) {
   assert(sb && "invalid buffer");
   if (!sb->buffer || sb->len == 0) return;
   sb->len--;
-  sb->buffer[sb->len - 1] = 0;
+  sb->buffer[sb->len] = 0;
 }
 
 __attribute__((format(printf, 2, 3))) void
