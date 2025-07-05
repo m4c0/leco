@@ -100,7 +100,7 @@ static void prepare_args(const char * input, const char * args) {
     fputln(out, "-fuse-ld=lld");
 
     auto rc = sim::sb { input }.path_extension("res");
-    if (mtime::of(*rc) > 0) fputln(out, *rc);
+    if (mtime::of(*rc) > 0) put_escape(out, *rc);
   } else if (sys::is_tgt_wasm()) {
     char sra[1024] {};
 
