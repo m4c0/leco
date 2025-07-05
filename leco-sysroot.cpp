@@ -41,12 +41,9 @@ static sim::sb apple_sysroot(const char *sdk) {
   sys::die("apple targets not supported when host isn't osx");
   return {};
 #else
-  auto cmd = sim::printf("xcrun --show-sdk-path --sdk %s", sdk);
-
-
-  auto p = p::proc(*cmd, "r");
+  auto p = p::proc { "xcrun", "--show-sdk-path", "--sdk", sdk };
   if (!p.gets()) return {};
-  return sim::sb { p.last_line_read() }.chomp();
+  return sim::sb { p.last_line_read() };
 #endif
 }
 
