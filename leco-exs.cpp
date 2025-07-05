@@ -19,6 +19,7 @@ static void copy_xcfw(const sim::sb & exedir, const char * xcfw_path) {
   sim::sb tgt = exedir;
   if (!sys::is_tgt_ios()) tgt.path_parent();
   tgt /= "Frameworks";
+  sys::mkdirs(*tgt);
 
   tgt /= sim::path_filename(xcfw_path);
   if (mtime::of(*tgt)) return;
