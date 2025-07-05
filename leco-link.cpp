@@ -169,5 +169,5 @@ int main() try {
 
   return 0;
 } catch (...) {
-  return (fprintf(stderr, "err\n"), 1);
+  return 1;
 }
