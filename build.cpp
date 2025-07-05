@@ -83,7 +83,6 @@ int main() try {
   if (mct_stat_mtime("build.cpp") > mct_stat_mtime("build.exe")) {
     puts("Rebuilding self");
     remove("build.old");
-    remove("build.new");
     run("clang++ -std=c++20 build.cpp -o build.new");
     rename("build.exe", "build.old");
     rename("build.new", "build.exe");
