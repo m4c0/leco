@@ -373,19 +373,20 @@ static bool pragma(const char * p) {
   if (exe_pragma(p, "app",  exe_t::app))  return true;
   if (exe_pragma(p, "dll",  exe_t::dll))  return true;
 
-  if (add_pragma(p, "dll",         'dlls'))             return true;
-  if (add_pragma(p, "embed",       'embd'))             return true;
-  if (add_pragma(p, "framework",   'frwk', print_asis)) return true;
-  if (add_pragma(p, "impl",        'impl', add_impl))   return true;
-  if (add_pragma(p, "include_dir", 'idir'))             return true;
-  if (add_pragma(p, "library",     'libr', print_asis)) return true;
-  if (add_pragma(p, "library_dir", 'ldir'))             return true;
-  if (add_pragma(p, "plugin",      'plgn', add_plgn))   return true;
-  if (add_pragma(p, "resource",    'rsrc'))             return true;
-  if (add_pragma(p, "rpath",       'rpth'))             return true;
-  if (add_pragma(p, "static_lib",  'slib'))             return true;
-  if (add_pragma(p, "shader",      'rsrc', add_shdr))   return true;
-  if (add_pragma(p, "xcframework", 'xcfw', add_xcfw))   return true;
+  if (add_pragma(p, "dll",          'dlls'))             return true;
+  if (add_pragma(p, "embed",        'embd'))             return true;
+  if (add_pragma(p, "framework",    'frwk', print_asis)) return true;
+  if (add_pragma(p, "impl",         'impl', add_impl))   return true;
+  if (add_pragma(p, "include_dir",  'idir'))             return true;
+  if (add_pragma(p, "library",      'libr', print_asis)) return true;
+  if (add_pragma(p, "library_dir",  'ldir'))             return true;
+  if (add_pragma(p, "plugin",       'plgn', add_plgn))   return true;
+  if (add_pragma(p, "resource",     'rsrc'))             return true;
+  if (add_pragma(p, "resource_dir", 'rdir'))             return true;
+  if (add_pragma(p, "rpath",        'rpth'))             return true;
+  if (add_pragma(p, "static_lib",   'slib'))             return true;
+  if (add_pragma(p, "shader",       'rsrc', add_shdr))   return true;
+  if (add_pragma(p, "xcframework",  'xcfw', add_xcfw))   return true;
 
   if (embed_pragma(p, "shader", 'embd', add_shdr)) return true;
 

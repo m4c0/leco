@@ -7,6 +7,14 @@ static void copy_res(const sim::sb & resdir, const char * file) {
   sys::link(file, *path);
 }
 
+static void copy_res_dir(const sim::sb & resdir, const char * rdir) {
+  sim::sb rin_dir { rdir };
+  for (auto p : pprent::list(rdir)) {
+    auto file = rin_dir / p;
+    copy_res(resdir, *file);
+  }
+}
+
 int main(int argc, char **argv) try {
   sys::for_each_root_dag([](auto dag, auto id, auto file) {
     if (id != 'tapp') return;
@@ -16,6 +24,7 @@ int main(int argc, char **argv) try {
 
     sys::mkdirs(*rdir);
     sys::recurse_dag(dag, [&](auto dag, auto id, auto file) {
+      if (id == 'rdir') copy_res_dir(rdir, file);
       if (id == 'rsrc') copy_res(rdir, file);
     });
   });
