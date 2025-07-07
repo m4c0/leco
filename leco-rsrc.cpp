@@ -10,6 +10,8 @@ static void copy_res(const sim::sb & resdir, const char * file) {
 static void copy_res_dir(const sim::sb & resdir, const char * rdir) {
   sim::sb rin_dir { rdir };
   for (auto p : pprent::list(rdir)) {
+    if (p[0] == '.') continue;
+
     auto file = rin_dir / p;
     copy_res(resdir, *file);
   }
