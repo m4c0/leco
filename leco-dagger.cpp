@@ -16,7 +16,7 @@ enum class exe_t {
   app,
 };
 
-static const char * dag_file_version = "2025-05-19";
+static const char * dag_file_version = "2025-07-07";
 
 static sim::sb source {};
 static sys::file * current_output;
@@ -267,12 +267,10 @@ static auto dll_path(const sim::sb & src) {
 }
 
 static void add_plgn(const char *mod_impl, const char *desc, uint32_t code) {
+  // TODO: check if target is a DLL
   auto src = path_of(mod_impl);
   if (src.len == 0) return missing_file(desc);
-
-  auto path = sim::path_parent(*source) / "out" / target / src.path_filename();
-  path.path_extension("dag");
-  output('plgn', *path);
+  output('plgn', *dll_path(src));
 }
 
 static void output_file_tags() {

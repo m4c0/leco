@@ -25,8 +25,7 @@ static void copy_xcfw(const sim::sb & exedir, const char * xcfw_path) {
 
 static void copy_plugins(const sim::sb & exedir, const char * dag) {
   sys::dag_read(dag, [&](auto id, auto file) {
-    if (id != 'plgn') return;
-    copy_exe(exedir, *sys::read_dag_tag('tdll', file));
+    if (id == 'plgn') return copy_exe(exedir, file);
   });
 }
 
