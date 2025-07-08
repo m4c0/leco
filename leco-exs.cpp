@@ -11,6 +11,8 @@ static void copy_exe(const sim::sb & exedir, const char * input) {
 }
 
 static void copy_xcfw(const sim::sb & exedir, const char * xcfw_path) {
+  if (!sys::is_tgt_apple()) sys::die("Trying to install a xcframework on a non-apple target");
+
   sim::sb tgt = exedir;
   if (!sys::is_tgt_ios()) tgt.path_parent();
   tgt /= "Frameworks";
