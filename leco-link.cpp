@@ -7,8 +7,8 @@ import sys;
 
 struct ctx {
   sim::sb cmd;
-  sim::sb exe;
   p::proc * proc {};
+  sim::sb exe;
 };
 
 static const auto clang = sys::tool_cmd("clang");
@@ -152,8 +152,8 @@ void run(const char * input, const char * output) {
   sys::log("linking", output);
   cs[i] = {
     .cmd = clang + " -- " + *a + " -o " + exe,
-    .exe = sim::sb { output },
     .proc = new p::proc { *clang, "--", *a, "-o", exe },
+    .exe = sim::sb { output },
   };
   hs[i] = cs[i].proc->handle();
 }
