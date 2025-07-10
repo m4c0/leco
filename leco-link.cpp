@@ -16,7 +16,7 @@ static void * hs[8] {};
 static ctx cs[8] {};
 
 static void drain(ctx * c, int res) {
-  auto &[cmd, exe, proc] = *c;
+  auto &[cmd, proc, exe] = *c;
 
   while (proc->gets())     err(proc->last_line_read());
   while (proc->gets_err()) err(proc->last_line_read());
