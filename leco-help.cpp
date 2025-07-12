@@ -7,7 +7,7 @@ Usage: ../leco/leco.exe <tool> <tool-options>
 
 Porcelain tools:
 
-        cleaner: cleans output folders
+        clean: cleans output folders
         driver: drives the LECO workflow (default tool if unspecified)
         format: formats code using clang-format
         git-status: list status of all folders in the git workspace

@@ -33,8 +33,8 @@ static void usage() {
 static void run_target(const char * target) {
   mct_syscall_setenv("LECO_TARGET", target);
 
-  if (clean_level == 1) sys::tool_run("cleaner");
-  if (clean_level >= 2) sys::tool_run("cleaner", "-a");
+  if (clean_level == 1) sys::tool_run("clean");
+  if (clean_level >= 2) sys::tool_run("clean", "-a");
 
   if (!sys::is_tgt_host()) sys::tool_run("sysroot");
 
