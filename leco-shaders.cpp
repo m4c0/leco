@@ -53,12 +53,7 @@ static void build_shader(const char * dag, const char * file) {
       if (line[7] == '/') line += 7;
       else if (line[8] == ':') line += 7;
     }
-    sim::sb l { line };
-    if (l[l.len - 2] == '\r') {
-      l[l.len - 2] = '\n';
-      l[l.len - 1] = 0;
-    }
-    put(*l);
+    putln(line);
   }
 
   if (p.wait() != 0) sys::die("shader compilation failed");

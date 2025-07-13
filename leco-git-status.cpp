@@ -32,7 +32,7 @@ int main() try {
 
     while (gs.gets()) {
       auto buf = gs.last_line_read();
-      if (0 == strcmp(buf, "# branch.ab +0 -0\n")) {
+      if (0 == strcmp(buf, "# branch.ab +0 -0")) {
       } else if (starts_with(buf, "# branch.ab")) {
         enable_printer();
         sys::runf("git -C %s log --branches --not --remotes --format=oneline", *pwd);
