@@ -18,8 +18,8 @@ static ctx cs[8] {};
 static void drain(ctx * c, int res) {
   auto &[cmd, proc] = *c;
 
-  while (proc->gets())     err(proc->last_line_read());
-  while (proc->gets_err()) err(proc->last_line_read());
+  while (proc->gets())     errln(proc->last_line_read());
+  while (proc->gets_err()) errln(proc->last_line_read());
 
   c->proc = {};
   if (res != 0) die("command failed: ", *cmd);
