@@ -333,9 +333,7 @@ static void output_root_tag() {
 static bool exe_pragma(const char * p, const char * e, exe_t t) {
   p = cmp(p, e);
   if (!p) return false;
-  if (!*p) return false;
-  if (*p != '\n' && *p != '\r') return false;
-  if (*p == ' ') error("expecting newline after this pragma");
+  if (*p) error("expecting newline after this pragma");
   if (exe_type != exe_t::none) error("multiple executable type found");
   exe_type = t;
   return true;
