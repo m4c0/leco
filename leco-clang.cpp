@@ -8,6 +8,11 @@
 #include "sim.h"
 #include "targets.hpp"
 
+#define IS_TGT(t, x) (0 == strcmp((t), (x)))
+#define IS_TGT_DROID(t)                                                        \
+  (IS_TGT(t, TGT_DROID_AARCH64) || IS_TGT(t, TGT_DROID_ARMV7) ||               \
+   IS_TGT(t, TGT_DROID_X86) || IS_TGT(t, TGT_DROID_X86_64))
+
 static void clang_cmd(sim_sb *buf, const char *exe) {
 #if __APPLE__ && !__arm64__
   sim_sb_copy(buf, "/usr/local/opt/llvm/bin");
