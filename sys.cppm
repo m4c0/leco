@@ -20,6 +20,7 @@ module;
 export module sys;
 export import mtime;
 export import no;
+export import popen;
 export import print;
 export import pprent;
 export import sim;
@@ -212,4 +213,51 @@ bool is_tgt_apple() { return is_tgt_osx()      || is_tgt_ios();     }
 
 #undef max
 constexpr auto max(auto a, auto b) { return a > b ? a : b; }
+
+class mt {
+  struct ctx {
+    sim::sb cmd;
+    p::proc * proc {};
+  };
+
+  sim::sb m_clang = tool_cmd("clang");
+  void * m_hs[8] {};
+  ctx m_cs[8] {};
+
+  void drain(ctx * c, int res) {
+    auto &[cmd, proc] = *c;
+  
+    while (proc->gets())     errln(proc->last_line_read());
+    while (proc->gets_err()) errln(proc->last_line_read());
+  
+    c->proc = {};
+    if (res != 0) ::die("command failed: ", *cmd);
+  }
+
+public:
+  ~mt() {
+    for (auto i = 0; i < 8; i++) {
+      if (!m_cs[i].proc) continue;
+      drain(m_cs + i, m_cs[i].proc->wait());
+    }
+  }
+
+  [[nodiscard]] auto reserve() {
+    int i {};
+    for (i = 0; i < 8; i++) if (m_hs[i] == nullptr) break;
+
+    if (i == 8) {
+      // TODO: "drain" buffers otherwise we might deadlock
+      auto res = p::wait_any(m_hs, &i);
+      drain(m_cs + i, res);
+    }
+
+    return i;
+  }
+
+  void run(int i, ctx c) {
+    m_cs[i] = c;
+    m_hs[i] = m_cs[i].proc->handle();
+  }
+};
 } // namespace sys
