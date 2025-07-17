@@ -43,12 +43,19 @@ int main() try {
 
       sim::sb src = sys::read_dag_tag('srcf', dag);
 
-      auto deps = sim::path_parent(dag) / "deplist";
-      auto incs = sim::path_parent(dag) / "includes";
+      auto deps = "@"_s + *(sim::path_parent(dag) / "deplist");
+      auto incs = "@"_s + *(sim::path_parent(dag) / "includes");
     
+      auto i = mt.reserve();
+
       sys::log("compiling module", *src);
-      sys::tool_run("clang", "-i %s -- -std=c++2b --precompile -o %s @%s @%s", *src, file, *deps, *incs);
+      auto clang = sys::tool_cmd("clang");
+      mt.run(i, {
+        .cmd = clang + " -i " + *src + " -- -std=c++2b --precompile -o " + *src + " " + file + " " + *deps + " " + *incs,
+        .proc = new p::proc { *clang, "-i", *src, "--", "-std=c++2b", "--precompile", "-o", file, *deps, *incs },
+      });
     });
+    putln("ding");
   } while (dirty);
 } catch (...) {
   return 1;
