@@ -2,14 +2,6 @@
 
 import sys;
 
-static void compile(const char * src, const char * pcm, const char * dag) {
-  auto deps = sim::path_parent(dag) / "deplist";
-  auto incs = sim::path_parent(dag) / "includes";
-
-  sys::log("compiling module", src);
-  sys::tool_run("clang", "-i %s -- -std=c++2b --precompile -o %s @%s @%s", src, pcm, *deps, *incs);
-}
-
 static str::map spec_cache {};
 static auto calc_mtime(const char * dag) {
   auto &mtime = spec_cache[dag];
@@ -31,6 +23,7 @@ int main() try {
   do {
     spec_cache = {};
 
+    sys::mt mt {};
     sys::for_each_tag_in_dags('pcmf', true, [&](auto dag, auto file) {
       if (calc_mtime(dag) < mtime::of(file)) return;
 
@@ -49,7 +42,12 @@ int main() try {
       }
 
       sim::sb src = sys::read_dag_tag('srcf', dag);
-      compile(*src, file, dag);
+
+      auto deps = sim::path_parent(dag) / "deplist";
+      auto incs = sim::path_parent(dag) / "includes";
+    
+      sys::log("compiling module", *src);
+      sys::tool_run("clang", "-i %s -- -std=c++2b --precompile -o %s @%s @%s", *src, file, *deps, *incs);
     });
   } while (dirty);
 } catch (...) {
