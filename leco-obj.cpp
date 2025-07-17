@@ -1,6 +1,5 @@
 #pragma leco tool
 
-import popen;
 import sys;
 
 // TODO: investigate why changes in deps are not triggering these

@@ -2,7 +2,6 @@
 
 #include <stdio.h>
 
-import popen;
 import sys;
 
 struct ctx {
