@@ -19,27 +19,26 @@ static auto calc_mtime(const char * dag) {
 }
 
 int main() try {
-  bool dirty = false;
-  do {
+  while (true) {
     spec_cache = {};
 
+    bool has_pending_work = false;
     sys::mt mt {};
     sys::for_each_tag_in_dags('pcmf', true, [&](auto dag, auto file) {
       if (calc_mtime(dag) < mtime::of(file)) return;
 
-      bool ok = true;
+      has_pending_work = true;
+
+      bool deps_ok = true;
       sys::dag_read(dag, [&](auto id, auto file) {
         if (id != 'mdag') return;
 
         auto pcmf = sys::read_dag_tag('pcmf', file);
         if (calc_mtime(file) < mtime::of(*pcmf)) return;
 
-        ok = false;
+        deps_ok = false;
       });
-      if (!ok) {
-        dirty = true;
-        return;
-      }
+      if (!deps_ok) return;
 
       sim::sb src = sys::read_dag_tag('srcf', dag);
 
@@ -55,8 +54,9 @@ int main() try {
         .proc = new p::proc { *clang, "-i", *src, "--", "-std=c++2b", "--precompile", "-o", file, *deps, *incs },
       });
     });
-    putln("ding");
-  } while (dirty);
+
+    if (!has_pending_work) break;
+  }
 } catch (...) {
   return 1;
 }
