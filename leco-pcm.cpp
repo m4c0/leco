@@ -2,14 +2,6 @@
 
 import sys;
 
-static void compile(const char * src, const char * pcm, const char * dag) {
-  auto deps = sim::path_parent(dag) / "deplist";
-  auto incs = sim::path_parent(dag) / "includes";
-
-  sys::log("compiling module", src);
-  sys::tool_run("clang", "-i %s -- -std=c++2b --precompile -o %s @%s @%s", src, pcm, *deps, *incs);
-}
-
 static str::map spec_cache {};
 static auto calc_mtime(const char * dag) {
   auto &mtime = spec_cache[dag];
@@ -25,16 +17,46 @@ static auto calc_mtime(const char * dag) {
 
   return mtime;
 }
-static void compile_pcmf(const char * dag, const char * _) {
-  sim::sb src = sys::read_dag_tag('srcf', dag);
-  sim::sb pcm = sys::read_dag_tag('pcmf', dag);
-  if (calc_mtime(dag) < mtime::of(*pcm)) return;
-
-  compile(*src, *pcm, dag);
-}
 
 int main() try {
-  sys::for_each_tag_in_dags('pcmf', true, &compile_pcmf);
+  while (true) {
+    spec_cache = {};
+
+    bool has_pending_work = false;
+    sys::mt mt {};
+    sys::for_each_tag_in_dags('pcmf', true, [&](auto dag, auto file) {
+      if (calc_mtime(dag) < mtime::of(file)) return;
+
+      has_pending_work = true;
+
+      bool deps_ok = true;
+      sys::dag_read(dag, [&](auto id, auto file) {
+        if (id != 'mdag') return;
+
+        auto pcmf = sys::read_dag_tag('pcmf', file);
+        if (calc_mtime(file) < mtime::of(*pcmf)) return;
+
+        deps_ok = false;
+      });
+      if (!deps_ok) return;
+
+      sim::sb src = sys::read_dag_tag('srcf', dag);
+
+      auto deps = "@"_s + *(sim::path_parent(dag) / "deplist");
+      auto incs = "@"_s + *(sim::path_parent(dag) / "includes");
+
+      auto i = mt.reserve();
+
+      sys::log("compiling module", *src);
+      auto clang = sys::tool_cmd("clang");
+      mt.run(i, {
+        .cmd = clang + " -i " + *src + " -- -std=c++2b --precompile -o " + *src + " " + file + " " + *deps + " " + *incs,
+        .proc = new p::proc { *clang, "-i", *src, "--", "-std=c++2b", "--precompile", "-o", file, *deps, *incs },
+      });
+    });
+
+    if (!has_pending_work) break;
+  }
 } catch (...) {
   return 1;
 }
