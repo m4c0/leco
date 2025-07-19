@@ -217,6 +217,7 @@ constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 class mt {
   struct ctx {
     sim::sb cmd;
+    sim::sb out;
     p::proc * proc {};
   };
 
@@ -225,21 +226,13 @@ class mt {
   ctx m_cs[8] {};
 
   void drain(ctx * c, int res) {
-    auto &[cmd, proc] = *c;
+    auto &[cmd, out, proc] = *c;
   
     while (proc->gets())     errln(proc->last_line_read());
     while (proc->gets_err()) errln(proc->last_line_read());
   
     c->proc = {};
     if (res != 0) ::die("command failed: ", *cmd);
-  }
-
-public:
-  ~mt() {
-    for (auto i = 0; i < 8; i++) {
-      if (!m_cs[i].proc) continue;
-      drain(m_cs + i, m_cs[i].proc->wait());
-    }
   }
 
   [[nodiscard]] auto reserve() {
@@ -255,7 +248,17 @@ public:
     return i;
   }
 
-  void run(int i, ctx c) {
+public:
+  ~mt() {
+    for (auto i = 0; i < 8; i++) {
+      if (!m_cs[i].proc) continue;
+      drain(m_cs + i, m_cs[i].proc->wait());
+    }
+  }
+
+  void run(const char * lbl, const char * out, ctx c) {
+    auto i = reserve();
+    sys::log(lbl, out);
     m_cs[i] = c;
     m_hs[i] = m_cs[i].proc->handle();
   }

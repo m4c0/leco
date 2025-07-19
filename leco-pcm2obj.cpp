@@ -15,11 +15,8 @@ int main() try {
 
     auto deps = "@"_s + *(sim::path_parent(dag) / "deplist");
 
-    auto i = mt.reserve();
-
-    sys::log("compiling mod obj", *obj);
     auto clang = sys::tool_cmd("clang");
-    mt.run(i, {
+    mt.run("compiling mod obj", *obj, {
       .cmd = clang + " -- -c " + pcm + " -o " + *obj + " " + *deps,
       .proc = new p::proc { *clang, "--", "-c", pcm, "-o", *obj, *deps },
     });
