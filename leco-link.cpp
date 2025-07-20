@@ -7,7 +7,7 @@ import sys;
 struct ctx {
   sim::sb cmd;
   p::proc * proc {};
-  sim::sb exe;
+  sim::sb out;
 };
 
 static const auto clang = sys::tool_cmd("clang");
@@ -15,7 +15,7 @@ static void * hs[8] {};
 static ctx cs[8] {};
 
 static void drain(ctx * c, int res) {
-  auto &[cmd, proc, exe] = *c;
+  auto &[cmd, proc, out] = *c;
 
   while (proc->gets())     errln(proc->last_line_read());
   while (proc->gets_err()) errln(proc->last_line_read());
@@ -24,11 +24,11 @@ static void drain(ctx * c, int res) {
   if (0 != res) die("command failed: ", *c->cmd);
 
 #ifdef _WIN32
-  auto old_f = exe + ".old";
-  auto new_f = exe + ".new";
+  auto old_f = out + ".old";
+  auto new_f = out + ".new";
   remove(*old_f);
-  rename(*exe, *old_f);
-  rename(*new_f, *exe);
+  rename(*out, *old_f);
+  rename(*new_f, *out);
 #endif
 }
 
@@ -152,7 +152,7 @@ void run(const char * input, const char * output) {
   cs[i] = {
     .cmd = clang + " -- " + *a + " -o " + exe,
     .proc = new p::proc { *clang, "--", *a, "-o", exe },
-    .exe = sim::sb { output },
+    .out = sim::sb { output },
   };
   hs[i] = cs[i].proc->handle();
 }
