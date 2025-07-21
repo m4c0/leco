@@ -4,31 +4,15 @@
 
 import sys;
 
-struct ctx {
-  sim::sb cmd;
-  p::proc * proc {};
-  sim::sb out;
-};
+static sys::mt g_mt {};
 
-static const auto clang = sys::tool_cmd("clang");
-static void * hs[8] {};
-static ctx cs[8] {};
-
-static void drain(ctx * c, int res) {
-  auto &[cmd, proc, out] = *c;
-
-  while (proc->gets())     errln(proc->last_line_read());
-  while (proc->gets_err()) errln(proc->last_line_read());
-
-  c->proc = {};
-  if (0 != res) die("command failed: ", *c->cmd);
-
+static void mt_dtor(const char * out) {
 #ifdef _WIN32
-  auto old_f = out + ".old";
-  auto new_f = out + ".new";
+  auto old_f = sim::sb { out } + ".old";
+  auto new_f = sim::sb { out } + ".new";
   remove(*old_f);
-  rename(*out, *old_f);
-  rename(*new_f, *out);
+  rename(out, *old_f);
+  rename(*new_f, out);
 #endif
 }
 
@@ -137,36 +121,21 @@ void run(const char * input, const char * output) {
   const char * exe = output;
 #endif
 
-  int i {};
-  for (i = 0; i < 8; i++) if (hs[i] == nullptr) break;
-
-  if (i == 8) {
-    // TODO: "drain" buffers otherwise we might deadlock
-    auto res = p::wait_any(hs, &i);
-    drain(cs + i, res);
-  }
-
   auto a = "@"_s + *args;
+  auto clang = sys::tool_cmd("clang");
 
-  sys::log("linking", output);
-  cs[i] = {
+  g_mt.run("linking", output, {
     .cmd = clang + " -- " + *a + " -o " + exe,
-    .proc = new p::proc { *clang, "--", *a, "-o", exe },
     .out = sim::sb { output },
-  };
-  hs[i] = cs[i].proc->handle();
+    .proc = new p::proc { *clang, "--", *a, "-o", exe },
+    .dtor = mt_dtor,
+  });
 }
 
 int main() try {
   sys::for_each_root_dag([](auto * dag, auto id, auto file) {
     if (id != 'tmmd') run(dag, file);
   });
-
-  for (auto i = 0; i < 8; i++) {
-    if (!cs[i].proc) continue;
-    drain(cs + i, cs[i].proc->wait());
-  }
-
   return 0;
 } catch (...) {
   return 1;

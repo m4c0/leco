@@ -219,6 +219,7 @@ class mt {
     sim::sb cmd;
     sim::sb out;
     p::proc * proc {};
+    void (*dtor)(const char *) = [](auto) {};
   };
 
   sim::sb m_clang = tool_cmd("clang");
@@ -226,13 +227,14 @@ class mt {
   ctx m_cs[8] {};
 
   void drain(ctx * c, int res) {
-    auto &[cmd, out, proc] = *c;
+    auto &[cmd, out, proc, dtor] = *c;
   
     while (proc->gets())     errln(proc->last_line_read());
     while (proc->gets_err()) errln(proc->last_line_read());
   
     c->proc = {};
     if (res != 0) ::die("command failed: ", *cmd);
+    (c->dtor)(*(c->out));
   }
 
   [[nodiscard]] auto reserve() {
