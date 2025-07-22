@@ -122,14 +122,10 @@ void run(const char * input, const char * output) {
 #endif
 
   auto a = "@"_s + *args;
-  auto clang = sys::tool_cmd("clang");
 
-  g_mt.run("linking", output, {
-    .cmd = clang + " -- " + *a + " -o " + exe,
-    .out = sim::sb { output },
-    .proc = new p::proc { *clang, "--", *a, "-o", exe },
-    .dtor = mt_dtor,
-  });
+  g_mt.run_clang(
+      "linking", output, mt_dtor,
+      "--", *a, "-o", exe);
 }
 
 int main() try {

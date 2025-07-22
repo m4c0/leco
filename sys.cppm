@@ -215,11 +215,12 @@ bool is_tgt_apple() { return is_tgt_osx()      || is_tgt_ios();     }
 constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 
 class mt {
+  using dtor_t = void (*)(const char *);
   struct ctx {
     sim::sb cmd;
     sim::sb out;
     p::proc * proc {};
-    void (*dtor)(const char *) = [](auto) {};
+    dtor_t dtor = [](auto) {};
   };
 
   sim::sb m_clang = tool_cmd("clang");
@@ -264,12 +265,17 @@ public:
     m_cs[i] = c;
     m_hs[i] = m_cs[i].proc->handle();
   }
-  void run_clang(const char * lbl, const char * out, auto *... args) {
+  void run_clang(const char * lbl, const char * out, dtor_t dtor, auto *... args) {
     auto clang = sys::tool_cmd("clang");
     run(lbl, out, ctx {
       .cmd = (clang + ... + args),
+      .out { out },
       .proc = new p::proc { *clang, args... },
+      .dtor = dtor,
     });
+  }
+  void run_clang(const char * lbl, const char * out, auto *... args) {
+    run_clang(lbl, out, [](auto) {}, args...);
   }
 };
 } // namespace sys
