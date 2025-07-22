@@ -45,11 +45,9 @@ int main() try {
       auto deps = "@"_s + *(sim::path_parent(dag) / "deplist");
       auto incs = "@"_s + *(sim::path_parent(dag) / "includes");
 
-      auto clang = sys::tool_cmd("clang");
-      mt.run("compiling module", *src, {
-        .cmd = clang + " -i " + *src + " -- -std=c++2b --precompile -o " + *src + " " + file + " " + *deps + " " + *incs,
-        .proc = new p::proc { *clang, "-i", *src, "--", "-std=c++2b", "--precompile", "-o", file, *deps, *incs },
-      });
+      mt.run_clang(
+          "compiling module", *src,
+          "-i", *src, "--", "-std=c++2b", "--precompile", "-o", file, *deps, *incs);
     });
 
     if (!has_pending_work) break;

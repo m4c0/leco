@@ -38,11 +38,9 @@ static void compile_objf(const char * dag, const char * _) {
   auto deps = "@"_s + *(sim::path_parent(dag) / "deplist");
   auto incs = "@"_s + *(sim::path_parent(dag) / "includes");
 
-  auto clang = sys::tool_cmd("clang");
-  mt.run("compiling object", *obj, {
-    .cmd = clang + " -i " + *src + " -- " + lang + " -c -o " + *obj + " " + *deps + " " + *incs,
-    .proc = new p::proc { *clang, "-i", *src, "--", lang, "-c", "-o", *obj, *deps, *incs },
-  });
+  mt.run_clang(
+      "compiling object", *obj,
+      "-i", *src, "--", lang, "-c", "-o", *obj, *deps, *incs);
 }
 
 int main() try {

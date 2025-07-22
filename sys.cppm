@@ -264,5 +264,12 @@ public:
     m_cs[i] = c;
     m_hs[i] = m_cs[i].proc->handle();
   }
+  void run_clang(const char * lbl, const char * out, auto *... args) {
+    auto clang = sys::tool_cmd("clang");
+    run(lbl, out, ctx {
+      .cmd = (clang + ... + args),
+      .proc = new p::proc { *clang, args... },
+    });
+  }
 };
 } // namespace sys
