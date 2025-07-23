@@ -227,17 +227,14 @@ class mt {
   void * m_hs[8] {};
   ctx m_cs[8] {};
 
-  void drain(ctx * c, int res, bool die_on_err) {
+  void drain(ctx * c, int res) {
     auto &[cmd, out, proc, dtor] = *c;
   
     while (proc->gets())     errln(proc->last_line_read());
     while (proc->gets_err()) errln(proc->last_line_read());
   
     c->proc = {};
-    if (res != 0) {
-      if (die_on_err) ::die("command failed: ", *cmd);
-      return;
-    }
+    if (res != 0) ::die("command failed: ", *cmd);
     (c->dtor)(*(c->out));
   }
 
@@ -248,7 +245,7 @@ class mt {
     if (i == 8) {
       // TODO: "drain" buffers otherwise we might deadlock
       auto res = p::wait_any(m_hs, &i);
-      drain(m_cs + i, res, true);
+      drain(m_cs + i, res);
     }
 
     return i;
@@ -258,7 +255,7 @@ public:
   ~mt() {
     for (auto i = 0; i < 8; i++) {
       if (!m_cs[i].proc) continue;
-      drain(m_cs + i, m_cs[i].proc->wait(), false);
+      drain(m_cs + i, m_cs[i].proc->wait());
     }
   }
 
