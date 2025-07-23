@@ -269,11 +269,10 @@ public:
     m_hs[i] = m_cs[i].proc->handle();
   }
   void run_clang(const char * lbl, const char * out, dtor_t dtor, auto *... args) {
-    auto clang = sys::tool_cmd("clang");
     run(lbl, out, ctx {
-      .cmd = (clang + ... + args),
+      .cmd = (m_clang + ... + args),
       .out { out },
-      .proc = new p::proc { *clang, args... },
+      .proc = new p::proc { *m_clang, args... },
       .dtor = dtor,
     });
   }
