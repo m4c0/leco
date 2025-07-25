@@ -111,7 +111,6 @@ int main(int argc, char **argv) try {
   GOPT(opts, argc, argv, "i:");
 
   bool cpp = true;
-  bool src = false;
   
   const char * target = sysstd_env("LECO_TARGET");
   if (!target) target = HOST_TARGET;
@@ -128,7 +127,6 @@ int main(int argc, char **argv) try {
       auto ext = sim_path_extension(input.buffer);
       cpp = (0 == strcmp(ext, ".cpp")) || (0 == strcmp(ext, ".cppm")) ||
             (0 == strcmp(ext, ".mm"));
-      src = cpp || (0 == strcmp(ext, ".m")) || (0 == strcmp(ext, ".c"));
       break;
     }
     default: return usage();
@@ -148,15 +146,6 @@ int main(int argc, char **argv) try {
 #endif
   }
   if (sysstd_env("LECO_OPT")) sim_sb_concat(&args, " -O3 -flto -fvisibility=hidden");
-
-  if (src) {
-    sim_sb path {};
-    sim_sb_new(&path, 10240);
-    sim_sb_path_copy_real(&path, ".");
-    sim_sb_concat(&args, " -I");
-    sim_sb_concat(&args, path.buffer);
-    sim_sb_delete(&path);
-  }
 
   sim_sb_printf(&args, " -target %s", target);
   add_target_defs(&args, target);
