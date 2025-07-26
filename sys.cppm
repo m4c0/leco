@@ -156,6 +156,7 @@ void for_each_root_dag(auto && fn) {
     switch (id) {
       case 'tapp':
       case 'tdll':
+      case 'test':
       case 'tool':
       case 'tmmd': fn(dag, id, file); break;
       default: break;

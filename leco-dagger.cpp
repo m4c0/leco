@@ -14,9 +14,10 @@ enum class exe_t {
   dll,
   tool,
   app,
+  test,
 };
 
-static const char * dag_file_version = "2025-07-07";
+static const char * dag_file_version = "2025-07-26";
 
 static sim::sb source {};
 static sys::file * current_output;
@@ -318,6 +319,12 @@ static void output_root_tag() {
   case exe_t::dll:
     output('tdll', *dll_path(source));
     break;
+  case exe_t::test:
+    if (sys::is_tgt_host()) {
+      auto path = exe_path(source);
+      output('test', *path);
+    }
+    break;
   case exe_t::tool:
     if (sys::is_tgt_host()) {
       auto path = exe_path(source);
@@ -366,6 +373,7 @@ static bool pragma(const char * p) {
   p = cmp(p, "#pragma leco ");
   if (!p) return false;
 
+  if (exe_pragma(p, "test", exe_t::test)) return true;
   if (exe_pragma(p, "tool", exe_t::tool)) return true;
   if (exe_pragma(p, "app",  exe_t::app))  return true;
   if (exe_pragma(p, "dll",  exe_t::dll))  return true;
