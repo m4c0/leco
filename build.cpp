@@ -1,7 +1,9 @@
 #define MCT_STAT_IMPLEMENTATION
+#define MCT_SYSCALL_IMPLEMENTATION
 #define SYSSTD_IMPLEMENTATION
 #include "targets.hpp"
 #include "../mct/mct-stat.h"
+#include "../mct/mct-syscall.h"
 #include "../sysstd/sysstd.h"
 
 #include <stdio.h>
@@ -67,13 +69,12 @@ int try_main() {
   TOOL("pcm2obj");
 
   TOOL("driver");
-  TOOL("meta");
 
-  puts("Building meta runner");
-  run(CLANG " -i leco.cpp -- -o leco.exe");
+  puts("Self-hosted build of final stage");
+  run("." SEP "out" SEP HOST_TARGET SEP "leco-driver.exe");
 
-  puts("Using LECO to build final stage");
-  run("." SEP "leco.exe");
+  puts("Hard-linking meta caller");
+  mct_syscall_link("out" SEP HOST_TARGET SEP "leco-meta.exe", "leco.exe");
 
   puts("Doney-devito");
   return 0;
