@@ -47,7 +47,7 @@ int main() try {
 
       mt.run_clang(
           "compiling module", *src,
-          "-i", *src, "--", "-std=c++2b", "--precompile", "-o", file, *deps, *incs);
+          "--", "-std=c++2b", "--precompile", "-o", file, *deps, *incs, *src);
     });
 
     if (!has_pending_work) break;
