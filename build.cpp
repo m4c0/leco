@@ -27,13 +27,13 @@
 #define MARG(name) " -fmodule-file=" name "=" PCM(name) " " PCM(name)
 #define LMARG(name) " -fmodule-file=" name "=" LPCM(name) " " LPCM(name)
 
-#define MODULE(name, ...) MKOUT(name); run(CLANG " -i .." SEP name SEP name ".cppm -- -o " PCM(name) PCMFL __VA_ARGS__);
-#define LOCAL_MODULE(name, ...) run(CLANG " -i " name ".cppm -- -o " LPCM(name) PCMFL PMP __VA_ARGS__);
+#define MODULE(name, ...) MKOUT(name); run(CLANG " -- .." SEP name SEP name ".cppm -o " PCM(name) PCMFL __VA_ARGS__);
+#define LOCAL_MODULE(name, ...) run(CLANG " -- " name ".cppm -o " LPCM(name) PCMFL PMP __VA_ARGS__);
 
 #define TOOL(name)                                                    \
   puts("Building " name);                                             \
-  run(CLANG " -i leco-" name ".cpp "                                  \
-            "-- -o out/" HOST_TARGET "/leco-" name ".exe " CPPSTD     \
+  run(CLANG " -- leco-" name ".cpp "                                  \
+            " -o out/" HOST_TARGET "/leco-" name ".exe " CPPSTD       \
             MARG("mtime") MARG("no") MARG("popen")                    \
             MARG("pprent") MARG("print") MARG("sysstd")               \
             LMARG("sim") LMARG("strset") LMARG("sys"))
