@@ -110,7 +110,7 @@ int main(int argc, char **argv) try {
   struct gopt opts;
   GOPT(opts, argc, argv, "i:");
 
-  bool cpp = true;
+  const char * clang_driver = "clang++";
   
   const char * target = sysstd_env("LECO_TARGET");
   if (!target) target = HOST_TARGET;
@@ -125,8 +125,9 @@ int main(int argc, char **argv) try {
       sim_sb_new(&input, 10240);
       sim_sb_path_copy_real(&input, val);
       auto ext = sim_path_extension(input.buffer);
-      cpp = (0 == strcmp(ext, ".cpp")) || (0 == strcmp(ext, ".cppm")) ||
-            (0 == strcmp(ext, ".mm"));
+      if ((0 == strcmp(ext, ".c")) || (0 == strcmp(ext, ".m"))) {
+        clang_driver = "clang";
+      }
       break;
     }
     default: return usage();
@@ -135,7 +136,7 @@ int main(int argc, char **argv) try {
 
   sim_sb args{};
   sim_sb_new(&args, 10240);
-  clang_cmd(&args, cpp ? "clang++" : "clang");
+  clang_cmd(&args, clang_driver);
   sim_sb_concat(&args, " -Wall -Wno-unknown-pragmas");
 
   if (sysstd_env("LECO_DEBUG")) {
