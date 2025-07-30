@@ -412,7 +412,7 @@ static bool pragma(const char * p) {
 enum run_result { OK, ERR, SKIPPED };
 [[nodiscard]] static run_result run(const char * dag, const char * src, bool roots_only) try {
   p::proc proc {
-    *sys::tool_cmd("clang"), "-i", src, "--", "-E"
+    *sys::tool_cmd("clang"), "--", src, "-E"
   };
   sys::file f { dag, "w" };
 
