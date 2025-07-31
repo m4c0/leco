@@ -467,7 +467,7 @@ enum run_result { OK, ERR, SKIPPED };
 
   if (proc.wait() != 0) {
     err(*buf);
-    die("error running: ", *sys::tool_cmd("clang"), " -i ", *source, " -- -E");
+    die("error running: ", *sys::tool_cmd("clang"), " -- ", *source, " -E");
   }
 
   output('vers', dag_file_version);
