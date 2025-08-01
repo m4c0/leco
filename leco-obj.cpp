@@ -34,13 +34,18 @@ static void compile_objf(const char * dag, const char * _) {
   auto lang = "-std=c++2b";
   if (ext == ".m" || ext == ".mm") lang = "-fmodules -fobjc-arc";
   else if (ext == ".c") lang = "-std=c11";
+
+  auto mode = "c++";
+  if      (ext == ".c" ) mode = "c";
+  else if (ext == ".m" ) mode = "objective-c";
+  else if (ext == ".mm") mode = "objective-c++";
  
   auto deps = "@"_s + *(sim::path_parent(dag) / "deplist");
   auto incs = "@"_s + *(sim::path_parent(dag) / "includes");
 
   mt.run_clang(
       "compiling object", *obj,
-      "-i", *src, "--", lang, "-c", "-o", *obj, *deps, *incs);
+      "--", "-x", mode, *src, lang, "-c", "-o", *obj, *deps, *incs);
 }
 
 int main() try {
