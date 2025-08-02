@@ -38,15 +38,12 @@ static int usage() {
   fprintf(stderr, R"(
 LECO's heavily-opiniated CLANG runner
 
-Usage: ../leco/leco.exe clang [-i <input>] [-- <clang-flags>]
+Usage: ../leco/leco.exe clang [-- <clang-flags>]
 
 This tool uses the clang version available via PATH, except on MacOS where it 
 requires llvm to be installed via Homebrew.
 
 Where:
-      -i <input>     input file. When used, certain flags will be automatically
-                     inferred, like C/C++ standard
-
       <clang-flags>  pass flags as-is to clang
 
 Environment variables:
@@ -108,35 +105,22 @@ static void add_sysroot(sim_sb * args, const char * target, const char * argv0) 
 
 int main(int argc, char **argv) try {
   struct gopt opts;
-  GOPT(opts, argc, argv, "i:");
+  GOPT(opts, argc, argv, "");
 
-  const char * clang_driver = "clang++";
-  
   const char * target = sysstd_env("LECO_TARGET");
   if (!target) target = HOST_TARGET;
-
-  sim_sb input{};
 
   char *val{};
   char ch;
   while ((ch = gopt_parse(&opts, &val)) != 0) {
     switch (ch) {
-    case 'i': {
-      sim_sb_new(&input, 10240);
-      sim_sb_path_copy_real(&input, val);
-      auto ext = sim_path_extension(input.buffer);
-      if ((0 == strcmp(ext, ".c")) || (0 == strcmp(ext, ".m"))) {
-        clang_driver = "clang";
-      }
-      break;
-    }
     default: return usage();
     }
   }
 
   sim_sb args{};
   sim_sb_new(&args, 10240);
-  clang_cmd(&args, clang_driver);
+  clang_cmd(&args, "clang++");
   sim_sb_concat(&args, " -Wall -Wno-unknown-pragmas");
 
   if (sysstd_env("LECO_DEBUG")) {
@@ -152,9 +136,7 @@ int main(int argc, char **argv) try {
   add_target_defs(&args, target);
   if (0 != strcmp(target, HOST_TARGET)) add_sysroot(&args, target, argv[0]);
 
-  if (input.len != 0) sim_sb_printf(&args, " %s", input.buffer);
-
-  // TODO: escape argv
+  // TODO: escape argv or use exec
   for (auto i = 0; i < opts.argc; i++) sim_sb_printf(&args, " %s", opts.argv[i]);
 
   run(args.buffer);
