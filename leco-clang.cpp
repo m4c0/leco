@@ -1,9 +1,7 @@
 #pragma leco tool
-#define GOPT_IMPLEMENTATION
 #define SIM_IMPLEMENTATION
 #define SYSSTD_IMPLEMENTATION
 
-#include "../gopt/gopt.h"
 #include "../sysstd/sysstd.h"
 #include "sim.h"
 #include "targets.hpp"
@@ -38,7 +36,7 @@ static int usage() {
   fprintf(stderr, R"(
 LECO's heavily-opiniated CLANG runner
 
-Usage: ../leco/leco.exe clang [-- <clang-flags>]
+Usage: ../leco/leco.exe clang [--] <clang-flags>
 
 This tool uses the clang version available via PATH, except on MacOS where it 
 requires llvm to be installed via Homebrew.
@@ -104,19 +102,15 @@ static void add_sysroot(sim_sb * args, const char * target, const char * argv0) 
 }
 
 int main(int argc, char **argv) try {
-  struct gopt opts;
-  GOPT(opts, argc, argv, "");
+  if (argc == 1) usage();
+
+  if (strcmp(argv[1], "--") == 0) {
+    argc--;
+    argv++;
+  }
 
   const char * target = sysstd_env("LECO_TARGET");
   if (!target) target = HOST_TARGET;
-
-  char *val{};
-  char ch;
-  while ((ch = gopt_parse(&opts, &val)) != 0) {
-    switch (ch) {
-    default: return usage();
-    }
-  }
 
   sim_sb args{};
   sim_sb_new(&args, 10240);
@@ -137,7 +131,7 @@ int main(int argc, char **argv) try {
   if (0 != strcmp(target, HOST_TARGET)) add_sysroot(&args, target, argv[0]);
 
   // TODO: escape argv or use exec
-  for (auto i = 0; i < opts.argc; i++) sim_sb_printf(&args, " %s", opts.argv[i]);
+  for (auto i = 1; i < argc; i++) sim_sb_printf(&args, " %s", argv[i]);
 
   run(args.buffer);
   return 0;
