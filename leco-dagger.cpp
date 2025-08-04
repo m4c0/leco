@@ -373,11 +373,6 @@ static bool pragma(const char * p) {
   p = cmp(p, "#pragma leco ");
   if (!p) return false;
 
-  if (exe_pragma(p, "test", exe_t::test)) return true;
-  if (exe_pragma(p, "tool", exe_t::tool)) return true;
-  if (exe_pragma(p, "app",  exe_t::app))  return true;
-  if (exe_pragma(p, "dll",  exe_t::dll))  return true;
-
   if (add_pragma(p, "dll",          'dlls'))             return true;
   if (add_pragma(p, "embed",        'embd'))             return true;
   if (add_pragma(p, "framework",    'frwk', print_asis)) return true;
@@ -401,6 +396,11 @@ static bool pragma(const char * p) {
 
   if (flag_pragma(p, "portrait",  'port')) return check_app();
   if (flag_pragma(p, "landscape", 'land')) return check_app();
+
+  if (exe_pragma(p, "test", exe_t::test)) return true;
+  if (exe_pragma(p, "tool", exe_t::tool)) return true;
+  if (exe_pragma(p, "app",  exe_t::app))  return true;
+  if (exe_pragma(p, "dll",  exe_t::dll))  return true;
 
   sim::sb buf { "unknown pragma: " };
   auto pp = strchr(p, ' ');
