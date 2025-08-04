@@ -45,7 +45,7 @@ static void compile_objf(const char * dag, const char * _) {
 
   mt.run_clang(
       "compiling object", *obj,
-      "--", "-x", mode, *src, lang, "-c", "-o", *obj, *deps, *incs);
+      "-x", mode, *src, lang, "-c", "-o", *obj, *deps, *incs);
 }
 
 int main() try {
