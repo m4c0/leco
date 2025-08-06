@@ -125,7 +125,7 @@ void run(const char * input, const char * output) {
 
   g_mt.run_clang(
       "linking", output, mt_dtor,
-      "--", *a, "-o", exe);
+      *a, "-o", exe);
 }
 
 int main() try {
