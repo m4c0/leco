@@ -17,7 +17,7 @@ int main() try {
 
     mt.run_clang(
         "compiling mod obj", *obj,
-        "--", "-c", pcm, "-o", *obj, *deps);
+        "-c", pcm, "-o", *obj, *deps);
   });
 } catch (...) {
   return 1;
