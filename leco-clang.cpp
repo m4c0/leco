@@ -36,7 +36,7 @@ static int usage() {
   fprintf(stderr, R"(
 LECO's heavily-opiniated CLANG runner
 
-Usage: ../leco/leco.exe clang [--] <clang-flags>
+Usage: ../leco/leco.exe clang <clang-flags>
 
 This tool uses the clang version available via PATH, except on MacOS where it 
 requires llvm to be installed via Homebrew.
@@ -103,11 +103,6 @@ static void add_sysroot(sim_sb * args, const char * target, const char * argv0) 
 
 int main(int argc, char **argv) try {
   if (argc == 1) usage();
-
-  if (strcmp(argv[1], "--") == 0) {
-    argc--;
-    argv++;
-  }
 
   const char * target = sysstd_env("LECO_TARGET");
   if (!target) target = HOST_TARGET;
