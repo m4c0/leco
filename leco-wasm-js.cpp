@@ -44,8 +44,7 @@ static void run(const char * dag, const char * _) {
   sys::log("generating", *output);
 
   sys::file f { *output, "wb" };
-  fprintf(f, "var leco_exports;\n");
-  fprintf(f, "var leco_imports = {};\n");
+  concat(f, "../leco/wasm.pre.js");
 
   sys::recurse_dag(dag, [&](auto dag, auto id, auto file) {
     if (id != 'srcf') return;
@@ -53,7 +52,7 @@ static void run(const char * dag, const char * _) {
     if (mtime::of(*js) > 0) concat(f, *js);
   });
 
-  concat(f, "../leco/wasm.js");
+  concat(f, "../leco/wasm.post.js");
 }
 
 int main(int argc, char **argv) try {
