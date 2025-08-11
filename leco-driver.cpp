@@ -40,7 +40,6 @@ static void run_target(const char * target) {
 
   sys::    tool_run("dagger");
   sys::opt_tool_run("shaders");
-  sys::opt_tool_run("embed");
   sys::opt_tool_run("rc");
   sys::opt_tool_run("deplist");
   sys::    tool_run("pcm");

@@ -350,11 +350,6 @@ static bool add_pragma(const char * p, const char * id, uint32_t code, printer_t
   read_file_list(p, id, code, prfn);
   return true;
 }
-static bool embed_pragma(const char * p, const char * id, uint32_t code, printer_t prfn = print_found) {
-  if (!(p = cmp(p, "embed_", id, " "))) return false;
-  read_file_list(p, id, code, prfn);
-  return true;
-}
 static bool prop_pragma(const char * p, const char * id, uint32_t code) {
   if (!(p = cmp(p, id, " "))) return false;
   read_file_list(p, id, code, print_asis);
@@ -374,7 +369,6 @@ static bool pragma(const char * p) {
   if (!p) return false;
 
   if (add_pragma(p, "dll",          'dlls'))             return true;
-  if (add_pragma(p, "embed",        'embd'))             return true;
   if (add_pragma(p, "framework",    'frwk', print_asis)) return true;
   if (add_pragma(p, "impl",         'impl', add_impl))   return true;
   if (add_pragma(p, "include_dir",  'idir'))             return true;
@@ -387,8 +381,6 @@ static bool pragma(const char * p) {
   if (add_pragma(p, "static_lib",   'slib'))             return true;
   if (add_pragma(p, "shader",       'rsrc', add_shdr))   return true;
   if (add_pragma(p, "xcframework",  'xcfw', add_xcfw))   return true;
-
-  if (embed_pragma(p, "shader", 'embd', add_shdr)) return true;
 
   if (prop_pragma(p, "display_name", 'name')) return check_app();
   if (prop_pragma(p, "app_id",       'apid')) return check_app();
