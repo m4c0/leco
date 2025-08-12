@@ -403,7 +403,13 @@ static bool pragma(const char * p) {
 
 enum run_result { OK, ERR, SKIPPED };
 [[nodiscard]] static run_result run(const char * dag, const char * src, bool roots_only) try {
-  p::proc proc { *sys::tool_cmd("clang"), src, "-E" };
+  auto ext = sim::path_extension(src);
+  auto mode = "c++";
+  if      (ext == ".c" ) mode = "c";
+  else if (ext == ".m" ) mode = "objective-c";
+  else if (ext == ".mm") mode = "objective-c++";
+
+  p::proc proc { *sys::tool_cmd("clang"), "-x", mode, src, "-E" };
   sys::file f { dag, "w" };
 
   source = sim::sb { src };
