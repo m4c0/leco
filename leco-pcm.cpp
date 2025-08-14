@@ -2,7 +2,7 @@
 
 import sys;
 
-static str::map spec_cache {};
+static sys::strmap spec_cache {};
 static auto calc_mtime(const char * dag) {
   auto &mtime = spec_cache[dag];
   if (mtime != 0) return mtime;

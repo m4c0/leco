@@ -36,7 +36,7 @@
             " -o out/" HOST_TARGET "/leco-" name ".exe " CPPSTD       \
             MARG("mtime") MARG("no") MARG("popen")                    \
             MARG("pprent") MARG("print") MARG("sysstd")               \
-            LMARG("sim") LMARG("strset") LMARG("sys"))
+            LMARG("sim") LMARG("sys"))
 
 static void run(const char * cmd) {
   if (0 == system(cmd)) return;
@@ -58,7 +58,6 @@ int try_main() {
   MODULE("print");
   MODULE("sysstd");
   LOCAL_MODULE("sim");
-  LOCAL_MODULE("strset");
   LOCAL_MODULE("sys", PARG("mtime") PARG("no") PARG("popen") PARG("print") PARG("pprent") PARG("sysstd"));
 
   TOOL("dagger");

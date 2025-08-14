@@ -32,7 +32,7 @@ static void add_local_fw(sys::file & out, const char * fw) {
   fputfn(out, "-F%s\n-framework\n%s", *path, stem.buffer);
 }
 
-static void read_dag(str::map & cache, const char * dag, sys::file & out) {
+static void read_dag(sys::strmap & cache, const char * dag, sys::file & out) {
   auto & mtime = cache[dag];
   if (mtime != 0) return;
   mtime = 1;
@@ -68,7 +68,7 @@ static auto mtime_of(const char * exe_dag) {
 
 static void prepare_args(const char * input, const char * args) {
   sys::file out { args, "wb" };
-  str::map cache {};
+  sys::strmap cache {};
   read_dag(cache, input, out);
 
   if (sys::is_tgt_osx()) {

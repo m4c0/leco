@@ -44,7 +44,7 @@ void run(const char * parent) {
 }
 
 int main() try {
-  str::set parents {};
+  sys::strset parents {};
   sys::for_each_dag(true, [&](auto dag, auto id, auto file) {
     if (id != 'vers') return;
 

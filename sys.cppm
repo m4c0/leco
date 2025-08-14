@@ -17,6 +17,10 @@ module;
 #include <windows.h>
 #endif
 
+#include <map>
+#include <set>
+#include <string>
+
 export module sys;
 export import mtime;
 export import no;
@@ -24,7 +28,6 @@ export import popen;
 export import print;
 export import pprent;
 export import sim;
-export import strset;
 
 export namespace sys {
 inline void run(const char * cmd) {
@@ -71,6 +74,20 @@ using env = hay<
   },
   free>;
 
+class strset {
+  std::set<std::string> m_data{};
+
+public:
+  bool insert(std::string s) {
+    auto [_, i] = m_data.insert(s);
+    return i;
+  }
+
+  [[nodiscard]] auto begin() { return m_data.begin(); }
+  [[nodiscard]] auto end() { return m_data.end(); }
+};
+using strmap = std::map<std::string, uint64_t>;
+
 void mkdirs(const char *path) {
   if (0 == mct_syscall_mkdir(path)) return;
   if (errno == EEXIST) return;
@@ -114,7 +131,7 @@ auto read_dag_tag(uint32_t tid, const char * dag) {
   return res;
 }
 
-void recurse_dag(str::set * cache, const char * dag, auto && fn) {
+void recurse_dag(strset * cache, const char * dag, auto && fn) {
   if (!cache->insert(dag)) return;
 
   dag_read(dag, [&](auto id, auto file) {
@@ -127,13 +144,13 @@ void recurse_dag(str::set * cache, const char * dag, auto && fn) {
   });
 }
 void recurse_dag(const char * dag, auto && fn) {
-  str::set added {};
+  strset added {};
   recurse_dag(&added, dag, fn);
 }
 
 const char * target(); 
 void for_each_dag(const char * basedir, bool recurse, auto && fn) {
-  str::set added {};
+  strset added {};
   auto path = (sim::sb { basedir } /= "out") /= target();
   for (auto file : pprent::list(*path)) {
     if (sim::path_extension(file) != ".dag") continue;

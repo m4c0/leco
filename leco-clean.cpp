@@ -27,7 +27,7 @@ static void rm_rf(const char * p) {
   sys::remove(p);
 }
 
-static str::set temp{};
+static sys::strset temp{};
 static void remove_with_deps(const char * p) {
   if (!temp.insert(p)) return;
 

@@ -4,7 +4,7 @@ import popen;
 import sys;
 
 int main() try {
-  str::set collected {};
+  sys::strset collected {};
   collected.insert("../leco"); // Marking as dependency for any leco-based software
 
   sys::for_each_tag_in_dags('vers', true, [&](auto dag, auto file) {
