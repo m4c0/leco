@@ -4,7 +4,6 @@
 
 #include <string.h>
 
-import gopt;
 import plist;
 import popen;
 import sys;
