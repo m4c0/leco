@@ -97,7 +97,7 @@ void gen(FILE * f, auto && fn) {
 <plist version="1.0">
 <dict>
 )");
-  fn(plist::dict { f });
+  fn(dict { f });
   fprintf(f, "</dict>\n</plist>");
 }
 void gen(const char * fname, auto && fn) {
@@ -145,7 +145,7 @@ void common_ios_plist(dict & d, const char * dag) {
   d.string("CFBundleDisplayName", *disp_name);
   d.string("CFBundleShortVersionString", *app_ver);
   d.array("CFBundleSupportedPlatforms", "iPhoneOS");
-  d.string("MinimumOSVersion", plist::minimum_os_version);
+  d.string("MinimumOSVersion", minimum_os_version);
   d.boolean("LSRequiresIPhoneOS", true);
   d.boolean("ITSAppUsesNonExemptEncryption", false);
   d.boolean("UIRequiresFullScreen", true);
@@ -180,15 +180,15 @@ void common_ios_plist(dict & d, const char * dag) {
 void gen_iphonesim_plist(const char * path, const char * dag) {
   auto info = sim::sb { path } / "Info.plist";
   if (mtime::of(*info)) return;
-  plist::gen(*info, [&](auto &&d) {
-    plist::common_ios_plist(d, dag);
+  gen(*info, [&](auto &&d) {
+    common_ios_plist(d, dag);
   });
 }
 void gen_osx_plist(const char * path) {
   auto info = sim::sb { path } / "Info.plist";
   if (mtime::of(*info)) return;
-  plist::gen(*info, [&](auto &&d) {
-    plist::common_app_plist(d, "app", "macosx");
+  gen(*info, [&](auto &&d) {
+    common_app_plist(d, "app", "macosx");
     d.string("CFBundleIdentifier", "br.com.tpk.app");
     d.string("CFBundleShortVersionString", "1.0.0");
     d.string("CFBundleDisplayName", "app");
@@ -198,7 +198,7 @@ void gen_osx_plist(const char * path) {
 void gen_info_plist(const char * exe_path, const char * dag, const char * build_path) {
   auto path = sim::sb { exe_path } / "Info.plist";
 
-  plist::gen(path.buffer, [&](auto &&d) {
+  gen(path.buffer, [&](auto &&d) {
     common_ios_plist(d, dag);
 
     auto plist = sim::sb { build_path } / "icon-partial.plist";
@@ -209,7 +209,7 @@ void gen_archive_plist(const char *xca_path, const char *name, const char * id, 
   auto path = sim::sb { xca_path } / "Info.plist";
   auto app_path = sim::printf("Applications/%s.app", name);
 
-  plist::gen(path.buffer, [&](auto &&d) {
+  gen(path.buffer, [&](auto &&d) {
     d.dictionary("ApplicationProperties", [&](auto &&dd) {
       dd.string("ApplicationPath", app_path.buffer);
       dd.array("Architectures", "arm64");
@@ -228,7 +228,7 @@ void gen_archive_plist(const char *xca_path, const char *name, const char * id, 
 void gen_export_plist(const char *build_path, const char * app_id) {
   auto path = sim::sb { build_path } / "export.plist";
 
-  plist::gen(path.buffer, [&](auto &&d) {
+  gen(path.buffer, [&](auto &&d) {
     d.string("method", sys::env("LECO_IOS_METHOD"));
     d.string("teamID", team_id());
     d.string("thinning", "&lt;none&gt;");
