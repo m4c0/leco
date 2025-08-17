@@ -5,8 +5,6 @@ import sys;
 // TODO: investigate why changes in deps are not triggering these
 // Example: change "sys.cppm", no tool gets its obj compiled
 
-static sys::mt mt {};
-
 static sys::strmap spec_cache {};
 static auto calc_mtime(const char * dag) {
   auto &mtime = spec_cache[dag];
@@ -23,7 +21,7 @@ static auto calc_mtime(const char * dag) {
   return mtime;
 }
 
-static void compile_objf(const char * dag, const char * _) {
+static void compile_objf(auto & mt, const char * dag) {
   if (sys::read_dag_tag('pcmf', dag) != "") return;
 
   auto src = sys::read_dag_tag('srcf', dag);
@@ -49,7 +47,10 @@ static void compile_objf(const char * dag, const char * _) {
 }
 
 int main() try {
-  sys::for_each_tag_in_dags('objf', true, &compile_objf);
+  sys::mt mt {};
+  sys::for_each_tag_in_dags('objf', true, [&](auto dag, auto) {
+    compile_objf(mt, dag);
+  });
 } catch (...) {
   return 1;
 }
