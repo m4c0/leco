@@ -56,7 +56,7 @@ static void run(const char * dag, const char * _) {
 }
 
 int main(int argc, char **argv) try {
-  if (!sys::is_tgt_apple()) usage();
+  if (!sys::is_tgt_wasm()) usage();
   sys::for_each_tag_in_dags('tapp', false, &run);
 } catch (...) {
   return 1;
