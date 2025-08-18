@@ -21,6 +21,9 @@ Usage: ../leco/leco.exe ipa
 )");
 }
 
+// TODO: fix this for multiple exports on the same repo
+static const auto out_path = "."_real / "out" / sys::target();
+
 static void compile_launch(const char *bundle_path) {
   sys::log("ibtool", bundle_path);
 
@@ -44,15 +47,9 @@ static void dump_symbols(const char * exe, const char * exca) {
 static void gen_iphone_ipa(const char * exe, const char * dag) {
   auto app_path = sim::path_parent(exe);
   
-  sim::sb exca = app_path;
-  exca.path_parent(); // Applications
-  exca.path_parent(); // Products
-  exca.path_parent(); // exports.xcarchive
+  sim::sb exca = out_path / "export.xcarchive";
 
-  sim::sb build_path = exca;
-  build_path.path_parent();
-
-  plist::gen_info_plist(*app_path, dag, *build_path);
+  plist::gen_info_plist(*app_path, dag, *out_path);
   compile_launch(*app_path);
   code_sign(*app_path);
   dump_symbols(exe, *exca);
@@ -66,21 +63,18 @@ static void gen_iphone_ipa(const char * exe, const char * dag) {
   if (app_ver == "") app_ver = sim::sb { "1.0.0" };
 
   plist::gen_archive_plist(*exca, *stem, *app_id, *app_ver);
-  plist::gen_export_plist(*build_path, *app_id);
+  plist::gen_export_plist(*out_path, *app_id);
 
   sys::log("bundle version", *plist::bundle_version);
 }
 
 static void export_archive() {
-  // TODO: fix this for multiple exports on the same repo
-  auto path = "."_real / "out" / sys::target();
-
-  sys::log("exporting from", *path);
+  sys::log("exporting from", *out_path);
   sys::runf("xcodebuild -exportArchive"
             " -archivePath %s/export.xcarchive"
             " -exportPath %s/export"
             " -exportOptionsPlist %s/export.plist",
-            *path, *path, *path);
+            *out_path, *out_path, *out_path);
 }
 
 static void upload_archive(const char * dag) {
