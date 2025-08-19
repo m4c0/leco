@@ -39,8 +39,7 @@ static void dump_symbols(const char * exe, const char * exca) {
 
   auto path = sim::sb { exca } / "dSYMs";
   sys::mkdirs(*path);
-  path /= sim::path_filename(exe);
-  path.path_extension(".app.dSYM");
+  path = (path / sim::path_filename(exe)).path_extension(".app.dSYM");
 
   sys::runf("dsymutil %s -o %s", exe, *path);
 }
