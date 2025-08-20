@@ -2,7 +2,6 @@
 
 #include <stdio.h>
 
-import gopt;
 import sys;
 
 // TODO: detect alpha in PNG - otherwise submit fails

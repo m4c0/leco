@@ -1,7 +1,6 @@
 #pragma leco tool
 #include <stdio.h>
 
-import gopt;
 import sys;
 
 // TODO: check if files actually need regen
