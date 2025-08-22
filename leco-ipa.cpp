@@ -23,6 +23,7 @@ Usage: ../leco/leco.exe ipa
 
 // TODO: fix this for multiple exports on the same repo
 static const auto out_path = "."_real / "out" / sys::target();
+static const auto exca = out_path / "export.xcarchive";
 
 static void compile_launch(const char *bundle_path) {
   sys::log("ibtool", bundle_path);
@@ -34,24 +35,25 @@ static void compile_launch(const char *bundle_path) {
 static void code_sign(const char *bundle_path) {
   sys::tool_run("codesign", "-d %s", bundle_path);
 }
-static void dump_symbols(const char * exe, const char * exca) {
+static void dump_symbols(const char * exe) {
   sys::log("dump symbols", exe);
 
-  auto path = sim::sb { exca } / "dSYMs";
+  auto path = exca / "dSYMs";
   sys::mkdirs(*path);
   path = (path / sim::path_filename(exe)).path_extension(".app.dSYM");
 
   sys::runf("dsymutil %s -o %s", exe, *path);
 }
-static void gen_iphone_ipa(const char * exe, const char * dag) {
-  auto app_path = sim::path_parent(exe);
-  
-  sim::sb exca = out_path / "export.xcarchive";
+static void gen_iphone_ipa(const char * dag) {
+  auto exe = sys::read_dag_tag('edir', dag) / sim::path_filename(dag);
+  exe.path_extension("exe");
+
+  auto app_path = sim::path_parent(*exe);
 
   plist::gen_info_plist(*app_path, dag, *out_path);
   compile_launch(*app_path);
   code_sign(*app_path);
-  dump_symbols(exe, *exca);
+  dump_symbols(*exe);
 
   auto stem = sim::path_stem(dag);
 
@@ -107,9 +109,7 @@ static void iphonesim_bundle(const char * dag) {
 static void iphone_bundle(const char *dag) {
   sys::tool_run("xcassets");
 
-  auto path = sys::read_dag_tag('edir', dag) / sim::path_filename(dag);
-  path.path_extension("exe");
-  gen_iphone_ipa(*path, dag);
+  gen_iphone_ipa(dag);
 
   export_archive();
   upload_archive(dag);
