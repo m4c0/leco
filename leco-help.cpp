@@ -10,8 +10,6 @@ Porcelain tools:
         clean: cleans output folders
         driver: drives the LECO workflow (default tool if unspecified)
         format: formats code using clang-format
-        git-status: list status of all folders in the git workspace
-        git-update: recursively updates known dependencies
         help: this tool
         ipa-upload: validates/upload iOS binaries
 
