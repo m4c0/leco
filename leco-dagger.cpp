@@ -160,11 +160,8 @@ static void add_shdr(const char * src, const char * desc, uint32_t code) {
   print_found(src, desc, 'shdr');
 
   auto out = sim::path_parent(*path_of(src)) / "out" / target;
-  if (code == 'embd') print_found(*out, "include dir", 'idir');
-
   out = out / sim::path_filename(src) + ".spv";
   output(code, *out);
-  if (code == 'embd') output('head', *(out + ".hpp"));
 }
 
 static void find_header(const char *l) {
@@ -185,12 +182,10 @@ static void find_header(const char *l) {
   *e = 0;
 
   // Flag == 3 means "system header". We don't track them.
-  if (strchr(e + 1, '3'))
-    return;
+  if (strchr(e + 1, '3')) return;
 
   // Flag == 1 means "entering file".
-  if (!strchr(e + 1, '1'))
-    return;
+  if (!strchr(e + 1, '1')) return;
 
   // Other flags would be "2" meaning "leaving file" and "4" meaning "extern C"
   // block.
