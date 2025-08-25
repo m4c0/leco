@@ -1,4 +1,5 @@
 #pragma leco tool
+#include "../mct/mct-syscall.h"
 import sys;
 
 void list_targets() {
@@ -18,10 +19,8 @@ int run_target(const char * name, int argc, char ** argv) {
   });
   if (exe == "") die("invalid target: ", name);
 
-  if (app) putln("TAPP");
-  putln(*exe);
-
-  return 1;
+  *argv = *exe;
+  return mct_syscall_spawn(*argv, argv);
 }
 
 int main(int argc, char ** argv) try {
@@ -29,7 +28,7 @@ int main(int argc, char ** argv) try {
   if (!sys::is_tgt_host()) die("Only host targets are supporter at the moment");
 
   if (argc == 1) return (list_targets(), 0);
-  else return run_target(argv[1], argc - 2, argv + 2);
+  else return run_target(argv[1], argc - 1, argv + 1);
 } catch (...) {
   return 1;
 }
