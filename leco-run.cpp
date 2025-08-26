@@ -19,6 +19,8 @@ int run_target(const char * name, int argc, char ** argv) {
   });
   if (exe == "") die("invalid target: ", name);
 
+  if (app) die("Support for app bundles TBD");
+
   *argv = *exe;
   return mct_syscall_spawn(*argv, argv);
 }
