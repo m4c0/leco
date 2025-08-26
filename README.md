@@ -85,3 +85,6 @@ Other subcommands are documented via the `help` tool:
 ../leco/leco.exe help
 ```
 
+The wasm target requires "wasm-ld" on path and the clang-rt lib in its default
+path. On OSX, `brew install ldd wasi-libc wasi-runtimes` does the trick.
+
