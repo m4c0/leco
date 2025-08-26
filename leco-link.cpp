@@ -85,11 +85,8 @@ static void prepare_args(const char * input, const char * args) {
     auto rc = sim::sb { input }.path_extension("res");
     if (mtime::of(*rc) > 0) put_escape(out, *rc);
   } else if (sys::is_tgt_wasm()) {
-    char sra[1024] {};
-
-    // TODO: the "sysroot" might make more sense in leco-sysroot
-    fgets(sra, sizeof(sra) - 1, sys::file { "../leco/out/wasm32-wasi/sysroot", "r" });
-    fputln(out, "-resource-dir\n", sra);
+    // Keeping it here to remember this flag if we ever need it again
+    // fputln(out, "-resource-dir\n", sra);
 
     // export-table: allows passing lambdas to JS
     fputln(out, "-Xlinker\n--export-table");
