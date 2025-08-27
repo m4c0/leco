@@ -10,16 +10,13 @@ void list_targets() {
 }
 
 int run_target(const char * name, int argc, char ** argv) {
-  bool app = false;
   sim::sb exe {};
   sys::for_each_root_dag([&](auto dag, auto id, auto file) {
     if (sim::path_stem(dag) != name) return;
-    app = id == 'tapp';
-    exe = sim::sb { file };
+    if (id == 'tapp') exe = sys::read_dag_tag('edir', dag) / sim::path_filename(file);
+    else exe = sim::sb { file };
   });
   if (exe == "") die("invalid target: ", name);
-
-  if (app) die("Support for app bundles TBD");
 
   *argv = *exe;
   return mct_syscall_spawn(*argv, argv);
