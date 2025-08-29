@@ -78,11 +78,16 @@ static void run_for(const sim::sb & target) {
   sys::die("unknown or invalid target for this platform: %s", *target);
 }
 
+static void chdir(const char * dir) {
+  if (0 != mct_syscall_chdir(dir)) sys::die("Directory not found: [%s]\n", dir);
+}
+
 int main(int argc, char ** argv) try {
   const auto shift = [&] { return argc > 1 ? (argc--, *++argv) : nullptr; };
   const char * target = "host";
   while (auto val = shift()) {
     if ("-c"_s == val) clean_level++;
+    else if ("-C"_s == val) chdir(shift());
     else if ("-t"_s == val) target = shift();
     else if ("-g"_s == val) mct_syscall_setenv("LECO_DEBUG", "1");
     else if ("-O"_s == val) mct_syscall_setenv("LECO_OPT", "1");
