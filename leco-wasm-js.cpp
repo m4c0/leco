@@ -24,6 +24,25 @@ static void concat(FILE *out, const char *in_file) {
   }
 }
 
+static void read_dag(sys::strset & cache, const char * dag, FILE * out) {
+  if (!cache.insert(dag)) return;
+
+  sim::sb js {};
+  sys::dag_read(dag, [&](auto id, auto file) {
+    if (id == 'srcf') {
+      js = sim::sb { file }.path_extension("js");
+      if (mtime::of(*js) == 0) js = {};
+      return;
+    }
+    if (id == 'idag' || id == 'mdag') {
+      read_dag(cache, file, out);
+      return;
+    }
+  });
+  // Concat after dependencies
+  if (js != "") concat(out, *js);
+}
+
 static void run(const char * dag, const char * _) {
   auto path = sim::sb { dag }.path_extension("app");
 
@@ -45,11 +64,8 @@ static void run(const char * dag, const char * _) {
   sys::file f { *output, "wb" };
   concat(f, "../leco/wasm.pre.js");
 
-  sys::recurse_dag(dag, [&](auto dag, auto id, auto file) {
-    if (id != 'srcf') return;
-    auto js = sim::sb { file }.path_extension("js");
-    if (mtime::of(*js) > 0) concat(f, *js);
-  });
+  sys::strset cache {};
+  read_dag(cache, dag, f);
 
   concat(f, "../leco/wasm.post.js");
 }
