@@ -1,5 +1,6 @@
 #pragma leco tool
 
+#include "../mct/mct-syscall.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -57,6 +58,12 @@ static void build_shader(const char * dag, const char * file) {
   }
 
   if (p.wait() != 0) sys::die("shader compilation failed");
+
+  if (!sys::is_tgt_wasm()) return;
+
+  auto gles = sim::path_parent(dag) / sim::path_filename(file) + ".gles";
+  const char * args[] { "spirv-cross", "--es", "--version", "300", "--output", *gles, *out, 0 };
+  if (0 != mct_syscall_spawn(args[0], args)) sys::die("shader cross to GLES failed");
 }
 
 static void run(const char * dag, const char * _) {
