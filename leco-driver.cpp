@@ -93,7 +93,6 @@ int main(int argc, char ** argv) try {
     else if ("-O"_s == val) mct_syscall_setenv("LECO_OPT", "1");
     else usage();
   }
-  if (!target) usage();
 
   run_for(sim::sb{target});
   return 0;
