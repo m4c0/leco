@@ -54,26 +54,26 @@ static void run_target(const char * target) {
   if (sys::is_tgt_wasm())  sys::tool_run("wasm-js");
 }
 
-static void run_targets(auto ... target) {
-  (run_target(target), ...);
-}
-
-static void run_for(const sim::sb & target) {
+static const char * target_of(const sim::sb & target) {
 #ifdef __APPLE__
-  if (target == "apple") return run_targets(TGT_OSX, TGT_IPHONEOS, TGT_IOS_SIMULATOR);
-  if (target == "ios") return run_targets(TGT_IPHONEOS, TGT_IOS_SIMULATOR);
-  if (target == "host" || target == "macosx") return run_target(TGT_OSX);
-  if (target == "iphoneos") return run_target(TGT_IPHONEOS);
-  if (target == "iphonesimulator") return run_target(TGT_IOS_SIMULATOR);
+  if (target == "host" || target == "macosx") return TGT_OSX;
+  if (target == "iphoneos") return TGT_IPHONEOS;
+  if (target == "iphonesimulator") return TGT_IOS_SIMULATOR;
+  if (target == "android") return TGT_DROID_ARMV7;
 #elifdef _WIN32
-  if (target == "host" || target == "windows") return run_target(TGT_WINDOWS);
+  if (target == "host" || target == "windows") return TGT_WINDOWS;
+  if (target == "android") return TGT_DROID_X86_64;
 #elifdef __linux__
-  if (target == "host" || target == "linux") return run_target(TGT_LINUX);
+  if (target == "host" || target == "linux") return TGT_LINUX;
+  if (target == "android") return TGT_DROID_X86_64;
 #endif
 
-  if (target == "wasm") return run_target(TGT_WASM);
-  if (target == "android")
-    return run_targets(TGT_DROID_AARCH64, TGT_DROID_ARMV7, TGT_DROID_X86, TGT_DROID_X86_64);
+  if (target == "wasm") return TGT_WASM;
+
+  if (target == "android_aarch64") return TGT_DROID_AARCH64;
+  if (target == "android_armv7")   return TGT_DROID_ARMV7;
+  if (target == "android_x86")     return TGT_DROID_X86;
+  if (target == "android_x86_64")  return TGT_DROID_X86_64;
 
   sys::die("unknown or invalid target for this platform: %s", *target);
 }
@@ -94,7 +94,7 @@ int main(int argc, char ** argv) try {
     else usage();
   }
 
-  run_for(sim::sb{target});
+  run_target(target_of(sim::sb{target}));
   return 0;
 } catch (...) {
   return 1;
