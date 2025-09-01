@@ -54,7 +54,9 @@ static void run_target(const char * target) {
   if (sys::is_tgt_wasm())  sys::tool_run("wasm-js");
 }
 
-static const char * target_of(const sim::sb & target) {
+static const char * target_of(const char * tgt) {
+  sim::sb target { tgt };
+
 #ifdef __APPLE__
   if (target == "host" || target == "macosx") return TGT_OSX;
   if (target == "iphoneos") return TGT_IPHONEOS;
@@ -84,17 +86,17 @@ static void chdir(const char * dir) {
 
 int main(int argc, char ** argv) try {
   const auto shift = [&] { return argc > 1 ? (argc--, *++argv) : nullptr; };
-  const char * target = "host";
+  const char * target = target_of("host");
   while (auto val = shift()) {
     if ("-c"_s == val) clean_level++;
     else if ("-C"_s == val) chdir(shift());
-    else if ("-t"_s == val) target = shift();
+    else if ("-t"_s == val) target = target_of(shift());
     else if ("-g"_s == val) mct_syscall_setenv("LECO_DEBUG", "1");
     else if ("-O"_s == val) mct_syscall_setenv("LECO_OPT", "1");
     else usage();
   }
 
-  run_target(target_of(sim::sb{target}));
+  run_target(target);
   return 0;
 } catch (...) {
   return 1;
