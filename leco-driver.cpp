@@ -82,6 +82,14 @@ static const char * target_of(const char * tgt) {
   sys::die("unknown or invalid target for this platform: %s", *target);
 }
 
+static int run_tool(int argc, char ** argv) {
+  if (argv[argc]) die("argv does not end with a nullptr");
+
+  auto cmd = sys::tool_cmd(argv[0]);
+  argv[0] = *cmd;
+  return mct_syscall_spawn(argv[0], argv);
+}
+
 static void chdir(const char * dir) {
   if (0 != mct_syscall_chdir(dir)) sys::die("Directory not found: [%s]\n", dir);
 }
@@ -94,6 +102,7 @@ int main(int argc, char ** argv) try {
     else if ("-t"_s == val) mct_syscall_setenv("LECO_TARGET", target_of(shift()));
     else if ("-g"_s == val) mct_syscall_setenv("LECO_DEBUG", "1");
     else if ("-O"_s == val) mct_syscall_setenv("LECO_OPT", "1");
+    else if (mtime::of(*sys::tool_cmd(val))) return run_tool(argc, argv);
     else usage();
   }
 
