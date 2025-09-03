@@ -26,11 +26,7 @@ static void usage() {
           for its referring platform (requires Apple SDKs and an Apple host)
       android_aarch64, android_armv7, android_x86, android_x86_64:
           for each of four Android architectures (requires Android SDK on any host)
-      linux, macosx, windows:
-          for their respective platforms (requires their SDKs can only be run
-          in their respective hosts)
-      host:
-          for the same platform as the host (default)
+      if abscent, uses host target
 )");
 }
 
@@ -60,16 +56,8 @@ static const char * target_of(const char * tgt) {
   sim::sb target { tgt };
 
 #ifdef __APPLE__
-  if (target == "host" || target == "macosx") return TGT_OSX;
   if (target == "iphoneos") return TGT_IPHONEOS;
   if (target == "iphonesimulator") return TGT_IOS_SIMULATOR;
-  if (target == "android") return TGT_DROID_ARMV7;
-#elifdef _WIN32
-  if (target == "host" || target == "windows") return TGT_WINDOWS;
-  if (target == "android") return TGT_DROID_X86_64;
-#elifdef __linux__
-  if (target == "host" || target == "linux") return TGT_LINUX;
-  if (target == "android") return TGT_DROID_X86_64;
 #endif
 
   if (target == "wasm") return TGT_WASM;
