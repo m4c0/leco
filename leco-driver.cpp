@@ -10,7 +10,7 @@ unsigned clean_level{};
 
 static void usage() {
   sys::die(R"(
-  Usage: ../leco/leco.exe [-C <dir>] [-g] [-O] [-t <target>]
+  Usage: ../leco/leco.exe [-c [-c]] [-C <dir>] [-g] [-O] [-t <target>] [<tool> [<tool options>]]
 
   Where:
     -c -- clean current module before build (if repeated, clean all modules)
@@ -27,6 +27,8 @@ static void usage() {
       android_aarch64, android_armv7, android_x86, android_x86_64:
           for each of four Android architectures (requires Android SDK on any host)
       if abscent, uses host target
+
+    <tool> -- tool name to run (runs the whole build if absent)
 )");
 }
 
