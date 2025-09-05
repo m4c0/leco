@@ -29,6 +29,23 @@ static void usage() {
       if abscent, uses host target
 
     <tool> -- tool name to run (runs the whole build if absent)
+
+      clang: runs clang with opiniated defaults
+      clean: cleans output folders (same as "-c")
+      codesign: runs codesign on Apple platforms
+      dagger: generates dependency files based on parsed code
+      driver: drives the workflow (default tool if unspecified)
+      exs: copies dependent executables to app bundles
+      ipa-export: exports an IPA archive
+      ipa-upload: validates/upload iOS binaries
+      ipa: generates and signs IPAs
+      link: links an executable
+      rc: generates "RC" files for Windows
+      rsrc: copies resource files to their app's resource folder
+      shaders: compiles GLSL into SPIRV
+      sysroot: calculates the sysroot of the environment
+      wasm-js: almost a webpacker
+      xcassets: generates xcassets for IPAs
 )");
 }
 
