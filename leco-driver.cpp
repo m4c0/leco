@@ -34,6 +34,7 @@ static void usage() {
       clean: cleans output folders (same as "-c")
       codesign: runs codesign on Apple platforms
       dagger: generates dependency files based on parsed code
+      deplist: creates a list of required modules and includes
       driver: drives the workflow (default tool if unspecified)
       exs: copies dependent executables to app bundles
       ipa-export: exports an IPA archive
