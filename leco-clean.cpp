@@ -4,15 +4,15 @@ import gopt;
 import sys;
 
 static bool log_all{};
-static void usage(const char *argv0) {
+static void usage() {
   sys::die(R"(
-usage: %s [-a] [-v]
+usage: ../leco/leco.exe clean [-a] [-v]
 
 where:
       -a        remove all known deps recursively
       -v        log all removed files
 
-)", argv0);
+)");
 }
 
 static void rm_rf(const char * p) {
@@ -63,7 +63,7 @@ int main(int argc, char **argv) try {
     switch (ch) {
       case 'a': all     = true; break;
       case 'v': log_all = true; break;
-      default: usage(argv[0]);
+      default: usage();
     }
   });
   if (opts.argc != 0) usage(argv[0]);
