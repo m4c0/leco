@@ -66,7 +66,7 @@ int main(int argc, char **argv) try {
       default: usage();
     }
   });
-  if (opts.argc != 0) usage(argv[0]);
+  if (opts.argc != 0) usage();
 
   auto cwd = "."_real;
   if (all) {
