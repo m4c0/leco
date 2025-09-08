@@ -452,7 +452,10 @@ enum run_result { OK, ERR, SKIPPED };
   }
 
   sim::sb buf { 102400 };
-  while (proc.gets_err()) buf += proc.last_line_read();
+  while (proc.gets_err()) {
+    buf += proc.last_line_read();
+    buf += "\n"; // Adds back since gets_err chomps it
+  }
 
   if (roots_only && exe_type == exe_t::none) return run_result::SKIPPED;
 
