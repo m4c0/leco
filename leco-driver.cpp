@@ -26,6 +26,8 @@ static void usage() {
           for its referring platform (requires Apple SDKs and an Apple host)
       android_aarch64, android_armv7, android_x86, android_x86_64:
           for each of four Android architectures (requires Android SDK on any host)
+      wasm:
+          for WebAssembly (requires WASI sysroot and clang's built-in runtime)
       if abscent, uses host target
 
     <tool> -- tool name to run (runs the whole build if absent)
