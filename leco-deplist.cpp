@@ -17,7 +17,7 @@ void run(const char * parent, const char * depf, const char * incf) {
   sys::file incs { incf, "wb" };
 
   sys::for_each_dag(parent, true, [&](auto dag, auto id, auto file) {
-    if      (id == 'idir') fputln(incs, "-I%s", file);
+    if      (id == 'idir') fputln(incs, "-I", file);
     else if (id == 'pcmf') {
       auto pcm = sim::sb { file };
       for (auto & c : pcm) if (c == '\\') c = '/';
