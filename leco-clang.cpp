@@ -11,18 +11,15 @@
   (IS_TGT(t, TGT_DROID_AARCH64) || IS_TGT(t, TGT_DROID_ARMV7) ||               \
    IS_TGT(t, TGT_DROID_X86) || IS_TGT(t, TGT_DROID_X86_64))
 
-static void clang_cmd(sim_sb *buf, const char *exe) {
+static const char * clang_cmd() {
 #if __APPLE__ && !__arm64__
-  sim_sb_copy(buf, "/usr/local/opt/llvm/bin");
-  sim_sb_path_append(buf, exe);
+  return "/usr/local/opt/llvm/bin/clang++";
 #elif __APPLE__
-  sim_sb_copy(buf, "/opt/homebrew/opt/llvm/bin");
-  sim_sb_path_append(buf, exe);
+  return "/opt/homebrew/opt/llvm/bin/clang++";
 #elif _WIN32
-  sim_sb_copy(buf, exe);
-  sim_sb_concat(buf, ".exe");
+  return "clang++.exe";
 #else
-  sim_sb_copy(buf, exe);
+  return "clang";
 #endif
 }
 
@@ -109,7 +106,7 @@ int main(int argc, char **argv) try {
 
   sim_sb args{};
   sim_sb_new(&args, 10240);
-  clang_cmd(&args, "clang++");
+  sim_sb_copy(&args, clang_cmd());
   sim_sb_concat(&args, " -Wall -Wno-unknown-pragmas");
 
   if (sysstd_env("LECO_DEBUG")) {
