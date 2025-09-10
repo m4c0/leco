@@ -40,12 +40,7 @@ static void run_wasm_target(const char * name, int argc, char ** argv) {
   if (0 != mct_syscall_chdir(*edir)) die("missing bundle directory");
 
   // TODO: detect python3 and use a less-hardcoded path
-  const char * args[] {
-    "python3",
-    "../../../../leco/webserver.py",
-    0,
-  };
-  if (0 != mct_syscall_spawn(*args, args)) die("webserver failed");
+  sys::run("python3 ../../../../leco/webserver.py");
 }
 
 static void main_wasm(int argc, char ** argv) {
