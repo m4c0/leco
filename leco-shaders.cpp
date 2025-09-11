@@ -62,8 +62,7 @@ static void build_shader(const char * dag, const char * file) {
   if (!sys::is_tgt_wasm()) return;
 
   auto gles = sim::path_parent(dag) / sim::path_filename(file) + ".gles";
-  const char * args[] { "spirv-cross", "--es", "--version", "300", "--output", *gles, *out, 0 };
-  if (0 != mct_syscall_spawn(args[0], args)) sys::die("shader cross to GLES failed");
+  sys::runf("spirv-cross --es --version 300 --output %s %s", *gles, *out);
 }
 
 static void run(const char * dag, const char * _) {
