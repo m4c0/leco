@@ -118,6 +118,8 @@ int main(int argc, char **argv) try {
   }
   if (sysstd_env("LECO_OPT")) sim_sb_concat(&args, " -O3 -flto -fvisibility=hidden");
 
+  if (0 == strcmp(target, TGT_WASM)) sim_sb_concat(&args, " -fwasm-exceptions");
+
   sim_sb_printf(&args, " -target %s", target);
   add_target_defs(&args, target);
   if (0 != strcmp(target, HOST_TARGET)) add_sysroot(&args, target, argv[0]);

@@ -93,6 +93,7 @@ static void prepare_args(const char * input, const char * args) {
     // exec-model: without it, we could use "main" but _start calls the global
     //             dtor after "main" returns
     fputln(out, "-mexec-model=reactor");
+    fputln(out, "-fwasm-exceptions");
     // no-check-features: allows using shared-memory without atomics/etc
     //                    https://stackoverflow.com/a/70186219
     //                    Only works because we won't be using malloc in threads
