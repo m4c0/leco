@@ -29,7 +29,7 @@ static void compile_objf(auto & mt, const char * dag) {
   if (calc_mtime(dag) < mtime::of(*obj)) return;
 
   auto ext = sim::path_extension(*src);
-  auto lang = "-std=c++2b";
+  auto lang = "-std=c++2c";
   if (ext == ".m" || ext == ".mm") lang = "-fmodules -fobjc-arc";
   else if (ext == ".c") lang = "-std=c11";
 

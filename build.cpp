@@ -17,7 +17,7 @@
 
 #define CLANG "out" SEP HOST_TARGET SEP "leco-clang.exe"
 
-#define CPPSTD " -std=c++2b"
+#define CPPSTD " -std=c++2c"
 #define PCMFL " --precompile" CPPSTD
 #define PMP " -fprebuilt-module-path=out" SEP HOST_TARGET
 
@@ -48,6 +48,7 @@ int try_main() {
   MKOUT("leco");
 
   puts("Building clang runner");
+  // Using c++20 as it is available on OSX without Homebrew
   run("clang++ -std=c++20 leco-clang.cpp -o " CLANG);
 
   puts("Building core modules");
