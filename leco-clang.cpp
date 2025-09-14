@@ -19,7 +19,7 @@ static const char * clang_cmd() {
 #elif _WIN32
   return "clang++.exe";
 #else
-  return "clang";
+  return "clang++";
 #endif
 }
 
