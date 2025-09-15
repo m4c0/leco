@@ -1,8 +1,8 @@
 #pragma leco tool
 
-#include "../mct/mct-syscall.h"
-#include <string.h>
-
+import glen;
+import jojo;
+import jute;
 import popen;
 import sys;
 
@@ -10,35 +10,27 @@ import sys;
 // 
 // Requires DAGs created via leco-dagger.
 
+static glen::parser parser { glen::lang::glsl };
+
 static bool must_recompile(const char * file, auto spv_time) {
   if (spv_time < mtime::of(file)) return true;
 
-  char buf[10240];
-  auto f = sys::file { file, "r" };
-  unsigned line { 0 };
-  while (!feof(f) && fgets(buf, sizeof(buf), f)) {
-    line++;
+  bool result = false;
+  auto src = jojo::read_cstr(jute::view::unsafe(file));
+  parser.parse(src).for_each_capture(jute::view { R"(
+    (preproc_include (string_literal (string_content) @inc))
+  )" }, [&](auto & n) {
+    auto s = ts_node_start_byte(n);
+    auto e = ts_node_end_byte(n);
+    auto path = jute::view { src.begin() + s, e - s }.cstr();
+    if (!mtime::of(path.begin())) {
+      auto [l, c] = ts_node_start_point(n);
+      dief("%s:%d:%d: include file not found", file, l, c);
+    }
+    if (must_recompile(path.begin(), spv_time)) result = true;
+  });
 
-    auto si = strstr(buf, "#include ");
-    if (!si) continue;
-
-    auto fail = [&](auto at, auto msg) {
-      int col = at - buf + 1;
-      sys::die("%s:%d:%d: %s", file, line, col, msg);
-    };
-
-    auto s = strchr(buf, '"');
-    if (!s) fail(si, "invalid include directive");
-    auto e = strchr(++s, '"');
-    if (!e) fail(s, "unclosed include directive");
-
-    *e = 0;
-    auto path = sim::path_parent(file) / s;
-    if (!mtime::of(*path)) fail(s, "include file not found");
-    if (must_recompile(*path, spv_time)) return true;
-  }
-
-  return false;
+  return result;
 }
 static void build_shader(const char * dag, const char * file) {
   auto out = sim::path_parent(dag) / sim::path_filename(file) + ".spv";
@@ -48,10 +40,10 @@ static void build_shader(const char * dag, const char * file) {
   p::proc p { "glslangValidator", "--target-env", "spirv1.3", "-V", "-o", *out, file };
 
   while (p.gets()) {
-    auto line = p.last_line_read();
-    if (0 == strncmp(line, "ERROR: ", 7))  {
-      if (line[7] == '/') line += 7;
-      else if (line[8] == ':') line += 7;
+    auto line = jute::view::unsafe(p.last_line_read());
+    if (line.starts_with("ERROR: ")) {
+      if (line[7] == '/') line = line.subview(7).after;
+      else if (line[8] == ':') line = line.subview(7).after;
     }
     putln(line);
   }
