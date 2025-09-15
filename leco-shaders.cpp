@@ -1,7 +1,6 @@
 #pragma leco tool
 
 #include "../mct/mct-syscall.h"
-#include <stdio.h>
 #include <string.h>
 
 import popen;
