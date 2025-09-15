@@ -34,7 +34,7 @@
   puts("Building " name);                                             \
   run(CLANG " leco-" name ".cpp "                                     \
             " -o out/" HOST_TARGET "/leco-" name ".exe " CPPSTD       \
-            MARG("mtime") MARG("no") MARG("popen")                    \
+            MARG("hay") MARG("mtime") MARG("no") MARG("popen")        \
             MARG("pprent") MARG("print") MARG("sysstd")               \
             LMARG("sim") LMARG("sys"))
 
