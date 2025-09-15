@@ -52,6 +52,7 @@ int try_main() {
   run("clang++ -std=c++20 leco-clang.cpp -o " CLANG);
 
   puts("Building core modules");
+  MODULE("hay");
   MODULE("mtime");
   MODULE("no");
   MODULE("popen", PARG("no"));
@@ -59,7 +60,7 @@ int try_main() {
   MODULE("print");
   MODULE("sysstd");
   LOCAL_MODULE("sim");
-  LOCAL_MODULE("sys", PARG("mtime") PARG("no") PARG("popen") PARG("print") PARG("pprent") PARG("sysstd"));
+  LOCAL_MODULE("sys", PARG("hay") PARG("mtime") PARG("no") PARG("popen") PARG("print") PARG("pprent") PARG("sysstd"));
 
   TOOL("dagger");
   TOOL("deplist");

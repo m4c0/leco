@@ -2,7 +2,6 @@ module;
 #define MCT_SYSCALL_IMPLEMENTATION
 #include "../mct/mct-syscall.h"
 
-#include "../hay/hay.hpp"
 #include "targets.hpp"
 
 #include <errno.h>
@@ -22,6 +21,7 @@ module;
 #include <string>
 
 export module sys;
+export import hay;
 export import mtime;
 export import no;
 export import popen;
