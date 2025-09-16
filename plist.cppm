@@ -16,10 +16,8 @@ constexpr const auto xcode_build = "15F31d";
 constexpr const auto xcode_version = "1540";
 
 const auto bundle_version = [] {
-  sim::sb buf {};
   auto t = time(nullptr);
-  snprintf(*buf, buf.size - 1, "%ld", t);
-  return buf;
+  return sim::sb {}.printf("%ld", t);
 }();
 
 // TODO: move all "envs" here for quick ref
