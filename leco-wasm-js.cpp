@@ -1,6 +1,8 @@
 #pragma leco tool
 #include <stdio.h>
 
+import jojo;
+import jute;
 import sys;
 
 // TODO: check if files actually need regen
@@ -14,14 +16,9 @@ Usage: ../leco/leco.exe wasm-js
 )");
 }
 
-static void concat(FILE *out, const char *in_file) {
-  sys::file in { in_file, "rb" };
-
-  char buf[10240];
-  int got{};
-  while ((got = fread(buf, 1, sizeof(buf), in)) > 0) {
-    fwrite(buf, 1, got, out);
-  }
+static void concat(FILE *out, jute::view in_file) {
+  auto src = jojo::read_cstr(in_file);
+  fwrite(src.begin(), 1, src.size(), out);
 }
 
 static void read_dag(sys::strset & cache, const char * dag, FILE * out) {
@@ -40,7 +37,7 @@ static void read_dag(sys::strset & cache, const char * dag, FILE * out) {
     }
   });
   // Concat after dependencies
-  if (js != "") concat(out, *js);
+  if (js != "") concat(out, js);
 }
 
 static void run(const char * dag, const char * _) {
