@@ -17,8 +17,8 @@ int main() try {
   for (const auto &s : collected) {
     auto path = s.c_str();
     p::proc p { "git", "-C", path, "rev-parse", "HEAD" };
-    if (!p.gets()) sys::die("failed to get git status");
-    putln(*sim::sb { p.last_line_read() }.chomp(), " ", sim::path_filename(path));
+    if (!p.gets()) die("failed to get git status");
+    putan(p.last_line_read(), sim::path_filename(path));
   }
 } catch (...) {
   return 1;
