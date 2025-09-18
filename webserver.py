@@ -7,6 +7,9 @@ class MagicServer(SimpleHTTPRequestHandler):
         self.send_header('Cross-Origin-Embedder-Policy', 'require-corp')
         return super(MagicServer, self).end_headers()
 
+    def log_message(self, fmt, *args):
+        print(fmt%args)
+
 with ThreadingHTTPServer(('0.0.0.0', 8000), MagicServer) as httpd:
     print("listening on 0.0.0.0:8000")
     try:
