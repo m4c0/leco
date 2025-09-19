@@ -21,7 +21,7 @@ static const char * dag_file_version = "2025-07-26";
 
 static sim::sb source {};
 static sys::file * current_output;
-static const char * target = sys::target();
+static auto target = sys::target();
 
 static unsigned line {};
 static exe_t exe_type {};
