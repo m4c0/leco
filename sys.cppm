@@ -74,6 +74,11 @@ using env = hay<
   },
   free>;
 
+auto target() { 
+  auto e = mct_syscall_dupenv("LECO_TARGET");
+  return hay<char *, nullptr, free> { e ? e : strdup(HOST_TARGET) };
+}
+
 class strset {
   std::set<std::string> m_data{};
 
@@ -148,7 +153,6 @@ void recurse_dag(const char * dag, auto && fn) {
   recurse_dag(&added, dag, fn);
 }
 
-const char * target(); 
 void for_each_dag(const char * basedir, bool recurse, auto && fn) {
   strset added {};
   auto path = (sim::sb { basedir } /= "out") /= target();
@@ -201,11 +205,6 @@ void tool_run(const char * name, const char * args, auto &&... as) {
 void opt_tool_run(const char * name, auto &&... as) {
   if (mtime::of(*tool_cmd(name)) == 0) return;
   tool_run(name, as...);
-}
-
-const char * target() { 
-  auto e = mct_syscall_dupenv("LECO_TARGET");
-  return e ? e : HOST_TARGET;
 }
 
 constexpr const char * host_target = HOST_TARGET;

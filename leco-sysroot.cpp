@@ -59,13 +59,13 @@ static sim::sb sysroot_for_target() {
   if (sys::is_tgt_ios_sim())  return apple_sysroot("iphonesimulator");
   if (sys::is_tgt_droid())    return android_sysroot();
   if (sys::is_tgt_wasm())     return wasi_sysroot();
-  sys::die("invalid target: %s", sys::target());
+  sys::die("invalid target: %s", (const char *)sys::target());
 }
 
 int main() try {
   if (sys::is_tgt_host()) return 0;
 
-  auto cf = sim::printf("../leco/out/%s", sys::target());
+  auto cf = sim::printf("../leco/out/%s", (const char *)sys::target());
   sys::mkdirs(*cf);
   cf /= "sysroot";
   if (exists(*cf)) return 0; 

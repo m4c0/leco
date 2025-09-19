@@ -31,8 +31,8 @@ void run(const char * parent, const char * depf, const char * incf) {
 }
 
 void run(const char * parent) {
-  auto depf = sim::printf("%s/out/%s/deplist",  parent, sys::target());
-  auto incf = sim::printf("%s/out/%s/includes", parent, sys::target());
+  auto depf = sim::printf("%s/out/%s/deplist",  parent, (const char *)sys::target());
+  auto incf = sim::printf("%s/out/%s/includes", parent, (const char *)sys::target());
 
   try {
     run(parent, *depf, *incf);
