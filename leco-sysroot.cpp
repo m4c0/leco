@@ -1,6 +1,5 @@
 #pragma leco tool
 
-#include "../mct/mct-syscall.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -10,7 +9,7 @@ import sys;
 static bool exists(const char * path) { return mtime::of(path) > 0; }
 
 static sim::sb android_sysroot() {
-  const sim::sb sdk { sys::env("ANDROID_SDK_ROOT") };
+  const sim::sb sdk { sys::envs::android_sdk_root() };
 
   auto res = sdk / "ndk-bundle";
   if (exists(*res)) return res;
@@ -48,17 +47,12 @@ static sim::sb apple_sysroot(const char *sdk) {
 #endif
 }
 
-static sim::sb wasi_sysroot() {
-  auto env = mct_syscall_dupenv("WASI_SYSROOT");
-  return env ? sim::sb{env} : sim::sb{};
-}
-
 static sim::sb sysroot_for_target() {
   if (sys::is_tgt_osx())      return apple_sysroot("macosx");
   if (sys::is_tgt_iphoneos()) return apple_sysroot("iphoneos");
   if (sys::is_tgt_ios_sim())  return apple_sysroot("iphonesimulator");
   if (sys::is_tgt_droid())    return android_sysroot();
-  if (sys::is_tgt_wasm())     return wasi_sysroot();
+  if (sys::is_tgt_wasm())     return sim::sb { sys::opt_envs::wasi_sysroot() };
   sys::die("invalid target: %s", (const char *)sys::target());
 }
 

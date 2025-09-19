@@ -57,11 +57,9 @@ static bool sign_is_fresh(const char * path) {
 }
 
 static void sign(const char * path) try {
-  // TODO: move all those "envs" to a module?
   // Only sign when we want to sign
-  auto team = sys::env("LECO_IOS_TEAM");
   sys::log("codesign", path);
-  sys::runf("codesign -f -s %s %s", (const char *)team, path);
+  sys::runf("codesign -f -s %s %s", (const char *)sys::envs::ios_team_id(), path);
 } catch (...) {
   return;
 }

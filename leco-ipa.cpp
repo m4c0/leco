@@ -4,6 +4,7 @@
 
 #include <string.h>
 
+import jute;
 import plist;
 import popen;
 import sys;
@@ -79,7 +80,7 @@ static void export_archive() {
 }
 
 static void upload_archive(const char * dag) {
-  auto method = sim::sb { sys::env("LECO_IOS_METHOD") };
+  auto method = jute::view::unsafe(sys::envs::ios_method());
   if (method != "app-store-connect") return;
 
   sys::tool_run("ipa-upload", " -i %s -s", dag);
@@ -102,7 +103,7 @@ static void iphonesim_bundle(const char * dag) {
   sys::log("installing", *stem);
   sys::runf(
       "xcrun simctl install %s %s",
-      (const char *)sys::env("LECO_IOS_SIM_TARGET"),
+      (const char *)sys::envs::ios_simulator_target(),
       *path);
 }
 
