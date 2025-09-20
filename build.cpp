@@ -75,6 +75,7 @@ int try_main() {
   run("." SEP "out" SEP HOST_TARGET SEP "leco-driver.exe");
 
   puts("Hard-linking meta caller");
+  remove("leco.exe");
   mct_syscall_link("out" SEP HOST_TARGET SEP "leco-meta.exe", "leco.exe");
 
   puts("Doney-devito");
