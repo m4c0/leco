@@ -1,21 +1,15 @@
 #pragma leco tool
-#define SIM_IMPLEMENTATION
-#define MCT_SYSCALL_IMPLEMENTATION
-
+#include <string.h>
 #include "../mct/mct-syscall.h"
 #include "sim.h"
 #include "targets.hpp"
+
+import sys;
 
 #define IS_TGT(t, x) (0 == strcmp((t), (x)))
 #define IS_TGT_DROID(t)                                                        \
   (IS_TGT(t, TGT_DROID_AARCH64) || IS_TGT(t, TGT_DROID_ARMV7) ||               \
    IS_TGT(t, TGT_DROID_X86) || IS_TGT(t, TGT_DROID_X86_64))
-
-static void run(const char * cmd) {
-  if (0 == system(cmd)) return;
-  fprintf(stderr, "command failed: %s\n", cmd);
-  throw 0;
-}
 
 static int usage() {
   fprintf(stderr, R"(
@@ -115,7 +109,7 @@ int main(int argc, char **argv) try {
   // TODO: escape argv or use exec
   for (auto i = 1; i < argc; i++) sim_sb_printf(&args, " %s", argv[i]);
 
-  run(args.buffer);
+  sys::run(args.buffer);
   return 0;
 } catch (...) {
   return 1;

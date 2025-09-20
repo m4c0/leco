@@ -18,7 +18,7 @@
   mct_syscall_mkdir(".." SEP name SEP "out"); \
   mct_syscall_mkdir(".." SEP name SEP "out" SEP HOST_TARGET);
 
-#define CLANG "out" SEP HOST_TARGET SEP "leco-clang.exe"
+#define CLANG CLANG_CMD
 
 #define CPPSTD " -std=c++2c"
 #define PCMFL " --precompile" CPPSTD
@@ -50,9 +50,6 @@ static void run(const char * cmd) {
 int try_main() {
   MKOUT("leco");
 
-  puts("Building clang runner");
-  run(CLANG_CMD CPPSTD " leco-clang.cpp -o " CLANG);
-
   puts("Building core modules");
   MODULE("hay");
   MODULE("mtime");
@@ -64,6 +61,7 @@ int try_main() {
   LOCAL_MODULE("sim");
   LOCAL_MODULE("sys", PARG("hay") PARG("mtime") PARG("no") PARG("popen") PARG("print") PARG("pprent") PARG("sysstd"));
 
+  TOOL("clang");
   TOOL("dagger");
   TOOL("deplist");
   TOOL("link");
