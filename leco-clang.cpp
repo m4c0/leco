@@ -1,5 +1,4 @@
 #pragma leco tool
-#include <stdio.h>
 #include "sim.h"
 #include "targets.hpp"
 
@@ -65,10 +64,7 @@ static void add_sysroot(sim_sb * args, const char * argv0) {
   sim_sb_path_append(&sra, "sysroot");
   if (!mtime::of(sra.buffer)) return; // Optional in WASM
 
-  sys::file f { sra.buffer, "r" };
-  fgets(sra.buffer, sra.size, f);
-
-  sim_sb_printf(args, " --sysroot %s", sra.buffer);
+  sim_sb_printf(args, " --sysroot @%s", sra.buffer);
 }
 
 int main(int argc, char **argv) try {
