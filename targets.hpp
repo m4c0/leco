@@ -21,3 +21,13 @@
 #elif __linux__
 #define HOST_TARGET TGT_LINUX
 #endif
+
+#if __APPLE__ && !__arm64__
+#define CLANG_CMD "/usr/local/opt/llvm/bin/clang++"
+#elif __APPLE__
+#define CLANG_CMD "/opt/homebrew/opt/llvm/bin/clang++"
+#elif _WIN32
+#define CLANG_CMD "clang++.exe"
+#else
+#define CLANG_CMD "clang++"
+#endif
