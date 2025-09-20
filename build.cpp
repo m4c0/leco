@@ -51,8 +51,7 @@ int try_main() {
   MKOUT("leco");
 
   puts("Building clang runner");
-  // Using c++2b as it is available on OSX without Homebrew
-  run("clang++ -std=c++2b leco-clang.cpp -o " CLANG);
+  run(CLANG_CMD CPPSTD " leco-clang.cpp -o " CLANG);
 
   puts("Building core modules");
   MODULE("hay");
