@@ -1,8 +1,8 @@
 #pragma leco tool
 #define SIM_IMPLEMENTATION
-#define SYSSTD_IMPLEMENTATION
+#define MCT_SYSCALL_IMPLEMENTATION
 
-#include "../sysstd/sysstd.h"
+#include "../mct/mct-syscall.h"
 #include "sim.h"
 #include "targets.hpp"
 
@@ -90,7 +90,7 @@ static void add_sysroot(sim_sb * args, const char * target, const char * argv0) 
   sim_sb_path_append(&sra, target);
   sim_sb_path_append(&sra, "sysroot");
 
-  auto f = sysstd_fopen(sra.buffer, "r");
+  auto f = mct_syscall_fopen(sra.buffer, "r");
   if (!f) return;
   fgets(sra.buffer, sra.size, f);
   fclose(f);
@@ -101,7 +101,7 @@ static void add_sysroot(sim_sb * args, const char * target, const char * argv0) 
 int main(int argc, char **argv) try {
   if (argc == 1) usage();
 
-  const char * target = sysstd_env("LECO_TARGET");
+  const char * target = mct_syscall_dupenv("LECO_TARGET");
   if (!target) target = HOST_TARGET;
 
   sim_sb args{};
@@ -109,14 +109,14 @@ int main(int argc, char **argv) try {
   sim_sb_copy(&args, clang_cmd());
   sim_sb_concat(&args, " -Wall -Wno-unknown-pragmas");
 
-  if (sysstd_env("LECO_DEBUG")) {
+  if (mct_syscall_dupenv("LECO_DEBUG")) {
 #ifdef _WIN32
     sim_sb_concat(&args, " -gdwarf");
 #else
     sim_sb_concat(&args, " -g");
 #endif
   }
-  if (sysstd_env("LECO_OPT")) sim_sb_concat(&args, " -O3 -flto -fvisibility=hidden");
+  if (mct_syscall_dupenv("LECO_OPT")) sim_sb_concat(&args, " -O3 -flto -fvisibility=hidden");
 
   if (0 == strcmp(target, TGT_WASM)) sim_sb_concat(&args, " -fwasm-exceptions");
 
