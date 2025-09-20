@@ -63,6 +63,7 @@ static void add_sysroot(sim_sb * args, const char * argv0) {
   sim_sb_path_parent(&sra);
   sim_sb_path_append(&sra, sys::target());
   sim_sb_path_append(&sra, "sysroot");
+  if (!mtime::of(sra.buffer)) return; // Optional in WASM
 
   sys::file f { sra.buffer, "r" };
   fgets(sra.buffer, sra.size, f);
