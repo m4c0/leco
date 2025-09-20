@@ -1,6 +1,6 @@
 #pragma once
 #ifdef __arm64__
-#define TGT_OSX "arm64-apple-macosx11"
+#define TGT_OSX "arm64-apple-macosx14"
 #else
 #define TGT_OSX "x86_64-apple-macosx11.6.0"
 #endif
