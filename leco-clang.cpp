@@ -1,6 +1,5 @@
 #pragma leco tool
 #include <stdio.h>
-#include <string.h>
 #include "sim.h"
 #include "targets.hpp"
 
