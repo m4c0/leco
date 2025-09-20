@@ -1,6 +1,6 @@
 #pragma leco tool
+#include <stdio.h>
 #include <string.h>
-#include "../mct/mct-syscall.h"
 #include "sim.h"
 #include "targets.hpp"
 
@@ -11,8 +11,8 @@ import sys;
   (IS_TGT(t, TGT_DROID_AARCH64) || IS_TGT(t, TGT_DROID_ARMV7) ||               \
    IS_TGT(t, TGT_DROID_X86) || IS_TGT(t, TGT_DROID_X86_64))
 
-static int usage() {
-  fprintf(stderr, R"(
+static void usage() {
+  die(R"(
 LECO's heavily-opiniated CLANG runner
 
 Usage: ../leco/leco.exe clang <clang-flags>
@@ -32,7 +32,6 @@ Environment variables:
       LECO_OPT       enable optimisation flags
 
 )");
-  return 1;
 }
 
 static void add_target_defs(sim_sb *buf, const char *tgt) {
@@ -59,8 +58,7 @@ static void add_target_defs(sim_sb *buf, const char *tgt) {
   } else if (IS_TGT(tgt, TGT_WASM)) {
     sim_sb_concat(buf, " -DLECO_TARGET_WASM");
   } else {
-    fprintf(stderr, "invalid target: [%s]\n", tgt);
-    throw 0;
+    die("invalid target: ", tgt);
   }
 }
 
@@ -72,10 +70,8 @@ static void add_sysroot(sim_sb * args, const char * target, const char * argv0) 
   sim_sb_path_append(&sra, target);
   sim_sb_path_append(&sra, "sysroot");
 
-  auto f = mct_syscall_fopen(sra.buffer, "r");
-  if (!f) return;
+  sys::file f { sra.buffer, "r" };
   fgets(sra.buffer, sra.size, f);
-  fclose(f);
 
   sim_sb_printf(args, " --sysroot %s", sra.buffer);
 }
@@ -83,26 +79,25 @@ static void add_sysroot(sim_sb * args, const char * target, const char * argv0) 
 int main(int argc, char **argv) try {
   if (argc == 1) usage();
 
-  const char * target = mct_syscall_dupenv("LECO_TARGET");
-  if (!target) target = HOST_TARGET;
+  auto target = sys::target();
 
   sim_sb args{};
   sim_sb_new(&args, 10240);
   sim_sb_copy(&args, CLANG_CMD);
   sim_sb_concat(&args, " -Wall -Wno-unknown-pragmas");
 
-  if (mct_syscall_dupenv("LECO_DEBUG")) {
+  if ((const char *)sys::opt_envs::debug()) {
 #ifdef _WIN32
     sim_sb_concat(&args, " -gdwarf");
 #else
     sim_sb_concat(&args, " -g");
 #endif
   }
-  if (mct_syscall_dupenv("LECO_OPT")) sim_sb_concat(&args, " -O3 -flto -fvisibility=hidden");
+  if ((const char *)sys::opt_envs::opt()) sim_sb_concat(&args, " -O3 -flto -fvisibility=hidden");
 
   if (0 == strcmp(target, TGT_WASM)) sim_sb_concat(&args, " -fwasm-exceptions");
 
-  sim_sb_printf(&args, " -target %s", target);
+  sim_sb_printf(&args, " -target %s", (const char *)target);
   add_target_defs(&args, target);
   if (0 != strcmp(target, HOST_TARGET)) add_sysroot(&args, target, argv[0]);
 

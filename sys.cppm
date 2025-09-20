@@ -93,6 +93,9 @@ namespace envs {
   auto ios_team_id() { return sys::env("LECO_IOS_TEAM"); }
 }
 namespace opt_envs {
+  auto debug() { return opt_env("LECO_DEBUG"); }
+  auto opt() { return opt_env("LECO_OPT"); }
+
   auto wasi_sysroot() { return opt_env("WASI_SYSROOT"); }
 }
 
