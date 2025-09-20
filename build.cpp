@@ -4,16 +4,19 @@
 #include "targets.hpp"
 #include "../mct/mct-stat.h"
 #include "../mct/mct-syscall.h"
-#include "../sysstd/sysstd.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
-#define SEP SYSSTD_FILE_SEP
+#ifdef _WIN32
+#define SEP "\\"
+#else
+#define SEP "/"
+#endif
 
 #define MKOUT(name) \
-  sysstd_mkdir(".." SEP name SEP "out"); \
-  sysstd_mkdir(".." SEP name SEP "out" SEP HOST_TARGET);
+  mct_syscall_mkdir(".." SEP name SEP "out"); \
+  mct_syscall_mkdir(".." SEP name SEP "out" SEP HOST_TARGET);
 
 #define CLANG "out" SEP HOST_TARGET SEP "leco-clang.exe"
 
