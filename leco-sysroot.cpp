@@ -47,12 +47,17 @@ static sim::sb apple_sysroot(const char *sdk) {
 #endif
 }
 
+static sim::sb wasm_sysroot() {
+  auto e = sys::opt_envs::wasi_sysroot();
+  return (const char *)e ? sim::sb { e } : sim::sb {};
+}
+
 static sim::sb sysroot_for_target() {
   if (sys::is_tgt_osx())      return apple_sysroot("macosx");
   if (sys::is_tgt_iphoneos()) return apple_sysroot("iphoneos");
   if (sys::is_tgt_ios_sim())  return apple_sysroot("iphonesimulator");
   if (sys::is_tgt_droid())    return android_sysroot();
-  if (sys::is_tgt_wasm())     return sim::sb { sys::opt_envs::wasi_sysroot() };
+  if (sys::is_tgt_wasm())     return wasm_sysroot();
   sys::die("invalid target: %s", (const char *)sys::target());
 }
 
