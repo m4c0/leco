@@ -14,6 +14,9 @@ module;
 #ifdef _WIN32
 #define WIN32_MEAN_AND_LEAN
 #include <windows.h>
+#undef strdup
+#else
+#define _strdup strdup
 #endif
 
 #include <map>
@@ -101,7 +104,7 @@ namespace opt_envs {
 
 auto target() { 
   auto e = mct_syscall_dupenv("LECO_TARGET");
-  return hay<char *, nullptr, free> { e ? e : strdup(HOST_TARGET) };
+  return hay<char *, nullptr, free> { e ? e : _strdup(HOST_TARGET) };
 }
 
 ////////////////////////////////////////////////////////////////////////////
