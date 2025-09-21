@@ -17,7 +17,11 @@ void run(const char * parent, const char * depf, const char * incf) {
   sys::file incs { incf, "wb" };
 
   sys::for_each_dag(parent, true, [&](auto dag, auto id, auto file) {
-    if      (id == 'idir') fputln(incs, "-I", file);
+    if      (id == 'idir') {
+      auto inc = sim::sb { file };
+      for (auto & c : inc) if (c == '\\') c = '/';
+      fputln(incs, "-I", *inc);
+    }
     else if (id == 'pcmf') {
       auto pcm = sim::sb { file };
       for (auto & c : pcm) if (c == '\\') c = '/';
