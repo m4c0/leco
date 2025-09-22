@@ -159,13 +159,9 @@ static void add_xcfw(const char * str, const char * desc, uint32_t code) {
 static void add_shdr(const char * src, const char * desc, uint32_t code) {
   print_found(src, desc, 'shdr');
 
-  auto out = sim::path_parent(*path_of(src)) / "out" / target;
-  out = out / sim::path_filename(src);
-  if (sys::is_tgt_wasm()) {
-    out = out + ".gles";
-  } else {
-    out = out + ".spv";
-  }
+  auto ext = sys::is_tgt_wasm() ? ".gles" : ".spv";
+
+  auto out = sim::path_parent(*path_of(src)) / "out" / target / sim::path_filename(src) + ext;
   output(code, *out);
 }
 
