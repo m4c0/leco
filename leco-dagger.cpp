@@ -1,12 +1,14 @@
 #pragma leco tool
 
-#include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
+import jute;
 import popen;
 import sys;
+import traits;
+
+using namespace traits::ints;
 
 enum class exe_t {
   none,
@@ -425,7 +427,7 @@ enum run_result { OK, ERR, SKIPPED };
       // # <line> "<file>" <flags>...
       find_header(pp);
 
-      auto l = atoi(pp);
+      auto [l, _] = jute::to_u32(jute::view::unsafe(pp));
       if (l != 0)
         line = l - 1;
     }
