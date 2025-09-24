@@ -27,7 +27,7 @@
 #define PCM(name) ".." SEP name SEP "out" SEP HOST_TARGET SEP name ".pcm"
 #define LPCM(name) "out" SEP HOST_TARGET SEP name ".pcm"
 #define PARG(name) " -fmodule-file=" name "=" PCM(name)
-#define MARG(name) " -fmodule-file=" name "=" PCM(name) " " PCM(name)
+#define MARG(name) PARG(name) " " PCM(name)
 #define LMARG(name) " -fmodule-file=" name "=" LPCM(name) " " LPCM(name)
 
 #define MODULE(name, ...) MKOUT(name); run(CLANG " .." SEP name SEP name ".cppm -o " PCM(name) PCMFL __VA_ARGS__);
