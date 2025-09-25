@@ -1,5 +1,4 @@
 #pragma leco tool
-#include "sim.h"
 #include "targets.hpp"
 
 import sys;
@@ -27,73 +26,65 @@ Environment variables:
 )");
 }
 
-static void add_target_defs(sim_sb * buf) {
+static void add_target_defs(sim::sb * buf) {
   if (sys::is_tgt_windows()) {
-    sim_sb_concat(buf, " -DLECO_TARGET_WINDOWS");
+    *buf += " -DLECO_TARGET_WINDOWS";
   } else if (sys::is_tgt_linux()) {
-    sim_sb_concat(buf, " -DLECO_TARGET_LINUX");
+    *buf += " -DLECO_TARGET_LINUX";
   } else if (sys::is_tgt_osx()) {
-    sim_sb_concat(buf, " -DLECO_TARGET_MACOSX");
-    sim_sb_concat(buf, " -DLECO_TARGET_APPLE");
-    sim_sb_concat(buf, " -D_C99_SOURCE");
+    *buf += " -DLECO_TARGET_MACOSX";
+    *buf += " -DLECO_TARGET_APPLE";
+    *buf += " -D_C99_SOURCE";
   } else if (sys::is_tgt_iphoneos()) {
-    sim_sb_concat(buf, " -DLECO_TARGET_IPHONEOS");
-    sim_sb_concat(buf, " -DLECO_TARGET_IOS");
-    sim_sb_concat(buf, " -DLECO_TARGET_APPLE");
-    sim_sb_concat(buf, " -D_C99_SOURCE");
+    *buf += " -DLECO_TARGET_IPHONEOS";
+    *buf += " -DLECO_TARGET_IOS";
+    *buf += " -DLECO_TARGET_APPLE";
+    *buf += " -D_C99_SOURCE";
   } else if (sys::is_tgt_ios_sim()) {
-    sim_sb_concat(buf, " -DLECO_TARGET_IPHONESIMULATOR");
-    sim_sb_concat(buf, " -DLECO_TARGET_IOS");
-    sim_sb_concat(buf, " -DLECO_TARGET_APPLE");
-    sim_sb_concat(buf, " -D_C99_SOURCE");
+    *buf += " -DLECO_TARGET_IPHONESIMULATOR";
+    *buf += " -DLECO_TARGET_IOS";
+    *buf += " -DLECO_TARGET_APPLE";
+    *buf += " -D_C99_SOURCE";
   } else if (sys::is_tgt_droid()) {
-    sim_sb_concat(buf, " -DLECO_TARGET_ANDROID");
+    *buf += " -DLECO_TARGET_ANDROID";
   } else if (sys::is_tgt_wasm()) {
-    sim_sb_concat(buf, " -DLECO_TARGET_WASM");
+    *buf += " -DLECO_TARGET_WASM";
   } else {
     die("invalid target: ", (const char *)sys::target());
   }
 }
 
-static void add_sysroot(sim_sb * args, const char * argv0) {
-  sim_sb sra{};
-  sim_sb_new(&sra, 10240);
-  sim_sb_path_copy_parent(&sra, argv0);
-  sim_sb_path_parent(&sra);
-  sim_sb_path_append(&sra, sys::target());
-  sim_sb_path_append(&sra, "sysroot");
-  if (!mtime::of(sra.buffer)) return; // Optional in WASM
+static void add_sysroot(sim::sb * args, const char * argv0) {
+  auto sra = sim::path_parent(argv0).path_parent() / sys::target() / "sysroot";
+  if (!mtime::of(*sra)) return; // Optional in WASM
 
-  sim_sb_printf(args, " --sysroot @%s", sra.buffer);
+  args->printf(" --sysroot @%s", *sra);
 }
 
 int main(int argc, char **argv) try {
   if (argc == 1) usage();
 
-  sim_sb args{};
-  sim_sb_new(&args, 10240);
-  sim_sb_copy(&args, CLANG_CMD);
-  sim_sb_concat(&args, " -Wall -Wno-unknown-pragmas");
+  auto args = sim::sb { CLANG_CMD } + " -Wall -Wno-unknown-pragmas";
 
   if ((const char *)sys::opt_envs::debug()) {
 #ifdef _WIN32
-    sim_sb_concat(&args, " -gdwarf");
+    args += " -gdwarf";
 #else
-    sim_sb_concat(&args, " -g");
+    args += " -g";
 #endif
   }
-  if ((const char *)sys::opt_envs::opt()) sim_sb_concat(&args, " -O3 -flto -fvisibility=hidden");
+  if ((const char *)sys::opt_envs::opt()) args += " -O3 -flto -fvisibility=hidden";
 
-  if (sys::is_tgt_wasm()) sim_sb_concat(&args, " -fwasm-exceptions");
+  if (sys::is_tgt_wasm()) args += " -fwasm-exceptions";
 
-  sim_sb_printf(&args, " -target %s", (const char *)sys::target());
+  args.printf(" -target %s", (const char *)sys::target());
   add_target_defs(&args);
   if (!sys::is_tgt_host()) add_sysroot(&args, argv[0]);
 
   // TODO: escape argv or use exec
-  for (auto i = 1; i < argc; i++) sim_sb_printf(&args, " %s", argv[i]);
+  for (auto i = 1; i < argc; i++) args.printf(" %s", argv[i]);
 
-  sys::run(args.buffer);
+  sys::run(*args);
   return 0;
 } catch (...) {
   return 1;
