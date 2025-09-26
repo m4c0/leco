@@ -237,6 +237,9 @@ void opt_tool_run(const char * name, auto &&... as) {
   tool_run(name, as...);
 }
 
+bool is_debug() { return static_cast<const char *>(opt_envs::debug()); }
+bool is_opt()   { return static_cast<const char *>(opt_envs::opt());   }
+
 constexpr const char * host_target = HOST_TARGET;
 bool is_tgt(const char * x) { return 0 == strcmp(target(), x); }
 bool is_tgt_host()     { return is_tgt(HOST_TARGET); }

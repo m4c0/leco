@@ -49,6 +49,7 @@ static void add_target_defs(sim::sb * buf) {
     *buf += " -DLECO_TARGET_ANDROID";
   } else if (sys::is_tgt_wasm()) {
     *buf += " -DLECO_TARGET_WASM";
+    *buf += " -fwasm-exceptions";
   } else {
     die("invalid target: ", (const char *)sys::target());
   }
@@ -56,7 +57,7 @@ static void add_target_defs(sim::sb * buf) {
 
 static void add_sysroot(sim::sb * args, const char * argv0) {
   auto sra = sim::path_parent(argv0).path_parent() / sys::target() / "sysroot";
-  if (!mtime::of(*sra)) return; // Optional in WASM
+  if (!mtime::of(*sra)) return; // Optional in WASM and host targets
 
   args->printf(" --sysroot @%s", *sra);
 }
@@ -66,20 +67,12 @@ int main(int argc, char **argv) try {
 
   auto args = sim::sb { CLANG_CMD } + " -Wall -Wno-unknown-pragmas";
 
-  if ((const char *)sys::opt_envs::debug()) {
-#ifdef _WIN32
-    args += " -gdwarf";
-#else
-    args += " -g";
-#endif
-  }
-  if ((const char *)sys::opt_envs::opt()) args += " -O3 -flto -fvisibility=hidden";
-
-  if (sys::is_tgt_wasm()) args += " -fwasm-exceptions";
+  if (sys::is_debug()) args += sys::is_tgt_windows() ? " -gdwarf" : " -g";
+  if (sys::is_opt())   args += " -O3 -flto -fvisibility=hidden";
 
   args.printf(" -target %s", (const char *)sys::target());
   add_target_defs(&args);
-  if (!sys::is_tgt_host()) add_sysroot(&args, argv[0]);
+  add_sysroot(&args, argv[0]);
 
   // TODO: escape argv or use exec
   for (auto i = 1; i < argc; i++) args.printf(" %s", argv[i]);
