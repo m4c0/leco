@@ -8,7 +8,6 @@ export module sim;
 export namespace sim {
   struct sb : sim_sb {
     sb() { sim_sb_new(this, 102400); }
-    sb(unsigned sz) { sim_sb_new(this, sz); }
     ~sb() { if (buffer) sim_sb_delete(this); }
 
     sb(const sb & o) : sb() { sim_sb_copy(this, o.buffer); }

@@ -123,12 +123,8 @@ static void read_file_list(const char *str, const char *desc, uint32_t code,
       e = strchr(str, '"');
     } else if (*str && *str != '\n') {
       e = strchr(str, ' ');
-      if (e == nullptr) {
-        e = strchr(str, '\n');
-      }
-      if (e == nullptr) {
-        e = str + strlen(str);
-      }
+      if (e == nullptr) e = strchr(str, '\n');
+      if (e == nullptr) e = str + strlen(str);
     }
     if (e == nullptr) throw 1;
 
@@ -243,9 +239,10 @@ static bool check_extension(sim::sb * mi, const char *desc, const char *ext) {
 static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
   auto mi = sim::path_parent(*source) / mod_impl;
 
-  if (check_extension(&mi, desc, "cpp") || check_extension(&mi, desc, "c") ||
-      check_extension(&mi, desc, "mm") || check_extension(&mi, desc, "m"))
-    return;
+  if (check_extension(&mi, desc, "cpp")) return;
+  if (check_extension(&mi, desc, "c"))   return;
+  if (check_extension(&mi, desc, "mm"))  return;
+  if (check_extension(&mi, desc, "m"))   return;
 
   missing_file(desc);
 }
@@ -452,7 +449,7 @@ enum run_result { OK, ERR, SKIPPED };
     }
   }
 
-  sim::sb buf { 102400 };
+  sim::sb buf {};
   while (proc.gets_err()) {
     buf += proc.last_line_read();
     buf += "\n"; // Adds back since gets_err chomps it
