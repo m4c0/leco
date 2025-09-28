@@ -1,7 +1,6 @@
 #pragma leco tool
 
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -42,9 +41,8 @@ storing dependencies in a DAG-like file.
 }
 
 static void output(uint32_t code, const char *msg) {
-  fwrite(&code, sizeof(uint32_t), 1, *current_output);
-  fputs(msg, *current_output);
-  fputc('\n', *current_output);
+  fput(*current_output, &code, sizeof(uint32_t));
+  fputln(*current_output, msg);
 }
 
 static const char *cmp(const char *str, const char *prefix) {
@@ -498,10 +496,10 @@ static void check_and_run(const char * src, bool roots_only) {
     case run_result::OK:
       return;
     case run_result::ERR:
-      remove(*dag);
+      sys::remove(*dag);
       throw 0;
     case run_result::SKIPPED:
-      remove(*dag);
+      sys::remove(*dag);
       return;
   }
 }
