@@ -41,8 +41,7 @@ storing dependencies in a DAG-like file.
 }
 
 static void output(uint32_t code, const char *msg) {
-  fput(*current_output, &code, sizeof(uint32_t));
-  fputln(*current_output, msg);
+  fputfn(*current_output, "%.4s%s", reinterpret_cast<char *>(&code), msg);
 }
 
 static const char *cmp(const char *str, const char *prefix) {
