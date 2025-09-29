@@ -56,11 +56,10 @@ static const char * cmp(const char * str, auto ... prefixes) {
 }
 
 static const char *chomp(const char *str, const char *prefix) {
-  static sim::sb buf {};
-
   auto ptr = cmp(str, prefix);
   if (!ptr) return ptr;
 
+  static sim::sb buf {};
   buf = sim::sb { ptr };
 
   auto scptr = strchr(*buf, ';');
@@ -72,13 +71,8 @@ static const char *chomp(const char *str, const char *prefix) {
 
 static sim::sb path_of(const char * rel_path) {
   sim::sb abs = sim::path_parent(*source) / rel_path;
-  if (mtime::of(*abs) != 0) {
-    abs = sim::path_real(*abs);
-  } else {
-    abs = sim::path_real(rel_path);
-    if (mtime::of(*abs) == 0) return {};
-  }
-  return abs;
+  abs = mtime::of(*abs) ? sim::path_real(*abs) : sim::path_real(rel_path);
+  return mtime::of(*abs) ? abs : sim::sb {};
 }
 static bool print_if_found(const char *rel_path, const char *desc,
                            uint32_t code) {
