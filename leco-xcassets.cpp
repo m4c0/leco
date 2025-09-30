@@ -9,7 +9,7 @@ import sys;
 //       added to the asset catalog in Xcode." error
 
 static void usage() {
-  sys::die(R"(
+  die(R"(
 Generates assets required for iOS bundling. Expects a 1024x1024 PNG icon named
 `icon.png` in the source root and assumes you don't want to mess with accent
 colours etc etc.

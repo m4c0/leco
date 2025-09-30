@@ -5,7 +5,7 @@ import gopt;
 import sys;
 
 static void usage() {
-  sys::die(R"(
+  die(R"(
 Invoke Apple's codesign utility to sign a specific directory.
 
 Usage: ../leco/leco.exe codesign -d <dir>

@@ -9,7 +9,7 @@ import sys;
 unsigned clean_level{};
 
 static void usage() {
-  sys::die(R"(
+  die(R"(
   Usage: ../leco/leco.exe [-c [-c]] [-C <dir>] [-g] [-O] [-t <target>] [<tool> [<tool options>]]
 
   Where:
@@ -89,7 +89,7 @@ static const char * target_of(const char * tgt) {
   if (target == "android_x86")     return TGT_DROID_X86;
   if (target == "android_x86_64")  return TGT_DROID_X86_64;
 
-  sys::die("unknown or invalid target for this platform: %s", *target);
+  dief("unknown or invalid target for this platform: %s", *target);
 }
 
 static int run_tool(int argc, char ** argv) {
@@ -101,7 +101,7 @@ static int run_tool(int argc, char ** argv) {
 }
 
 static void chdir(const char * dir) {
-  if (0 != mct_syscall_chdir(dir)) sys::die("Directory not found: [%s]\n", dir);
+  if (0 != mct_syscall_chdir(dir)) dief("Directory not found: [%s]", dir);
 }
 
 int main(int argc, char ** argv) try {

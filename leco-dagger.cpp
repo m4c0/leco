@@ -27,17 +27,17 @@ static exe_t exe_type {};
 static sim::sb mod_name {};
 
 static void usage() {
-  sys::die(R"(
+  die(R"(
 LECO tool responsible for preprocessing C++ files containing leco pragmas and
 storing dependencies in a DAG-like file.
 )");
 }
 
 [[noreturn]] static void error(const char *msg) {
-  sys::die("%s:%d: %s\n", *source, line, msg);
+  dief("%s:%d: %s\n", *source, line, msg);
 }
 [[noreturn]] static void missing_file(const char *desc) {
-  sys::die("%s:%d: could not find %s\n", *source, line, desc);
+  dief("%s:%d: could not find %s\n", *source, line, desc);
 }
 
 static void output(uint32_t code, const char *msg) {
@@ -135,7 +135,7 @@ static void add_xcfw(const char * str, const char * desc, uint32_t code) {
   if (sys::is_tgt_iphoneos())     path /= "ios-arm64";
   else if (sys::is_tgt_ios_sim()) path /= "ios-arm64_x86_64-simulator";
   else if (sys::is_tgt_osx())     path /= "macos-arm64_x86_64";
-  else sys::die("xcframework is only supported in apple platforms");
+  else die("xcframework is only supported in apple platforms");
 
   path /= sim::path_filename(str);
   path.path_extension("framework");

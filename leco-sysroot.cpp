@@ -16,7 +16,7 @@ static sim::sb android_sysroot() {
 
   res = sdk / "ndk";
   if (!exists(*res))
-    sys::die("ANDROID_SDK_ROOT path does not contain a folder named: [%s]", *res);
+    dief("ANDROID_SDK_ROOT path does not contain a folder named: [%s]", *res);
 
   sim::sb max { "" };
 
@@ -26,19 +26,19 @@ static sim::sb android_sysroot() {
   }
 
   res = res / *max / "toolchains" / "llvm" / "prebuilt";
-  if (!exists(*res)) sys::die("prebuilt path isn't a directory: [%s]", *res);
+  if (!exists(*res)) dief("prebuilt path isn't a directory: [%s]", *res);
 
   for (auto e : pprent::list(*res)) {
     if (e[0] == '.') continue;
 
     return res / e / "sysroot";
   }
-  sys::die("no LLVM inside prebuilt dir: [%s]", *res);
+  dief("no LLVM inside prebuilt dir: [%s]", *res);
 }
 
 static sim::sb apple_sysroot(const char *sdk) {
 #ifndef __APPLE__
-  sys::die("apple targets not supported when host isn't osx");
+  die("apple targets not supported when host isn't osx");
   return {};
 #else
   auto p = p::proc { "xcrun", "--show-sdk-path", "--sdk", sdk };
@@ -58,7 +58,7 @@ static sim::sb sysroot_for_target() {
   if (sys::is_tgt_ios_sim())  return apple_sysroot("iphonesimulator");
   if (sys::is_tgt_droid())    return android_sysroot();
   if (sys::is_tgt_wasm())     return wasm_sysroot();
-  sys::die("invalid target: %s", (const char *)sys::target());
+  dief("invalid target: %s", (const char *)sys::target());
 }
 
 int main() try {

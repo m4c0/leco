@@ -11,7 +11,7 @@ static void copy_exe(const sim::sb & exedir, const char * input) {
 }
 
 static void copy_xcfw(const sim::sb & exedir, const char * xcfw_path) {
-  if (!sys::is_tgt_apple()) sys::die("Trying to install a xcframework on a non-apple target");
+  if (!sys::is_tgt_apple()) die("Trying to install a xcframework on a non-apple target");
 
   sim::sb tgt = exedir;
   if (!sys::is_tgt_ios()) tgt.path_parent();
@@ -43,7 +43,7 @@ int main(int argc, char ** argv) try {
     if (id != 'tapp' && id != 'tool') return;
 
     sim::sb edir = sys::read_dag_tag('edir', dag); 
-    if (edir == "") sys::die("dag without executable directory");
+    if (edir == "") die("dag without executable directory");
 
     sys::mkdirs(*edir);
 

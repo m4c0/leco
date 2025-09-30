@@ -10,7 +10,7 @@ import popen;
 import sys;
 
 void usage() {
-  sys::die(R"(
+  die(R"(
 Exports iOS applications - i.e. generates uploadable IPAs.
 
 If you see werid messages from XCode about missing iOS Simulator stuff, you

@@ -6,7 +6,7 @@ import gopt;
 import sys;
 
 void usage() {
-  sys::die(R"(
+  die(R"(
 Uploads an iOS application. This assumes everything else was generated, signed,
 exported, etc.
 
@@ -26,7 +26,7 @@ Where:
 
 int main(int argc, char ** argv) try {
   // TODO: match with dag target or transform this into a root-diver
-  if (!sys::is_tgt_iphoneos()) sys::die("only iPhone target is supported");
+  if (!sys::is_tgt_iphoneos()) die("only iPhone target is supported");
 
   const char * input {};
   bool upload {};

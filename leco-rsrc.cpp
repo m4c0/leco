@@ -22,7 +22,7 @@ int main(int argc, char **argv) try {
     if (id != 'tapp') return;
 
     sim::sb rdir = sys::read_dag_tag('rdir', dag);
-    if (rdir == "") sys::die("app dag without resource dir");
+    if (rdir == "") die("app dag without resource dir");
 
     sys::mkdirs(*rdir);
     sys::recurse_dag(dag, [&](auto dag, auto id, auto file) {

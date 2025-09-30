@@ -8,7 +8,7 @@ import sys;
 // TODO: check if files actually need regen
 
 static void usage() {
-  sys::die(R"(
+  die(R"(
 Merges JS files into a single file. Only useful with WASM target. Expects JS to
 have the same name as its related C++ module.
 

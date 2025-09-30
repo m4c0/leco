@@ -256,11 +256,6 @@ bool is_tgt_droid() {
 bool is_tgt_ios()   { return is_tgt_iphoneos() || is_tgt_ios_sim(); }
 bool is_tgt_apple() { return is_tgt_osx()      || is_tgt_ios();     }
 
-#pragma clang diagnostic ignored "-Wgcc-compat"
-[[noreturn]] __attribute__((format(printf, 1, 2))) inline void die(const char *msg, auto &&... args) {
-  ::dief(msg, args...);
-}
-
 #undef max
 constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 

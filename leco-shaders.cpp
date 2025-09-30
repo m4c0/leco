@@ -48,7 +48,7 @@ static void build_shader(const char * dag, const char * file) {
     putln(line);
   }
 
-  if (p.wait() != 0) sys::die("shader compilation failed");
+  if (p.wait() != 0) die("shader compilation failed");
 
   if (!sys::is_tgt_wasm()) return;
 

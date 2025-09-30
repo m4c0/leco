@@ -5,7 +5,7 @@ import sys;
 
 static bool log_all{};
 static void usage() {
-  sys::die(R"(
+  die(R"(
 usage: ../leco/leco.exe clean [-a] [-v]
 
 where:
