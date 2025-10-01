@@ -1,7 +1,5 @@
 #pragma leco tool
 
-#include <stdio.h>
-
 import sys;
 
 static sys::mt g_mt {};

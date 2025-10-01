@@ -1,6 +1,5 @@
 #pragma leco tool
 
-#include <stdio.h>
 #include <string.h>
 
 import popen;
@@ -73,7 +72,7 @@ int main() try {
   if (!sysroot.len) return 0;
 
   sys::log("sysroot", *sysroot);
-  fputs(*sysroot, sys::file { *cf, "w" });
+  fputln(sys::file { *cf, "w" }, *sysroot);
 } catch (...) {
   return 1;
 }

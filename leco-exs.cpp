@@ -1,7 +1,5 @@
 #pragma leco tool
 
-#include <stdio.h>
-
 import sys;
 
 static void copy_exe(const sim::sb & exedir, const char * input) {

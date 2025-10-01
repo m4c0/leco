@@ -2,8 +2,6 @@
 #include "../mct/mct-syscall.h"
 #include "targets.hpp"
 
-#include <string.h>
-
 import sys;
 
 unsigned clean_level{};

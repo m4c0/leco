@@ -2,8 +2,6 @@
 #pragma leco tool
 #endif
 
-#include <string.h>
-
 import jute;
 import plist;
 import popen;

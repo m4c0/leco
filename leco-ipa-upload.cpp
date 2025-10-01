@@ -1,7 +1,5 @@
 #pragma leco tool
 
-#include <string.h>
-
 import gopt;
 import sys;
 

@@ -1,5 +1,4 @@
 #pragma leco tool
-#include <stdio.h>
 
 import jojo;
 import jute;
@@ -16,12 +15,11 @@ Usage: ../leco/leco.exe wasm-js
 )");
 }
 
-static void concat(FILE *out, jute::view in_file) {
-  auto src = jojo::read_cstr(in_file);
-  fwrite(src.begin(), 1, src.size(), out);
+static void concat(auto & out, jute::view in_file) {
+  fputln(out, jojo::read_cstr(in_file));
 }
 
-static void read_dag(sys::strset & cache, const char * dag, FILE * out) {
+static void read_dag(sys::strset & cache, const char * dag, auto & out) {
   if (!cache.insert(dag)) return;
 
   sim::sb js {};

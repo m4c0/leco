@@ -1,7 +1,5 @@
 #pragma leco tool
 
-#include <stdio.h>
-
 import sys;
 
 // TODO: detect alpha in PNG - otherwise submit fails
@@ -26,13 +24,13 @@ Usage: ../leco/leco.exe xcassets
 static void create_xca_contents(const char *path) {
   auto file = sim::sb { path } / "Contents.json";
 
-  fprintf(sys::file { *file, "w" }, R"({ "info": {"version": 1} })");
+  fputln(sys::file { *file, "w" }, R"({ "info": {"version": 1} })");
 }
 
 static void create_icon_contents(const char *path) {
   auto file = sim::sb { path } / "Contents.json";
 
-  fprintf(sys::file { *file, "w" }, R"({
+  fput(sys::file { *file, "w" }, R"({
   "images": [{
     "filename": "Icon-1024.png",
     "idiom": "universal",
@@ -46,7 +44,7 @@ static void create_icon_contents(const char *path) {
 static void create_colour_contents(const char *path) {
   auto file = sim::sb { path } / "Contents.json";
 
-  fprintf(sys::file { *file, "w" }, R"({ "info": {"version": 1} })");
+  fputln(sys::file { *file, "w" }, R"({ "info": {"version": 1} })");
 }
 
 static void copy_icon(const char *path) {
