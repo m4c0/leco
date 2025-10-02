@@ -472,12 +472,9 @@ static void create_gitignore(const auto & out) {
 }
 
 static void check_and_run(const char * src, bool roots_only) {
-  auto gparent = sim::path_parent(src) / "out";
-  sys::mkdirs(*gparent);
-  create_gitignore(gparent);
-
-  auto parent = gparent / target;
+  auto parent = sim::path_parent(src) / "out" / target;
   sys::mkdirs(*parent);
+  create_gitignore(sim::path_parent(*parent));
 
   auto dag = (parent / sim::path_filename(src)).path_extension("dag");
 
