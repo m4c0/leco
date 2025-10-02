@@ -45,7 +45,7 @@ static void build_shader(const char * dag, const char * file) {
       if (line[7] == '/') line = line.subview(7).after;
       else if (line[8] == ':') line = line.subview(7).after;
     }
-    putln(line);
+    err(line);
   }
 
   if (p.wait() != 0) die("shader compilation failed");
