@@ -25,8 +25,7 @@ export namespace sim {
 
     explicit sb(const char * s) : sb {} { sim_sb_copy(this, s); }
 
-    char * operator*() { return buffer; }
-    const char * operator*() const { return buffer; }
+    auto * operator*(this auto && self) { return self.buffer; }
 
     bool operator==(const char * s) const {
       return 0 == strcmp(buffer, s);
@@ -43,10 +42,8 @@ export namespace sim {
       return *this;
     }
 
-    auto begin() const { return buffer; }
-    auto begin() { return buffer; }
-    auto end() const { return buffer + len; }
-    auto end() { return buffer + len; }
+    auto begin(this auto && self) { return self.buffer; }
+    auto end(this auto && self) { return self.buffer + self.len; }
 
     auto data() const { return buffer; }
     auto size() const { return len; }
