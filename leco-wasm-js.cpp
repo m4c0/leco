@@ -42,7 +42,16 @@ static void run(const char * dag, const char * _) {
   auto path = sim::sb { dag }.path_extension("app");
 
   auto html = (path / sim::path_filename(dag)).path_extension("html");
-  sys::link("../leco/wasm.html", *html);
+  if (mtime::of(*html) == 0) {
+    jojo::write(html, jute::view { R"(
+<html>
+  <head><title>App</title></head>
+  <body>
+    <script type="text/javascript" src="leco.js"></script>
+  </body>
+</html>
+)" });
+  }
 
   mtime::t mtime = 0;
   sys::recurse_dag(dag, [&](auto dag, auto id, auto file) {
