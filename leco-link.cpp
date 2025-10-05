@@ -1,4 +1,7 @@
 #pragma leco tool
+#ifdef _WIN32
+#include <stdio.h>
+#endif
 
 import sys;
 
@@ -8,7 +11,7 @@ static void mt_dtor(const char * out) {
 #ifdef _WIN32
   auto old_f = sim::sb { out } + ".old";
   auto new_f = sim::sb { out } + ".new";
-  remove(*old_f);
+  sys::remove(*old_f);
   rename(out, *old_f);
   rename(*new_f, out);
 #endif
