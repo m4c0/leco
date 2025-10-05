@@ -3,14 +3,14 @@
 import gopt;
 import sys;
 
-static bool log_all{};
 static void usage() {
   die(R"(
-usage: ../leco/leco.exe clean [-a] [-v]
+Cleans LECO build directories.
+
+usage: ../leco/leco.exe clean [-a]
 
 where:
-      -a        remove all known deps recursively
-      -v        log all removed files
+      -a: remove all known deps recursively
 
 )");
 }
@@ -22,8 +22,6 @@ static void rm_rf(const char * p) {
     auto path = sim::sb { p } / entry;
     rm_rf(*path);
   }
-
-  if (log_all) sys::log("removing", p);
   sys::remove(p);
 }
 
@@ -53,7 +51,6 @@ static void remove_with_deps(const char * p) {
     });
   }
 
-  if (!log_all) sys::log("removing", *path);
   rm_rf(*path);
 }
 
@@ -61,8 +58,7 @@ int main(int argc, char **argv) try {
   bool all{};
   auto opts = gopt_parse(argc, argv, "av", [&](auto ch, auto val) {
     switch (ch) {
-      case 'a': all     = true; break;
-      case 'v': log_all = true; break;
+      case 'a': all = true; break;
       default: usage();
     }
   });
@@ -73,7 +69,7 @@ int main(int argc, char **argv) try {
     remove_with_deps(*cwd);
   } else {
     auto tgt = cwd / "out" / sys::target();
-    if (!log_all) sys::log("removing", *tgt);
+    sys::log("removing", *tgt);
     rm_rf(*tgt);
   }
 
