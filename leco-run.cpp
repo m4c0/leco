@@ -1,5 +1,6 @@
 #pragma leco tool
 #include "../mct/mct-syscall.h"
+import hai;
 import sys;
 
 void list_targets() {
@@ -18,8 +19,16 @@ int run_target(const char * name, int argc, char ** argv) {
   });
   if (exe == "") die("invalid target: ", name);
 
-  *argv = *exe;
-  return mct_syscall_spawn(*argv, argv);
+  if (!sys::is_debug()) {
+    *argv = *exe;
+    return mct_syscall_spawn(*argv, argv);
+  }
+
+  hai::array<const char *> args { argc + 2U };
+  args[0] = sys::is_tgt_windows() ? "lldb.exe" : "lldb";
+  args[1] = *exe;
+  for (auto i = 1; i < argc; i++) args[i + 1] = argv[i];
+  return mct_syscall_spawn(args[0], args.begin());
 }
 
 static void list_wasm_targets() {
@@ -29,6 +38,8 @@ static void list_wasm_targets() {
 }
 
 static void run_wasm_target(const char * name, int argc, char ** argv) {
+  if (sys::is_debug()) errln("debug is not supported in WASM at the moment");
+
   sim::sb edir {};
   sys::for_each_root_dag([&](auto dag, auto id, auto file) {
     if (sim::path_stem(dag) != name) return;
