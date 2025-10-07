@@ -1,14 +1,13 @@
 #pragma leco tool
 #include <string.h>
 
-import gopt;
 import sys;
 
 static void usage() {
   die(R"(
 Invoke Apple's codesign utility to sign a specific directory.
 
-Usage: ../leco/leco.exe codesign -d <dir>
+Usage: ../leco/leco.exe codesign [-d <dir>] [-d <dir>]...
 
 Where:
         -d  Directory to sign
@@ -58,6 +57,8 @@ static bool sign_is_fresh(const char * path) {
 
 static void sign(const char * path) try {
   // Only sign when we want to sign
+  if (sign_is_fresh(path)) return;
+
   sys::log("codesign", path);
   sys::runf("codesign -f -s %s %s", (const char *)sys::envs::ios_team_id(), path);
 } catch (...) {
@@ -65,18 +66,11 @@ static void sign(const char * path) try {
 }
 
 int main(int argc, char ** argv) try {
-  const char * path {};
-  auto opts = gopt_parse(argc, argv, "d:", [&](auto ch, auto val) {
-    switch (ch) {
-      case 'd': path = val; break;
-      default: usage();
-    }
-  });
-  if (!path || opts.argc) usage();
-
-  if (sign_is_fresh(path)) return 0;
-
-  sign(path);
+  const auto shift = [&] { return argc > 1 ? (argc--, *++argv) : nullptr; };
+  while (auto val = shift()) {
+    if ("-d"_s == val) sign(val);
+    else usage();
+  }
 } catch (...) {
   return 1;
 }
