@@ -1,6 +1,6 @@
 #pragma leco tool
-#include <string.h>
 
+import jute;
 import sys;
 
 static void usage() {
@@ -30,6 +30,16 @@ struct pair {
   mtime::t signature {};
 };
 
+static pair sign_times(const char * path) {
+  pair res {};
+  for (auto entry : pprent::list(path)) {
+    if (entry[0] == '.') continue;
+
+    auto f = mtime::of(path);
+    res.signature = sys::max(res.signature, f);
+  }
+  return res;
+}
 static pair mod_times(const char * path) {
   pair res {};
 
@@ -37,22 +47,19 @@ static pair mod_times(const char * path) {
     if (entry[0] == '.') continue;
 
     auto p = sim::sb { path } / entry;
-    auto [ f, s ] = mod_times(*p);
-    res.files = res.files < f ? f : res.files;
-    res.signature = res.signature < s ? s : res.signature;
+    auto ev = jute::view::unsafe(entry);
+    auto [f, s] = (ev == "_CodeSignature") ? sign_times(*p) : mod_times(*p);
+    res.files = sys::max(res.files, f);
+    res.signature = sys::max(res.signature, s);
   }
 
   auto f = mtime::of(path);
   res.files = res.files < f ? f : res.files;
-
-  if (strstr(path, "_CodeSignature")) {
-    res.signature = res.signature < f ? f : res.signature;
-  }
   return res;
 }
 static bool sign_is_fresh(const char * path) {
   auto [ f, s ] = mod_times(path);
-  return f == s;
+  return f <= s;
 }
 
 static void sign(const char * path) try {

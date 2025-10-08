@@ -256,6 +256,8 @@ bool is_tgt_droid() {
 bool is_tgt_ios()   { return is_tgt_iphoneos() || is_tgt_ios_sim(); }
 bool is_tgt_apple() { return is_tgt_osx()      || is_tgt_ios();     }
 
+#undef min
+constexpr auto min(auto a, auto b) { return a > b ? b : a; }
 #undef max
 constexpr auto max(auto a, auto b) { return a > b ? a : b; }
 
