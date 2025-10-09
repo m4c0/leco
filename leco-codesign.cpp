@@ -75,7 +75,7 @@ static void sign(const char * path) try {
 int main(int argc, char ** argv) try {
   const auto shift = [&] { return argc > 1 ? (argc--, *++argv) : nullptr; };
   while (auto val = shift()) {
-    if ("-d"_s == val) sign(val);
+    if ("-d"_s == val) sign(shift());
     else usage();
   }
 } catch (...) {
