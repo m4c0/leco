@@ -1,10 +1,9 @@
 module;
 
-#include <string.h>
 #include "../mct/mct-syscall.h"
 
 export module plist;
-
+import jute;
 import sys;
 
 export namespace plist {
@@ -77,8 +76,9 @@ public:
     fgets(buf, sizeof(buf), f); // dict
  
     while (!feof(f) && fgets(buf, sizeof(buf), f) != nullptr) {
-      if (0 == strcmp("</dict>", buf)) break;
-      fwrite(buf, 1, strlen(buf), m_f);
+      auto v = jute::view::unsafe(buf);
+      if (v == "</dict>") break;
+      fput(m_f, v);
     }
   }
 };
