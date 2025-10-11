@@ -1,6 +1,5 @@
 #pragma leco tool
 
-import gopt;
 import sys;
 
 void usage() {
@@ -26,16 +25,16 @@ int main(int argc, char ** argv) try {
   // TODO: match with dag target or transform this into a root-diver
   if (!sys::is_tgt_iphoneos()) die("only iPhone target is supported");
 
+  const auto shift = [&] { return argc > 1 ? (argc--, *++argv) : nullptr; };
+
   const char * input {};
   bool upload {};
-  auto opts = gopt_parse(argc, argv, "i:s", [&](auto ch, auto val) {
-    switch (ch) {
-      case 'i': input = val; break;
-      case 's': upload = true; break;
-      default: usage();
-    }
-  });
-  if (opts.argc != 0 || !input) usage();
+  while (auto val = shift()) {
+    if      ("-i"_s == val) input = shift();
+    else if ("-s"_s == val) upload = true;
+    else usage();
+  }
+  if (!input) usage();
 
   auto ipa = sim::path_parent(input);
 
