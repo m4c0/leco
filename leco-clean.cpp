@@ -1,6 +1,5 @@
 #pragma leco tool
 
-import gopt;
 import sys;
 
 static void usage() {
@@ -55,14 +54,13 @@ static void remove_with_deps(const char * p) {
 }
 
 int main(int argc, char **argv) try {
-  bool all{};
-  auto opts = gopt_parse(argc, argv, "av", [&](auto ch, auto val) {
-    switch (ch) {
-      case 'a': all = true; break;
-      default: usage();
-    }
-  });
-  if (opts.argc != 0) usage();
+  bool all = false;
+
+  const auto shift = [&] { return argc > 1 ? (argc--, *++argv) : nullptr; };
+  while (auto val = shift()) {
+    if (val == "a"_s) all = true;
+    else usage();
+  }
 
   auto cwd = "."_real;
   if (all) {
