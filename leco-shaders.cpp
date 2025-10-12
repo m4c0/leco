@@ -41,11 +41,13 @@ static void build_shader(const char * dag, const char * file) {
 
   while (p.gets()) {
     auto line = jute::view::unsafe(p.last_line_read());
+    // glslangValidator always output the file name, for reasons
+    if (line == jute::view::unsafe(file)) continue;
     if (line.starts_with("ERROR: ")) {
       if (line[7] == '/') line = line.subview(7).after;
       else if (line[8] == ':') line = line.subview(7).after;
     }
-    err(line);
+    errln(line);
   }
 
   if (p.wait() != 0) die("shader compilation failed");
