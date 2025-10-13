@@ -51,6 +51,7 @@ __attribute__((format(printf, 1, 2))) inline void runf(const char * cmd, ...) {
 inline void log(const char *verb, const char * msg) { errfn("%20s %s", verb, msg); }
 
 constexpr const auto remove = ::remove;
+constexpr const auto rename = ::rename;
 
 void link(const char *src, const char *dst) {
   if (mtime::of(dst) >= mtime::of(src)) return;
