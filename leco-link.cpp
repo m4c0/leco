@@ -6,10 +6,9 @@ static sys::mt g_mt {};
 
 static void mt_dtor(const char * out) {
 #ifdef _WIN32
-  auto old_f = sim::sb { out } + ".old";
+  sys::win_switchroo(out);
+
   auto new_f = sim::sb { out } + ".new";
-  sys::remove(*old_f);
-  sys::rename(out, *old_f);
   sys::rename(*new_f, out);
 #endif
 }
