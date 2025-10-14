@@ -10,17 +10,23 @@ Intended usage:
 2. Clone LECO
 3. Clone these repos:
     * [gopt][gopt] - GNU-like command line parser
+    * [hay][hay] - RAII wrapper
     * [mtime][mtime] - "stat" wrapper
+    * [no][no] - copy/move semantics
     * [popen][popen] - "popen" wrapper
+    * [print][print] - utilities for printing on terminal
     * [pprent][pprent] - "[minirent][minirent]" wrapper (i.e. "dirent" wrapper)
 4. Clone/create intended C++ repos in that workspace
 5. Build LECO
 6. Use LECO to build everything else
 
 [gopt]: https://github.com/m4c0/gopt.git
+[hay]: https://github.com/m4c0/hay.git
 [minirent]: https://github.com/tsoding/minirent.git
 [mtime]: https://github.com/m4c0/mtime.git
+[no]: https://github.com/m4c0/no.git
 [popen]: https://github.com/m4c0/popen.git
+[print]: https://github.com/m4c0/print.git
 [pprent]: https://github.com/m4c0/pprent.git
 
 Some rules:
