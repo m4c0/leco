@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-import popen;
 import sys;
 
 enum class exe_t {
