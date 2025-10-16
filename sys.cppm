@@ -24,6 +24,7 @@ module;
 #include <string>
 
 export module sys;
+export import c;
 export import hay;
 export import mtime;
 export import no;

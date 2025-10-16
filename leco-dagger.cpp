@@ -1,10 +1,8 @@
 #pragma leco tool
 
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-
 import sys;
+
+using namespace c;
 
 enum class exe_t {
   none,
@@ -32,6 +30,8 @@ storing dependencies in a DAG-like file.
 )");
 }
 
+static_assert(sizeof(unsigned) == 4);
+
 [[noreturn]] static void error(const char *msg) {
   dief("%s:%d: %s\n", *source, line, msg);
 }
@@ -39,7 +39,7 @@ storing dependencies in a DAG-like file.
   dief("%s:%d: could not find %s\n", *source, line, desc);
 }
 
-static void output(uint32_t code, const char *msg) {
+static void output(unsigned code, const char *msg) {
   fputfn(*current_output, "%.4s%s", reinterpret_cast<char *>(&code), msg);
 }
 
@@ -73,24 +73,22 @@ static sim::sb path_of(const char * rel_path) {
   abs = mtime::of(*abs) ? sim::path_real(*abs) : sim::path_real(rel_path);
   return mtime::of(*abs) ? abs : sim::sb {};
 }
-static bool print_if_found(const char *rel_path, const char *desc,
-                           uint32_t code) {
+static bool print_if_found(const char *rel_path, const char *desc, unsigned code) {
   auto abs = path_of(rel_path);
   if (abs.len == 0) return false;
 
   output(code, *abs);
   return true;
 }
-static void print_found(const char *rel_path, const char *desc, uint32_t code) {
+static void print_found(const char *rel_path, const char *desc, unsigned code) {
   if (print_if_found(rel_path, desc, code)) return;
 
   missing_file(desc);
 }
-static void print_asis(const char *rel_path, const char *desc, uint32_t code) {
+static void print_asis(const char *rel_path, const char *desc, unsigned code) {
   output(code, rel_path);
 }
-static bool print_dag_if_found(const char *src, const char *desc, uint32_t code,
-                               uint32_t dag_code) {
+static bool print_dag_if_found(const char *src, const char *desc, unsigned code, unsigned dag_code) {
   if (!print_if_found(src, desc, code)) return false;
 
   auto dag = sim::path_parent(*sim::path_real(src)) / "out" / target / sim::path_filename(src);
@@ -101,8 +99,8 @@ static bool print_dag_if_found(const char *src, const char *desc, uint32_t code,
   return true;
 }
 
-using printer_t = void (*)(const char *, const char *, uint32_t);
-static void read_file_list(const char *str, const char *desc, uint32_t code,
+using printer_t = void (*)(const char *, const char *, unsigned);
+static void read_file_list(const char *str, const char *desc, unsigned code,
                            printer_t prfn = print_found) {
   while (*str && *str != '\n') {
     while (*str == ' ') str++;
@@ -128,7 +126,7 @@ static void read_file_list(const char *str, const char *desc, uint32_t code,
   if (*str != 0 && *str != '\n') throw 1;
 }
 
-static void add_xcfw(const char * str, const char * desc, uint32_t code) {
+static void add_xcfw(const char * str, const char * desc, unsigned code) {
   auto path = sim::sb { str };
 
   if (sys::is_tgt_iphoneos())     path /= "ios-arm64";
@@ -142,7 +140,7 @@ static void add_xcfw(const char * str, const char * desc, uint32_t code) {
   print_found(*path, desc, code);
 }
 
-static void add_shdr(const char * src, const char * desc, uint32_t code) {
+static void add_shdr(const char * src, const char * desc, unsigned code) {
   print_found(src, desc, 'shdr');
 
   auto ext = sys::is_tgt_wasm() ? ".gles" : ".spv";
@@ -226,7 +224,7 @@ static bool check_extension(sim::sb * mi, const char *desc, const char *ext) {
   return print_dag_if_found(**mi, desc, 'impl', 'idag');
 }
 
-static void add_impl(const char *mod_impl, const char *desc, uint32_t code) {
+static void add_impl(const char *mod_impl, const char *desc, unsigned code) {
   auto mi = sim::path_parent(*source) / mod_impl;
 
   if (check_extension(&mi, desc, "cpp")) return;
@@ -250,7 +248,7 @@ static auto dll_path(const sim::sb & src) {
   return path;
 }
 
-static void add_plgn(const char *mod_impl, const char *desc, uint32_t code) {
+static void add_plgn(const char *mod_impl, const char *desc, unsigned code) {
   // TODO: check if target is a DLL
   auto src = path_of(mod_impl);
   if (src.len == 0) return missing_file(desc);
@@ -328,17 +326,17 @@ static bool exe_pragma(const char * p, const char * e, exe_t t) {
   exe_type = t;
   return true;
 }
-static bool add_pragma(const char * p, const char * id, uint32_t code, printer_t prfn = print_found) {
+static bool add_pragma(const char * p, const char * id, unsigned code, printer_t prfn = print_found) {
   if (!(p = cmp(p, "add_", id, " "))) return false;
   read_file_list(p, id, code, prfn);
   return true;
 }
-static bool prop_pragma(const char * p, const char * id, uint32_t code) {
+static bool prop_pragma(const char * p, const char * id, unsigned code) {
   if (!(p = cmp(p, id, " "))) return false;
   read_file_list(p, id, code, print_asis);
   return true;
 }
-static bool flag_pragma(const char * p, const char * id, uint32_t code) {
+static bool flag_pragma(const char * p, const char * id, unsigned code) {
   if (!(p = cmp(id, "\n"))) return false;
   output(code, "");
   return true;
