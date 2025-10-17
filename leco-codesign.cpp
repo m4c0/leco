@@ -72,6 +72,8 @@ static void sign(const char * path) try {
   return;
 }
 
+// TODO: make this tool independent (i.e. `leco codesign` without `-d`)
+// TODO: take framework signing logic from "exs" (after `fdir` is in dagger)
 int main(int argc, char ** argv) try {
   const auto shift = [&] { return argc > 1 ? (argc--, *++argv) : nullptr; };
   while (auto val = shift()) {

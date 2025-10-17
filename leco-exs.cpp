@@ -11,6 +11,7 @@ static void copy_exe(const sim::sb & exedir, const char * input) {
 static void copy_xcfw(const sim::sb & exedir, const char * xcfw_path) {
   if (!sys::is_tgt_apple()) die("Trying to install a xcframework on a non-apple target");
 
+  // TODO: introduce 'fdir' in dagger and move this out
   sim::sb tgt = exedir;
   if (!sys::is_tgt_ios()) tgt.path_parent();
   tgt /= "Frameworks";
@@ -20,6 +21,7 @@ static void copy_xcfw(const sim::sb & exedir, const char * xcfw_path) {
   if (mtime::of(*tgt)) return;
 
   sys::runf("rsync -rav %s %s", xcfw_path, *tgt);
+  // TODO: remove this once codesign drops `-d`
   sys::tool_run("codesign", "-d %s", *tgt);
 }
 
