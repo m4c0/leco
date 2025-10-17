@@ -1,9 +1,9 @@
 #pragma leco tool
 
-#include <string.h>
-
 import popen;
 import sys;
+
+using namespace c;
 
 static bool exists(const char * path) { return mtime::of(path) > 0; }
 
