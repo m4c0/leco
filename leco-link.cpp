@@ -5,9 +5,9 @@ import sys;
 static sys::mt g_mt {};
 
 static void mt_dtor(const char * out) {
-#ifdef _WIN32
-  sys::win_switchroo(out);
+  sys::hardlink_switchroo(out);
 
+#ifdef _WIN32
   auto new_f = sim::sb { out } + ".new";
   sys::rename(*new_f, out);
 #endif

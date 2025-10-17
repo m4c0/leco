@@ -54,13 +54,16 @@ inline void log(const char *verb, const char * msg) { errfn("%20s %s", verb, msg
 constexpr const auto remove = ::remove;
 constexpr const auto rename = ::rename;
 
-// Rename original file. This is a "Windows-approved" way of modifying an open
-// executable or file.
-void win_switchroo(const char * f) {
+void hardlink_switchroo(const char * f) {
 #ifdef _WIN32
+  // Rename original file. This is a "Windows-approved" way of modifying an open
+  // executable or file.
   auto bkp = sim::sb { f } + ".bkp";
   remove(*bkp);
   rename(f, *bkp);
+#elif __APPLE__
+  // Apple's "hard-link" complains if the target file exist
+  remove(f);
 #endif
 }
 
@@ -68,7 +71,7 @@ void link(const char *src, const char *dst) {
   if (mtime::of(dst) >= mtime::of(src)) return;
   sys::log("hard-linking", dst);
 
-  win_switchroo(dst);
+  hardlink_switchroo(dst);
 
   auto msg = mct_syscall_link(src, dst);
   if (msg) die("error: ", msg);
