@@ -110,7 +110,7 @@ void run(const char * input, const char * output) {
   // place then do the appropriate renames.
 
   auto next = sim::sb { output } + ".new";
-  remove(*next);
+  sys::remove(*next);
   const char * exe = *next;
 #else
   const char * exe = output;
