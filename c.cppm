@@ -11,6 +11,7 @@ export namespace c {
   const auto strlen = ::strlen;
   const auto strncmp = ::strncmp;
 
-  // These have overloads in certain platforms
-  char * (*strchr)(const char *, int) = ::strchr;
+  // This have overloads in certain platforms (and they differ between
+  // platforms)
+  inline auto strchr(auto str, auto c) { return ::strchr(str, c); }
 }
