@@ -8,16 +8,8 @@ static void copy_exe(const sim::sb & exedir, const char * input) {
   sys::link(input, *path);
 }
 
-static void copy_xcfw(const sim::sb & exedir, const char * xcfw_path) {
-  if (!sys::is_tgt_apple()) die("Trying to install a xcframework on a non-apple target");
-
-  // TODO: introduce 'fdir' in dagger and move this out
-  sim::sb tgt = exedir;
-  if (!sys::is_tgt_ios()) tgt.path_parent();
-  tgt /= "Frameworks";
-  sys::mkdirs(*tgt);
-
-  tgt /= sim::path_filename(xcfw_path);
+static void copy_xcfw(const sim::sb & fdir, const char * xcfw_path) {
+  auto tgt = fdir / sim::path_filename(xcfw_path);
   if (mtime::of(*tgt)) return;
 
   sys::runf("rsync -rav %s %s", xcfw_path, *tgt);
@@ -34,7 +26,17 @@ static void copy_plugins(const sim::sb & exedir, const char * dag) {
 static void copy_libraries(const sim::sb & exedir, const char * dag) {
   sys::recurse_dag(dag, [&](auto dag, auto id, auto file) {
     if (id == 'dlls') return copy_exe(exedir, file);
-    if (id == 'xcfw') return copy_xcfw(exedir, file);
+  });
+}
+static void copy_frameworks(const char * dag) {
+  if (!sys::is_tgt_apple()) return;
+
+  sim::sb fdir = sys::read_dag_tag('fdir', dag); 
+  if (fdir == "") return;
+  sys::mkdirs(*fdir);
+
+  sys::recurse_dag(dag, [&](auto dag, auto id, auto file) {
+    if (id == 'xcfw') return copy_xcfw(fdir, file);
   });
 }
 
@@ -46,14 +48,10 @@ int main(int argc, char ** argv) try {
     if (edir == "") die("dag without executable directory");
     else sys::mkdirs(*edir);
 
-    sim::sb fdir = sys::read_dag_tag('fdir', dag); 
-    if (fdir != "") {
-      sys::mkdirs(*fdir);
-    }
-
     copy_exe(edir, file);
     copy_plugins(edir, dag);
     copy_libraries(edir, dag);
+    copy_frameworks(dag);
   });
 } catch (...) {
   return 1;
