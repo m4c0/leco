@@ -13,7 +13,7 @@ enum class exe_t {
   test,
 };
 
-static const char * dag_file_version = "2025-07-26";
+static const char * dag_file_version = "2025-10-19";
 
 static sim::sb source {};
 static sys::file * current_output;
@@ -281,6 +281,7 @@ static void output_root_tag() {
     if (sys::is_tgt_osx()) {
       path.path_extension("app");
       output('edir', *(path / "Contents/MacOS"));
+      output('fdir', *(path / "Contents/Frameworks"));
       output('rdir', *(path / "Contents/Resources"));
     } else if (sys::is_tgt_iphoneos()) {
       path.path_parent();
@@ -288,6 +289,7 @@ static void output_root_tag() {
       path /= source.path_filename();
       path.path_extension("app");
       output('edir', *path);
+      output('fdir', *(path / "Frameworks"));
       output('rdir', *path);
     } else {
       path.path_extension("app");
