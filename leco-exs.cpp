@@ -44,8 +44,12 @@ int main(int argc, char ** argv) try {
 
     sim::sb edir = sys::read_dag_tag('edir', dag); 
     if (edir == "") die("dag without executable directory");
+    else sys::mkdirs(*edir);
 
-    sys::mkdirs(*edir);
+    sim::sb fdir = sys::read_dag_tag('fdir', dag); 
+    if (fdir != "") {
+      sys::mkdirs(*fdir);
+    }
 
     copy_exe(edir, file);
     copy_plugins(edir, dag);
