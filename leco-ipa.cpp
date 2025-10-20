@@ -31,9 +31,6 @@ static void compile_launch(const char *bundle_path) {
             "--compile %s/Base.lproj/launch.storyboard",
             bundle_path);
 }
-static void code_sign(const char *bundle_path) {
-  sys::tool_run("codesign", "-d %s", bundle_path);
-}
 static void dump_symbols(const char * exe) {
   sys::log("dump symbols", exe);
 
@@ -51,7 +48,7 @@ static void gen_iphone_ipa(const char * dag) {
 
   plist::gen_info_plist(*app_path, dag, *out_path);
   compile_launch(*app_path);
-  code_sign(*app_path);
+  sys::tool_run("codesign", "-d %s", *app_path);
   dump_symbols(*exe);
 
   auto stem = sim::path_stem(dag);
