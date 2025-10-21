@@ -8,6 +8,7 @@ export namespace c {
   const auto atoi = ::atoi;
 
   const auto strcmp = ::strcmp;
+  const auto strdup = ::strdup;
   const auto strlen = ::strlen;
   const auto strncmp = ::strncmp;
 
