@@ -75,6 +75,8 @@ static void sign(const char * path) try {
 // TODO: make this tool independent (i.e. `leco codesign` without `-d`)
 // TODO: take framework signing logic from "exs" (after `fdir` is in dagger)
 int main(int argc, char ** argv) try {
+  if (!sys::is_tgt_apple()) return 0;
+
   const auto shift = [&] { return argc > 1 ? (argc--, *++argv) : nullptr; };
   while (auto val = shift()) {
     if ("-d"_s == val) sign(shift());
