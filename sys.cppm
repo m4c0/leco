@@ -92,18 +92,18 @@ using opt_env = hay<char *, mct_syscall_dupenv, free>;
 namespace envs {
   auto android_sdk_root() { return sys::env("ANDROID_SDK_ROOT"); }
 
-  auto ios_api_key() { return sys::env("LECO_IOS_API_KEY"); }
-  auto ios_api_issuer() { return sys::env("LECO_IOS_API_ISSUER"); }
+  auto ios_api_key()          { return sys::env("LECO_IOS_API_KEY");    }
+  auto ios_api_issuer()       { return sys::env("LECO_IOS_API_ISSUER"); }
   // Ad-hoc, development, app-store-connect
-  auto ios_method() { return sys::env("LECO_IOS_METHOD"); }
-  auto ios_prov_profile() { return sys::env("LECO_IOS_PROV_PROF"); }
-  auto ios_sign_id() { return sys::env("LECO_IOS_SIGN_ID"); }
+  auto ios_method()           { return sys::env("LECO_IOS_METHOD");     }
+  auto ios_prov_profile()     { return sys::env("LECO_IOS_PROV_PROF");  }
+  auto ios_sign_id()          { return sys::env("LECO_IOS_SIGN_ID");    }
   auto ios_simulator_target() { return sys::env("LECO_IOS_SIM_TARGET"); }
-  auto ios_team_id() { return sys::env("LECO_IOS_TEAM"); }
+  auto ios_team_id()          { return sys::env("LECO_IOS_TEAM");       }
 }
 namespace opt_envs {
   auto debug() { return opt_env("LECO_DEBUG"); }
-  auto opt() { return opt_env("LECO_OPT"); }
+  auto opt()   { return opt_env("LECO_OPT");   }
 
   auto wasi_sysroot() { return opt_env("WASI_SYSROOT"); }
 }
