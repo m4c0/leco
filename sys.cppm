@@ -5,7 +5,6 @@ module;
 #include "targets.hpp"
 
 #include <errno.h>
-#include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,15 +34,8 @@ inline void run(const char * cmd) {
   if (0 != system(cmd)) dief("command failed: %s", cmd);
 }
 
-__attribute__((format(printf, 1, 2))) inline void runf(const char * cmd, ...) {
-  char buf[10240] {};
-
-  va_list arg;
-  va_start(arg, cmd);
-  vsnprintf(buf, sizeof(buf), cmd, arg);
-  va_end(arg);
-
-  run(buf);
+inline void runf(const char * cmd, auto ... args) {
+  run(*sim::printf(cmd, args...));
 }
 
 inline void log(const char *verb, const char * msg) { errfn("%20s %s", verb, msg); }
