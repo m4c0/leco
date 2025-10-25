@@ -1,4 +1,5 @@
 module;
+#define _CRT_NONSTDC_NO_DEPRECATE
 #include <stdlib.h>
 #include <string.h>
 

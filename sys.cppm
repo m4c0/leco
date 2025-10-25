@@ -1,4 +1,5 @@
 module;
+#define _CRT_NONSTDC_NO_DEPRECATE
 #define MCT_SYSCALL_IMPLEMENTATION
 #include "../mct/mct-syscall.h"
 
