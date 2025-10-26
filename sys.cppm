@@ -10,11 +10,6 @@ module;
 #include <stdio.h>
 #include <string.h>
 
-#ifdef _WIN32
-#define WIN32_MEAN_AND_LEAN
-#include <windows.h>
-#endif
-
 #include <map>
 #include <set>
 #include <string>
