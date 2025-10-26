@@ -2,6 +2,8 @@
 
 import sys;
 
+using namespace c;
+
 static void usage() {
   die(R"(
 Cleans LECO build directories.
@@ -21,7 +23,7 @@ static void rm_rf(const char * p) {
     auto path = sim::sb { p } / entry;
     rm_rf(*path);
   }
-  sys::remove(p);
+  remove(p);
 }
 
 static sys::strset temp{};

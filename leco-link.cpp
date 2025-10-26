@@ -2,6 +2,8 @@
 
 import sys;
 
+using namespace c;
+
 static sys::mt g_mt {};
 
 static void mt_dtor(const char * out) {
@@ -9,7 +11,7 @@ static void mt_dtor(const char * out) {
   sys::hardlink_switchroo(out);
 
   auto new_f = sim::sb { out } + ".new";
-  sys::rename(*new_f, out);
+  rename(*new_f, out);
 #endif
 }
 
@@ -110,7 +112,7 @@ void run(const char * input, const char * output) {
   // place then do the appropriate renames.
 
   auto next = sim::sb { output } + ".new";
-  sys::remove(*next);
+  remove(*next);
   const char * exe = *next;
 #else
   const char * exe = output;

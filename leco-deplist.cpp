@@ -2,6 +2,8 @@
 
 import sys;
 
+using namespace c;
+
 // TODO: consider merging this with leco-clang
 // TODO: consider taking flag logic from leco-clang
 
@@ -41,8 +43,8 @@ void run(const char * parent) {
   try {
     run(parent, *depf, *incf);
   } catch (...) {
-    sys::remove(*depf);
-    sys::remove(*incf);
+    remove(*depf);
+    remove(*incf);
     throw;
   }
 }

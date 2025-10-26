@@ -485,10 +485,10 @@ static void check_and_run(const char * src, bool roots_only) {
     case run_result::OK:
       return;
     case run_result::ERR:
-      sys::remove(*dag);
+      remove(*dag);
       throw 0;
     case run_result::SKIPPED:
-      sys::remove(*dag);
+      remove(*dag);
       return;
   }
 }

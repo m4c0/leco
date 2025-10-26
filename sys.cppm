@@ -35,9 +35,6 @@ inline void runf(const char * cmd, auto ... args) {
 
 inline void log(const char *verb, const char * msg) { errfn("%20s %s", verb, msg); }
 
-constexpr const auto remove = ::remove;
-constexpr const auto rename = ::rename;
-
 void hardlink_switchroo(const char * f) {
 #ifdef _WIN32
   // Rename original file. This is a "Windows-approved" way of modifying an open
