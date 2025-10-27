@@ -58,6 +58,8 @@ void link(const char *src, const char *dst) {
   if (msg) die("error: ", msg);
 }
 
+using file = hay<FILE *, &c::fopen, &c::fclose>;
+
 //////////////////////////////////////////////////////////////////////////////
 // Environment variables. Grabbing them all here for documentation purposes //
 //////////////////////////////////////////////////////////////////////////////
@@ -122,15 +124,6 @@ void mkdirs(const char *path) {
 
   mct_syscall_mkdir(path);
 }
-
-using file = hay<
-  FILE *, 
-  [](const char * name, const char * mode) {
-    FILE * res = mct_syscall_fopen(name, mode);
-    if (res == nullptr) die("could not open file: ", name);
-    return res;
-  },
-  ::fclose>;
 
 void dag_read(const char *dag, auto &&fn) try {
   file f { dag, "r" };
