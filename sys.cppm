@@ -5,11 +5,6 @@ module;
 
 #include "targets.hpp"
 
-#include <errno.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-
 #include <map>
 #include <set>
 #include <string>
