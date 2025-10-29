@@ -108,7 +108,12 @@ public:
   [[nodiscard]] auto begin() { return m_data.begin(); }
   [[nodiscard]] auto end() { return m_data.end(); }
 };
-using strmap = std::map<std::string, uint64_t>;
+class strmap {
+  std::map<std::string, uint64_t> m_data {};
+
+public:
+  auto & operator[](std::string key) { return m_data[key]; }
+};
 
 void mkdirs(const char *path) {
   if (0 == mct_syscall_mkdir(path)) return;
