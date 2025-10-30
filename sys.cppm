@@ -275,6 +275,11 @@ class mt {
     if (i == 8) {
       // TODO: "drain" buffers otherwise we might deadlock
       auto res = p::wait_any(m_hs, &i);
+      if (res == -1) {
+        errln("could not wait for child process");
+        // Try again, worst case we crash on infinite recursion
+        return reserve();
+      }
       drain(m_cs + i, res);
     }
 
