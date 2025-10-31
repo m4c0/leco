@@ -268,7 +268,7 @@ class mt {
     (c->dtor)(*(c->out));
   }
 
-  [[nodiscard]] auto reserve() {
+  [[nodiscard]] int reserve() {
     int i {};
     for (i = 0; i < 8; i++) if (m_hs[i] == nullptr) break;
 
