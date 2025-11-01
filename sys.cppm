@@ -89,10 +89,14 @@ namespace opt_envs {
   auto wasi_sysroot() { return opt_env("WASI_SYSROOT"); }
 }
 
-auto target() { 
-  auto e = mct_syscall_dupenv("LECO_TARGET");
-  return hay<char *, nullptr, free> { e ? e : strdup(HOST_TARGET) };
-}
+using target_env = hay<
+  char *,
+  [] {
+    auto e = mct_syscall_dupenv("LECO_TARGET");
+    return e ? e : strdup(HOST_TARGET);
+  },
+  free>;
+auto target() { return target_env {}; }
 
 ////////////////////////////////////////////////////////////////////////////
 
