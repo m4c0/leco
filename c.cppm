@@ -8,9 +8,17 @@ module;
 export module c;
 
 export namespace c {
+  constexpr const auto seek_set = SEEK_SET;
+  constexpr const auto seek_end = SEEK_END;
+
   const auto atoi = ::atoi;
   const auto fclose = ::fclose;
   const auto fopen = ::fopen;
+  const auto fread = ::fread;
+  const auto free = ::free;
+  const auto fseek = ::fseek;
+  const auto ftell = ::ftell;
+  const auto malloc = ::malloc;
   const auto remove = ::remove;
   const auto rename = ::rename;
   const auto strcmp = ::strcmp;
