@@ -10,7 +10,7 @@ import sys;
 // 
 // Requires DAGs created via leco-dagger.
 
-static glen::parser parser { glen::lang::glsl };
+static glen::parser parser { tree_sitter_glsl };
 
 static bool must_recompile(const char * file, auto spv_time) {
   if (spv_time < mtime::of(file)) return true;
