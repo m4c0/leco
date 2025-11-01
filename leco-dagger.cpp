@@ -1,5 +1,6 @@
 #pragma leco tool
 
+import glen;
 import sys;
 
 using namespace c;
@@ -386,6 +387,8 @@ static bool pragma(const char * p) {
 
 enum run_result { OK, ERR, SKIPPED };
 [[nodiscard]] static run_result run(const char * dag, const char * src, bool roots_only) try {
+  glen::parser p { tree_sitter_cpp };
+
   auto ext = sim::path_extension(src);
   auto mode = "c++";
   if      (ext == ".c" ) mode = "c";

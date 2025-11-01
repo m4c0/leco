@@ -33,13 +33,13 @@
 #define MODULE(name, ...) MKOUT(name); run(CLANG " .." SEP name SEP name ".cppm -o " PCM(name) PCMFL __VA_ARGS__);
 #define LOCAL_MODULE(name, ...) run(CLANG " " name ".cppm -o " LPCM(name) PCMFL PMP __VA_ARGS__);
 
-#define TOOL(name)                                                    \
+#define TOOL(name, ...)                                               \
   puts("Building " name);                                             \
   run(CLANG " leco-" name ".cpp "                                     \
             " -o out/" HOST_TARGET "/leco-" name ".exe " CPPSTD       \
             MARG("hay") MARG("mtime") MARG("no") MARG("popen")        \
             MARG("pprent") MARG("print") MARG("sysstd")               \
-            LMARG("c") LMARG("sim") LMARG("sys"))
+            LMARG("c") LMARG("sim") LMARG("sys") __VA_ARGS__)
 
 static void run(const char * cmd) {
   if (0 == system(cmd)) return;
@@ -52,6 +52,7 @@ int try_main() {
 
   puts("Building core modules");
   MODULE("hay");
+  MODULE("glen", PARG("hay"));
   MODULE("mtime");
   MODULE("no");
   MODULE("popen", PARG("no"));
@@ -62,8 +63,16 @@ int try_main() {
   LOCAL_MODULE("sim");
   LOCAL_MODULE("sys", PARG("hay") PARG("mtime") PARG("no") PARG("popen") PARG("print") PARG("pprent") PARG("sysstd"));
 
+  puts("Building tree-sitter");
+  run(CLANG " -x c -I ../glen/tree-sitter/lib/include -c ../glen/tree-sitter/lib/src/lib.c -o out/" HOST_TARGET "/tree-sitter-lib.o");
+  run(CLANG " -x c -I ../glen/tree-sitter/lib/include -c ../glen/tree-sitter-cpp/src/parser.c -o out/" HOST_TARGET "/tree-sitter-cpp-parser.o");
+  run(CLANG " -x c -I ../glen/tree-sitter/lib/include -c ../glen/tree-sitter-cpp/src/scanner.c -o out/" HOST_TARGET "/tree-sitter-cpp-scanner.o");
+
   TOOL("clang");
-  TOOL("dagger");
+  TOOL("dagger", MARG("glen")
+      " out/" HOST_TARGET "/tree-sitter-lib.o"
+      " out/" HOST_TARGET "/tree-sitter-cpp-parser.o"
+      " out/" HOST_TARGET "/tree-sitter-cpp-scanner.o");
   TOOL("deplist");
   TOOL("link");
   TOOL("obj");
