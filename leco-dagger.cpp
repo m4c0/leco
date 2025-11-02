@@ -349,7 +349,7 @@ static bool check_app() {
   return true;
 }
 static bool pragma(const char * p) {
-  p = cmp(p, "leco ");
+  p = cmp(p, "#pragma leco ");
   if (!p) return false;
 
   if (add_pragma(p, "dll",          'dlls'))             return true;
@@ -385,20 +385,9 @@ static bool pragma(const char * p) {
   error(*buf);
 }
 
-static auto slurp(const char * src) {
-  sys::file f { src, "rb" };
-  fseek(f, 0, seek_end);
-  sim::sb data { static_cast<unsigned>(ftell(f)), true };
-  fseek(f, 0, seek_set);
-  fread(data.begin(), data.size(), 1, f);
-  return data;
-}
-
 enum run_result { OK, ERR, SKIPPED };
 [[nodiscard]] static run_result run(const char * dag, const char * src, bool roots_only) try {
   glen::parser p { tree_sitter_cpp };
-  auto src_data = slurp(src);
-  auto t = p.parse(src_data);
 
   auto ext = sim::path_extension(src);
   auto mode = "c++";
@@ -415,20 +404,12 @@ enum run_result { OK, ERR, SKIPPED };
   exe_type = {};
   mod_name = {};
 
-  t.for_each_match(R"(
-    (preproc_call directive: (_) @d argument: (_) @a)
-  )"_s, [src=src_data.begin()](auto & m) {
-    auto s = ts_node_start_byte(m.captures[1].node);
-    auto e = ts_node_end_byte(m.captures[1].node);
-    pragma(*sim::printf("%.*s\0", e - s, src + s));
-  });
-
   while (proc.gets()) {
     const char *p = proc.last_line_read();
     while (*p == ' ') p++;
     line++;
 
-    if (cmp(p, "#pragma ")) continue;
+    if (pragma(p)) continue;
 
     if (auto pp = cmp(p, "# ")) {
       // # <line> "<file>" <flags>...

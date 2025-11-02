@@ -7,13 +7,8 @@ export module sim;
 
 export namespace sim {
   struct sb : sim_sb {
-    sb() : sb { 102400 } {}
+    sb() { sim_sb_new(this, 102400); }
     ~sb() { if (buffer) sim_sb_delete(this); }
-
-    sb(unsigned sz, bool full = false) {
-      sim_sb_new(this, sz);
-      if (full) len = sim_sb::size;
-    }
 
     sb(const sb & o) : sb() { sim_sb_copy(this, o.buffer); }
     sb(sb && o) : sim_sb { o } { static_cast<sim_sb &>(o) = {}; }
