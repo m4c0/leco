@@ -60,7 +60,7 @@ int main(int argc, char **argv) try {
 
   const auto shift = [&] { return argc > 1 ? (argc--, *++argv) : nullptr; };
   while (auto val = shift()) {
-    if (val == "a"_s) all = true;
+    if (val == "-a"_s) all = true;
     else usage();
   }
 
