@@ -531,7 +531,7 @@ int main(int argc, char **argv) try {
     auto ext = sim::path_extension(file);
     if (!ext.len) continue;
 
-    if (ext != ".cppm" && ext != ".cpp" && ext != ".c") continue;
+    if (ext != ".cppm" && ext != ".cpp" && ext != ".c" && ext != ".m" && ext != ".mm") continue;
 
     check_and_run(*sim::path_real(file), true);
   }
