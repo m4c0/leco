@@ -418,12 +418,8 @@ enum run_result { OK, ERR, SKIPPED };
   t.for_each_match(R"(
     (preproc_call directive: (_) @d argument: (_) @a)
   )"_s, [src=src_data.begin()](auto & m) {
-    auto s = ts_node_start_byte(m.captures[0].node);
-    auto e = ts_node_end_byte(m.captures[0].node);
-    if (sim::printf("%.*s", e - s, src + s) != "#pragma") return;
-
-    s = ts_node_start_byte(m.captures[1].node);
-    e = ts_node_end_byte(m.captures[1].node);
+    auto s = ts_node_start_byte(m.captures[1].node);
+    auto e = ts_node_end_byte(m.captures[1].node);
     pragma(*sim::printf("%.*s\0", e - s, src + s));
   });
 
