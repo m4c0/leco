@@ -117,6 +117,31 @@ bool is_tgt_droid() {
 bool is_tgt_ios()   { return is_tgt_iphoneos() || is_tgt_ios_sim(); }
 bool is_tgt_apple() { return is_tgt_osx()      || is_tgt_ios();     }
 
+void for_each_target_def(auto && fn) {
+  if (is_tgt_windows()) {
+    fn("LECO_TARGET_WINDOWS");
+  } else if (is_tgt_linux()) {
+    fn("LECO_TARGET_LINUX");
+  } else if (is_tgt_osx()) {
+    fn("LECO_TARGET_MACOSX");
+    fn("LECO_TARGET_APPLE");
+  } else if (is_tgt_iphoneos()) {
+    fn("LECO_TARGET_IPHONEOS");
+    fn("LECO_TARGET_IOS");
+    fn("LECO_TARGET_APPLE");
+  } else if (is_tgt_ios_sim()) {
+    fn("LECO_TARGET_IPHONESIMULATOR");
+    fn("LECO_TARGET_IOS");
+    fn("LECO_TARGET_APPLE");
+  } else if (is_tgt_droid()) {
+    fn("LECO_TARGET_ANDROID");
+  } else if (is_tgt_wasm()) {
+    fn("LECO_TARGET_WASM");
+  } else {
+    die("invalid target: ", (const char *)target());
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////
 
 class strset {
