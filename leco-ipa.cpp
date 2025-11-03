@@ -4,7 +4,6 @@
 
 import jute;
 import plist;
-import popen;
 import sys;
 
 void usage() {
