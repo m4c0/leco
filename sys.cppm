@@ -98,6 +98,25 @@ using target_env = hay<
   free>;
 auto target() { return target_env {}; }
 
+bool is_debug() { return static_cast<const char *>(opt_envs::debug()); }
+bool is_opt()   { return static_cast<const char *>(opt_envs::opt());   }
+
+constexpr const char * host_target = HOST_TARGET;
+bool is_tgt(const char * x) { return 0 == strcmp(target(), x); }
+bool is_tgt_host()     { return is_tgt(HOST_TARGET); }
+bool is_tgt_linux()    { return is_tgt(TGT_LINUX); }
+bool is_tgt_wasm()     { return is_tgt(TGT_WASM); }
+bool is_tgt_windows()  { return is_tgt(TGT_WINDOWS); }
+bool is_tgt_iphoneos() { return is_tgt(TGT_IPHONEOS); }
+bool is_tgt_ios_sim()  { return is_tgt(TGT_IOS_SIMULATOR); }
+bool is_tgt_osx()      { return is_tgt(TGT_OSX); }
+bool is_tgt_droid() {
+  return is_tgt(TGT_DROID_AARCH64) || is_tgt(TGT_DROID_ARMV7)
+      || is_tgt(TGT_DROID_X86)     || is_tgt(TGT_DROID_X86_64);
+}
+bool is_tgt_ios()   { return is_tgt_iphoneos() || is_tgt_ios_sim(); }
+bool is_tgt_apple() { return is_tgt_osx()      || is_tgt_ios();     }
+
 ////////////////////////////////////////////////////////////////////////////
 
 class strset {
@@ -223,25 +242,6 @@ void opt_tool_run(const char * name, auto &&... as) {
   if (mtime::of(*tool_cmd(name)) == 0) return;
   tool_run(name, as...);
 }
-
-bool is_debug() { return static_cast<const char *>(opt_envs::debug()); }
-bool is_opt()   { return static_cast<const char *>(opt_envs::opt());   }
-
-constexpr const char * host_target = HOST_TARGET;
-bool is_tgt(const char * x) { return 0 == strcmp(target(), x); }
-bool is_tgt_host()     { return is_tgt(HOST_TARGET); }
-bool is_tgt_linux()    { return is_tgt(TGT_LINUX); }
-bool is_tgt_wasm()     { return is_tgt(TGT_WASM); }
-bool is_tgt_windows()  { return is_tgt(TGT_WINDOWS); }
-bool is_tgt_iphoneos() { return is_tgt(TGT_IPHONEOS); }
-bool is_tgt_ios_sim()  { return is_tgt(TGT_IOS_SIMULATOR); }
-bool is_tgt_osx()      { return is_tgt(TGT_OSX); }
-bool is_tgt_droid() {
-  return is_tgt(TGT_DROID_AARCH64) || is_tgt(TGT_DROID_ARMV7)
-      || is_tgt(TGT_DROID_X86)     || is_tgt(TGT_DROID_X86_64);
-}
-bool is_tgt_ios()   { return is_tgt_iphoneos() || is_tgt_ios_sim(); }
-bool is_tgt_apple() { return is_tgt_osx()      || is_tgt_ios();     }
 
 #undef min
 constexpr auto min(auto a, auto b) { return a > b ? b : a; }
