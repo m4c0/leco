@@ -52,7 +52,6 @@ int try_main() {
 
   puts("Building core modules");
   MODULE("hay");
-  MODULE("glen", PARG("hay"));
   MODULE("mtime");
   MODULE("no");
   MODULE("popen", PARG("no"));
@@ -64,10 +63,7 @@ int try_main() {
   LOCAL_MODULE("sys", PARG("hay") PARG("mtime") PARG("no") PARG("popen") PARG("print") PARG("pprent") PARG("sysstd"));
 
   TOOL("clang");
-  TOOL("dagger", MARG("glen")
-      " out/" HOST_TARGET "/tree-sitter-lib.o"
-      " out/" HOST_TARGET "/tree-sitter-cpp-parser.o"
-      " out/" HOST_TARGET "/tree-sitter-cpp-scanner.o");
+  TOOL("dagger");
   TOOL("deplist");
   TOOL("link");
   TOOL("obj");
