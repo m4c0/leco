@@ -44,8 +44,8 @@ static void output(unsigned code, const char *msg) {
 }
 
 static const char *cmp(const char *str, const char *prefix) {
+  if (!sv::unsafe(str).starts_with(sv::unsafe(prefix))) return nullptr;
   auto len = strlen(prefix);
-  if (strncmp(str, prefix, len) != 0) return nullptr;
   return str + len;
 }
 static const char * cmp(const char * str, auto ... prefixes) {

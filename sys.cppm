@@ -18,6 +18,7 @@ export import popen;
 export import print;
 export import pprent;
 export import sim;
+export import sv;
 
 export namespace sys {
 inline void run(const char * cmd) {

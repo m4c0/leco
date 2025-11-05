@@ -38,7 +38,7 @@
   run(CLANG " leco-" name ".cpp "                                     \
             " -o out/" HOST_TARGET "/leco-" name ".exe " CPPSTD       \
             MARG("hay") MARG("mtime") MARG("no") MARG("popen")        \
-            MARG("pprent") MARG("print") MARG("sysstd")               \
+            MARG("pprent") MARG("print") MARG("sv") MARG("sysstd")    \
             LMARG("c") LMARG("sim") LMARG("sys") __VA_ARGS__)
 
 static void run(const char * cmd) {
@@ -57,10 +57,11 @@ int try_main() {
   MODULE("popen", PARG("no"));
   MODULE("pprent");
   MODULE("print");
+  MODULE("sv");
   MODULE("sysstd");
   LOCAL_MODULE("c");
   LOCAL_MODULE("sim");
-  LOCAL_MODULE("sys", PARG("hay") PARG("mtime") PARG("no") PARG("popen") PARG("print") PARG("pprent") PARG("sysstd"));
+  LOCAL_MODULE("sys", PARG("hay") PARG("mtime") PARG("no") PARG("popen") PARG("print") PARG("pprent") PARG("sv") PARG("sysstd"));
 
   TOOL("clang");
   TOOL("dagger");
