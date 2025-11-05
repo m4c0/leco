@@ -63,11 +63,6 @@ int try_main() {
   LOCAL_MODULE("sim");
   LOCAL_MODULE("sys", PARG("hay") PARG("mtime") PARG("no") PARG("popen") PARG("print") PARG("pprent") PARG("sysstd"));
 
-  puts("Building tree-sitter");
-  run(CLANG " -x c -I ../glen/tree-sitter/lib/include -c ../glen/tree-sitter/lib/src/lib.c -o out/" HOST_TARGET "/tree-sitter-lib.o");
-  run(CLANG " -x c -I ../glen/tree-sitter/lib/include -c ../glen/tree-sitter-cpp/src/parser.c -o out/" HOST_TARGET "/tree-sitter-cpp-parser.o");
-  run(CLANG " -x c -I ../glen/tree-sitter/lib/include -c ../glen/tree-sitter-cpp/src/scanner.c -o out/" HOST_TARGET "/tree-sitter-cpp-scanner.o");
-
   TOOL("clang");
   TOOL("dagger", MARG("glen")
       " out/" HOST_TARGET "/tree-sitter-lib.o"
