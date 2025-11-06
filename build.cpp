@@ -1,6 +1,8 @@
 #define MCT_STAT_IMPLEMENTATION
 #define MCT_SYSCALL_IMPLEMENTATION
+#define SIM_IMPLEMENTATION
 #define SYSSTD_IMPLEMENTATION
+#include "sim.h"
 #include "targets.hpp"
 #include "../mct/mct-stat.h"
 #include "../mct/mct-syscall.h"
@@ -14,10 +16,6 @@
 #define SEP "/"
 #endif
 
-#define MKOUT(name) \
-  mct_syscall_mkdir(".." SEP name SEP "out"); \
-  mct_syscall_mkdir(".." SEP name SEP "out" SEP HOST_TARGET);
-
 #define CLANG CLANG_CMD
 
 #define CPPSTD " -std=c++2c"
@@ -30,7 +28,7 @@
 #define MARG(name) PARG(name) " " PCM(name)
 #define LMARG(name) " -fmodule-file=" name "=" LPCM(name) " " LPCM(name)
 
-#define MODULE(name, ...) MKOUT(name); run(CLANG " .." SEP name SEP name ".cppm -o " PCM(name) PCMFL __VA_ARGS__);
+#define MODULE(name, ...) mkout(name); run(CLANG " .." SEP name SEP name ".cppm -o " PCM(name) PCMFL __VA_ARGS__);
 #define LOCAL_MODULE(name, ...) run(CLANG " " name ".cppm -o " LPCM(name) PCMFL PMP __VA_ARGS__);
 
 #define TOOL(name, ...)                                               \
@@ -47,8 +45,22 @@ static void run(const char * cmd) {
   throw 0;
 }
 
+static void mkout(const char * name) {
+  sim_sb sb {};
+  sim_sb_new(&sb, 102400);
+
+  sim_sb_path_copy_append(&sb, "..", name);
+  sim_sb_path_append(&sb, "out");
+  mct_syscall_mkdir(sb.buffer);
+
+  sim_sb_path_append(&sb, HOST_TARGET);
+  mct_syscall_mkdir(sb.buffer);
+
+  sim_sb_delete(&sb);
+}
+
 int try_main() {
-  MKOUT("leco");
+  mkout("leco");
 
   puts("Building core modules");
   MODULE("hay");
