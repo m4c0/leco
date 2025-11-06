@@ -28,9 +28,6 @@
 #define MARG(name) PARG(name) " " PCM(name)
 #define LMARG(name) " -fmodule-file=" name "=" LPCM(name) " " LPCM(name)
 
-#define MODULE(name, ...) mkout(name); run(CLANG " .." SEP name SEP name ".cppm -o " PCM(name) PCMFL __VA_ARGS__);
-#define LOCAL_MODULE(name, ...) run(CLANG " " name ".cppm -o " LPCM(name) PCMFL PMP __VA_ARGS__);
-
 #define TOOL(name, ...)                                               \
   puts("Building " name);                                             \
   run(CLANG " leco-" name ".cpp "                                     \
@@ -83,10 +80,21 @@ static void do_module(const char * name) {
   sim_sb_printf(&module_args, " -fmodule-file=%s=%s", name, mod_sb.buffer);
 }
 
+static void local_module(const char * name) {
+  static auto sb = sb_alloc();
+  sim_sb_copy(&sb, CLANG " ");
+  sim_sb_printf(&sb, "%s.cppm -o out", name);
+  sim_sb_path_append(&sb, HOST_TARGET);
+  sim_sb_path_append(&sb, name);
+  sim_sb_concat(&sb, ".pcm " PCMFL PMP " ");
+  sim_sb_concat(&sb, module_args.buffer);
+  run(sb.buffer);
+}
+
 int try_main() {
   mkout("leco");
 
-  puts("Building core modules");
+  puts("Building dependencies");
   do_module("hay");
   do_module("mtime");
   do_module("no");
@@ -95,27 +103,20 @@ int try_main() {
   do_module("print");
   do_module("sv");
   do_module("sysstd");
-  LOCAL_MODULE("c");
-  LOCAL_MODULE("sim");
-  LOCAL_MODULE("sys",
-      PARG("hay")
-      PARG("mtime")
-      PARG("no")
-      PARG("popen")
-      PARG("print")
-      PARG("pprent")
-      PARG("sv")
-      PARG("sysstd"));
+
+  puts("Building core modules");
+  local_module("c");
+  local_module("sim");
+  local_module("sys");
 
   TOOL("clang");
   TOOL("dagger");
   TOOL("deplist");
+  TOOL("driver");
   TOOL("link");
   TOOL("obj");
   TOOL("pcm");
   TOOL("pcm2obj");
-
-  TOOL("driver");
 
   puts("Self-hosted build of final stage");
   run("." SEP "out" SEP HOST_TARGET SEP "leco-driver.exe");
