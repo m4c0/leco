@@ -39,6 +39,14 @@
             MARG("pprent") MARG("print") MARG("sv") MARG("sysstd")    \
             LMARG("c") LMARG("sim") LMARG("sys") __VA_ARGS__)
 
+static auto sb_alloc() {
+  sim_sb sb {};
+  sim_sb_new(&sb, 102400);
+  return sb;
+}
+
+static auto module_args = sb_alloc();
+
 static void run(const char * cmd) {
   if (0 == system(cmd)) return;
   fprintf(stderr, "command failed: %s\n", cmd);
@@ -46,8 +54,7 @@ static void run(const char * cmd) {
 }
 
 static void mkout(const char * name) {
-  sim_sb sb {};
-  sim_sb_new(&sb, 102400);
+  static auto sb = sb_alloc();
 
   sim_sb_path_copy_append(&sb, "..", name);
   sim_sb_path_append(&sb, "out");
@@ -55,22 +62,39 @@ static void mkout(const char * name) {
 
   sim_sb_path_append(&sb, HOST_TARGET);
   mct_syscall_mkdir(sb.buffer);
+}
 
-  sim_sb_delete(&sb);
+static void do_module(const char * name) {
+  mkout(name);
+
+  static auto mod_sb = sb_alloc();
+  sim_sb_path_copy_append(&mod_sb, "..", name);
+  sim_sb_path_append(&mod_sb, "out");
+  sim_sb_path_append(&mod_sb, HOST_TARGET);
+  sim_sb_path_append(&mod_sb, name);
+  sim_sb_concat(&mod_sb, ".pcm");
+
+  static auto sb = sb_alloc();
+  sim_sb_path_copy_append(&sb, CLANG " " PCMFL " ..", name);
+  sim_sb_path_append(&sb, name);
+  sim_sb_printf(&sb, ".cppm -o %s %s", mod_sb.buffer, module_args.buffer);
+  run(sb.buffer);
+
+  sim_sb_printf(&module_args, " -fmodule-file=%s=%s", name, mod_sb.buffer);
 }
 
 int try_main() {
   mkout("leco");
 
   puts("Building core modules");
-  MODULE("hay");
-  MODULE("mtime");
-  MODULE("no");
-  MODULE("popen", PARG("no"));
-  MODULE("pprent");
-  MODULE("print");
-  MODULE("sv");
-  MODULE("sysstd");
+  do_module("hay");
+  do_module("mtime");
+  do_module("no");
+  do_module("popen");
+  do_module("pprent");
+  do_module("print");
+  do_module("sv");
+  do_module("sysstd");
   LOCAL_MODULE("c");
   LOCAL_MODULE("sim");
   LOCAL_MODULE("sys",
