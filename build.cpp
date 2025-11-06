@@ -61,7 +61,15 @@ int try_main() {
   MODULE("sysstd");
   LOCAL_MODULE("c");
   LOCAL_MODULE("sim");
-  LOCAL_MODULE("sys", PARG("hay") PARG("mtime") PARG("no") PARG("popen") PARG("print") PARG("pprent") PARG("sv") PARG("sysstd"));
+  LOCAL_MODULE("sys",
+      PARG("hay")
+      PARG("mtime")
+      PARG("no")
+      PARG("popen")
+      PARG("print")
+      PARG("pprent")
+      PARG("sv")
+      PARG("sysstd"));
 
   TOOL("clang");
   TOOL("dagger");
