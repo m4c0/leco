@@ -22,26 +22,13 @@
 #define PCMFL " --precompile" CPPSTD
 #define PMP " -fprebuilt-module-path=out" SEP HOST_TARGET
 
-#define PCM(name) ".." SEP name SEP "out" SEP HOST_TARGET SEP name ".pcm"
-#define LPCM(name) "out" SEP HOST_TARGET SEP name ".pcm"
-#define PARG(name) " -fmodule-file=" name "=" PCM(name)
-#define MARG(name) PARG(name) " " PCM(name)
-#define LMARG(name) " -fmodule-file=" name "=" LPCM(name) " " LPCM(name)
-
-#define TOOL(name, ...)                                               \
-  puts("Building " name);                                             \
-  run(CLANG " leco-" name ".cpp "                                     \
-            " -o out/" HOST_TARGET "/leco-" name ".exe " CPPSTD       \
-            MARG("hay") MARG("mtime") MARG("no") MARG("popen")        \
-            MARG("pprent") MARG("print") MARG("sv") MARG("sysstd")    \
-            LMARG("c") LMARG("sim") LMARG("sys") __VA_ARGS__)
-
 static auto sb_alloc() {
   sim_sb sb {};
   sim_sb_new(&sb, 102400);
   return sb;
 }
 
+static auto object_args = sb_alloc();
 static auto module_args = sb_alloc();
 
 static void run(const char * cmd) {
@@ -65,29 +52,39 @@ static void do_module(const char * name) {
   mkout(name);
 
   static auto mod_sb = sb_alloc();
-  sim_sb_path_copy_append(&mod_sb, "..", name);
-  sim_sb_path_append(&mod_sb, "out");
-  sim_sb_path_append(&mod_sb, HOST_TARGET);
-  sim_sb_path_append(&mod_sb, name);
-  sim_sb_concat(&mod_sb, ".pcm");
+  sim_sb_copy(&mod_sb, "");
+  sim_sb_printf(&mod_sb, "../%s/out/" HOST_TARGET "/%s.pcm", name, name);
 
   static auto sb = sb_alloc();
-  sim_sb_path_copy_append(&sb, CLANG " " PCMFL " ..", name);
-  sim_sb_path_append(&sb, name);
-  sim_sb_printf(&sb, ".cppm -o %s %s", mod_sb.buffer, module_args.buffer);
+  sim_sb_copy(&sb, "");
+  sim_sb_printf(&sb,
+      CLANG " " PCMFL " ../%s/%s.cppm -o %s %s",
+      name, name, mod_sb.buffer, module_args.buffer);
   run(sb.buffer);
 
   sim_sb_printf(&module_args, " -fmodule-file=%s=%s", name, mod_sb.buffer);
+  sim_sb_printf(&object_args, " %s", mod_sb.buffer);
 }
 
 static void local_module(const char * name) {
   static auto sb = sb_alloc();
-  sim_sb_copy(&sb, CLANG " ");
-  sim_sb_printf(&sb, "%s.cppm -o out", name);
-  sim_sb_path_append(&sb, HOST_TARGET);
-  sim_sb_path_append(&sb, name);
-  sim_sb_concat(&sb, ".pcm " PCMFL PMP " ");
-  sim_sb_concat(&sb, module_args.buffer);
+  sim_sb_copy(&sb, "");
+  sim_sb_printf(&sb,
+      CLANG PCMFL PMP " %s.cppm -o out/" HOST_TARGET "/%s.pcm %s",
+      name, name, module_args.buffer);
+  run(sb.buffer);
+
+  sim_sb_printf(&object_args, " out/" HOST_TARGET "/%s.pcm", name);
+}
+
+static void tool(const char * name) {
+  printf("Building %s\n", name);
+
+  static auto sb = sb_alloc();
+  sim_sb_copy(&sb, "");
+  sim_sb_printf(&sb,
+      CLANG " leco-%s.cpp -o out/" HOST_TARGET "/leco-%s.exe" PMP CPPSTD " %s %s",
+      name, name, module_args.buffer, object_args.buffer);
   run(sb.buffer);
 }
 
@@ -109,14 +106,14 @@ int try_main() {
   local_module("sim");
   local_module("sys");
 
-  TOOL("clang");
-  TOOL("dagger");
-  TOOL("deplist");
-  TOOL("driver");
-  TOOL("link");
-  TOOL("obj");
-  TOOL("pcm");
-  TOOL("pcm2obj");
+  tool("clang");
+  tool("dagger");
+  tool("deplist");
+  tool("driver");
+  tool("link");
+  tool("obj");
+  tool("pcm");
+  tool("pcm2obj");
 
   puts("Self-hosted build of final stage");
   run("." SEP "out" SEP HOST_TARGET SEP "leco-driver.exe");
