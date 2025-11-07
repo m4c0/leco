@@ -33,6 +33,10 @@ export namespace sim {
 
     char & operator[](unsigned idx) { return buffer[idx]; }
 
+    sb & operator+=(auto str) {
+      sim_sb_printf(this, "%.*s", static_cast<unsigned>(str.size()), str.begin());
+      return *this;
+    }
     sb & operator+=(const char * s) {
       sim_sb_concat(this, s);
       return *this;

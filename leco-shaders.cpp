@@ -1,6 +1,7 @@
 #pragma leco tool
 
-import glen;
+import c42;
+import hai;
 import jojo;
 import jute;
 import popen;
@@ -10,39 +11,60 @@ import sys;
 // 
 // Requires DAGs created via leco-dagger.
 
-static glen::parser parser { tree_sitter_glsl };
+using namespace c;
 
-static bool must_recompile(const char * file, auto spv_time) {
-  if (spv_time < mtime::of(file)) return true;
-
-  bool result = false;
-  auto src = jojo::read_cstr(jute::view::unsafe(file));
-  parser.parse(src).for_each_capture(jute::view { R"(
-    (preproc_include (string_literal (string_content) @inc))
-  )" }, [&](auto & n) {
-    auto s = ts_node_start_byte(n);
-    auto e = ts_node_end_byte(n);
-    auto path = jute::view { src.begin() + s, e - s }.cstr();
-    if (!mtime::of(path.begin())) {
-      auto [l, c] = ts_node_start_point(n);
-      dief("%s:%d:%d: include file not found", file, l, c);
-    }
-    if (must_recompile(path.begin(), spv_time)) result = true;
-  });
-
-  return result;
-}
 static void build_shader(const char * dag, const char * file) {
   auto out = sim::path_parent(dag) / sim::path_filename(file) + ".spv";
-  if (!must_recompile(file, mtime::of(*out))) return;
+  auto spv_time = mtime::of(*out);
+  bool stale = mtime::of(file) > spv_time;
+
+  auto fsv = sv::unsafe(file);
+  auto stem = fsv.rsplit('.').after;
+
+  const char * argv[1024] {};
+  int argc = 0;
+
+  argv[argc++] = "glslangValidator";
+  argv[argc++] = "--target-env";
+  argv[argc++] = "spirv1.3";
+  argv[argc++] = "-V";
+  argv[argc++] = "-S";
+  argv[argc++] = stem.begin();
+  argv[argc++] = "-e";
+  argv[argc++] = "main";
+  argv[argc++] = "-o";
+  argv[argc++] = *out;
+  argv[argc++] = file;
+
+  struct : c42::defines {
+    bool has(sv name) const override { return false; }
+  } d {};
+  auto src = jojo::read_cstr(fsv);
+  auto ctx = c42::preprocess(&d, src);
+  for (auto t : ctx) {
+    switch (t.type) {
+      case c42::t_pragma: {
+        auto [l, r] = ctx.txt(t).split(' ');
+        if (l != "leco") continue;
+
+        auto [cmd, param] = r.trim().split(' ');
+        if (cmd == "include") {
+          auto file = param.trim().split('"').after.split('"').before;
+          argv[argc++] = strndup(file.begin(), file.size());
+          stale |= mtime::of(hai::cstr{file}.begin()) > spv_time;
+        }
+        break;
+      }
+      default: break;
+    }
+  }
+  if (!stale) return;
 
   sys::log("compiling shader", file);
-  p::proc p { "glslangValidator", "--target-env", "spirv1.3", "-V", "-o", *out, file };
+  p::proc p { argc, static_cast<const char * const *>(argv) };
 
   while (p.gets()) {
     auto line = jute::view::unsafe(p.last_line_read());
-    // glslangValidator always output the file name, for reasons
-    if (line == jute::view::unsafe(file)) continue;
     if (line.starts_with("ERROR: ")) {
       if (line[7] == '/') line = line.subview(7).after;
       else if (line[8] == ':') line = line.subview(7).after;
