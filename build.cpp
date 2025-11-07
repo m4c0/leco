@@ -10,17 +10,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef _WIN32
-#define SEP "\\"
-#else
-#define SEP "/"
-#endif
+#define SEP SIM_PATHSEP_S
 
 #define CLANG CLANG_CMD
 
 #define CPPSTD " -std=c++2c"
 #define PCMFL " --precompile" CPPSTD
-#define PMP " -fprebuilt-module-path=out" SEP HOST_TARGET
+#define PMP " -fprebuilt-module-path=out/" HOST_TARGET
 
 static auto sb_alloc() {
   sim_sb sb {};
