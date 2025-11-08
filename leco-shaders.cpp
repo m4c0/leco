@@ -62,7 +62,7 @@ static void build_shader(const char * dag, const char * file) {
   if (!stale) return;
 
   sys::log("compiling shader", file);
-  p::proc p { argc, static_cast<const char * const *>(argv) };
+  p::proc p { argc, argv };
 
   while (p.gets()) {
     auto line = jute::view::unsafe(p.last_line_read());
