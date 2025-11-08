@@ -49,9 +49,10 @@ static void build_shader(const char * dag, const char * file) {
 
         auto [cmd, param] = r.trim().split(' ');
         if (cmd == "include") {
-          auto file = param.trim().split('"').after.split('"').before;
-          argv[argc++] = strndup(file.begin(), file.size());
-          stale |= mtime::of(hai::cstr{file}.begin()) > spv_time;
+          auto file = hai::cstr { param.trim().split('"').after.split('"').before };
+          auto real = sim::path_real(file.begin());
+          argv[argc++] = strndup(real.buffer, real.len);
+          stale |= mtime::of(*real) > spv_time;
         }
         break;
       }
