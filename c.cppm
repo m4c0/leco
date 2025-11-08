@@ -23,7 +23,6 @@ export namespace c {
   const auto rename = ::rename;
   const auto strcmp = ::strcmp;
   const auto strdup = ::strdup;
-  const auto strndup = ::strndup;
   const auto strlen = ::strlen;
   const auto strncmp = ::strncmp;
 

@@ -51,7 +51,7 @@ static void build_shader(const char * dag, const char * file) {
         if (cmd == "include") {
           auto file = hai::cstr { param.trim().split('"').after.split('"').before };
           auto real = sim::path_real(file.begin());
-          argv[argc++] = strndup(real.buffer, real.len);
+          argv[argc++] = strdup(real.buffer);
           stale |= mtime::of(*real) > spv_time;
         }
         break;
