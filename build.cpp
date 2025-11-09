@@ -97,6 +97,8 @@ int try_main() {
   do_module("sv");
   do_module("sysstd");
 
+  do_module("c42");
+
   puts("Building core modules");
   local_module("c");
   local_module("sim");
