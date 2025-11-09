@@ -1,5 +1,6 @@
 #pragma leco tool
 
+import c42;
 import sys;
 
 using namespace c;
@@ -382,6 +383,50 @@ static bool pragma(const char * p) {
   buf.printf("%.*s", pp - p, p);
 
   error(*buf);
+}
+
+static void run_with_c42(const char * src) {
+  struct defs : c42::defines {
+    bool has(sv name) const override {
+      return false;
+    }
+  } d {};
+  sys::file f { src, "rb" };
+  fseek(f, 0, seek_end);
+  unsigned len = ftell(f);
+  fseek(f, 0, seek_set);
+
+  sim::sb buf { len };
+  fread(*buf, len, 1, f);
+
+  errln(src);
+  auto ctx = c42::preprocess(&d, sv { *buf, len });
+  for (auto it = ctx.begin(); it != ctx.end(); it++) {
+    auto t = *it;
+    switch (t.type) {
+      case c42::t_pragma: {
+        auto [ns, r] = ctx.txt(t).split(' ');
+        if (ns != "leco") continue;
+
+        errln("p ", r);
+        break;
+      }
+      case c42::t_error: {
+        errln(src, ":", t.line, ":", t.column, ": ", ctx.txt(t));
+        break;
+      }
+      case c42::t_module: {
+        errln("m ", ctx.txt(t));
+        break;
+      }
+      case c42::t_import: {
+        errln("i ", ctx.txt(t));
+        break;
+      }
+      default:
+        break;
+    }
+  }
 }
 
 enum run_result { OK, ERR, SKIPPED };

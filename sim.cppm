@@ -7,6 +7,7 @@ export module sim;
 
 export namespace sim {
   struct sb : sim_sb {
+    explicit sb(unsigned size) { sim_sb_new(this, size); }
     sb() { sim_sb_new(this, 102400); }
     ~sb() { if (buffer) sim_sb_delete(this); }
 
