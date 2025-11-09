@@ -358,7 +358,11 @@ static bool pragma(const char * p) {
 static void run_with_c42(const char * src) {
   struct defs : c42::defines {
     bool has(sv name) const override {
-      return false;
+      bool res = false;
+      sys::for_each_target_def([&](sv env) {
+        res |= env == name;
+      });
+      return res;
     }
   } d {};
   sys::file f { src, "rb" };
