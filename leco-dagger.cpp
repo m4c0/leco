@@ -55,20 +55,6 @@ static const char * cmp(const char * str, auto ... prefixes) {
   return nullptr;
 }
 
-static const char *chomp(const char *str, const char *prefix) {
-  auto ptr = cmp(str, prefix);
-  if (!ptr) return ptr;
-
-  static sim::sb buf {};
-  buf = sim::sb { ptr };
-
-  auto scptr = strchr(*buf, ';');
-  if (!scptr) return scptr;
-  *scptr = 0;
-
-  return *buf;
-}
-
 static sim::sb path_of(const char * rel_path) {
   sim::sb abs = sim::path_parent(*source) / rel_path;
   abs = mtime::of(*abs) ? sim::path_real(*abs) : sim::path_real(rel_path);
@@ -183,46 +169,25 @@ static void find_header(const char *l) {
 
   print_found(*hdr, "header", 'head');
 }
-static void add_mod_dep(const char *p, const char *desc) {
-  sim::sb mm {};
-  if (*p == ':') {
-    mm = { mod_name };
-    if (auto mc = strchr(*mm, ':')) {
-      *mc = 0;
-      mm.len = strlen(*mm);
-    }
-    mm += p;
-  } else {
-    mm = sim::sb { p };
-  }
+static void add_import(sv name, sv part) {
+  auto srcdir = sim::path_parent(*source);
 
-  sim::sb srcdir = sim::path_parent(*source);
-  sim::sb pp { *mm };
-
-  // Module parts
-  auto sc = strchr(*pp, ':');
-  if (sc != nullptr) {
-    *sc = '-';
-
-    auto dep = srcdir / *pp + ".cppm";
-    if (print_dag_if_found(*dep, desc, 'mdep', 'mdag')) return;
+  // Module part
+  if (part != "") {
+    auto dep = srcdir / name + "-" + name + ".cppm";
+    print_dag_found(*dep, "imported part", 'mdep', 'mdag');
+    return;
   }
 
   // Module in the same folder
-  auto dep = srcdir / *mm + ".cppm";
-  if (print_dag_if_found(*dep, desc, 'mdep', 'mdag')) return;
+  auto dep = srcdir / name + ".cppm";
+  if (print_dag_if_found(*dep, "imported module", 'mdep', 'mdag')) return;
 
   // Module in sibling folder
-  dep = sim::path_parent(*srcdir) / *mm / *mm + ".cppm";
-  if (print_dag_if_found(*dep, desc, 'mdep', 'mdag')) return;
+  dep = sim::path_parent(*srcdir) / name / name + ".cppm";
+  if (print_dag_if_found(*dep, "imported module", 'mdep', 'mdag')) return;
 
-  // Module in sibling folder with "-" instead of "_"
-  char * u;
-  while ((u = strchr(*pp, '_')) != nullptr) *u = '-';
-  dep = sim::path_parent(*srcdir) / *pp / *mm + ".cppm";
-  if (print_dag_if_found(*dep, desc, 'mdep', 'mdag')) return;
-
-  missing_file(desc);
+  missing_file("imported module");
 }
 
 static bool check_extension(sim::sb * mi, const char *desc, const char *ext) {
@@ -446,8 +411,9 @@ static void run_with_c42(const char * src) {
         break;
       }
       case c42::t_import: {
-        auto nt = it[1].type == c42::t_ex ? ctx.txt(it[1]) : "";
-        erran("i", ctx.txt(t), nt);
+        auto name = ctx.txt(t);
+        auto part = it[1].type == c42::t_ex ? ctx.txt(it[1]) : "";
+        add_import(name, part);
         break;
       }
       default:
@@ -490,10 +456,6 @@ enum run_result { OK, ERR, SKIPPED };
       auto l = atoi(pp);
       if (l != 0)
         line = l - 1;
-    } else if (auto pp = chomp(p, "export import ")) {
-      add_mod_dep(pp, "exported dependency");
-    } else if (auto pp = chomp(p, "import ")) {
-      add_mod_dep(pp, "dependency");
     }
   }
 

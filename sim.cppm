@@ -4,6 +4,7 @@ module;
 #include <string.h>
 
 export module sim;
+import sv;
 
 export namespace sim {
   struct sb : sim_sb {
@@ -34,7 +35,7 @@ export namespace sim {
 
     char & operator[](unsigned idx) { return buffer[idx]; }
 
-    sb & operator+=(auto str) {
+    sb & operator+=(sv str) {
       sim_sb_printf(this, "%.*s", static_cast<unsigned>(str.size()), str.begin());
       return *this;
     }
@@ -113,9 +114,19 @@ export namespace sim {
     sim_sb_concat(&res, b);
     return res;
   }
+  sb operator+(const sb & a, sv str) {
+    sb res = a;
+    res += str;
+    return res;
+  }
   sb operator/(const sb & a, const char * b) {
     sb res = a;
     sim_sb_path_append(&res, b);
+    return res;
+  }
+  sb operator/(const sb & a, sv str) {
+    sb res = a;
+    sim_sb_path_append(&res, *(sim::sb {} += str));
     return res;
   }
 
