@@ -99,6 +99,11 @@ static bool print_dag_if_found(const char *src, const char *desc, unsigned code,
   // TODO: merge dags from deps (also recursing?)
   return true;
 }
+static void print_dag_found(const char *src, const char *desc, unsigned code, unsigned dag_code) {
+  if (print_dag_if_found(src, desc, code, dag_code)) return;
+
+  missing_file(desc);
+}
 
 using printer_t = void (*)(const char *, const char *, unsigned);
 static void read_file_list(const char *str, const char *desc, unsigned code,
@@ -401,6 +406,7 @@ static void run_with_c42(const char * src) {
 
   errln(src);
   auto ctx = c42::preprocess(&d, sv { *buf, len });
+  bool exporting = false;
   for (auto it = ctx.begin(); it != ctx.end(); it++) {
     auto t = *it;
     switch (t.type) {
@@ -415,17 +421,39 @@ static void run_with_c42(const char * src) {
         errln(src, ":", t.line, ":", t.column, ": ", ctx.txt(t));
         break;
       }
+      case c42::t_export: {
+        exporting = true;
+        continue;
+      }
       case c42::t_module: {
-        errln("m ", ctx.txt(t));
+        auto name = ctx.txt(t); 
+        if (name == "") continue;
+
+        auto part = it[1].type == c42::t_ex ? ctx.txt(it[1]) : "";
+        if (part == "private") continue;
+
+        mod_name = sim::printf("%.*s", name.size(), name.begin());
+        if (part != "" || !exporting) { // part or impl
+          auto dep = sim::path_parent(src) / *mod_name + ".cppm";
+          print_dag_found(*dep, "main module dependency", 'mdep', 'mdag');
+        } else if (exporting) {
+          auto fn = sim::path_parent(src);
+          auto dir = fn.path_filename();
+          if (mod_name == dir && exe_type == exe_t::none) {
+            exe_type = exe_t::main_mod;
+          }
+        }
         break;
       }
       case c42::t_import: {
-        errln("i ", ctx.txt(t));
+        auto nt = it[1].type == c42::t_ex ? ctx.txt(it[1]) : "";
+        erran("i", ctx.txt(t), nt);
         break;
       }
       default:
         break;
     }
+    exporting = false;
   }
 }
 
@@ -446,6 +474,8 @@ enum run_result { OK, ERR, SKIPPED };
   exe_type = {};
   mod_name = {};
 
+  run_with_c42(src);
+
   while (proc.gets()) {
     const char *p = proc.last_line_read();
     while (*p == ' ') p++;
@@ -460,23 +490,6 @@ enum run_result { OK, ERR, SKIPPED };
       auto l = atoi(pp);
       if (l != 0)
         line = l - 1;
-    }
-        
-    else if (auto pp = chomp(p, "module ")) {
-      if (pp[0] < 'a' || pp[0] > 'z') {
-        // Ignoring if not identifier
-      } else if (0 != strcmp(pp, ":private")) {
-        mod_name = sim::sb { pp };
-        add_mod_dep(pp, "main module dependency");
-      }
-    } else if (auto pp = chomp(p, "export module ")) {
-      mod_name = sim::sb { pp };
-      if (strchr(*mod_name, ':') == nullptr) {
-        auto fn = sim::path_parent(*source);
-        auto dir = fn.path_filename();
-        if (mod_name == dir && exe_type == exe_t::none)
-          exe_type = exe_t::main_mod;
-      }
     } else if (auto pp = chomp(p, "export import ")) {
       add_mod_dep(pp, "exported dependency");
     } else if (auto pp = chomp(p, "import ")) {
