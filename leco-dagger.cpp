@@ -141,34 +141,6 @@ static void add_shdr(const char * src, const char * desc, unsigned code) {
   output(code, *out);
 }
 
-static void find_header(const char *l) {
-  auto s = strchr(l, '"');
-  if (!s) error("mismatching quote");
-
-  s++;
-
-  // <build-in> and <command-line>
-  if (*s == '<') return;
-
-  auto hdr = sim::sb { s };
-
-  // Ignore system headers
-  auto e = strchr(*hdr, '"');
-  if (!e) return;
-
-  *e = 0;
-
-  // Flag == 3 means "system header". We don't track them.
-  if (strchr(e + 1, '3')) return;
-
-  // Flag == 1 means "entering file".
-  if (!strchr(e + 1, '1')) return;
-
-  // Other flags would be "2" meaning "leaving file" and "4" meaning "extern C"
-  // block.
-
-  print_found(*hdr, "header", 'head');
-}
 static void add_import(sv name, sv part) {
   auto srcdir = sim::path_parent(*source);
 
@@ -314,27 +286,23 @@ static bool flag_pragma(const char * p, const char * id, unsigned code) {
   output(code, "");
   return true;
 }
-static bool check_app() {
+static void check_app() {
   if (exe_type != exe_t::app) error("this pragma is only supported for apps");
-  return true;
 }
-static bool pragma(const char * p) {
-  p = cmp(p, "#pragma leco ");
-  if (!p) return false;
-
-  if (add_pragma(p, "dll",          'dlls'))             return true;
-  if (add_pragma(p, "framework",    'frwk', print_asis)) return true;
-  if (add_pragma(p, "impl",         'impl', add_impl))   return true;
-  if (add_pragma(p, "include_dir",  'idir'))             return true;
-  if (add_pragma(p, "library",      'libr', print_asis)) return true;
-  if (add_pragma(p, "library_dir",  'ldir'))             return true;
-  if (add_pragma(p, "plugin",       'plgn', add_plgn))   return true;
-  if (add_pragma(p, "resource",     'rsrc'))             return true;
-  if (add_pragma(p, "resource_dir", 'rdir'))             return true;
-  if (add_pragma(p, "rpath",        'rpth'))             return true;
-  if (add_pragma(p, "static_lib",   'slib'))             return true;
-  if (add_pragma(p, "shader",       'rsrc', add_shdr))   return true;
-  if (add_pragma(p, "xcframework",  'xcfw', add_xcfw))   return true;
+static void pragma(const char * p) {
+  if (add_pragma(p, "dll",          'dlls'))             return;
+  if (add_pragma(p, "framework",    'frwk', print_asis)) return;
+  if (add_pragma(p, "impl",         'impl', add_impl))   return;
+  if (add_pragma(p, "include_dir",  'idir'))             return;
+  if (add_pragma(p, "library",      'libr', print_asis)) return;
+  if (add_pragma(p, "library_dir",  'ldir'))             return;
+  if (add_pragma(p, "plugin",       'plgn', add_plgn))   return;
+  if (add_pragma(p, "resource",     'rsrc'))             return;
+  if (add_pragma(p, "resource_dir", 'rdir'))             return;
+  if (add_pragma(p, "rpath",        'rpth'))             return;
+  if (add_pragma(p, "static_lib",   'slib'))             return;
+  if (add_pragma(p, "shader",       'rsrc', add_shdr))   return;
+  if (add_pragma(p, "xcframework",  'xcfw', add_xcfw))   return;
 
   if (prop_pragma(p, "display_name", 'name')) return check_app();
   if (prop_pragma(p, "app_id",       'apid')) return check_app();
@@ -343,10 +311,10 @@ static bool pragma(const char * p) {
   if (flag_pragma(p, "portrait",  'port')) return check_app();
   if (flag_pragma(p, "landscape", 'land')) return check_app();
 
-  if (exe_pragma(p, "test", exe_t::test)) return true;
-  if (exe_pragma(p, "tool", exe_t::tool)) return true;
-  if (exe_pragma(p, "app",  exe_t::app))  return true;
-  if (exe_pragma(p, "dll",  exe_t::dll))  return true;
+  if (exe_pragma(p, "test", exe_t::test)) return;
+  if (exe_pragma(p, "tool", exe_t::tool)) return;
+  if (exe_pragma(p, "app",  exe_t::app))  return;
+  if (exe_pragma(p, "dll",  exe_t::dll))  return;
 
   sim::sb buf { "unknown pragma: " };
   auto pp = strchr(p, ' ');
@@ -355,7 +323,7 @@ static bool pragma(const char * p) {
   error(*buf);
 }
 
-static void run_with_c42(const char * src) {
+static bool run_with_c42(const char * src) {
   struct defs : c42::defines {
     bool has(sv name) const override {
       bool res = false;
@@ -376,6 +344,7 @@ static void run_with_c42(const char * src) {
   errln(src);
   auto ctx = c42::preprocess(&d, sv { *buf, len });
   bool exporting = false;
+  bool erred = false;
   for (auto it = ctx.begin(); it != ctx.end(); it++) {
     auto t = *it;
     switch (t.type) {
@@ -383,11 +352,13 @@ static void run_with_c42(const char * src) {
         auto [ns, r] = ctx.txt(t).split(' ');
         if (ns != "leco") continue;
 
-        errln("p ", r);
+        pragma(*(sim::sb {} + r));
         break;
       }
+      // print_found(*hdr, "header", 'head');
       case c42::t_error: {
         errln(src, ":", t.line, ":", t.column, ": ", ctx.txt(t));
+        erred = true;
         break;
       }
       case c42::t_export: {
@@ -425,6 +396,8 @@ static void run_with_c42(const char * src) {
     }
     exporting = false;
   }
+
+  return !erred;
 }
 
 enum run_result { OK, ERR, SKIPPED };
@@ -444,37 +417,9 @@ enum run_result { OK, ERR, SKIPPED };
   exe_type = {};
   mod_name = {};
 
-  run_with_c42(src);
-
-  while (proc.gets()) {
-    const char *p = proc.last_line_read();
-    while (*p == ' ') p++;
-    line++;
-
-    if (pragma(p)) continue;
-
-    if (auto pp = cmp(p, "# ")) {
-      // # <line> "<file>" <flags>...
-      find_header(pp);
-
-      auto l = atoi(pp);
-      if (l != 0)
-        line = l - 1;
-    }
-  }
-
-  sim::sb buf {};
-  while (proc.gets_err()) {
-    buf += proc.last_line_read();
-    buf += "\n"; // Adds back since gets_err chomps it
-  }
+  if (!run_with_c42(src)) return run_result::ERR;
 
   if (roots_only && exe_type == exe_t::none) return run_result::SKIPPED;
-
-  if (proc.wait() != 0) {
-    err(*buf);
-    die("error running: ", *sys::tool_cmd("clang"), " -x ", mode, " ", src, " -E");
-  }
 
   output('vers', dag_file_version);
   output('srcf', *source);
