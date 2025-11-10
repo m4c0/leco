@@ -355,7 +355,10 @@ static bool run_with_c42(const char * src) {
         pragma(*(sim::sb {} + r));
         break;
       }
-      // print_found(*hdr, "header", 'head');
+      case c42::t_include: {
+        // print_found(*hdr, "header", 'head');
+        break;
+      }
       case c42::t_error: {
         errln(src, ":", t.line, ":", t.column, ": ", ctx.txt(t));
         erred = true;
