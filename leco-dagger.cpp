@@ -146,7 +146,7 @@ static void add_import(sv name, sv part) {
 
   // Module part
   if (part != "") {
-    auto dep = srcdir / name + "-" + part + ".cppm";
+    auto dep = srcdir / *mod_name + "-" + part + ".cppm";
     print_dag_found(*dep, "imported part", 'mdep', 'mdag');
     return;
   }
