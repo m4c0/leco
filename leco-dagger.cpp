@@ -379,10 +379,10 @@ static bool run_with_c42(const char * src) {
         if (part == "private") continue;
 
         mod_name = sim::printf("%.*s", name.size(), name.begin());
-        if (part != "" || !exporting) { // part or impl
+        if (!exporting) {
           auto dep = sim::path_parent(src) / *mod_name + ".cppm";
           print_dag_found(*dep, "main module dependency", 'mdep', 'mdag');
-        } else if (exporting) {
+        } else if (part == "") {
           auto fn = sim::path_parent(src);
           auto dir = fn.path_filename();
           if (mod_name == dir && exe_type == exe_t::none) {
