@@ -146,7 +146,7 @@ static void add_import(sv name, sv part) {
 
   // Module part
   if (part != "") {
-    auto dep = srcdir / name + "-" + name + ".cppm";
+    auto dep = srcdir / name + "-" + part + ".cppm";
     print_dag_found(*dep, "imported part", 'mdep', 'mdag');
     return;
   }
@@ -346,6 +346,7 @@ static bool run_with_c42(const char * src) {
   bool erred = false;
   for (auto it = ctx.begin(); it != ctx.end(); it++) {
     auto t = *it;
+    line = t.line;
     switch (t.type) {
       case c42::t_pragma: {
         auto [ns, r] = ctx.txt(t).split(' ');
