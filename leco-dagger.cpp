@@ -341,7 +341,6 @@ static bool run_with_c42(const char * src) {
   sim::sb buf { len };
   fread(*buf, len, 1, f);
 
-  errln(src);
   auto ctx = c42::preprocess(&d, sv { *buf, len });
   bool exporting = false;
   bool erred = false;
@@ -356,6 +355,9 @@ static bool run_with_c42(const char * src) {
         break;
       }
       case c42::t_include: {
+        auto hdr = ctx.txt(t);
+        if (hdr[0] == '<') continue;
+        errln(hdr);
         // print_found(*hdr, "header", 'head');
         break;
       }
