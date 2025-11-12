@@ -357,7 +357,9 @@ static bool run_with_c42(const char * src) {
       }
       case c42::t_include: {
         auto hdr = ctx.txt(t);
-        if (hdr[0] == '<') continue;
+        if (hdr[0] != '"') continue;
+        hdr = hdr.subview(1).after;
+        hdr = hdr.subview(hdr.size() - 1).before;
         errln(hdr);
         // print_found(*hdr, "header", 'head');
         break;
