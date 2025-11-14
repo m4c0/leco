@@ -330,6 +330,15 @@ static bool run_with_c42(const char * src) {
       sys::for_each_target_def([&](sv env) {
         res |= env == name;
       });
+      if (sys::is_tgt_windows()) {
+        res |= name == "_WIN32";
+      } else if (sys::is_tgt_linux()) {
+        res |= name == "__linux__";
+      } else if (sys::is_tgt_osx()) {
+        res |= name == "__APPLE__";
+      } else if (!name.starts_with("LECO")) {
+        errln("unknown def: ", name);
+      }
       return res;
     }
   } d {};
