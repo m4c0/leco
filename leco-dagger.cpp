@@ -351,7 +351,7 @@ static bool run_with_c42(const char * src) {
   buf.len = fread(*buf, 1, len, f);
 
   auto ext = sim::path_extension(src);
-  auto cpp = ext == "cppm" || ext == "cpp";
+  auto cpp = ext == ".cppm" || ext == ".cpp";
 
   auto ctx = c42::preprocess(&d, sv { *buf, buf.len });
   bool exporting = false;
