@@ -350,6 +350,9 @@ static bool run_with_c42(const char * src) {
   sim::sb buf { len };
   buf.len = fread(*buf, 1, len, f);
 
+  auto ext = sim::path_extension(src);
+  auto cpp = ext == "cppm" || ext == "cpp";
+
   auto ctx = c42::preprocess(&d, sv { *buf, buf.len });
   bool exporting = false;
   bool erred = false;
@@ -382,6 +385,8 @@ static bool run_with_c42(const char * src) {
         continue;
       }
       case c42::t_module: {
+        if (!cpp) break;
+
         auto name = ctx.txt(t); 
         // TODO: improve detection of "module" as an identifier
         // Example: obj.module = ...
@@ -404,6 +409,8 @@ static bool run_with_c42(const char * src) {
         break;
       }
       case c42::t_import: {
+        if (!cpp) break;
+
         auto name = ctx.txt(t);
         auto part = it[1].type == c42::t_ex ? ctx.txt(it[1]) : "";
         add_import(name, part);
