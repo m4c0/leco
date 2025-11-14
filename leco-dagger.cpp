@@ -339,9 +339,9 @@ static bool run_with_c42(const char * src) {
   fseek(f, 0, seek_set);
 
   sim::sb buf { len };
-  fread(*buf, len, 1, f);
+  buf.len = fread(*buf, 1, len, f);
 
-  auto ctx = c42::preprocess(&d, sv { *buf, len });
+  auto ctx = c42::preprocess(&d, sv { *buf, buf.len });
   bool exporting = false;
   bool erred = false;
   for (auto it = ctx.begin(); it != ctx.end(); it++) {
