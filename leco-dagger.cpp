@@ -374,7 +374,9 @@ static bool run_with_c42(const char * src) {
       }
       case c42::t_module: {
         auto name = ctx.txt(t); 
-        if (name == "") continue;
+        // TODO: improve detection of "module" as an identifier
+        // Example: obj.module = ...
+        if (name == "" || name == "module") continue;
 
         auto part = it[1].type == c42::t_ex ? ctx.txt(it[1]) : "";
         if (part == "private") continue;
