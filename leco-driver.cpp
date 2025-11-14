@@ -68,7 +68,7 @@ static void run_target() {
   sys::opt_tool_run("exs");
   sys::opt_tool_run("rsrc");
 
-  if (sys::is_tgt_apple()) sys::tool_run("ipa");
+  if (sys::is_tgt_apple()) sys::opt_tool_run("ipa");
   if (sys::is_tgt_wasm())  sys::tool_run("wasm-js");
 }
 
