@@ -342,17 +342,11 @@ static bool run_with_c42(const char * src) {
       return res;
     }
   } d {};
-  sys::file f { src, "rb" };
-  fseek(f, 0, seek_end);
-  unsigned len = ftell(f);
-  fseek(f, 0, seek_set);
-
-  sim::sb buf { len };
-  buf.len = fread(*buf, 1, len, f);
 
   auto ext = sim::path_extension(src);
   auto cpp = ext == ".cppm" || ext == ".cpp";
 
+  auto buf = sys::slurp(src);
   auto ctx = c42::preprocess(&d, sv { *buf, buf.len });
   bool exporting = false;
   bool erred = false;

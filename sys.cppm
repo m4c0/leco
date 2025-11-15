@@ -56,6 +56,17 @@ void link(const char *src, const char *dst) {
 
 using file = hay<FILE *, &c::fopen, &c::fclose>;
 
+auto slurp(const char * src) {
+  file f { src, "rb" };
+  fseek(f, 0, c::seek_end);
+  unsigned len = ftell(f);
+  fseek(f, 0, c::seek_set);
+
+  sim::sb buf { len };
+  buf.len = fread(*buf, 1, len, f);
+  return buf;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 // Environment variables. Grabbing them all here for documentation purposes //
 //////////////////////////////////////////////////////////////////////////////
