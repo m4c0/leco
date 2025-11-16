@@ -34,8 +34,7 @@ static void run(const char * cmd) {
 }
 
 static void mkout(const char * name) {
-  static auto sb = sb_alloc();
-
+  auto sb = sb_alloc();
   sim_sb_path_copy_append(&sb, "..", name);
   sim_sb_path_append(&sb, "out");
   mct_syscall_mkdir(sb.buffer);
@@ -47,12 +46,10 @@ static void mkout(const char * name) {
 static void do_module(const char * name) {
   mkout(name);
 
-  static auto mod_sb = sb_alloc();
-  sim_sb_copy(&mod_sb, "");
+  auto mod_sb = sb_alloc();
   sim_sb_printf(&mod_sb, "../%s/out/" HOST_TARGET "/%s.pcm", name, name);
 
-  static auto sb = sb_alloc();
-  sim_sb_copy(&sb, "");
+  auto sb = sb_alloc();
   sim_sb_printf(&sb,
       CLANG " " PCMFL " ../%s/%s.cppm -o %s %s",
       name, name, mod_sb.buffer, module_args.buffer);
@@ -63,8 +60,7 @@ static void do_module(const char * name) {
 }
 
 static void local_module(const char * name) {
-  static auto sb = sb_alloc();
-  sim_sb_copy(&sb, "");
+  auto sb = sb_alloc();
   sim_sb_printf(&sb,
       CLANG PCMFL PMP " %s.cppm -o out/" HOST_TARGET "/%s.pcm %s",
       name, name, module_args.buffer);
@@ -76,8 +72,7 @@ static void local_module(const char * name) {
 static void tool(const char * name) {
   printf("Building %s\n", name);
 
-  static auto sb = sb_alloc();
-  sim_sb_copy(&sb, "");
+  auto sb = sb_alloc();
   sim_sb_printf(&sb,
       CLANG " leco-%s.cpp -o out/" HOST_TARGET "/leco-%s.exe" PMP CPPSTD " %s %s",
       name, name, module_args.buffer, object_args.buffer);
