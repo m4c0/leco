@@ -8,8 +8,9 @@ module;
 export module c;
 
 export namespace c {
-  constexpr const auto seek_set = SEEK_SET;
   constexpr const auto seek_end = SEEK_END;
+  constexpr const auto seek_cur = SEEK_CUR;
+  constexpr const auto seek_set = SEEK_SET;
 
   const auto atoi = ::atoi;
   const auto fclose = ::fclose;
