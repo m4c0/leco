@@ -1,9 +1,9 @@
 module;
 #define SIM_IMPLEMENTATION
 #include "sim.h"
-#include <string.h>
 
 export module sim;
+import c;
 import sv;
 
 export namespace sim {
@@ -30,7 +30,7 @@ export namespace sim {
     auto * operator*(this auto && self) { return self.buffer; }
 
     bool operator==(const char * s) const {
-      return 0 == strcmp(buffer, s);
+      return 0 == c::strcmp(buffer, s);
     }
 
     char & operator[](unsigned idx) { return buffer[idx]; }
