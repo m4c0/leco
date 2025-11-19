@@ -300,9 +300,17 @@ class mt {
 
   void drain(ctx * c, int res) {
     auto &[cmd, out, proc, dtor] = *c;
+
+    auto dump = [&,logged=false] mutable {
+      if (!logged) {
+        sys::log("erred", *c->out);
+        logged = true;
+      }
+      errln(proc->last_line_read());
+    };
   
-    while (proc->gets())     errln(proc->last_line_read());
-    while (proc->gets_err()) errln(proc->last_line_read());
+    while (proc->gets())     dump();
+    while (proc->gets_err()) dump();
   
     c->proc = {};
     if (res != 0) ::die("command failed: ", *cmd);
