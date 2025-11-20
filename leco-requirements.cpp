@@ -15,7 +15,7 @@ import sys;
 }
 
 int main(int argc, char ** argv) try {
-  bool verbose = true;
+  bool verbose = false;
 
   const auto shift = [&] { return argc > 1 ? (argc--, *++argv) : nullptr; };
   while (auto val = shift()) {
