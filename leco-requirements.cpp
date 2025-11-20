@@ -5,7 +5,7 @@ import sys;
 
 int main() try {
   sys::strset collected {};
-  collected.insert("../leco"); // Marking as dependency for any leco-based software
+  collected.insert(*"../leco"_real); // Marking as dependency for any leco-based software
 
   sys::for_each_tag_in_dags('vers', true, [&](auto dag, auto file) {
     auto path = sim::path_parent(dag);
