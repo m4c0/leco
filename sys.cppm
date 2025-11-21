@@ -316,18 +316,24 @@ class mt {
     if (res != 0) ::die("command failed: ", *cmd);
     (c->dtor)(*(c->out));
   }
+  void drain_all() {
+    for (auto i = 0; i < 8; i++) {
+      if (!m_cs[i].proc) continue;
+      drain(m_cs + i, m_cs[i].proc->wait());
+    }
+  }
 
   [[nodiscard]] int reserve() {
     int i {};
     for (i = 0; i < 8; i++) if (m_hs[i] == nullptr) break;
 
     if (i == 8) {
-      // TODO: "drain" buffers otherwise we might deadlock
       auto res = p::wait_any(m_hs, &i);
       if (res == -1) {
-        errln("could not wait for child process");
-        // Try again, worst case we crash on infinite recursion
-        return reserve();
+        // This might be a deadlock (we wait on a process and the process waits
+        // on a stdout drain). Let's drain them all and try again.
+        drain_all();
+        return 0;
       }
       drain(m_cs + i, res);
     }
@@ -336,12 +342,7 @@ class mt {
   }
 
 public:
-  ~mt() {
-    for (auto i = 0; i < 8; i++) {
-      if (!m_cs[i].proc) continue;
-      drain(m_cs + i, m_cs[i].proc->wait());
-    }
-  }
+  ~mt() { drain_all(); }
 
   void run(const char * lbl, const char * out, ctx c) {
     auto i = reserve();
