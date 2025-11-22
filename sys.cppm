@@ -36,11 +36,11 @@ void hardlink_switchroo(const char * f) {
   // Rename original file. This is a "Windows-approved" way of modifying an open
   // executable or file.
   auto bkp = sim::sb { f } + ".bkp";
-  remove(*bkp);
-  rename(f, *bkp);
+  c::remove(*bkp);
+  c::rename(f, *bkp);
 #elif __APPLE__
   // Apple's "hard-link" complains if the target file exist
-  remove(f);
+  c::remove(f);
 #endif
 }
 
@@ -105,9 +105,9 @@ using target_env = hay<
   char *,
   [] {
     auto e = mct_syscall_dupenv("LECO_TARGET");
-    return e ? e : strdup(HOST_TARGET);
+    return e ? e : c::strdup(HOST_TARGET);
   },
-  free>;
+  &c::free>;
 auto target() { return target_env {}; }
 
 bool is_debug() { return static_cast<const char *>(opt_envs::debug()); }
