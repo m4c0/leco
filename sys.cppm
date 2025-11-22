@@ -46,7 +46,7 @@ void hardlink_switchroo(const char * f) {
 
 void link(const char *src, const char *dst) {
   if (mtime::of(dst) >= mtime::of(src)) return;
-  sys::log("hard-linking", dst);
+  log("hard-linking", dst);
 
   hardlink_switchroo(dst);
 
@@ -83,16 +83,16 @@ using env = hay<
 using opt_env = hay<char *, mct_syscall_dupenv, free>;
 
 namespace envs {
-  auto android_sdk_root() { return sys::env("ANDROID_SDK_ROOT"); }
+  auto android_sdk_root() { return env("ANDROID_SDK_ROOT"); }
 
-  auto ios_api_key()          { return sys::env("LECO_IOS_API_KEY");    }
-  auto ios_api_issuer()       { return sys::env("LECO_IOS_API_ISSUER"); }
+  auto ios_api_key()          { return env("LECO_IOS_API_KEY");    }
+  auto ios_api_issuer()       { return env("LECO_IOS_API_ISSUER"); }
   // Ad-hoc, development, app-store-connect
-  auto ios_method()           { return sys::env("LECO_IOS_METHOD");     }
-  auto ios_prov_profile()     { return sys::env("LECO_IOS_PROV_PROF");  }
-  auto ios_sign_id()          { return sys::env("LECO_IOS_SIGN_ID");    }
-  auto ios_simulator_target() { return sys::env("LECO_IOS_SIM_TARGET"); }
-  auto ios_team_id()          { return sys::env("LECO_IOS_TEAM");       }
+  auto ios_method()           { return env("LECO_IOS_METHOD");     }
+  auto ios_prov_profile()     { return env("LECO_IOS_PROV_PROF");  }
+  auto ios_sign_id()          { return env("LECO_IOS_SIGN_ID");    }
+  auto ios_simulator_target() { return env("LECO_IOS_SIM_TARGET"); }
+  auto ios_team_id()          { return env("LECO_IOS_TEAM");       }
 }
 namespace opt_envs {
   auto debug() { return opt_env("LECO_DEBUG"); }
@@ -303,7 +303,7 @@ class mt {
 
     auto dump = [&,logged=false] mutable {
       if (!logged) {
-        sys::log("erred", *c->out);
+        log("erred", *c->out);
         logged = true;
       }
       errln(proc->last_line_read());
@@ -346,7 +346,7 @@ public:
 
   void run(const char * lbl, const char * out, ctx c) {
     auto i = reserve();
-    sys::log(lbl, out);
+    log(lbl, out);
     m_cs[i] = c;
     m_hs[i] = m_cs[i].proc->handle();
   }
