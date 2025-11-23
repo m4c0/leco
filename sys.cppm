@@ -21,14 +21,6 @@ export import sim;
 export import sv;
 
 export namespace sys {
-inline void run(const char * cmd) {
-  if (0 != system(cmd)) dief("command failed: %s", cmd);
-}
-
-inline void runf(const char * cmd, auto ... args) {
-  run(*sim::printf(cmd, args...));
-}
-
 inline void log(const char *verb, const char * msg) { errfn("%20s %s", verb, msg); }
 
 void hardlink_switchroo(const char * f) {
@@ -262,6 +254,14 @@ void for_each_tag_in_dags(auto tid, bool recurse, auto && fn) {
   for_each_dag(recurse, [&](auto dag, auto id, auto file) {
     if (id == tid) fn(dag, file);
   });
+}
+
+inline void run(const char * cmd) {
+  if (0 != system(cmd)) dief("command failed: %s", cmd);
+}
+
+inline void runf(const char * cmd, auto ... args) {
+  run(*sim::printf(cmd, args...));
 }
 
 auto tool_cmd(const char * name) {
