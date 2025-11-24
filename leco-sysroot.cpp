@@ -72,7 +72,12 @@ int main() try {
   if (!sysroot.len) return 0;
 
   sys::log("sysroot", *sysroot);
-  fputln(sys::file { *cf, "w" }, *sysroot);
+
+  for (auto & c : sysroot) c = (c == '\\') ? '/' : c;
+
+  sys::file f { *cf, "w" };
+  fputln(f, "--sysroot");
+  fputln(f, *sysroot);
 } catch (...) {
   return 1;
 }

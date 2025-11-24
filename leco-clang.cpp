@@ -42,7 +42,7 @@ static void add_sysroot(sim::sb * args, const char * argv0) {
   auto sra = sim::path_parent(argv0).path_parent() / sys::target() / "sysroot";
   if (!mtime::of(*sra)) return; // Optional in WASM and host targets
 
-  args->printf(" --sysroot @%s", *sra);
+  args->printf(" @%s", *sra);
 }
 
 int main(int argc, char **argv) try {
