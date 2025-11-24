@@ -39,7 +39,7 @@ static void build_shader(const char * dag, const char * file) {
   struct : c42::defines {
     bool has(sv name) const override { return false; }
   } d {};
-  auto src = jojo::read_cstr(fsv);
+  auto src = jojo::slurp(fsv);
   auto ctx = c42::preprocess(&d, src);
   for (auto t : ctx) {
     switch (t.type) {

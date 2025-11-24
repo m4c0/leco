@@ -16,7 +16,7 @@ Usage: ../leco/leco.exe wasm-js
 }
 
 static void concat(auto & out, jute::view in_file) {
-  fputln(out, jojo::read_cstr(in_file));
+  fputln(out, jojo::slurp(in_file));
 }
 
 static void read_dag(sys::strset & cache, const char * dag, auto & out) {
