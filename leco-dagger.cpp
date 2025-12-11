@@ -332,10 +332,14 @@ static bool run_with_c42(const char * src) {
       });
       if (sys::is_tgt_windows()) {
         res |= name == "_WIN32";
+      } else if (sys::is_tgt_droid()) {
+        res |= name == "__ANDROID__";
       } else if (sys::is_tgt_linux()) {
         res |= name == "__linux__";
       } else if (sys::is_tgt_osx()) {
         res |= name == "__APPLE__";
+      } else if (sys::is_tgt_wasm()) {
+        res |= name == "__wasm__";
       } else if (!name.starts_with("LECO")) {
         errln("unknown def: ", name);
       }
