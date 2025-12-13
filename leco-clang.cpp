@@ -50,6 +50,7 @@ int main(int argc, char **argv) try {
 
   auto args = sim::sb { CLANG_CMD } + " -Wall -Wno-unknown-pragmas";
 
+  // TODO: sanitiser? -O1 -g -fsanitize=address -fno-omit-frame-pointer
   if (sys::is_debug()) args += sys::is_tgt_windows() ? " -gdwarf" : " -g";
   if (sys::is_opt())   args += " -O3 -flto -fvisibility=hidden";
 
