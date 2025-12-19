@@ -55,6 +55,8 @@ int main(int argc, char **argv) try {
 
   auto o = sys::opt_envs::sanitise();
   if (o.data()) {
+    // LLD tries to use MSVC's sanitisers, which requires MSVS installed
+    if (sys::is_tgt_windows()) die("Sanitisers + LECO + Windows does not work");
     args += " -O1 -g -fno-omit-frame-pointer -fsanitize=";
     args += o;
   }
