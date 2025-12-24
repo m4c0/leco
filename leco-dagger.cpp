@@ -12,6 +12,7 @@ enum class exe_t {
   tool,
   app,
   test,
+  pretest,
 };
 
 static const char * dag_file_version = "2025-10-19";
@@ -245,6 +246,9 @@ static void output_root_tag() {
   case exe_t::dll:
     output('tdll', *dll_path(source));
     break;
+  case exe_t::pretest:
+    output('tprt', *exe_path(source));
+    break;
   case exe_t::test:
     if (sys::is_tgt_host()) {
       auto path = exe_path(source);
@@ -311,10 +315,11 @@ static void pragma(const char * p) {
   if (flag_pragma(p, "portrait",  'port')) return check_app();
   if (flag_pragma(p, "landscape", 'land')) return check_app();
 
-  if (exe_pragma(p, "test", exe_t::test)) return;
-  if (exe_pragma(p, "tool", exe_t::tool)) return;
-  if (exe_pragma(p, "app",  exe_t::app))  return;
-  if (exe_pragma(p, "dll",  exe_t::dll))  return;
+  if (exe_pragma(p, "pretest", exe_t::pretest)) return;
+  if (exe_pragma(p, "test",    exe_t::test))    return;
+  if (exe_pragma(p, "tool",    exe_t::tool))    return;
+  if (exe_pragma(p, "app",     exe_t::app))     return;
+  if (exe_pragma(p, "dll",     exe_t::dll))     return;
 
   sim::sb buf { "unknown pragma: " };
   auto pp = strchr(p, ' ');

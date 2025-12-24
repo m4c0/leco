@@ -249,6 +249,7 @@ void for_each_root_dag(auto && fn) {
       case 'tdll':
       case 'test':
       case 'tool':
+      case 'tprt':
       case 'tmmd': fn(dag, id, file); break;
       default: break;
     }
