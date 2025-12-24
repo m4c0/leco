@@ -247,13 +247,10 @@ static void output_root_tag() {
     output('tdll', *dll_path(source));
     break;
   case exe_t::pretest:
-    output('tprt', *exe_path(source));
+    if (sys::is_tgt_host()) output('tprt', *exe_path(source));
     break;
   case exe_t::test:
-    if (sys::is_tgt_host()) {
-      auto path = exe_path(source);
-      output('test', *path);
-    }
+    if (sys::is_tgt_host()) output('test', *exe_path(source));
     break;
   case exe_t::tool:
     if (sys::is_tgt_host()) {
