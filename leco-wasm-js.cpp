@@ -41,16 +41,23 @@ static void read_dag(sys::strset & cache, const char * dag, auto & out) {
 static void run(const char * dag, const char * _) {
   auto path = sim::sb { dag }.path_extension("app");
 
-  auto html = (path / sim::path_filename(dag)).path_extension("html");
+  auto html = path / "index.html";
   if (mtime::of(*html) == 0) {
-    jojo::write(html, jute::view { R"(
+    sys::log("generating", *html);
+
+    auto name = sys::read_dag_tag('name', dag);
+    if (name == "") {
+      name = sim::path_stem(dag);
+    }
+
+    jojo::write(html, jute::fmt<R"(
 <html>
-  <head><title>App</title></head>
+  <head><title>%s</title></head>
   <body>
-    <script type="text/javascript" src="leco.js"></script>
+    <script type="text/javascript" src="index.js"></script>
   </body>
 </html>
-)" });
+)">(sv { name }));
   }
 
   mtime::t mtime = 0;
@@ -60,7 +67,7 @@ static void run(const char * dag, const char * _) {
     mtime = sys::max(mtime, mtime::of(*js));
   });
 
-  auto output = path / "leco.js";
+  auto output = path / "index.js";
   if (mtime::of(*output) >= mtime) return;
 
   sys::log("generating", *output);
@@ -71,7 +78,17 @@ static void run(const char * dag, const char * _) {
   sys::strset cache {};
   read_dag(cache, dag, f);
 
-  concat(f, "../leco/wasm.post.js");
+  fputln(f, jute::fmt<R"(
+(function() {
+  fetch("%s.wasm")
+    .then(response => response.arrayBuffer())
+    .then(bytes => WebAssembly.instantiate(bytes, leco_imports))
+    .then(obj => {
+      leco_exports = obj.instance.exports;
+      obj.instance.exports._initialize();
+    });
+})();
+)">(sv{sim::path_stem(dag)}));
 }
 
 int main(int argc, char **argv) try {
