@@ -78,6 +78,7 @@ static void run(const char * dag, const char * _) {
   sys::strset cache {};
   read_dag(cache, dag, f);
 
+  auto stem = sim::path_stem(dag);
   fputln(f, jute::fmt<R"(
 (function() {
   fetch("%s.wasm")
@@ -88,7 +89,11 @@ static void run(const char * dag, const char * _) {
       obj.instance.exports._initialize();
     });
 })();
-)">(sv{sim::path_stem(dag)}));
+)">(sv{stem}));
+
+  auto zip = sim::sb { dag }.path_extension("zip");
+  sys::log("bundling", *zip);
+  sys::runf("zip -q -j %s %s/*", *zip, *path);
 }
 
 int main(int argc, char **argv) try {
