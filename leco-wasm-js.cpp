@@ -38,28 +38,7 @@ static void read_dag(sys::strset & cache, const char * dag, auto & out) {
   if (js != "") concat(out, js);
 }
 
-static void run(const char * dag, const char * _) {
-  auto path = sim::sb { dag }.path_extension("app");
-
-  auto html = path / "index.html";
-  if (mtime::of(*html) == 0) {
-    sys::log("generating", *html);
-
-    auto name = sys::read_dag_tag('name', dag);
-    if (name == "") {
-      name = sim::path_stem(dag);
-    }
-
-    jojo::write(html, jute::fmt<R"(
-<html>
-  <head><title>%s</title></head>
-  <body>
-    <script type="text/javascript" src="index.js"></script>
-  </body>
-</html>
-)">(sv { name }));
-  }
-
+static void gen_main_js(const char * dag, const sim::sb & path) {
   mtime::t mtime = 0;
   sys::recurse_dag(dag, [&](auto dag, auto id, auto file) {
     if (id != 'srcf') return;
@@ -90,6 +69,31 @@ static void run(const char * dag, const char * _) {
     });
 })();
 )">(sv{stem}));
+}
+
+static void run(const char * dag, const char * _) {
+  auto path = sim::sb { dag }.path_extension("app");
+
+  auto html = path / "index.html";
+  if (mtime::of(*html) == 0) {
+    sys::log("generating", *html);
+
+    auto name = sys::read_dag_tag('name', dag);
+    if (name == "") {
+      name = sim::path_stem(dag);
+    }
+
+    jojo::write(html, jute::fmt<R"(
+<html>
+  <head><title>%s</title></head>
+  <body>
+    <script type="text/javascript" src="index.js"></script>
+  </body>
+</html>
+)">(sv { name }));
+  }
+
+  gen_main_js(dag, path);
 
   auto zip = sim::sb { dag }.path_extension("zip");
   sys::log("bundling", *zip);
