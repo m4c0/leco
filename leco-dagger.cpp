@@ -475,14 +475,15 @@ static void check_and_run(const char * src, bool roots_only) {
     if (dag_file_version == sys::read_dag_tag('vers', *dag)) return;
   }
 
-  try {
-    switch (run(*dag, src, roots_only)) {
-      case run_result::OK:      return;
-      case run_result::SKIPPED: remove(*dag); return;
-    }
-  } catch (...) {
-    remove(*dag);
-    whilst("processing ", src);
+  auto tmp = dag + ".tmp";
+  switch (run(*tmp, src, roots_only)) {
+    case run_result::OK:
+      c::remove(*dag);
+      c::rename(*tmp, *dag);
+      return;
+    case run_result::SKIPPED:
+      c::remove(*tmp);
+      return;
   }
 }
 
