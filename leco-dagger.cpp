@@ -327,7 +327,7 @@ static void pragma(const char * p) {
   error(*buf);
 }
 
-static bool run_with_c42(const char * src) {
+static void run_with_c42(const char * src) {
   struct defs : c42::defines {
     bool has(sv name) const override {
       bool res = false;
@@ -424,11 +424,11 @@ static bool run_with_c42(const char * src) {
     exporting = false;
   }
 
-  return !erred;
+  if (erred) die("bailing out after errors were found"); 
 }
 
-enum run_result { OK, ERR, SKIPPED };
-[[nodiscard]] static run_result run(const char * dag, const char * src, bool roots_only) try {
+enum run_result { OK, SKIPPED };
+[[nodiscard]] static run_result run(const char * dag, const char * src, bool roots_only) {
   auto ext = sim::path_extension(src);
   auto mode = "c++";
   if      (ext == ".c" ) mode = "c";
@@ -444,7 +444,7 @@ enum run_result { OK, ERR, SKIPPED };
   exe_type = {};
   mod_name = {};
 
-  if (!run_with_c42(src)) return run_result::ERR;
+  run_with_c42(src);
 
   if (roots_only && exe_type == exe_t::none) return run_result::SKIPPED;
 
@@ -455,9 +455,6 @@ enum run_result { OK, ERR, SKIPPED };
   output_root_tag();
   output_file_tags();
   return run_result::OK;
-} catch (...) {
-  errln("unknown error processing ", src);
-  return run_result::ERR;
 }
 
 static void create_gitignore(const auto & out) {
@@ -478,15 +475,14 @@ static void check_and_run(const char * src, bool roots_only) {
     if (dag_file_version == sys::read_dag_tag('vers', *dag)) return;
   }
 
-  switch (run(*dag, src, roots_only)) {
-    case run_result::OK:
-      return;
-    case run_result::ERR:
-      remove(*dag);
-      throw 0;
-    case run_result::SKIPPED:
-      remove(*dag);
-      return;
+  try {
+    switch (run(*dag, src, roots_only)) {
+      case run_result::OK:      return;
+      case run_result::SKIPPED: remove(*dag); return;
+    }
+  } catch (...) {
+    remove(*dag);
+    whilst("processing ", src);
   }
 }
 
