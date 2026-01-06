@@ -102,12 +102,14 @@ static void read_file_list(const char *str, const char *desc, unsigned code,
     if (*str == '"') {
       str++;
       e = strchr(str, '"');
+      if (e == nullptr) die("missing end quote after: ", str);
     } else if (*str && *str != '\n') {
       e = strchr(str, ' ');
       if (e == nullptr) e = strchr(str, '\n');
       if (e == nullptr) e = str + strlen(str);
+    } else {
+      if (e == nullptr) die("missing file list for ", desc);
     }
-    if (e == nullptr) throw 1;
 
     auto buf = sim::sb { str };
     (*buf)[e - str] = 0;
@@ -116,7 +118,7 @@ static void read_file_list(const char *str, const char *desc, unsigned code,
 
     str = *e ? e + 1 : e;
   }
-  if (*str != 0 && *str != '\n') throw 1;
+  if (*str != 0 && *str != '\n') die("unexpected token after: ", str);
 }
 
 static void add_xcfw(const char * str, const char * desc, unsigned code) {
