@@ -454,6 +454,7 @@ enum run_result { OK, ERR, SKIPPED };
   output_file_tags();
   return run_result::OK;
 } catch (...) {
+  errln("unknown error processing ", src);
   return run_result::ERR;
 }
 
