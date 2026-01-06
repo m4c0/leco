@@ -94,10 +94,6 @@ static void run(const char * dag, const char * _) {
   }
 
   gen_main_js(dag, path);
-
-  auto zip = sim::sb { dag }.path_extension("zip");
-  sys::log("bundling", *zip);
-  sys::runf("zip -q -j %s %s/*", *zip, *path);
 }
 
 int main(int argc, char **argv) try {
