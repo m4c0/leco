@@ -36,29 +36,33 @@ static void build_shader(const char * dag, const char * file) {
   argv[argc++] = *out;
   argv[argc++] = file;
 
-  struct : c42::defines {
-    bool has(sv name) const override { return false; }
-  } d {};
-  auto src = jojo::slurp(fsv);
-  auto ctx = c42::preprocess(&d, src);
-  for (auto t : ctx) {
-    switch (t.type) {
-      case c42::t_pragma: {
-        auto [l, r] = ctx.txt(t).split(' ');
-        if (l != "leco") continue;
+  const auto rec = [&](auto & rec, sv fsv) -> void {
+    struct : c42::defines {
+      bool has(sv name) const override { return false; }
+    } d {};
+    auto src = jojo::slurp(fsv);
+    auto ctx = c42::preprocess(&d, src);
+    for (auto t : ctx) {
+      switch (t.type) {
+        case c42::t_pragma: {
+          auto [l, r] = ctx.txt(t).split(' ');
+          if (l != "leco") continue;
 
-        auto [cmd, param] = r.trim().split(' ');
-        if (cmd == "include") {
-          auto file = hai::cstr { param.trim().split('"').after.split('"').before };
-          auto real = sim::path_real(file.begin());
-          argv[argc++] = strdup(real.buffer);
-          stale |= mtime::of(*real) > spv_time;
+          auto [cmd, param] = r.trim().split(' ');
+          if (cmd == "include") {
+            auto file = hai::cstr { param.trim().split('"').after.split('"').before };
+            auto real = sim::path_real(file.begin());
+            argv[argc++] = strdup(real.buffer);
+            stale |= mtime::of(*real) > spv_time;
+            rec(rec, sv { real });
+          }
+          break;
         }
-        break;
+        default: break;
       }
-      default: break;
     }
-  }
+  };
+  rec(rec, fsv);
   if (!stale) return;
 
   sys::log("compiling shader", file);
